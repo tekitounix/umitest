@@ -1,0 +1,179 @@
+{
+    tool_target_test_midi_macosx_arm64_cxx = {
+        program = "/Library/Developer/CommandLineTools/usr/bin/clang",
+        toolname = "clang",
+        toolchain_info = {
+            name = "xcode",
+            arch = "arm64",
+            plat = "macosx",
+            cachekey = "xcode_arch_arm64_plat_macosx"
+        }
+    },
+    gfortran_arch_arm64_plat_macosx = {
+        plat = "macosx",
+        arch = "arm64",
+        __checked = true,
+        __global = true
+    },
+    xcode_arch_arm64_plat_macosx = {
+        xcode_sysroot = "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        bindir = "/Library/Developer/CommandLineTools/usr/bin",
+        plat = "macosx",
+        arch = "arm64",
+        __checked = true,
+        __global = true
+    },
+    tool_target_test_kernel_macosx_arm64_ld = {
+        program = "/Library/Developer/CommandLineTools/usr/bin/clang++",
+        toolname = "clangxx",
+        toolchain_info = {
+            name = "xcode",
+            arch = "arm64",
+            plat = "macosx",
+            cachekey = "xcode_arch_arm64_plat_macosx"
+        }
+    },
+    tool_target_firmware_cross_arm_cxx = {
+        program = "/Applications/ArmGNUToolchain/14.2.rel1/arm-none-eabi/bin/arm-none-eabi-g++",
+        toolname = "gxx",
+        toolchain_info = {
+            name = "arm-none-eabi",
+            arch = "arm",
+            plat = "cross",
+            cachekey = "arm-none-eabi_arch_arm_plat_cross"
+        }
+    },
+    nim_arch_arm64_plat_macosx = {
+        plat = "macosx",
+        arch = "arm64",
+        __checked = false,
+        __global = true
+    },
+    tool_target_firmware_cross_arm_ld = {
+        program = "/Applications/ArmGNUToolchain/14.2.rel1/arm-none-eabi/bin/arm-none-eabi-g++",
+        toolname = "gxx",
+        toolchain_info = {
+            name = "arm-none-eabi",
+            plat = "cross",
+            arch = "arm",
+            cachekey = "arm-none-eabi_arch_arm_plat_cross"
+        }
+    },
+    nasm_arch_arm64_plat_macosx = {
+        plat = "macosx",
+        arch = "arm64",
+        __checked = true,
+        __global = true
+    },
+    rust_arch_arm64_plat_macosx = {
+        plat = "macosx",
+        arch = "arm64",
+        __checked = true,
+        __global = true
+    },
+    ["arm-none-eabi_arch_arm_plat_cross"] = {
+        plat = "cross",
+        __checked = true,
+        arch = "arm"
+    },
+    yasm_arch_arm64_plat_macosx = {
+        plat = "macosx",
+        arch = "arm64",
+        __checked = true,
+        __global = true
+    },
+    cross_arch_arm_plat_cross = {
+        plat = "cross",
+        __checked = false,
+        arch = "arm"
+    },
+    envs_arch_arm64_plat_macosx = {
+        plat = "macosx",
+        arch = "arm64",
+        __checked = true,
+        __global = true
+    },
+    tool_target_test_kernel_macosx_arm64_cxx = {
+        program = "/Library/Developer/CommandLineTools/usr/bin/clang",
+        toolname = "clang",
+        toolchain_info = {
+            name = "xcode",
+            arch = "arm64",
+            plat = "macosx",
+            cachekey = "xcode_arch_arm64_plat_macosx"
+        }
+    },
+    tool_target_test_audio_macosx_arm64_cxx = {
+        program = "/Library/Developer/CommandLineTools/usr/bin/clang",
+        toolname = "clang",
+        toolchain_info = {
+            name = "xcode",
+            arch = "arm64",
+            plat = "macosx",
+            cachekey = "xcode_arch_arm64_plat_macosx"
+        }
+    },
+    go_arch_arm64_plat_macosx = {
+        plat = "macosx",
+        arch = "arm64",
+        __checked = true,
+        __global = true
+    },
+    fpc_arch_arm64_plat_macosx = {
+        plat = "macosx",
+        arch = "arm64",
+        __checked = true,
+        __global = true
+    },
+    tool_target_renode_test_cross_arm_cxx = {
+        program = "/Applications/ArmGNUToolchain/14.2.rel1/arm-none-eabi/bin/arm-none-eabi-g++",
+        toolname = "gxx",
+        toolchain_info = {
+            name = "arm-none-eabi",
+            arch = "arm",
+            plat = "cross",
+            cachekey = "arm-none-eabi_arch_arm_plat_cross"
+        }
+    },
+    tool_target_renode_test_cross_arm_ld = {
+        program = "/Applications/ArmGNUToolchain/14.2.rel1/arm-none-eabi/bin/arm-none-eabi-g++",
+        toolname = "gxx",
+        toolchain_info = {
+            name = "arm-none-eabi",
+            arch = "arm",
+            plat = "cross",
+            cachekey = "arm-none-eabi_arch_arm_plat_cross"
+        }
+    },
+    cuda_arch_arm64_plat_macosx = {
+        plat = "macosx",
+        arch = "arm64",
+        __checked = true,
+        __global = true
+    },
+    tool_target_test_midi_macosx_arm64_ld = {
+        program = "/Library/Developer/CommandLineTools/usr/bin/clang++",
+        toolname = "clangxx",
+        toolchain_info = {
+            name = "xcode",
+            arch = "arm64",
+            plat = "macosx",
+            cachekey = "xcode_arch_arm64_plat_macosx"
+        }
+    },
+    tool_target_test_audio_macosx_arm64_ld = {
+        program = "/Library/Developer/CommandLineTools/usr/bin/clang++",
+        toolname = "clangxx",
+        toolchain_info = {
+            plat = "macosx",
+            arch = "arm64",
+            name = "xcode",
+            cachekey = "xcode_arch_arm64_plat_macosx"
+        }
+    },
+    envs_arch_arm_plat_cross = {
+        plat = "cross",
+        __checked = true,
+        arch = "arm"
+    }
+}

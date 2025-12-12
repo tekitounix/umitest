@@ -1,0 +1,68 @@
+{
+    kernel = {
+        values = {
+            "mono",
+            "micro"
+        },
+        __scriptdir = "/Users/tekitou/work/umi_os",
+        __sourceinfo_description = {
+            ["Kernel configuration"] = {
+                line = 59,
+                file = "./xmake.lua"
+            }
+        },
+        __sourceinfo_values = {
+            mono = {
+                line = 60,
+                file = "./xmake.lua"
+            },
+            micro = {
+                line = 60,
+                file = "./xmake.lua"
+            }
+        },
+        default = "mono",
+        description = "Kernel configuration",
+        __sourceinfo_default = {
+            mono = {
+                line = 57,
+                file = "./xmake.lua"
+            }
+        },
+        __sourceinfo_showmenu = { },
+        showmenu = true
+    },
+    board = {
+        values = {
+            "stm32f4",
+            "stub"
+        },
+        __scriptdir = "/Users/tekitou/work/umi_os",
+        __sourceinfo_description = {
+            ["Target board"] = {
+                line = 52,
+                file = "./xmake.lua"
+            }
+        },
+        __sourceinfo_values = {
+            stm32f4 = {
+                line = 53,
+                file = "./xmake.lua"
+            },
+            stub = {
+                line = 53,
+                file = "./xmake.lua"
+            }
+        },
+        default = "stm32f4",
+        description = "Target board",
+        __sourceinfo_default = {
+            stm32f4 = {
+                line = 50,
+                file = "./xmake.lua"
+            }
+        },
+        __sourceinfo_showmenu = { },
+        showmenu = true
+    }
+}
