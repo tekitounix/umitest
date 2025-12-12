@@ -453,3 +453,277 @@ adapter/
     ├── processor.hh       # WasmProcessor
     └── bindings.hh        # Emscripten バインディング
 ```
+
+---
+
+## UIアダプター設計
+
+### 概要
+
+UIはハードウェア（エンコーダ/LED/LCD）とGUI（描画）を統一的に扱う。
+MCU効率のため、ハードウェアバインディングはコンパイル時に解決。
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     AudioProcessor                               │
+│  ┌──────────────────┐  ┌──────────────────┐                     │
+│  │  DSPエンジン      │  │  パラメータ定義   │                     │
+│  │  process()       │  │  params[]        │                     │
+│  │  on_midi()       │  │  hw_bindings     │                     │
+│  └──────────────────┘  └──────────────────┘                     │
+├─────────────────────────────────────────────────────────────────┤
+│                      UI Adapter                                  │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
+│  │  Headless   │  │  Hardware   │  │    GUI      │              │
+│  │  MIDI CC    │  │  Encoder    │  │  Canvas     │              │
+│  │  ↔ Param   │  │  LED/LCD    │  │  描画API    │              │
+│  │             │  │  (ゼロコスト)│  │  (実行時)   │              │
+│  └─────────────┘  └─────────────┘  └─────────────┘              │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 3つのUIモード
+
+| モード | 入力 | 出力 | 用途 |
+|--------|------|------|------|
+| **Headless** | MIDI CC/SysEx | Audio + MIDI | ペダル、1Uラック |
+| **HardwareUI** | エンコーダ/ボタン | LED/LCD | シンセモジュール |
+| **GUI** | マウス/タッチ | 描画 | VST/AU/WASM |
+
+---
+
+### パラメータ定義（共通）
+
+```cpp
+struct MySynth : umi::AudioProcessor<MySynth> {
+    // パラメータ定義（全プラットフォーム共通）
+    static constexpr auto params = std::array{
+        umi::Param{"freq",      20.f, 20000.f, 440.f, umi::Scale::Log},
+        umi::Param{"resonance", 0.f,  1.f,     0.5f,  umi::Scale::Linear},
+        umi::Param{"waveform",  0,    3,       0,     {"Saw", "Square", "Tri", "Sine"}},
+    };
+    
+    void process(...);
+    void on_midi(...);
+};
+```
+
+---
+
+### ハードウェアバインディング（MCU専用、コンパイル時解決）
+
+```cpp
+struct MySynth : umi::AudioProcessor<MySynth> {
+    static constexpr auto params = /* ... */;
+    
+    // ハードウェアマッピング（コンパイル時に ISR ハンドラ生成）
+    static constexpr auto hw_bindings = umi::HwBindings{
+        // エンコーダ → パラメータ
+        umi::Encoder{0} >> umi::param_ref<0>,  // encoder 0 → freq
+        umi::Encoder{1} >> umi::param_ref<1>,  // encoder 1 → resonance
+        
+        // パラメータ → LED リング
+        umi::param_ref<0> >> umi::LedRing{0},
+        umi::param_ref<1> >> umi::LedRing{1},
+        
+        // ボタン → パラメータ（列挙値サイクル）
+        umi::Button{0} >> umi::param_ref<2>,   // button 0 → waveform
+    };
+};
+```
+
+### コンパイル時生成（ゼロオーバーヘッド）
+
+```cpp
+// カーネルがテンプレートから生成するコード（概念）
+namespace generated {
+
+// 各エンコーダに対して個別ハンドラ（仮想関数なし、分岐なし）
+template<> void encoder_handler<0>(int delta) {
+    constexpr auto& param = MySynth::params[0];  // freq
+    float step = param.range() * 0.01f / param.scale_factor();
+    app.param_values_[0] += delta * step;
+    app.param_values_[0] = std::clamp(app.param_values_[0], param.min, param.max);
+    led_ring<0>.set_normalized((app.param_values_[0] - param.min) / param.range());
+}
+
+template<> void encoder_handler<1>(int delta) {
+    constexpr auto& param = MySynth::params[1];  // resonance
+    app.param_values_[1] += delta * 0.01f;
+    app.param_values_[1] = std::clamp(app.param_values_[1], 0.f, 1.f);
+    led_ring<1>.set_normalized(app.param_values_[1]);
+}
+
+template<> void button_handler<0>(bool pressed) {
+    if (pressed) {
+        int v = static_cast<int>(app.param_values_[2]);
+        v = (v + 1) % 4;  // waveform: 0-3 サイクル
+        app.param_values_[2] = static_cast<float>(v);
+    }
+}
+
+}  // namespace generated
+
+// ISR から直接呼び出し
+extern "C" void EXTI0_IRQHandler() {
+    generated::encoder_handler<0>(hw::encoder<0>.read_delta());
+}
+```
+
+### 効率比較
+
+| 方式 | RAM | ROM | CPU/イベント | 備考 |
+|------|-----|-----|--------------|------|
+| 実行時ループ | vtable + レイアウト | 大 | 数百サイクル | 分岐コスト |
+| **コンパイル時生成** | なし | 最小 | 数十サイクル | インライン化 |
+
+---
+
+### GUIレイアウト（VST/AU/WASM用）
+
+デスクトップ環境は余裕があるため、実行時解釈で柔軟なレイアウト。
+
+```cpp
+struct MySynth : umi::AudioProcessor<MySynth> {
+    static constexpr auto params = /* ... */;
+    static constexpr auto hw_bindings = /* ... */;  // MCU用
+    
+    // GUIレイアウト（オプション、VST/AU/WASM用）
+    static constexpr auto gui_layout = umi::Layout{
+        umi::Row{
+            umi::Knob{umi::param_ref<0>, "Freq"},
+            umi::Knob{umi::param_ref<1>, "Reso"},
+        },
+        umi::Selector{umi::param_ref<2>, "Wave"},
+    };
+};
+```
+
+### GUIアダプター
+
+```cpp
+// adapter/gui/renderer.hh
+template<typename App>
+class GUIRenderer {
+public:
+    void render(Canvas& ctx) {
+        if constexpr (has_gui_layout<App>) {
+            render_layout(ctx, App::gui_layout);
+        } else {
+            // gui_layout 未定義なら params から自動生成
+            render_auto(ctx, App::params);
+        }
+    }
+    
+private:
+    template<typename Layout>
+    void render_layout(Canvas& ctx, const Layout& layout) {
+        for (const auto& widget : layout.widgets) {
+            std::visit([&](auto& w) { render_widget(ctx, w); }, widget);
+        }
+    }
+    
+    void render_widget(Canvas& ctx, const umi::Knob& knob) {
+        float value = app_.get_param(knob.param_index);
+        ctx.draw_knob(knob.label, value, knob.min, knob.max);
+        if (ctx.knob_changed()) {
+            app_.set_param(knob.param_index, ctx.knob_value());
+        }
+    }
+};
+```
+
+---
+
+### UIモード切り替え
+
+```cpp
+// ヘッドレス（MIDI CCのみでパラメータ制御）
+umi::run<MySynth, umi::Headless>();
+
+// ハードウェアUI（hw_bindings からハンドラ生成）
+umi::run<MySynth, umi::HardwareUI>();
+
+// GUI付き（VST3）
+umi::vst3::create<MySynth, umi::DefaultGUI>();
+
+// カスタムGUI（VST3）
+umi::vst3::create<MySynth, MyCustomGUI>();
+```
+
+### Headless モード
+
+```cpp
+// adapter/mcu/headless.hh
+template<typename App>
+class HeadlessAdapter {
+    void on_midi(const umi::midi::Event& ev) {
+        if (ev.type == umi::midi::Type::ControlChange) {
+            // CC番号 → パラメータインデックス のマッピング
+            if (auto idx = cc_to_param(ev.data1)) {
+                float normalized = ev.data2 / 127.f;
+                float value = denormalize(App::params[*idx], normalized);
+                app_.set_param(*idx, value);
+            }
+        }
+        // その他のMIDIは processor に転送
+        app_.on_midi(ev);
+    }
+};
+```
+
+---
+
+### パラメータ同期フロー
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     パラメータ値                                 │
+│                   std::atomic<float>                            │
+│                         ↑↓                                      │
+├────────────┬────────────┼────────────┬──────────────────────────┤
+│ Encoder    │ MIDI CC    │ process()  │ GUI                      │
+│ (ISR)      │ (MIDI ISR) │ (Audio)    │ (Non-RT)                 │
+│ hw_bindings│ CC mapping │ get_param()│ set_param()              │
+└────────────┴────────────┴────────────┴──────────────────────────┘
+         ↓          ↓                           ↓
+    LED Ring    MIDI Out                      描画
+```
+
+- **リアルタイム安全**: `std::atomic` + `relaxed` オーダー
+- **ロックフリー**: 全パス待ちなし
+- **単一ソース**: パラメータ値が唯一の状態
+
+---
+
+### ウィジェット対応表
+
+| ウィジェット | Hardware | GUI | Headless (MIDI) |
+|--------------|----------|-----|-----------------|
+| `Knob` | エンコーダ + LED リング | 回転ノブ | CC (連続値) |
+| `Slider` | フェーダー | スライダー | CC (連続値) |
+| `Selector` | ボタン + LCD | ドロップダウン | CC (離散値) |
+| `Toggle` | スイッチ + LED | チェックボックス | CC (0/127) |
+| `XYPad` | 2軸ジョイスティック | 2Dパッド | CC×2 |
+
+---
+
+### ファイル構成（追加）
+
+```
+adapter/
+├── common/
+│   ├── adapter_base.hh
+│   └── param.hh           # Param, ParamInfo
+├── ui/
+│   ├── headless.hh        # MIDI CC ↔ パラメータ
+│   ├── hw_bindings.hh     # コンパイル時バインディング
+│   ├── hw_widgets.hh      # Encoder, Button, LedRing, LCD
+│   └── gui_layout.hh      # Layout, Knob, Slider, Selector
+├── mcu/
+│   ├── run.hh
+│   └── hw_ui_adapter.hh   # HardwareUI 生成
+└── vst3/
+    ├── processor.hh
+    └── gui_adapter.hh     # GUIRenderer
+```
