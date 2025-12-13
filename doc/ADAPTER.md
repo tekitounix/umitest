@@ -1,6 +1,152 @@
 # ホストアダプター設計
 
-MCUで動くコードをVST/AU/WASMでも動かすための仕組み。
+MCUで動くコードをVST/AU/CLAP/WASMでも動かすための仕組み。
+
+---
+
+## 設計原則
+
+**process() が必要とする全ての外部情報は引数（Context）経由で渡す。**
+
+```cpp
+// ✅ 良い例: 全て引数経由
+void process(umi::Context& ctx) {
+    float freq = ctx.params[0];          // パラメータ
+    while (auto ev = ctx.midi.pop_at(i)) // MIDI
+    ctx.out[0][i] = generate();          // オーディオ出力
+}
+
+// ❌ 悪い例: グローバル/シングルトン
+void process(umi::Context& ctx) {
+    float sr = GlobalConfig::sample_rate;        // NG
+    auto& midi = MidiServer::instance().queue(); // NG
+}
+```
+
+| 許可 | 禁止 |
+|------|------|
+| 引数 (Context) | グローバル変数 |
+| メンバ変数（自身の状態） | シングルトン |
+| constexpr 定数 | static mutable |
+| | ハードウェア直接アクセス |
+
+---
+
+## Context 構造
+
+```cpp
+namespace umi {
+
+struct Context {
+    // === オーディオ I/O ===
+    float** out;                          // 出力バッファ
+    const float** in;                     // 入力バッファ
+    std::size_t frames;                   // サンプル数
+    std::size_t channels;                 // チャンネル数
+    
+    // === パラメータ ===
+    std::span<const float> params;        // パラメータ値（読み取り専用）
+    
+    // === MIDI（サンプル精度）===
+    MidiQueue& midi;                      // MIDI入力キュー
+    
+    // === 環境情報 ===
+    float sample_rate;                    // サンプルレート
+    
+    // === オプショナル（nullptr可）===
+    MidiOut* midi_out{nullptr};           // MIDI出力
+    Display* display{nullptr};            // 表示更新
+    const Transport* transport{nullptr};  // DAWトランスポート情報
+};
+
+struct MidiQueue {
+    struct TimedEvent {
+        std::size_t sample_offset;        // バッファ内のサンプル位置
+        midi::Event event;
+    };
+    
+    // サンプル位置 i のイベントを取得
+    std::optional<midi::Event> pop_at(std::size_t sample_pos);
+    
+    // アダプターが呼ぶ
+    void push(std::size_t offset, const midi::Event& ev);
+    void clear();
+};
+
+struct Transport {
+    std::uint64_t position_samples;       // 再生位置（サンプル）
+    float bpm;                            // テンポ
+    bool is_playing;                      // 再生中か
+};
+
+}
+```
+
+---
+
+## AudioProcessor インターフェース
+
+```cpp
+namespace umi {
+
+template<typename Derived>
+struct AudioProcessor {
+    // パラメータ定義（必須）
+    static constexpr auto params = std::array<Param, 0>{};
+    
+    // ライフサイクル
+    void prepare(float sample_rate, std::size_t max_buffer_size) {}
+    void reset() {}
+    
+    // オーディオ処理（必須）
+    void process(Context& ctx);
+};
+
+}
+```
+
+### 使用例
+
+```cpp
+struct MySynth : umi::AudioProcessor<MySynth> {
+    static constexpr auto params = std::array{
+        umi::Param{"freq", 20.f, 20000.f, 440.f},
+        umi::Param{"reso", 0.f, 1.f, 0.5f},
+    };
+    
+    // 内部状態（メンバ変数はOK）
+    float phase_{0.f};
+    float sample_rate_{48000.f};
+    
+    void prepare(float sr, std::size_t) {
+        sample_rate_ = sr;
+    }
+    
+    void process(umi::Context& ctx) {
+        float freq = ctx.params[0];
+        
+        for (std::size_t i = 0; i < ctx.frames; ++i) {
+            // サンプル精度でMIDI処理
+            while (auto ev = ctx.midi.pop_at(i)) {
+                if (ev->type == umi::midi::Type::NoteOn) {
+                    freq = midi_to_freq(ev->data1);
+                }
+            }
+            
+            // オーディオ生成
+            ctx.out[0][i] = std::sin(phase_ * 6.28318f);
+            ctx.out[1][i] = ctx.out[0][i];
+            phase_ += freq / sample_rate_;
+            if (phase_ > 1.f) phase_ -= 1.f;
+        }
+        
+        // オプショナル: 表示更新
+        if (ctx.display) {
+            ctx.display->line(0, "Freq: {:.1f}", freq);
+        }
+    }
+};
+```
 
 ---
 
@@ -13,20 +159,11 @@ MCUで動くコードをVST/AU/WASMでも動かすための仕組み。
 ├─────────────────────────────────────────────────────────┤
 │                   Host Adapter Layer                     │
 │                                                         │
-│  各ホストの違いを吸収し、同一インターフェースを提供        │
+│  各ホストの違いを吸収し、Context を構築して process() へ  │
 │                                                         │
-│  ┌─────────────────────────────────────────────────┐   │
-│  │              Adapter Interface                   │   │
-│  │  - process() の呼び出し                          │   │
-│  │  - MIDI イベントの変換と配信                      │   │
-│  │  - パラメータの同期                              │   │
-│  │  - 状態の保存/復元                               │   │
-│  └─────────────────────────────────────────────────┘   │
-│                                                         │
-│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐      │
-│  │   MCU   │ │  VST3   │ │   AU    │ │  WASM   │      │
-│  │ Adapter │ │ Adapter │ │ Adapter │ │ Adapter │      │
-│  └─────────┘ └─────────┘ └─────────┘ └─────────┘      │
+│  ┌───────┐ ┌───────┐ ┌───────┐ ┌───────┐ ┌───────┐    │
+│  │  MCU  │ │ VST3  │ │  AU   │ │ CLAP  │ │ WASM  │    │
+│  └───────┘ └───────┘ └───────┘ └───────┘ └───────┘    │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -34,114 +171,95 @@ MCUで動くコードをVST/AU/WASMでも動かすための仕組み。
 
 ## 各ホストの違い
 
-| 項目 | MCU (UMI-OS) | VST3 | AU | WASM |
-|------|-------------|------|-----|------|
-| オーディオコール | ISR→Task notify | processBlock() | render() | JS callback |
-| MIDI形式 | umi::midi::Event | Steinberg::Vst::Event | MIDIPacket | Uint8Array |
-| パラメータ | 直接アクセス | IEditController | AudioUnitParameter | JS object |
-| サンプルレート | 固定(48kHz等) | 可変 | 可変 | 可変 |
-| バッファサイズ | 固定(64-256) | 可変 | 可変 | 固定(128等) |
-| スレッド | RTOSタスク | ホスト管理 | ホスト管理 | シングル |
+| 項目 | MCU | VST3 | AU | CLAP | WASM |
+|------|-----|------|-----|------|------|
+| オーディオコール | DMA完了通知 | processBlock() | render() | process() | AudioWorklet |
+| バッファサイズ | 固定(64-256) | 可変 | 可変 | 可変 | 固定128 |
+| MIDI形式 | ISR→Queue | Vst::Event | MIDIPacket | clap_event | postMessage |
+| MIDIタイミング | タイムスタンプ | sampleOffset | timeStamp | time | バッファ単位 |
+| パラメータ | 共有メモリ | IEditController | AUParameter | clap_param | SharedArrayBuffer |
+| サンプルレート | 固定 | 可変 | 可変 | 可変 | 可変 |
+| スレッド | RTOSタスク | ホスト管理 | ホスト管理 | ホスト管理 | AudioWorklet |
 
 ---
 
-## Adapter Interface
+## MCU Adapter
 
-各アダプターが実装すべきインターフェース。
-
-```cpp
-namespace umi::adapter {
-
-template<typename Processor>
-struct AdapterBase {
-    Processor processor;
-    
-    // === オーディオ処理 ===
-    // ホストから呼ばれる → processor.process() を呼ぶ
-    void process_audio(float** out, const float** in,
-                       std::size_t frames, std::size_t channels);
-    
-    // === MIDI ===
-    // ホスト形式 → umi::midi::Event に変換 → processor.on_midi()
-    void handle_midi(/* ホスト固有の形式 */);
-    
-    // === パラメータ ===
-    void set_param(std::size_t index, float value);
-    float get_param(std::size_t index) const;
-    
-    // === 状態 ===
-    std::size_t save_state(std::byte* buf, std::size_t max) const;
-    void load_state(const std::byte* buf, std::size_t len);
-    
-    // === ライフサイクル ===
-    void prepare(float sample_rate, std::size_t max_frames);
-    void reset();
-};
-
-}
-```
-
----
-
-## MCU Adapter (UMI-OS)
-
-カーネルがタスクを管理し、`processor` のメソッドを呼び出す。
+カーネルがタスクを管理し、Context を構築して `process()` を呼び出す。
 
 ```cpp
 // adapter/mcu/run.hh
 namespace umi::mcu {
 
-template<typename Processor>
-[[noreturn]] void run(Processor& proc) {
-    // カーネル初期化
-    Kernel<HW, MaxTasks> kernel;
+template<typename App>
+[[noreturn]] void run(App& app) {
+    Kernel kernel;
     
-    // オーディオバッファ（静的確保）
-    alignas(4) static float out_buf[2][256];
-    alignas(4) static float in_buf[2][256];
+    // 静的バッファ
+    alignas(4) static float out_buf[2][BufferSize];
+    alignas(4) static float in_buf[2][BufferSize];
+    static std::array<float, App::params.size()> param_values;
+    static MidiQueue midi_queue;
+    static MidiQueue midi_queue_swap;  // ダブルバッファ
     
-    // MIDI キュー
-    static SpscQueue<midi::Event, 64> midi_queue;
+    // 初期化
+    app.prepare(SampleRate, BufferSize);
+    for (std::size_t i = 0; i < App::params.size(); ++i) {
+        param_values[i] = App::params[i].default_value;
+    }
     
     // オーディオタスク（Realtime）
     kernel.create_task({
-        .entry = [](void* ctx) {
-            auto& p = *static_cast<Processor*>(ctx);
+        .entry = [&app](void*) {
             float* out[2] = {out_buf[0], out_buf[1]};
             const float* in[2] = {in_buf[0], in_buf[1]};
             
             while (true) {
                 kernel.wait(Event::AudioReady);
                 
-                // MIDIイベント処理
-                while (auto ev = midi_queue.try_pop()) {
-                    p.on_midi(*ev);
-                }
+                // Context 構築
+                auto& midi = midi_queue_swap;
+                std::swap(midi_queue, midi_queue_swap);
+                
+                Context ctx{
+                    .out = out,
+                    .in = in,
+                    .frames = BufferSize,
+                    .channels = 2,
+                    .params = param_values,
+                    .midi = midi,
+                    .sample_rate = SampleRate,
+                };
                 
                 // オーディオ処理
                 auto start = DWT::cycles();
-                p.process(out, in, 256, 2);
+                app.process(ctx);
                 load_monitor.record(DWT::cycles() - start);
+                
+                midi.clear();
             }
         },
-        .arg = &proc,
         .prio = Priority::Realtime,
         .name = "audio",
     });
     
-    // MIDI Server（High）
+    // MIDI Server（High）- タイムスタンプ付きでキューイング
     kernel.create_task({
-        .entry = midi_server_task,
+        .entry = [](void*) {
+            while (true) {
+                kernel.wait(Event::MidiReady);
+                while (auto raw = midi_uart.pop()) {
+                    auto ev = parse_midi(raw);
+                    auto offset = timestamp_to_sample_offset(ev.timestamp);
+                    midi_queue.push(offset, ev);
+                }
+            }
+        },
         .prio = Priority::High,
         .name = "midi",
     });
     
-    // DMA ISR（notify のみ）
-    HW::set_audio_callback([] {
-        kernel.notify_from_isr(audio_task, Event::AudioReady);
-    });
-    
-    kernel.start();  // 戻らない
+    kernel.start();
 }
 
 }
@@ -168,77 +286,91 @@ Steinberg VST3 SDK とのブリッジ。
 // adapter/vst3/processor.hh
 namespace umi::vst3 {
 
-template<typename Processor>
+template<typename App>
 class Vst3Processor : public Steinberg::Vst::AudioEffect {
-    Processor proc_;
+    App app_;
+    std::array<float, App::params.size()> param_values_;
+    MidiQueue midi_queue_;
+    float sample_rate_{44100.f};
     
 public:
-    // VST3 からのオーディオ処理コール
+    tresult initialize(FUnknown* context) override {
+        for (std::size_t i = 0; i < App::params.size(); ++i) {
+            param_values_[i] = App::params[i].default_value;
+        }
+        return AudioEffect::initialize(context);
+    }
+    
+    tresult setBusArrangements(...) override { /* ... */ }
+    
+    tresult setupProcessing(ProcessSetup& setup) override {
+        sample_rate_ = setup.sampleRate;
+        app_.prepare(sample_rate_, setup.maxSamplesPerBlock);
+        return kResultOk;
+    }
+    
     tresult process(ProcessData& data) override {
-        // MIDI イベント変換
+        midi_queue_.clear();
+        
+        // MIDI イベント変換（サンプルオフセット付き）
         if (data.inputEvents) {
             for (int32 i = 0; i < data.inputEvents->getEventCount(); ++i) {
-                Event vstEvent;
-                data.inputEvents->getEvent(i, vstEvent);
+                Event e;
+                data.inputEvents->getEvent(i, e);
                 
-                // VST3 Event → umi::midi::Event
-                if (vstEvent.type == Event::kNoteOnEvent) {
-                    proc_.on_midi(midi::Event{
-                        .type = midi::Type::NoteOn,
-                        .channel = static_cast<uint8_t>(vstEvent.noteOn.channel),
-                        .data1 = static_cast<uint8_t>(vstEvent.noteOn.pitch),
-                        .data2 = static_cast<uint8_t>(vstEvent.noteOn.velocity * 127),
+                if (e.type == Event::kNoteOnEvent) {
+                    midi_queue_.push(e.sampleOffset, midi::Event{
+                        midi::Type::NoteOn,
+                        static_cast<uint8_t>(e.noteOn.channel),
+                        static_cast<uint8_t>(e.noteOn.pitch),
+                        static_cast<uint8_t>(e.noteOn.velocity * 127),
+                    });
+                } else if (e.type == Event::kNoteOffEvent) {
+                    midi_queue_.push(e.sampleOffset, midi::Event{
+                        midi::Type::NoteOff,
+                        static_cast<uint8_t>(e.noteOff.channel),
+                        static_cast<uint8_t>(e.noteOff.pitch),
+                        0,
                     });
                 }
-                // ... 他のイベント
             }
         }
         
-        // オーディオ処理
+        // パラメータ変更
+        if (data.inputParameterChanges) {
+            for (int32 i = 0; i < data.inputParameterChanges->getParameterCount(); ++i) {
+                auto* queue = data.inputParameterChanges->getParameterData(i);
+                ParamValue value;
+                int32 offset;
+                queue->getPoint(queue->getPointCount() - 1, offset, value);
+                
+                auto id = queue->getParameterId();
+                auto& info = App::params[id];
+                param_values_[id] = info.min + value * (info.max - info.min);
+            }
+        }
+        
+        // Context 構築
         float* out[2] = {data.outputs[0].channelBuffers32[0],
                          data.outputs[0].channelBuffers32[1]};
         const float* in[2] = {data.inputs[0].channelBuffers32[0],
                               data.inputs[0].channelBuffers32[1]};
         
-        proc_.process(out, in, data.numSamples, 2);
+        Context ctx{
+            .out = out,
+            .in = in,
+            .frames = static_cast<std::size_t>(data.numSamples),
+            .channels = 2,
+            .params = param_values_,
+            .midi = midi_queue_,
+            .sample_rate = sample_rate_,
+        };
         
-        return kResultOk;
-    }
-    
-    // パラメータ
-    tresult setParamNormalized(ParamID id, ParamValue value) override {
-        auto& info = Processor::params[id];
-        float denorm = info.min + value * (info.max - info.min);
-        proc_.set_param(id, denorm);
-        return kResultOk;
-    }
-    
-    // 状態保存
-    tresult getState(IBStream* state) override {
-        std::array<std::byte, 4096> buf;
-        auto size = proc_.save_state(buf.data(), buf.size());
-        state->write(buf.data(), size, nullptr);
+        app_.process(ctx);
         return kResultOk;
     }
 };
 
-// ファクトリ生成マクロ不要 - テンプレートで生成
-template<typename Processor>
-auto create() {
-    return new Vst3Processor<Processor>();
-}
-
-}
-```
-
-**使用方法:**
-```cpp
-#include "my_synth.hh"
-#include <umi/vst3/processor.hh>
-
-// VST3 エントリーポイント
-IPluginFactory* GetPluginFactory() {
-    return umi::vst3::create_factory<MySynth>("MySynth", "1.0.0");
 }
 ```
 
@@ -252,9 +384,12 @@ Apple Audio Unit とのブリッジ。
 // adapter/au/processor.hh
 namespace umi::au {
 
-template<typename Processor>
+template<typename App>
 class AUProcessor : public AUAudioUnit {
-    Processor proc_;
+    App app_;
+    std::array<float, App::params.size()> param_values_;
+    MidiQueue midi_queue_;
+    float sample_rate_;
     
 public:
     - (AUInternalRenderBlock)internalRenderBlock {
@@ -267,19 +402,31 @@ public:
             const AURenderEvent* realtimeEvents,
             AURenderPullInputBlock pullInput
         ) {
-            // MIDI イベント処理
-            for (auto event = realtimeEvents; event; event = event->head.next) {
+            midi_queue_.clear();
+            
+            // MIDI イベント処理（サンプルオフセット付き）
+            for (auto* event = realtimeEvents; event; event = event->head.next) {
                 if (event->head.eventType == AURenderEventMIDI) {
-                    proc_.on_midi(convert_midi(event->MIDI));
+                    auto offset = event->head.eventSampleTime - timestamp->mSampleTime;
+                    midi_queue_.push(offset, convert_midi(event->MIDI));
                 }
             }
             
-            // オーディオ処理
+            // Context 構築
             float* out[2] = {(float*)outputData->mBuffers[0].mData,
                              (float*)outputData->mBuffers[1].mData};
             
-            proc_.process(out, nullptr, frameCount, 2);
+            Context ctx{
+                .out = out,
+                .in = nullptr,
+                .frames = frameCount,
+                .channels = 2,
+                .params = param_values_,
+                .midi = midi_queue_,
+                .sample_rate = sample_rate_,
+            };
             
+            app_.process(ctx);
             return noErr;
         };
     }
@@ -290,80 +437,373 @@ public:
 
 ---
 
-## WASM Adapter
+## CLAP Adapter
 
-WebAssembly + JavaScript とのブリッジ。
+CLAP (Clever Audio Plugin) とのブリッジ。VST3 より単純でモダンな設計。
+
+```cpp
+// adapter/clap/processor.hh
+namespace umi::clap {
+
+template<typename App>
+class ClapProcessor {
+    App app_;
+    std::array<float, App::params.size()> param_values_;
+    MidiQueue midi_queue_;
+    float sample_rate_{44100.f};
+    
+public:
+    static const clap_plugin_descriptor* descriptor() {
+        static clap_plugin_descriptor desc = {
+            .clap_version = CLAP_VERSION,
+            .id = App::id,
+            .name = App::name,
+            .vendor = App::vendor,
+            // ...
+        };
+        return &desc;
+    }
+    
+    bool init() {
+        for (std::size_t i = 0; i < App::params.size(); ++i) {
+            param_values_[i] = App::params[i].default_value;
+        }
+        return true;
+    }
+    
+    bool activate(double sr, uint32_t min_frames, uint32_t max_frames) {
+        sample_rate_ = static_cast<float>(sr);
+        app_.prepare(sample_rate_, max_frames);
+        return true;
+    }
+    
+    clap_process_status process(const clap_process* p) {
+        midi_queue_.clear();
+        
+        // イベント処理
+        auto* in_events = p->in_events;
+        for (uint32_t i = 0; i < in_events->size(in_events); ++i) {
+            auto* header = in_events->get(in_events, i);
+            
+            if (header->type == CLAP_EVENT_NOTE_ON) {
+                auto* ev = reinterpret_cast<const clap_event_note*>(header);
+                midi_queue_.push(header->time, midi::Event{
+                    midi::Type::NoteOn,
+                    static_cast<uint8_t>(ev->channel),
+                    static_cast<uint8_t>(ev->key),
+                    static_cast<uint8_t>(ev->velocity * 127),
+                });
+            } else if (header->type == CLAP_EVENT_NOTE_OFF) {
+                auto* ev = reinterpret_cast<const clap_event_note*>(header);
+                midi_queue_.push(header->time, midi::Event{
+                    midi::Type::NoteOff,
+                    static_cast<uint8_t>(ev->channel),
+                    static_cast<uint8_t>(ev->key),
+                    0,
+                });
+            } else if (header->type == CLAP_EVENT_PARAM_VALUE) {
+                auto* ev = reinterpret_cast<const clap_event_param_value*>(header);
+                param_values_[ev->param_id] = static_cast<float>(ev->value);
+            }
+        }
+        
+        // Context 構築
+        float* out[2] = {p->audio_outputs[0].data32[0],
+                         p->audio_outputs[0].data32[1]};
+        const float* in[2] = {p->audio_inputs[0].data32[0],
+                              p->audio_inputs[0].data32[1]};
+        
+        Context ctx{
+            .out = out,
+            .in = in,
+            .frames = p->frames_count,
+            .channels = 2,
+            .params = param_values_,
+            .midi = midi_queue_,
+            .sample_rate = sample_rate_,
+        };
+        
+        app_.process(ctx);
+        return CLAP_PROCESS_CONTINUE;
+    }
+    
+    // パラメータ情報
+    uint32_t params_count() const { return App::params.size(); }
+    
+    bool params_get_info(uint32_t index, clap_param_info* info) const {
+        if (index >= App::params.size()) return false;
+        
+        const auto& p = App::params[index];
+        info->id = index;
+        info->flags = CLAP_PARAM_IS_AUTOMATABLE;
+        std::strncpy(info->name, p.name, CLAP_NAME_SIZE);
+        info->min_value = p.min;
+        info->max_value = p.max;
+        info->default_value = p.default_value;
+        return true;
+    }
+};
+
+}
+```
+
+**使用方法:**
+```cpp
+#include "my_synth.hh"
+#include <umi/clap/processor.hh>
+
+extern "C" const clap_plugin_entry clap_entry = {
+    .clap_version = CLAP_VERSION,
+    .init = [](const char*) { return true; },
+    .deinit = []() {},
+    .get_factory = [](const char* id) -> const void* {
+        if (strcmp(id, CLAP_PLUGIN_FACTORY_ID) == 0) {
+            return &umi::clap::factory<MySynth>;
+        }
+        return nullptr;
+    }
+};
+```
+
+---
+
+## WASM AudioWorklet Adapter
+
+WebAssembly + AudioWorklet とのブリッジ。
+
+### C++ 側（Emscripten）
 
 ```cpp
 // adapter/wasm/processor.hh
 namespace umi::wasm {
 
-template<typename Processor>
+template<typename App>
 class WasmProcessor {
-    Processor proc_;
+    App app_;
+    std::array<float, App::params.size()> param_values_;
+    MidiQueue midi_queue_;
+    float sample_rate_{48000.f};
+    
+    // AudioWorklet との共有バッファ
+    alignas(4) float audio_out_[2][128];
+    alignas(4) float audio_in_[2][128];
     
 public:
-    // JS から呼ばれる
-    void process(uintptr_t out_ptr, uintptr_t in_ptr, 
-                 std::size_t frames, std::size_t channels) {
-        auto* out = reinterpret_cast<float**>(out_ptr);
-        auto* in = reinterpret_cast<const float**>(in_ptr);
-        proc_.process(out, in, frames, channels);
+    WasmProcessor() {
+        for (std::size_t i = 0; i < App::params.size(); ++i) {
+            param_values_[i] = App::params[i].default_value;
+        }
     }
     
-    void on_midi(uint8_t status, uint8_t data1, uint8_t data2) {
-        proc_.on_midi(midi::Event{
-            .type = static_cast<midi::Type>(status & 0xF0),
-            .channel = static_cast<uint8_t>(status & 0x0F),
-            .data1 = data1,
-            .data2 = data2,
+    void prepare(float sr) {
+        sample_rate_ = sr;
+        app_.prepare(sr, 128);
+    }
+    
+    // JS から呼ばれる
+    float* get_audio_out(int ch) { return audio_out_[ch]; }
+    float* get_audio_in(int ch) { return audio_in_[ch]; }
+    float* get_param_buffer() { return param_values_.data(); }
+    
+    void process(int frames) {
+        float* out[2] = {audio_out_[0], audio_out_[1]};
+        const float* in[2] = {audio_in_[0], audio_in_[1]};
+        
+        Context ctx{
+            .out = out,
+            .in = in,
+            .frames = static_cast<std::size_t>(frames),
+            .channels = 2,
+            .params = param_values_,
+            .midi = midi_queue_,
+            .sample_rate = sample_rate_,
+        };
+        
+        app_.process(ctx);
+        midi_queue_.clear();
+    }
+    
+    void note_on(int channel, int note, int velocity) {
+        midi_queue_.push(0, midi::Event{
+            midi::Type::NoteOn,
+            static_cast<uint8_t>(channel),
+            static_cast<uint8_t>(note),
+            static_cast<uint8_t>(velocity),
         });
     }
     
-    void set_param(std::size_t index, float value) {
-        proc_.set_param(index, value);
+    void note_off(int channel, int note) {
+        midi_queue_.push(0, midi::Event{
+            midi::Type::NoteOff,
+            static_cast<uint8_t>(channel),
+            static_cast<uint8_t>(note),
+            0,
+        });
     }
+    
+    // パラメータ情報
+    static int get_param_count() { return App::params.size(); }
+    static const char* get_param_name(int i) { return App::params[i].name; }
+    static float get_param_min(int i) { return App::params[i].min; }
+    static float get_param_max(int i) { return App::params[i].max; }
+    static float get_param_default(int i) { return App::params[i].default_value; }
 };
 
-// Emscripten バインディング
-template<typename Processor>
-void expose(const char* name) {
-    emscripten::class_<WasmProcessor<Processor>>(name)
-        .constructor()
-        .function("process", &WasmProcessor<Processor>::process)
-        .function("onMidi", &WasmProcessor<Processor>::on_midi)
-        .function("setParam", &WasmProcessor<Processor>::set_param);
-}
+}  // namespace umi::wasm
 
+// Emscripten バインディング
+#include <emscripten/bind.h>
+
+EMSCRIPTEN_BINDINGS(umi_synth) {
+    using Proc = umi::wasm::WasmProcessor<MySynth>;
+    
+    emscripten::class_<Proc>("Processor")
+        .constructor<>()
+        .function("prepare", &Proc::prepare)
+        .function("getAudioOut", &Proc::get_audio_out, emscripten::allow_raw_pointers())
+        .function("getAudioIn", &Proc::get_audio_in, emscripten::allow_raw_pointers())
+        .function("getParamBuffer", &Proc::get_param_buffer, emscripten::allow_raw_pointers())
+        .function("process", &Proc::process)
+        .function("noteOn", &Proc::note_on)
+        .function("noteOff", &Proc::note_off)
+        .class_function("getParamCount", &Proc::get_param_count)
+        .class_function("getParamName", &Proc::get_param_name, emscripten::allow_raw_pointers())
+        .class_function("getParamMin", &Proc::get_param_min)
+        .class_function("getParamMax", &Proc::get_param_max)
+        .class_function("getParamDefault", &Proc::get_param_default);
 }
 ```
 
-**JavaScript 側:**
+### AudioWorklet 側（JavaScript）
+
 ```javascript
-// AudioWorklet 内
-class MySynthProcessor extends AudioWorkletProcessor {
+// worklet/processor.js
+class UmiProcessor extends AudioWorkletProcessor {
     constructor() {
         super();
-        this.synth = new Module.MySynth();
+        this.processor = null;
+        this.paramBuffer = null;
+        this.audioOut = [null, null];
+        this.audioIn = [null, null];
         
-        this.port.onmessage = (e) => {
-            if (e.data.type === 'midi') {
-                this.synth.onMidi(e.data.status, e.data.data1, e.data.data2);
+        this.port.onmessage = (e) => this.handleMessage(e.data);
+    }
+    
+    async handleMessage(msg) {
+        if (msg.type === 'init') {
+            await this.initWasm(msg.wasmModule);
+        } else if (msg.type === 'param') {
+            if (this.paramBuffer) {
+                this.paramBuffer[msg.index] = msg.value;
             }
-        };
+        } else if (msg.type === 'noteOn') {
+            this.processor?.noteOn(msg.channel, msg.note, msg.velocity);
+        } else if (msg.type === 'noteOff') {
+            this.processor?.noteOff(msg.channel, msg.note);
+        }
+    }
+    
+    async initWasm(wasmModule) {
+        const Module = await wasmModule();
+        this.processor = new Module.Processor();
+        this.processor.prepare(sampleRate);  // AudioWorklet グローバル
+        
+        // 共有バッファ取得
+        const paramPtr = this.processor.getParamBuffer();
+        this.paramBuffer = new Float32Array(
+            Module.HEAPF32.buffer, paramPtr, Module.Processor.getParamCount());
+        
+        for (let ch = 0; ch < 2; ch++) {
+            this.audioOut[ch] = new Float32Array(
+                Module.HEAPF32.buffer, this.processor.getAudioOut(ch), 128);
+            this.audioIn[ch] = new Float32Array(
+                Module.HEAPF32.buffer, this.processor.getAudioIn(ch), 128);
+        }
+        
+        // デフォルト値設定
+        for (let i = 0; i < Module.Processor.getParamCount(); i++) {
+            this.paramBuffer[i] = Module.Processor.getParamDefault(i);
+        }
+        
+        this.port.postMessage({ type: 'ready' });
     }
     
     process(inputs, outputs, parameters) {
-        const outL = outputs[0][0];
-        const outR = outputs[0][1];
+        if (!this.processor) return true;
         
-        // WASM メモリに直接書き込み
-        this.synth.process(outPtrs, inPtrs, 128, 2);
+        // 入力コピー
+        const input = inputs[0];
+        if (input?.length >= 2) {
+            this.audioIn[0].set(input[0]);
+            this.audioIn[1].set(input[1]);
+        }
+        
+        // WASM 処理
+        this.processor.process(128);
+        
+        // 出力コピー
+        const output = outputs[0];
+        output[0].set(this.audioOut[0]);
+        output[1].set(this.audioOut[1]);
         
         return true;
     }
 }
+
+registerProcessor('umi-processor', UmiProcessor);
 ```
+
+### メインスレッド側（JavaScript）
+
+```javascript
+// main.js
+class UmiSynth {
+    async init() {
+        this.audioContext = new AudioContext();
+        await this.audioContext.audioWorklet.addModule('worklet/processor.js');
+        
+        this.workletNode = new AudioWorkletNode(this.audioContext, 'umi-processor');
+        this.workletNode.connect(this.audioContext.destination);
+        
+        const wasmModule = await import('./synth.js');
+        this.workletNode.port.postMessage({ type: 'init', wasmModule: wasmModule.default });
+        
+        return new Promise(resolve => {
+            this.workletNode.port.onmessage = (e) => {
+                if (e.data.type === 'ready') resolve();
+            };
+        });
+    }
+    
+    setParam(index, value) {
+        this.workletNode.port.postMessage({ type: 'param', index, value });
+    }
+    
+    noteOn(channel, note, velocity) {
+        this.workletNode.port.postMessage({ type: 'noteOn', channel, note, velocity });
+    }
+    
+    noteOff(channel, note) {
+        this.workletNode.port.postMessage({ type: 'noteOff', channel, note });
+    }
+}
+
+// 使用例
+const synth = new UmiSynth();
+await synth.init();
+synth.noteOn(0, 60, 100);
+```
+
+---
+
+## アダプター比較
+
+| 項目 | MCU | VST3 | AU | CLAP | WASM |
+|------|-----|------|-----|------|------|
+| Context 構築 | カーネル | Adapter | Adapter | Adapter | Adapter |
+| MIDI精度 | サンプル | サンプル | サンプル | サンプル | バッファ |
+| パラメータ | 共有メモリ | IEditController | AUParameter | clap_param | postMessage |
+| GUI | HW/なし | VSTGUI | Cocoa | 任意 | HTML |
 
 ---
 
@@ -378,6 +818,7 @@ AudioProcessor は以下を守る必要がある:
 | **浮動小数点のみ** | double は MCU で遅い場合がある |
 | **グローバル状態禁止** | 複数インスタンス対応 |
 | **スレッド依存禁止** | ホストがスレッド管理 |
+| **引数経由のみ** | 外部状態へのアクセスは Context 経由 |
 
 ### 使用可能なもの
 
@@ -385,7 +826,7 @@ AudioProcessor は以下を守る必要がある:
 // OK
 #include <array>
 #include <cstdint>
-#include <cmath>        // sinf, cosf など（MCU でも使える）
+#include <cmath>        // sinf, cosf など
 #include <span>         // C++20
 #include <optional>     // C++17
 
@@ -398,60 +839,25 @@ AudioProcessor は以下を守る必要がある:
 
 ---
 
-## パラメータの同期
-
-```cpp
-// AudioProcessor でのパラメータ定義
-struct MySynth : umi::AudioProcessor<MySynth> {
-    static constexpr auto params = std::array{
-        umi::ParamInfo{"cutoff", "Cutoff", 20.f, 20000.f, 1000.f},
-        umi::ParamInfo{"reso", "Resonance", 0.f, 1.f, 0.5f},
-    };
-    
-    // パラメータ値（atomic でスレッドセーフ）
-    std::array<std::atomic<float>, params.size()> param_values_{
-        1000.f, 0.5f  // デフォルト値
-    };
-    
-    void set_param(std::size_t i, float v) {
-        param_values_[i].store(v, std::memory_order_relaxed);
-    }
-    
-    float get_param(std::size_t i) const {
-        return param_values_[i].load(std::memory_order_relaxed);
-    }
-    
-    void process(...) {
-        float cutoff = get_param(0);
-        float reso = get_param(1);
-        // ...
-    }
-};
-```
-
-各アダプターがホスト側のパラメータ変更を `set_param()` に変換。
-
----
-
 ## ファイル構成
 
 ```
 adapter/
 ├── common/
-│   └── adapter_base.hh    # 共通インターフェース
+│   ├── context.hh         # Context, MidiQueue
+│   └── param.hh           # Param 定義
 ├── mcu/
-│   ├── run.hh             # umi::mcu::run()
-│   └── hw_bridge.hh       # HW抽象化
+│   └── run.hh             # umi::mcu::run()
 ├── vst3/
 │   ├── processor.hh       # Vst3Processor
-│   ├── controller.hh      # Vst3Controller (UI)
+│   ├── controller.hh      # Vst3Controller
 │   └── factory.hh         # プラグイン登録
 ├── au/
-│   ├── processor.hh       # AUProcessor
-│   └── view.hh            # AU View (UI)
+│   └── processor.hh       # AUProcessor
+├── clap/
+│   └── processor.hh       # ClapProcessor
 └── wasm/
-    ├── processor.hh       # WasmProcessor
-    └── bindings.hh        # Emscripten バインディング
+    └── processor.hh       # WasmProcessor + Emscripten bindings
 ```
 
 ---
