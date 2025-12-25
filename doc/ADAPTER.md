@@ -11,9 +11,9 @@ MCUで動くコードをVST/AU/CLAP/WASMでも動かすための仕組み。
 ```cpp
 // ✅ 良い例: 全て引数経由
 void process(umi::Context& ctx) {
-    float freq = ctx.params[0];          // パラメータ
-    while (auto ev = ctx.midi.pop_at(i)) // MIDI
-    ctx.out[0][i] = generate();          // オーディオ出力
+    float freq = ctx.params[0];              // パラメータ
+    while (auto ev = ctx.midi_in.pop_at(i))  // MIDI
+    ctx.audio_out[0][i] = generate();        // オーディオ出力
 }
 
 // ❌ 悪い例: グローバル/シングルトン
@@ -34,27 +34,76 @@ void process(umi::Context& ctx) {
 
 ## Context 構造
 
+### 型安全なバッファビュー
+
+チャンネル数・フレーム数をバッファと一体化し、インターフェースを明確にする。
+
 ```cpp
 namespace umi {
 
+// 安全なオーディオバッファビュー（ゼロコスト抽象化）
+template<typename T>
+struct AudioBuffer {
+    T** data;
+    std::uint8_t channels;
+    std::uint16_t frames;
+    
+    // 安全なチャンネルアクセス → span<T> を返す
+    std::span<T> operator[](std::uint8_t ch) const {
+        return {data[ch], frames};
+    }
+    
+    auto channel_count() const { return channels; }
+    auto frame_count() const { return frames; }
+};
+
+// MIDIポートバッファ（入力用）
+struct MidiIn {
+    MidiQueue* queues;    // ポートごとのキュー配列
+    std::uint8_t ports;
+    
+    MidiQueue& operator[](std::uint8_t port) const {
+        return queues[port];
+    }
+    
+    // シングルポートの場合の便利メソッド
+    std::optional<midi::Event> pop_at(std::size_t sample_pos) {
+        return queues[0].pop_at(sample_pos);
+    }
+    
+    auto port_count() const { return ports; }
+};
+
+// MIDIポートバッファ（出力用）
+struct MidiOut {
+    MidiOutQueue* queues;
+    std::uint8_t ports;
+    
+    MidiOutQueue& operator[](std::uint8_t port) const {
+        return queues[port];
+    }
+    
+    void send(const midi::Event& ev, std::size_t sample_offset = 0) {
+        queues[0].push(sample_offset, ev);
+    }
+    
+    auto port_count() const { return ports; }
+};
+
 struct Context {
-    // === オーディオ I/O ===
-    float** out;                          // 出力バッファ
-    const float** in;                     // 入力バッファ
-    std::size_t frames;                   // サンプル数
-    std::size_t channels;                 // チャンネル数
+    // === オーディオ I/O（型安全）===
+    AudioBuffer<float> audio_out;         // 出力バッファ
+    AudioBuffer<const float> audio_in;    // 入力バッファ
+    float sample_rate;                    // サンプルレート
+    
+    // === MIDI I/O（サンプル精度）===
+    MidiIn midi_in;                       // MIDI入力（マルチポート対応）
+    MidiOut midi_out;                     // MIDI出力（マルチポート対応）
     
     // === パラメータ ===
     std::span<const float> params;        // パラメータ値（読み取り専用）
     
-    // === MIDI（サンプル精度）===
-    MidiQueue& midi;                      // MIDI入力キュー
-    
-    // === 環境情報 ===
-    float sample_rate;                    // サンプルレート
-    
     // === オプショナル（nullptr可）===
-    MidiOut* midi_out{nullptr};           // MIDI出力
     Display* display{nullptr};            // 表示更新
     const Transport* transport{nullptr};  // DAWトランスポート情報
 };
@@ -73,12 +122,68 @@ struct MidiQueue {
     void clear();
 };
 
+struct MidiOutQueue {
+    void push(std::size_t sample_offset, const midi::Event& ev);
+    void clear();
+};
+
 struct Transport {
     std::uint64_t position_samples;       // 再生位置（サンプル）
     float bpm;                            // テンポ
     bool is_playing;                      // 再生中か
 };
 
+}
+```
+
+### オーバーヘッドについて
+
+`AudioBuffer` と `MidiIn/MidiOut` はゼロコスト抽象化です：
+
+- `operator[]` はインライン展開され、生ポインタアクセスと同一コードを生成
+- `span<T>` はポインタ + サイズのペアで、最適化により消去される
+- Context全体のサイズ増加は約8バイト（チャンネル/ポート数のメタデータ分）
+
+```cpp
+// コンパイル後（-O2以上）は完全に同一
+auto out = ctx.audio_out[ch];    // → float* ptr = data[ch];
+for (auto& s : out) { ... }      // → for (i = 0; i < frames; i++) { ptr[i] = ...; }
+```
+
+### 動的構成変更（USB拡張など）
+
+Contextは毎回の `process()` 呼び出し時に渡されるため、動的な構成変更に対応可能：
+
+```cpp
+// ホストアダプター側：USB Audio接続時
+void on_usb_audio_connected(uint8_t extra_channels) {
+    usb_channels = extra_channels;
+    usb_connected = true;
+    // 次の process() から反映
+}
+
+void audio_task() {
+    if (usb_connected) {
+        // 拡張構成
+        float* combined_out[10];  // main(2) + usb(8)
+        std::copy(main_out, main_out + 2, combined_out);
+        std::copy(usb_out, usb_out + usb_channels, combined_out + 2);
+        ctx.audio_out = {combined_out, uint8_t(2 + usb_channels), frames};
+    } else {
+        ctx.audio_out = {main_out, 2, frames};
+    }
+    app.process(ctx);
+}
+
+// アプリ側：チャンネル数を動的に扱う
+void MyApp::process(Context& ctx) {
+    // メインステレオ（常に存在）
+    generate_stereo(ctx.audio_out[0], ctx.audio_out[1]);
+    
+    // 追加チャンネルがあれば使用
+    for (uint8_t ch = 2; ch < ctx.audio_out.channel_count(); ++ch) {
+        generate_aux(ctx.audio_out[ch], ch - 2);
+    }
 }
 ```
 
@@ -124,18 +229,20 @@ struct MySynth : umi::AudioProcessor<MySynth> {
     
     void process(umi::Context& ctx) {
         float freq = ctx.params[0];
+        auto frames = ctx.audio_out.frame_count();
         
-        for (std::size_t i = 0; i < ctx.frames; ++i) {
+        for (std::size_t i = 0; i < frames; ++i) {
             // サンプル精度でMIDI処理
-            while (auto ev = ctx.midi.pop_at(i)) {
+            while (auto ev = ctx.midi_in.pop_at(i)) {
                 if (ev->type == umi::midi::Type::NoteOn) {
                     freq = midi_to_freq(ev->data1);
                 }
             }
             
-            // オーディオ生成
-            ctx.out[0][i] = std::sin(phase_ * 6.28318f);
-            ctx.out[1][i] = ctx.out[0][i];
+            // オーディオ生成（型安全なアクセス）
+            float sample = std::sin(phase_ * 6.28318f);
+            ctx.audio_out[0][i] = sample;
+            ctx.audio_out[1][i] = sample;
             phase_ += freq / sample_rate_;
             if (phase_ > 1.f) phase_ -= 1.f;
         }
@@ -211,24 +318,24 @@ template<typename App>
     // オーディオタスク（Realtime）
     kernel.create_task({
         .entry = [&app](void*) {
-            float* out[2] = {out_buf[0], out_buf[1]};
-            const float* in[2] = {in_buf[0], in_buf[1]};
+            float* out_ptrs[2] = {out_buf[0], out_buf[1]};
+            const float* in_ptrs[2] = {in_buf[0], in_buf[1]};
+            static MidiQueue midi_queue_single;
             
             while (true) {
                 kernel.wait(Event::AudioReady);
                 
-                // Context 構築
-                auto& midi = midi_queue_swap;
+                // Context 構築（型安全）
                 std::swap(midi_queue, midi_queue_swap);
+                midi_queue_single = midi_queue_swap;
                 
                 Context ctx{
-                    .out = out,
-                    .in = in,
-                    .frames = BufferSize,
-                    .channels = 2,
-                    .params = param_values,
-                    .midi = midi,
+                    .audio_out = {out_ptrs, 2, BufferSize},
+                    .audio_in = {in_ptrs, 2, BufferSize},
                     .sample_rate = SampleRate,
+                    .midi_in = {&midi_queue_single, 1},
+                    .midi_out = {},  // 必要に応じて設定
+                    .params = param_values,
                 };
                 
                 // オーディオ処理
@@ -236,7 +343,7 @@ template<typename App>
                 app.process(ctx);
                 load_monitor.record(DWT::cycles() - start);
                 
-                midi.clear();
+                midi_queue_swap.clear();
             }
         },
         .prio = Priority::Realtime,
@@ -350,20 +457,19 @@ public:
             }
         }
         
-        // Context 構築
-        float* out[2] = {data.outputs[0].channelBuffers32[0],
-                         data.outputs[0].channelBuffers32[1]};
-        const float* in[2] = {data.inputs[0].channelBuffers32[0],
-                              data.inputs[0].channelBuffers32[1]};
+        // Context 構築（型安全）
+        float* out_ptrs[2] = {data.outputs[0].channelBuffers32[0],
+                              data.outputs[0].channelBuffers32[1]};
+        const float* in_ptrs[2] = {data.inputs[0].channelBuffers32[0],
+                                   data.inputs[0].channelBuffers32[1]};
         
         Context ctx{
-            .out = out,
-            .in = in,
-            .frames = static_cast<std::size_t>(data.numSamples),
-            .channels = 2,
-            .params = param_values_,
-            .midi = midi_queue_,
+            .audio_out = {out_ptrs, 2, static_cast<std::uint16_t>(data.numSamples)},
+            .audio_in = {in_ptrs, 2, static_cast<std::uint16_t>(data.numSamples)},
             .sample_rate = sample_rate_,
+            .midi_in = {&midi_queue_, 1},
+            .midi_out = {},
+            .params = param_values_,
         };
         
         app_.process(ctx);
@@ -412,18 +518,17 @@ public:
                 }
             }
             
-            // Context 構築
-            float* out[2] = {(float*)outputData->mBuffers[0].mData,
-                             (float*)outputData->mBuffers[1].mData};
+            // Context 構築（型安全）
+            float* out_ptrs[2] = {(float*)outputData->mBuffers[0].mData,
+                                  (float*)outputData->mBuffers[1].mData};
             
             Context ctx{
-                .out = out,
-                .in = nullptr,
-                .frames = frameCount,
-                .channels = 2,
-                .params = param_values_,
-                .midi = midi_queue_,
+                .audio_out = {out_ptrs, 2, static_cast<std::uint16_t>(frameCount)},
+                .audio_in = {},  // 入力なし
                 .sample_rate = sample_rate_,
+                .midi_in = {&midi_queue_, 1},
+                .midi_out = {},
+                .params = param_values_,
             };
             
             app_.process(ctx);
@@ -507,20 +612,19 @@ public:
             }
         }
         
-        // Context 構築
-        float* out[2] = {p->audio_outputs[0].data32[0],
-                         p->audio_outputs[0].data32[1]};
-        const float* in[2] = {p->audio_inputs[0].data32[0],
-                              p->audio_inputs[0].data32[1]};
+        // Context 構築（型安全）
+        float* out_ptrs[2] = {p->audio_outputs[0].data32[0],
+                              p->audio_outputs[0].data32[1]};
+        const float* in_ptrs[2] = {p->audio_inputs[0].data32[0],
+                                   p->audio_inputs[0].data32[1]};
         
         Context ctx{
-            .out = out,
-            .in = in,
-            .frames = p->frames_count,
-            .channels = 2,
-            .params = param_values_,
-            .midi = midi_queue_,
+            .audio_out = {out_ptrs, 2, static_cast<std::uint16_t>(p->frames_count)},
+            .audio_in = {in_ptrs, 2, static_cast<std::uint16_t>(p->frames_count)},
             .sample_rate = sample_rate_,
+            .midi_in = {&midi_queue_, 1},
+            .midi_out = {},
+            .params = param_values_,
         };
         
         app_.process(ctx);
@@ -606,17 +710,16 @@ public:
     float* get_param_buffer() { return param_values_.data(); }
     
     void process(int frames) {
-        float* out[2] = {audio_out_[0], audio_out_[1]};
-        const float* in[2] = {audio_in_[0], audio_in_[1]};
+        float* out_ptrs[2] = {audio_out_[0], audio_out_[1]};
+        const float* in_ptrs[2] = {audio_in_[0], audio_in_[1]};
         
         Context ctx{
-            .out = out,
-            .in = in,
-            .frames = static_cast<std::size_t>(frames),
-            .channels = 2,
-            .params = param_values_,
-            .midi = midi_queue_,
+            .audio_out = {out_ptrs, 2, static_cast<std::uint16_t>(frames)},
+            .audio_in = {in_ptrs, 2, static_cast<std::uint16_t>(frames)},
             .sample_rate = sample_rate_,
+            .midi_in = {&midi_queue_, 1},
+            .midi_out = {},
+            .params = param_values_,
         };
         
         app_.process(ctx);
@@ -844,7 +947,9 @@ AudioProcessor は以下を守る必要がある:
 ```
 adapter/
 ├── common/
-│   ├── context.hh         # Context, MidiQueue
+│   ├── context.hh         # Context
+│   ├── audio_buffer.hh    # AudioBuffer<T>
+│   ├── midi_buffer.hh     # MidiIn, MidiOut, MidiQueue
 │   └── param.hh           # Param 定義
 ├── mcu/
 │   └── run.hh             # umi::mcu::run()
