@@ -32,32 +32,47 @@ class AudioProcessor {
 };
 ```
 
-#### 新API（Processor）
+#### 新API（Processor - RAII設計）
 
 ```cpp
 // 新: include/umi/processor.hpp
 class Processor {
-    // ライフサイクル
-    void initialize();           // 一度だけ、ヒープ許可
-    void prepare(StreamConfig);  // 設定変更時
-    void release();              // シャットダウン前
-    void terminate();            // 破棄前
+public:
+    // 構築時にリソース確保（RAII）
+    explicit Processor(const StreamConfig& config);
+    virtual ~Processor() = default;  // リソース解放
     
     // 処理（必須）
-    void process(AudioContext& ctx);  // リアルタイム安全
+    virtual void process(AudioContext& ctx) = 0;  // リアルタイム安全
     
     // 処理（オプション）
-    void control(ControlContext& ctx);  // 低優先度
+    virtual void control(ControlContext& ctx);  // 低優先度
+    
+    // 設定
+    const StreamConfig& config() const;
+    virtual void reconfigure(const StreamConfig& new_config);  // 必要な場合のみ
     
     // 宣言
-    span<ParamDescriptor> params();
-    span<PortDescriptor> ports();
+    virtual span<const ParamDescriptor> params() const;
+    virtual span<const PortDescriptor> ports() const;
     
     // 状態
-    size_t save_state(span<uint8_t>);
-    bool load_state(span<const uint8_t>);
+    virtual size_t save_state(span<uint8_t>) const;
+    virtual bool load_state(span<const uint8_t>);
+    
+    // 要件
+    static Requirements requirements();
 };
 ```
+
+**設計原則:**
+- コンストラクタで全リソース確保、デストラクタで解放（RAII）
+- サンプルレート変更時は新インスタンス構築→スワップが推奨
+- `-fno-exceptions`環境ではファクトリパターンを使用:
+  ```cpp
+  static auto create(const StreamConfig& config) 
+      -> expected<std::unique_ptr<MyProcessor>, Error>;
+  ```
 
 ### AudioContext
 

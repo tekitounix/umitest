@@ -113,35 +113,32 @@ struct Requirements {
 // Processor Base Class
 // ============================================================================
 
-/// Base class for audio processors
+/// Base class for audio processors (RAII design)
 /// 
 /// Lifecycle:
-/// 1. Construction (allocate static resources)
-/// 2. initialize() - one-time setup, heap allowed
-/// 3. prepare() - called when sample rate/buffer size changes
-/// 4. process() - called for each audio buffer (real-time safe!)
-/// 5. control() - called from control thread (optional)
-/// 6. release() - called before reconfiguration
-/// 7. terminate() - called before destruction
+/// 1. Construct with StreamConfig - allocate all resources
+/// 2. process() - called for each audio buffer (real-time safe!)
+/// 3. control() - called from control thread (optional)
+/// 4. Destructor - release all resources
+///
+/// For sample rate changes: construct new instance, swap, destroy old.
+/// Use reconfigure() only if in-place reconfiguration is truly needed.
 class Processor {
 public:
+    /// Construct processor with stream configuration
+    /// All resource allocation should happen here.
+    /// For error handling without exceptions, use factory pattern in derived class:
+    ///   static auto create(config) -> expected<unique_ptr<Derived>, Error>
+    explicit Processor(const StreamConfig& config) 
+        : config_(config) {}
+    
     virtual ~Processor() = default;
     
-    // === Lifecycle ===
-    
-    /// Called once after construction
-    /// Heap allocation allowed here
-    virtual void initialize() {}
-    
-    /// Called when audio stream configuration changes
-    /// Minimal heap allowed (sample-rate dependent buffers)
-    virtual void prepare(const StreamConfig& config) { (void)config; }
-    
-    /// Called before reconfiguration or shutdown
-    virtual void release() {}
-    
-    /// Called before destruction
-    virtual void terminate() {}
+    // Non-copyable, movable
+    Processor(const Processor&) = delete;
+    Processor& operator=(const Processor&) = delete;
+    Processor(Processor&&) = default;
+    Processor& operator=(Processor&&) = default;
     
     // === Processing ===
     
@@ -153,6 +150,18 @@ public:
     /// Control processing callback (optional)
     /// Called from control thread, lower priority
     virtual void control(ControlContext& ctx) { (void)ctx; }
+    
+    // === Configuration ===
+    
+    /// Current stream configuration
+    [[nodiscard]] const StreamConfig& config() const noexcept { return config_; }
+    
+    /// Reconfigure processor in-place (optional)
+    /// Default implementation does nothing - override if in-place reconfigure is needed.
+    /// For most cases, prefer constructing a new instance instead.
+    virtual void reconfigure(const StreamConfig& new_config) { 
+        config_ = new_config; 
+    }
     
     // === Descriptors ===
     
@@ -179,7 +188,10 @@ public:
     // === Requirements ===
     
     /// Return resource requirements (can be static)
-    virtual Requirements requirements() const { return {}; }
+    static Requirements requirements() { return {}; }
+    
+protected:
+    StreamConfig config_;
 };
 
 } // namespace umi

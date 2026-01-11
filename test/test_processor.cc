@@ -51,21 +51,16 @@ static int tests_passed = 0;
     } while(0)
 
 // ============================================================================
-// Simple sine oscillator for testing
+// Simple sine oscillator for testing (RAII design)
 // ============================================================================
 
 class SineOscillator : public umi::Processor {
 public:
-    void initialize() override {
-        phase_ = 0.0f;
-        frequency_ = 440.0f;
-        initialized_ = true;
-    }
-    
-    void prepare(const umi::StreamConfig& config) override {
+    explicit SineOscillator(const umi::StreamConfig& config)
+        : Processor(config)
+    {
         sample_rate_ = static_cast<float>(config.sample_rate);
         phase_inc_ = frequency_ / sample_rate_;
-        prepared_ = true;
     }
     
     void process(umi::AudioContext& ctx) override {
@@ -80,30 +75,21 @@ public:
         process_count_++;
     }
     
-    void release() override {
-        released_ = true;
-    }
-    
-    void terminate() override {
-        terminated_ = true;
+    void reconfigure(const umi::StreamConfig& new_config) override {
+        Processor::reconfigure(new_config);
+        sample_rate_ = static_cast<float>(new_config.sample_rate);
+        phase_inc_ = frequency_ / sample_rate_;
     }
     
     // Test accessors
-    bool was_initialized() const { return initialized_; }
-    bool was_prepared() const { return prepared_; }
-    bool was_released() const { return released_; }
-    bool was_terminated() const { return terminated_; }
     int process_count() const { return process_count_; }
+    float sample_rate() const { return sample_rate_; }
     
 private:
     float phase_ = 0.0f;
     float phase_inc_ = 0.0f;
     float frequency_ = 440.0f;
     float sample_rate_ = 48000.0f;
-    bool initialized_ = false;
-    bool prepared_ = false;
-    bool released_ = false;
-    bool terminated_ = false;
     int process_count_ = 0;
 };
 
@@ -187,17 +173,17 @@ void test_event_queue() {
 }
 
 void test_processor_lifecycle() {
-    TEST(processor_lifecycle);
-    
-    SineOscillator osc;
-    ASSERT(!osc.was_initialized());
-    
-    osc.initialize();
-    ASSERT(osc.was_initialized());
+    TEST(processor_raii_construction);
     
     umi::StreamConfig config{48000, 256};
-    osc.prepare(config);
-    ASSERT(osc.was_prepared());
+    SineOscillator osc(config);
+    
+    ASSERT_EQ(osc.config().sample_rate, 48000u);
+    ASSERT_EQ(osc.config().buffer_size, 256u);
+    ASSERT_NEAR(osc.sample_rate(), 48000.0f, 0.1f);
+    PASS();
+    
+    TEST(processor_process);
     
     // Create audio context for process
     std::array<umi::sample_t, 256> out_buf{};
@@ -222,12 +208,15 @@ void test_processor_lifecycle() {
         if (s != 0.0f) has_nonzero = true;
     }
     ASSERT(has_nonzero);
+    PASS();
     
-    osc.release();
-    ASSERT(osc.was_released());
+    TEST(processor_reconfigure);
     
-    osc.terminate();
-    ASSERT(osc.was_terminated());
+    umi::StreamConfig new_config{96000, 512};
+    osc.reconfigure(new_config);
+    
+    ASSERT_EQ(osc.config().sample_rate, 96000u);
+    ASSERT_NEAR(osc.sample_rate(), 96000.0f, 0.1f);
     PASS();
 }
 
