@@ -1,0 +1,13 @@
+// Renode Platform Description for UMI-OS Testing
+// Based on STM32F407 / STM32F446
+
+// Include base STM32F4 platform (provides CPU, NVIC, peripherals)
+using "platforms/cpus/stm32f4.repl"
+
+// Override flash size for our smaller test image
+flash:
+    size: 0x80000
+
+// Add boot alias at 0x00000000 (STM32 boots from here)
+boot: Memory.MappedMemory @ sysbus 0x00000000
+    size: 0x80000
