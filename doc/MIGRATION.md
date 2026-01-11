@@ -34,42 +34,55 @@ class AudioProcessor {
 
 #### 新API（Concept-based設計）
 
+継承不要。必要なメソッドを実装するだけ：
+
 ```cpp
-// 新: include/umi/processor.hpp
-
-// コンセプト定義（継承不要）
-template<typename T>
-concept ProcessorLike = requires(T& p, AudioContext& ctx) {
-    { p.process(ctx) } -> std::same_as<void>;
-};
-
-template<typename T>
-concept Controllable = ProcessorLike<T> && requires(T& p, ControlContext& ctx) {
-    { p.control(ctx) } -> std::same_as<void>;
-};
-
-// 型消去ラッパー（動的ディスパッチが必要な時）
-class AnyProcessor {
+// 最小実装（これだけでProcessorLikeを満たす）
+class MySynth {
 public:
-    template<ProcessorLike P> explicit AnyProcessor(P& proc);
-    template<ProcessorLike P> explicit AnyProcessor(std::unique_ptr<P> proc);
-    
-    void process(AudioContext& ctx);
-    void control(ControlContext& ctx);
-    bool has_control() const;
+    void process(AudioContext& ctx) {
+        auto* out = ctx.output(0);
+        for (size_t i = 0; i < ctx.buffer_size; ++i) {
+            out[i] = /* generate audio */;
+        }
+    }
 };
 
-// ヘルパー関数（インライン化される）
-template<ProcessorLike P>
-void process_once(P& proc, AudioContext& ctx);
+// オプション: control()があればControllableになる
+class MyControllableSynth {
+public:
+    void process(AudioContext& ctx) { /* ... */ }
+    void control(ControlContext& ctx) { /* パラメータ更新など */ }
+};
 
-template<ProcessorLike P>
-void process_with_control(P& proc, AudioContext& audio_ctx, ControlContext& ctrl_ctx);
+// オプション: params()があればHasParamsになる
+class MyParamSynth {
+public:
+    void process(AudioContext& ctx) { /* ... */ }
+    std::span<const ParamDescriptor> params() const { return params_; }
+private:
+    static constexpr ParamDescriptor params_[] = {
+        {0, "Volume", 0.8f, 0.0f, 1.0f},
+        {1, "Cutoff", 1000.0f, 20.0f, 20000.0f},
+    };
+};
+```
+
+**使用方法:**
+
+```cpp
+// 組み込み（インライン化、vtable不要）
+MySynth synth;
+umi::process_once(synth, ctx);  // 直接呼び出し
+
+// テスト/プラグイン（動的ディスパッチが必要な時）
+umi::AnyProcessor any(synth);
+any.process(ctx);  // 型消去経由
 ```
 
 **設計原則:**
-- 継承不要: `process(AudioContext&)`メソッドがあればOK
-- 組み込み: コンセプト直接使用でvtable不要、完全インライン化
+- 継承不要: 必要なメソッドがあればOK（ダックタイピング）
+- 組み込み: 直接使用でvtable不要、完全インライン化
 - テスト/プラグイン: `AnyProcessor`で動的ディスパッチ
 - `-fno-rtti`対応: コンセプトはRTTI不要
 
