@@ -1,6 +1,7 @@
 # UMI-OS リファクタリング計画
 
 **作成日**: 2025年1月12日  
+**最終更新**: 2026年1月12日  
 **基準ドキュメント**: [DESIGN_COMPARISON_REPORT.md](DESIGN_COMPARISON_REPORT.md)
 
 ---
@@ -13,10 +14,18 @@ NEW_DESIGN.md を目標仕様として、既存設計の成熟した部分を維
 
 | 方針 | 内容 |
 |------|------|
-| 新設計採用 | Processor API、時間管理、メモリ管理、保護レベル、ログ・アサート |
+| 新設計採用 | **コンセプトベースProcessor API**、時間管理、メモリ管理、保護レベル、ログ・アサート |
 | 既存維持 | コルーチン(umi_coro.hh)、UI設計(ADAPTER.md)、設計決定記録 |
 | アーカイブ | 現在の実装を完全に保存してから変更開始 |
 | 進行方式 | 依存関係順に実行、各フェーズ完了条件で区切る |
+
+### 1.2 設計決定
+
+| 決定 | 理由 |
+|------|------|
+| C++20コンセプト | vtable不要、インライン化可能、-fno-rtti対応 |
+| ダックタイピング | 継承不要、柔軟なAPI |
+| 型消去ラッパー | 動的ディスパッチが必要な時のみ使用 |
 
 ---
 
@@ -58,71 +67,84 @@ archive/
 
 ```
 umi_os/
-├── xmake.lua                       # 更新
-├── include/umi/                    # 公開ヘッダー（新規）
-│   ├── processor.hpp              # Processor API（6段階ライフサイクル）
-│   ├── audio_context.hpp          # AudioContext/EventQueue
-│   ├── time.hpp                   # 時間ユーティリティ
-│   ├── assert.hpp                 # 層別アサート
-│   ├── log.hpp                    # 層別ログ
-│   ├── coro.hpp                   # ← core/umi_coro.hh を移動
-│   └── error.hpp                  # Result<T>/Errorコード
+├── xmake.lua                       # 更新済
+├── include/umi/                    # 公開ヘッダー
+│   ├── types.hpp                  # ✅ 型定義
+│   ├── time.hpp                   # ✅ 時間ユーティリティ
+│   ├── event.hpp                  # ✅ Event/EventQueue
+│   ├── audio_context.hpp          # ✅ AudioContext/ControlContext
+│   ├── processor.hpp              # ✅ コンセプトベースAPI
+│   ├── coro.hpp                   # ← core/umi_coro.hh を移動予定
+│   ├── assert.hpp                 # 層別アサート（予定）
+│   ├── log.hpp                    # 層別ログ（予定）
+│   └── error.hpp                  # Result<T>/Errorコード（予定）
 ├── core/                          # カーネル・内部実装
-│   ├── kernel/                    # umi_kernel.hh 分割
-│   │   ├── task.hpp
-│   │   ├── scheduler.hpp
-│   │   └── ipc.hpp
-│   ├── audio/                     # umi_audio.hh 分割
-│   │   ├── engine.hpp
-│   │   └── triple_buffer.hpp      # 新規
-│   ├── midi/                      # umi_midi.hh 分割
-│   └── monitor/                   # umi_monitor.hh / umi_shell.hh
-├── dsp/                           # DSP部品（依存なし）
-│   └── oscillator.hpp
-├── adapter/                       # アダプタ層（ADAPTER.md設計）
+│   ├── umi_coro.hh               # コルーチン（成熟）
+│   ├── umi_kernel.hh             # カーネル
+│   ├── umi_audio.hh              # オーディオ
+│   ├── umi_midi.hh               # MIDI
+│   ├── kernel/                    # 分割予定
+│   └── audio/
+│       └── triple_buffer.hpp      # 予定
+├── dsp/                           # DSP部品（依存なし、予定）
+├── adapter/                       # アダプタ層（予定）
 │   ├── embedded/
 │   ├── vst3/
 │   ├── clap/
 │   └── wasm/
 ├── port/                          # PAL（既存構造維持）
 ├── doc/
-│   ├── NEW_DESIGN.md              # 目標仕様
-│   ├── ADAPTER.md                 # UI設計（維持）
-│   ├── COMPARISON_MOS_STM32.md    # 設計決定（維持）
-│   ├── MIGRATION.md               # 移行ガイド（新規）
+│   ├── DESIGN_COMPARISON_REPORT.md # 比較レポート
+│   ├── MIGRATION.md               # 移行ガイド
 │   └── REFACTORING_PLAN.md        # 本ドキュメント
 ├── examples/
+│   └── example_app.cc            # ✅ 新API対応済
 ├── test/
-└── archive/                       # 旧実装アーカイブ
+│   ├── test_processor.cc         # ✅ 新API、16テスト
+│   ├── test_kernel.cc            # 既存
+│   ├── test_audio.cc             # 既存
+│   └── test_midi.cc              # 既存
+├── renode/
+└── archive/
+    └── v0.1-legacy/              # ✅ 旧実装アーカイブ
 ```
 
 ---
 
 ## 4. フェーズ計画
 
-### Phase 0: 準備
+### Phase 0: 準備 ✅ 完了
 
 **依存**: なし  
 **完了条件**: アーカイブ完了、新ディレクトリ構造準備完了
 
-| タスク | 詳細 |
-|--------|------|
-| アーカイブ作成 | `archive/v0.1-legacy/` に現在のファイルをコピー |
-| Gitタグ作成 | `v0.1-legacy` タグを作成 |
-| MIGRATION.md作成 | 旧→新APIマッピング表 |
-| ディレクトリ作成 | `include/umi/` を作成 |
+| タスク | 状態 | 詳細 |
+|--------|------|------|
+| アーカイブ作成 | ✅ | `archive/v0.1-legacy/` に全ファイルコピー |
+| Gitタグ作成 | ✅ | `v0.1-legacy` タグ作成済 |
+| MIGRATION.md作成 | ✅ | 旧→新APIマッピング表 |
+| ディレクトリ作成 | ✅ | `include/umi/` 作成済 |
 
-### Phase 1: Processor API改訂
+### Phase 1: Processor API改訂 ✅ 完了
 
 **依存**: Phase 0  
 **完了条件**: 新Processor APIで最小限のシンセサイザーがネイティブテストで動作
 
-| タスク | 詳細 |
-|--------|------|
-| processor.hpp | 6段階ライフサイクル定義 |
-| audio_context.hpp | AudioContext、EventQueue、sample_position |
-| time.hpp | ms_to_samples()、samples_to_ms() |
-| ネイティブテスト | test/test_processor.cc 作成・パス |
+| タスク | 状態 | 詳細 |
+|--------|------|------|
+| types.hpp | ✅ | sample_t、定数定義 |
+| time.hpp | ✅ | ms_to_samples()、samples_to_ms()、bpm計算 |
+| event.hpp | ✅ | EventType、Event、EventQueue（SPSC） |
+| audio_context.hpp | ✅ | AudioContext、ControlContext、StreamConfig |
+| processor.hpp | ✅ | **コンセプトベース設計**（継承不要） |
+| ネイティブテスト | ✅ | test_processor.cc: 16テストパス |
+| example更新 | ✅ | example_app.cc を新API対応 |
+
+**設計変更**:
+- 当初の6段階ライフサイクル → コンセプトベース設計に変更
+- `ProcessorLike`: `process(AudioContext&)`があればOK
+- `Controllable`: `control(ControlContext&)`も持つ
+- `AnyProcessor`: 動的ディスパッチ用型消去ラッパー
 
 ### Phase 2: コア分割・整理
 
