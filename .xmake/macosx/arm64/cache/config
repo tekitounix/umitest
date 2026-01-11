@@ -1,10 +1,10 @@
 {
+    recheck = false,
     mtimes = {
         ["xmake.lua"] = 1768157182
     },
     options = {
         clean = true,
         builddir = ".build"
-    },
-    recheck = false
+    }
 }

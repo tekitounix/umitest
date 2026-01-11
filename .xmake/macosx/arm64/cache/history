@@ -21,6 +21,8 @@
         "xmake build test_processor",
         "xmake build test_processor",
         "xmake build test_processor",
+        "xmake build test_processor",
+        "xmake build example_app",
         "xmake build test_processor"
     }
 }

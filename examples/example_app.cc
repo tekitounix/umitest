@@ -2,15 +2,21 @@
 // UMI-OS Example Application
 // =====================================================================
 //
-// Task-based design:
-//   - Audio Task (Priority::Realtime): DMA ISR notifies, task processes
-//   - UI/MIDI: Coroutines in User priority task
+// Demonstrates:
+//   - Concept-based Processor (no inheritance required)
+//   - Coroutine-based UI/MIDI tasks
+//   - Sample-accurate event processing
 //
 // =====================================================================
 
 #include <cstdint>
 #include <cmath>
 #include <chrono>
+#include <array>
+
+#include <umi/processor.hpp>
+#include <umi/audio_context.hpp>
+#include <umi/event.hpp>
 #include "../core/umi_coro.hh"
 
 // =====================================================================
@@ -46,8 +52,6 @@ inline RegionDesc get_shared(RegionId id) {
     return desc;
 }
 
-/// Wait with timeout - returns fired event mask
-/// timeout_us: microseconds to wait, UINT64_MAX for infinite
 inline std::uint32_t wait(std::uint32_t mask, usec timeout_us) {
     std::uint32_t result = 0;
     (void)mask;
@@ -55,9 +59,8 @@ inline std::uint32_t wait(std::uint32_t mask, usec timeout_us) {
     return result;
 }
 
-/// Get current monotonic time in microseconds
 inline usec get_time_usec() {
-    return 0;  // Stub - kernel provides real implementation
+    return 0;
 }
 
 } // namespace umi_syscall
@@ -81,44 +84,159 @@ struct MidiShared {
 };
 
 // =====================================================================
-// Audio Processing
+// SimpleSynth - Concept-based Processor (no inheritance!)
 // =====================================================================
 //
-// In the real implementation:
-//   - DMA ISR calls: audio_engine.on_dma_complete(in, out);
-//                    kernel.notify(audio_task_id, Event::AudioReady);
-//   - Audio task calls: audio_engine.process(kernel, midi_queue);
+// Satisfies:
+//   - ProcessorLike (has process())
+//   - Controllable (has control())
+//   - HasParams (has params())
 //
 // =====================================================================
 
-namespace audio {
+class SimpleSynth {
+public:
+    explicit SimpleSynth(std::uint32_t sample_rate)
+        : sample_rate_(static_cast<float>(sample_rate))
+    {
+        update_phase_inc();
+    }
+    
+    // === ProcessorLike: required ===
+    void process(umi::AudioContext& ctx) {
+        if (ctx.num_outputs() < 1) return;
+        
+        auto* out = ctx.output(0);
+        
+        // Process sample-accurate events
+        for (std::size_t i = 0; i < ctx.buffer_size; ++i) {
+            // Check for events at this sample
+            umi::Event ev;
+            while (ctx.events.pop_until(static_cast<umi::sample_position_t>(i), ev)) {
+                handle_event(ev);
+            }
+            
+            // Generate audio
+            out[i] = amplitude_ * std::sin(phase_);
+            phase_ += phase_inc_;
+            if (phase_ >= two_pi_) phase_ -= two_pi_;
+        }
+    }
+    
+    // === Controllable: optional ===
+    void control(umi::ControlContext& ctx) {
+        // Process any remaining events (parameter changes from UI, etc.)
+        umi::Event ev;
+        while (ctx.events.pop(ev)) {
+            handle_event(ev);
+        }
+    }
+    
+    // === HasParams: optional ===
+    std::span<const umi::ParamDescriptor> params() const {
+        return params_;
+    }
+    
+    // === Public interface ===
+    void set_frequency(float hz) {
+        frequency_ = hz;
+        update_phase_inc();
+    }
+    
+    void set_amplitude(float amp) {
+        amplitude_ = amp;
+    }
+    
+private:
+    void handle_event(const umi::Event& ev) {
+        switch (ev.type) {
+            case umi::EventType::Midi:
+                if (ev.midi.is_note_on()) {
+                    // Simple MIDI-to-frequency (A4 = 440Hz at note 69)
+                    float note = static_cast<float>(ev.midi.note());
+                    frequency_ = 440.0f * std::pow(2.0f, (note - 69.0f) / 12.0f);
+                    amplitude_ = static_cast<float>(ev.midi.velocity()) / 127.0f * 0.3f;
+                    update_phase_inc();
+                } else if (ev.midi.is_note_off()) {
+                    amplitude_ = 0.0f;
+                }
+                break;
+                
+            case umi::EventType::Param:
+                if (ev.param.id == 0) {
+                    set_frequency(params_[0].denormalize(ev.param.value));
+                } else if (ev.param.id == 1) {
+                    set_amplitude(ev.param.value);
+                }
+                break;
+                
+            default:
+                break;
+        }
+    }
+    
+    void update_phase_inc() {
+        phase_inc_ = frequency_ * two_pi_ / sample_rate_;
+    }
+    
+    static constexpr float two_pi_ = 6.283185307f;
+    
+    static constexpr umi::ParamDescriptor params_[] = {
+        {0, "Frequency", 440.0f, 20.0f, 20000.0f},
+        {1, "Amplitude", 0.3f, 0.0f, 1.0f},
+    };
+    
+    float sample_rate_;
+    float phase_ = 0.0f;
+    float phase_inc_ = 0.0f;
+    float frequency_ = 440.0f;
+    float amplitude_ = 0.3f;
+};
 
-float phase = 0.0f;
-float frequency = 440.0f;
-constexpr float two_pi = 6.283185307f;
+// Verify concepts at compile time
+static_assert(umi::ProcessorLike<SimpleSynth>);
+static_assert(umi::Controllable<SimpleSynth>);
+static_assert(umi::HasParams<SimpleSynth>);
 
-void process_callback(float* input, float* output, std::size_t frames, 
-                       std::uint8_t channels, std::uint32_t sample_rate) {
+// Global synth instance
+SimpleSynth* g_synth = nullptr;
+
+// =====================================================================
+// Audio Callback (called from DMA ISR or audio thread)
+// =====================================================================
+
+extern "C" void umi_audio_process(float* input, float* output, 
+                                   std::size_t frames, std::uint8_t channels,
+                                   std::uint32_t sample_rate) {
     (void)input;
     
-    float phase_inc = frequency * two_pi / static_cast<float>(sample_rate);
+    if (!g_synth) return;
     
+    // Create AudioContext
+    // Note: In real implementation, events would come from kernel's event queue
+    static umi::EventQueue<64> events;
+    
+    std::array<float, 1024> out_buf;
+    float* out_ptr = out_buf.data();
+    
+    umi::AudioContext ctx{
+        .inputs = {},
+        .outputs = std::span<umi::sample_t* const>(&out_ptr, 1),
+        .events = events,
+        .sample_rate = sample_rate,
+        .buffer_size = static_cast<std::uint32_t>(frames),
+        .sample_position = 0
+    };
+    
+    // Process using concept-based API (inlined, no vtable)
+    umi::process_once(*g_synth, ctx);
+    
+    // Copy to interleaved output
     for (std::size_t i = 0; i < frames; ++i) {
-        float sample = 0.3f * std::sin(phase);
-        phase += phase_inc;
-        if (phase >= two_pi) phase -= two_pi;
-        
-        std::size_t idx = i * channels;
-        output[idx + 0] = sample;
-        output[idx + 1] = sample;
+        for (std::uint8_t ch = 0; ch < channels; ++ch) {
+            output[i * channels + ch] = out_buf[i];
+        }
     }
-}
-
-} // namespace audio
-
-extern "C" {
-using AudioCallback = void (*)(float*, float*, std::size_t, std::uint8_t, std::uint32_t);
-AudioCallback umi_audio_callback = audio::process_callback;
 }
 
 // =====================================================================
@@ -128,79 +246,50 @@ AudioCallback umi_audio_callback = audio::process_callback;
 namespace app {
 
 using namespace umi::coro;
-using namespace umi::coro::literals;  // for ms, s literals
 using namespace umi_syscall;
 
-// Global state accessible from coroutines
 const HwState* hw_state = nullptr;
 const MidiShared* midi_buffer = nullptr;
 
-// =====================================================================
 // UI Coroutine: handles display updates
-// =====================================================================
-
 Task<void> ui_task(SchedulerContext<8>& ctx) {
     while (true) {
-        // Wait for vsync
         co_await ctx.wait_for(event::VSync);
-        
-        // Update display (non-blocking)
-        // In real app: draw to framebuffer
+        // Update display
     }
 }
 
-// =====================================================================
-// Parameter Coroutine: updates audio params from hardware
-// =====================================================================
-
+// Parameter Coroutine: updates audio params from hardware knobs
 Task<void> param_task(SchedulerContext<8>& ctx) {
     while (true) {
-        // Update at ~60Hz using sleep
         co_await ctx.sleep(std::chrono::milliseconds(16));
         
-        // Read knob and update frequency
-        if (hw_state) {
+        if (hw_state && g_synth) {
             std::uint16_t knob = hw_state->adc_values[0];
-            audio::frequency = 100.0f + static_cast<float>(knob) * 0.5f;
+            float freq = 100.0f + static_cast<float>(knob) * 0.5f;
+            g_synth->set_frequency(freq);
         }
     }
 }
 
-// =====================================================================
-// MIDI Coroutine: processes incoming MIDI messages
-// =====================================================================
-
+// MIDI Coroutine: processes incoming MIDI
 Task<void> midi_task(SchedulerContext<8>& ctx) {
     while (true) {
-        // Wait for MIDI data
         co_await ctx.wait_for(event::MidiReady);
         
-        // Process MIDI ring buffer
         if (midi_buffer) {
             while (midi_buffer->head != midi_buffer->tail) {
-                // Parse MIDI bytes...
-                // For CC: update parameters
-                // For notes: handled in audio callback for sample-accuracy
+                // Parse and queue MIDI events for sample-accurate processing
             }
         }
     }
 }
 
-// =====================================================================
-// LED Blink Coroutine: demonstrates sleep usage
-// =====================================================================
-
+// LED Blink Coroutine
 Task<void> led_task(SchedulerContext<8>& ctx) {
     while (true) {
-        // LED on
-        // gpio::set(LED_PIN);
-        
         co_await ctx.sleep(std::chrono::milliseconds(500));
-        
-        // LED off
-        // gpio::clear(LED_PIN);
-        
-        co_await ctx.sleep(std::chrono::milliseconds(500));
+        // Toggle LED
     }
 }
 
@@ -209,15 +298,14 @@ Task<void> led_task(SchedulerContext<8>& ctx) {
 // =====================================================================
 // Application Entry Point
 // =====================================================================
-//
-// Audio Task is created separately by the kernel at Priority::Realtime.
-// This function runs as a User priority task with coroutines.
-//
-// =====================================================================
 
 extern "C" void umi_main(void*) {
     using namespace umi_syscall;
     using namespace umi::coro;
+    
+    // Initialize synth
+    static SimpleSynth synth(48000);
+    g_synth = &synth;
     
     // Get shared memory
     auto hw_region = get_shared(RegionId::HwState);
@@ -226,7 +314,7 @@ extern "C" void umi_main(void*) {
     app::hw_state = static_cast<const HwState*>(hw_region.base);
     app::midi_buffer = static_cast<const MidiShared*>(midi_region.base);
     
-    // Create scheduler with wait function and time function
+    // Create scheduler
     Scheduler<8> sched(wait, get_time_usec);
     SchedulerContext<8> ctx(sched);
     
