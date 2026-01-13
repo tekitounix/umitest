@@ -76,6 +76,18 @@ option("kernel")
     set_values("mono", "micro")
 option_end()
 
+option("coverage")
+    set_default(false)
+    set_showmenu(true)
+    set_description("Enable code coverage instrumentation")
+option_end()
+
+-- Apply coverage flags if enabled
+if has_config("coverage") and is_mode("debug") then
+    add_cxflags("--coverage", {force = true})
+    add_ldflags("--coverage", {force = true})
+end
+
 -- =====================================================================
 -- Toolchain: ARM GCC (Cross-compilation)
 -- =====================================================================
@@ -291,7 +303,7 @@ rule("wasm-worklet")
         -- Modular output
         target:add("ldflags", "-sMODULARIZE=1", {force = true})
         target:add("ldflags", "-sEXPORT_ES6=1", {force = true})
-        target:add("ldflags", "-sENVIRONMENT=web,worker", {force = true})
+        target:add("ldflags", "-sENVIRONMENT=web,worker,node", {force = true})
     end)
 rule_end()
 
@@ -312,8 +324,8 @@ target("umim_synth")
     add_cxflags("-fno-exceptions", "-fno-rtti", "-O3", {force = true})
     add_ldflags("-sWASM=1", "-sALLOW_MEMORY_GROWTH=1", {force = true})
     add_ldflags("-sEXPORTED_FUNCTIONS=['_malloc','_free','_umi_create','_umi_process','_umi_note_on','_umi_note_off','_umi_set_param','_umi_get_param','_umi_get_param_count','_umi_get_param_name','_umi_get_param_min','_umi_get_param_max','_umi_get_param_default','_umi_get_param_curve','_umi_get_param_unit','_umi_process_cc']", {force = true})
-    add_ldflags("-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','UTF8ToString']", {force = true})
-    add_ldflags("-sMODULARIZE=1", "-sEXPORT_ES6=1", "-sENVIRONMENT=web,worker", {force = true})
+    add_ldflags("-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','UTF8ToString','HEAPF32','HEAP8']", {force = true})
+    add_ldflags("-sMODULARIZE=1", "-sEXPORT_ES6=1", "-sENVIRONMENT=web,worker,node", {force = true})
 target_end()
 
 -- UMIM Module: Delay
@@ -333,8 +345,8 @@ target("umim_delay")
     add_cxflags("-fno-exceptions", "-fno-rtti", "-O3", {force = true})
     add_ldflags("-sWASM=1", "-sALLOW_MEMORY_GROWTH=1", {force = true})
     add_ldflags("-sEXPORTED_FUNCTIONS=['_malloc','_free','_umi_create','_umi_process','_umi_note_on','_umi_note_off','_umi_set_param','_umi_get_param','_umi_get_param_count','_umi_get_param_name','_umi_get_param_min','_umi_get_param_max','_umi_get_param_default','_umi_get_param_curve','_umi_get_param_unit','_umi_process_cc']", {force = true})
-    add_ldflags("-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','UTF8ToString']", {force = true})
-    add_ldflags("-sMODULARIZE=1", "-sEXPORT_ES6=1", "-sENVIRONMENT=web,worker", {force = true})
+    add_ldflags("-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','UTF8ToString','HEAPF32','HEAP8']", {force = true})
+    add_ldflags("-sMODULARIZE=1", "-sEXPORT_ES6=1", "-sENVIRONMENT=web,worker,node", {force = true})
 target_end()
 
 -- UMIM Module: Volume
@@ -354,8 +366,8 @@ target("umim_volume")
     add_cxflags("-fno-exceptions", "-fno-rtti", "-O3", {force = true})
     add_ldflags("-sWASM=1", "-sALLOW_MEMORY_GROWTH=1", {force = true})
     add_ldflags("-sEXPORTED_FUNCTIONS=['_malloc','_free','_umi_create','_umi_process','_umi_note_on','_umi_note_off','_umi_set_param','_umi_get_param','_umi_get_param_count','_umi_get_param_name','_umi_get_param_min','_umi_get_param_max','_umi_get_param_default','_umi_get_param_curve','_umi_get_param_unit','_umi_process_cc']", {force = true})
-    add_ldflags("-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','UTF8ToString']", {force = true})
-    add_ldflags("-sMODULARIZE=1", "-sEXPORT_ES6=1", "-sENVIRONMENT=web,worker", {force = true})
+    add_ldflags("-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','UTF8ToString','HEAPF32','HEAP8']", {force = true})
+    add_ldflags("-sMODULARIZE=1", "-sEXPORT_ES6=1", "-sENVIRONMENT=web,worker,node", {force = true})
 target_end()
 
 end  -- if has_emscripten

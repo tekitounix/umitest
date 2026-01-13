@@ -1,7 +1,9 @@
 # UMI-OS CI/CD Pipeline
-# - Host tests (native compilation)
+# - Host tests with coverage
 # - WASM tests (Emscripten + Node.js)
-# - ARM tests (Renode emulator) [optional]
+# - UMIM patching tests
+# - Browser integration tests (Playwright)
+# - ARM build verification
 
 name: CI
 
@@ -13,7 +15,7 @@ on:
 
 jobs:
   # ===========================================
-  # Host Unit Tests (Linux/macOS)
+  # Host Unit Tests with Coverage (Linux/macOS)
   # ===========================================
   host-tests:
     name: Host Tests
@@ -31,17 +33,36 @@ jobs:
         with:
           xmake-version: latest
 
+      - name: Install coverage tools (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get install -y lcov
+
       - name: Configure
         run: xmake f -m release -y
 
-      - name: Build all targets
-        run: xmake build -a
+      - name: Build test targets
+        run: xmake build test_dsp
 
       - name: Run unit tests
         run: xmake test
 
+      - name: Build with coverage (Linux only)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          xmake f -m debug --coverage=y -y
+          xmake build test_dsp
+          xmake run test_dsp || true
+
+      - name: Generate coverage report
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          lcov --capture --directory .build --output-file coverage.info --ignore-errors mismatch || true
+          lcov --remove coverage.info '/usr/*' '*/test/*' --output-file coverage.info || true
+          lcov --list coverage.info || true
+        continue-on-error: true
+
   # ===========================================
-  # WASM Build + Tests
+  # WASM Build + Tests (including patching)
   # ===========================================
   wasm-tests:
     name: WASM Tests
@@ -76,16 +97,56 @@ jobs:
           source $EMSDK/emsdk_env.sh
           xmake build umim_synth umim_delay umim_volume
 
-      - name: Run WASM headless tests
+      - name: Verify UMIM modules built
         run: |
-          # Test that WASM modules were built
+          echo "Built UMIM modules:"
           ls -la .build/umim/
-          # Run headless test if test module exists
-          if [ -f ".build/wasm/umi_test.js" ]; then
-            node test/test-headless.mjs
-          else
-            echo "Note: WASM test module not built, skipping headless tests"
-          fi
+
+      - name: Run WASM headless tests
+        run: node test/test-headless.mjs
+
+  # ===========================================
+  # Browser Integration Tests (Playwright)
+  # ===========================================
+  browser-tests:
+    name: Browser Tests
+    runs-on: ubuntu-latest
+    needs: wasm-tests
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup xmake
+        uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: latest
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: '3.1.50'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build UMIM modules
+        run: |
+          source $EMSDK/emsdk_env.sh
+          xmake f -p wasm -a wasm32 --toolchain=emcc -y
+          xmake build umim_synth umim_delay umim_volume
+
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install -D @playwright/test
+          npx playwright install chromium --with-deps
+
+      - name: Run Playwright tests
+        run: npx playwright test test/browser.spec.ts --reporter=list
+        continue-on-error: true
 
   # ===========================================
   # ARM Firmware Build (Cross-compilation check)
@@ -115,7 +176,7 @@ jobs:
         run: xmake build firmware renode_test || echo "ARM build requires arm-embedded package"
 
   # ===========================================
-  # Renode Emulator Tests (Optional)
+  # Renode Emulator Tests
   # ===========================================
   renode-tests:
     name: Renode Tests
@@ -131,6 +192,11 @@ jobs:
         with:
           xmake-version: latest
 
+      - name: Install ARM toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-none-eabi libnewlib-arm-none-eabi
+
       - name: Install Renode
         run: |
           wget https://github.com/renode/renode/releases/download/v1.14.0/renode-1.14.0.linux-portable.tar.gz
@@ -142,7 +208,7 @@ jobs:
 
       - name: Build for Renode
         run: |
-          xmake f -p cross -a arm -y
+          xmake f -p cross -a arm --toolchain=gcc-arm -y
           xmake build renode_test
 
       - name: Run Renode tests

@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "core/umim_adapter.hh"
+#include <umim_adapter.hh>
 
 #include <array>
 #include <cstring>

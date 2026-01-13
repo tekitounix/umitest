@@ -2,7 +2,7 @@
 // UMI-OS Volume - Minimal UMIM (Single file)
 // =====================================================================
 
-#include "core/umim_adapter.hh"
+#include <umim_adapter.hh>
 
 using namespace umi;
 using namespace umi::umim;
