@@ -20,3 +20,4 @@ archive/
 
 # Tools (xmake packages, toolchains)
 .tools/
+build/
