@@ -5,6 +5,18 @@
 
 #include <cstdint>
 
+// Thread-safe globals on platforms with atomic support
+#if __has_include(<atomic>) && !defined(UMI_NO_ATOMIC)
+#include <atomic>
+#define UMI_ATOMIC_ASSERT_PTR(T) std::atomic<T>
+#define UMI_ATOMIC_ASSERT_LOAD(x) (x).load(std::memory_order_relaxed)
+#define UMI_ATOMIC_ASSERT_STORE(x, v) (x).store(v, std::memory_order_relaxed)
+#else
+#define UMI_ATOMIC_ASSERT_PTR(T) T
+#define UMI_ATOMIC_ASSERT_LOAD(x) (x)
+#define UMI_ATOMIC_ASSERT_STORE(x, v) ((x) = (v))
+#endif
+
 namespace umi {
 
 // ============================================================================
@@ -42,12 +54,12 @@ inline void default_assert_handler(const char* file, int line, const char* expr)
     while (true) {} // Never reached
 }
 
-/// Global assert handler (can be replaced)
-inline AssertHandler g_assert_handler = default_assert_handler;
+/// Global assert handler (thread-safe on supported platforms)
+inline UMI_ATOMIC_ASSERT_PTR(AssertHandler) g_assert_handler{default_assert_handler};
 
 /// Set custom assert handler
 inline void set_assert_handler(AssertHandler handler) {
-    g_assert_handler = handler;
+    UMI_ATOMIC_ASSERT_STORE(g_assert_handler, handler);
 }
 
 // ============================================================================
@@ -63,14 +75,16 @@ inline void set_assert_handler(AssertHandler handler) {
     #define UMI_ASSERT(expr) \
         do { \
             if (!(expr)) { \
-                ::umi::g_assert_handler(__FILE__, __LINE__, #expr); \
+                auto handler = UMI_ATOMIC_ASSERT_LOAD(::umi::g_assert_handler); \
+                if (handler) handler(__FILE__, __LINE__, #expr); \
             } \
         } while (false)
-    
+
     #define UMI_ASSERT_MSG(expr, msg) \
         do { \
             if (!(expr)) { \
-                ::umi::g_assert_handler(__FILE__, __LINE__, msg); \
+                auto handler = UMI_ATOMIC_ASSERT_LOAD(::umi::g_assert_handler); \
+                if (handler) handler(__FILE__, __LINE__, msg); \
             } \
         } while (false)
 #endif
@@ -95,14 +109,16 @@ inline void set_assert_handler(AssertHandler handler) {
 #define UMI_REQUIRE(expr) \
     do { \
         if (!(expr)) { \
-            ::umi::g_assert_handler(__FILE__, __LINE__, "REQUIRE: " #expr); \
+            auto handler = UMI_ATOMIC_ASSERT_LOAD(::umi::g_assert_handler); \
+            if (handler) handler(__FILE__, __LINE__, "REQUIRE: " #expr); \
         } \
     } while (false)
 
 #define UMI_ENSURE(expr) \
     do { \
         if (!(expr)) { \
-            ::umi::g_assert_handler(__FILE__, __LINE__, "ENSURE: " #expr); \
+            auto handler = UMI_ATOMIC_ASSERT_LOAD(::umi::g_assert_handler); \
+            if (handler) handler(__FILE__, __LINE__, "ENSURE: " #expr); \
         } \
     } while (false)
 

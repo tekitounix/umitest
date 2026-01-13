@@ -7,23 +7,9 @@
 #pragma once
 
 #include <cmath>
-#include <cstdint>
-
-#if __has_include(<numbers>) && __cplusplus >= 202002L
-#include <numbers>
-#endif
+#include "constants.hh"
 
 namespace umi::dsp {
-
-// Mathematical constants for filter calculations
-namespace detail {
-#if defined(__cpp_lib_math_constants)
-    inline constexpr float kPi = std::numbers::pi_v<float>;
-#else
-    inline constexpr float kPi = 3.14159265358979323846f;
-#endif
-    inline constexpr float k2Pi = kPi * 2.0f;
-} // namespace detail
 
 // ============================================================================
 // One-Pole Filter
@@ -39,7 +25,7 @@ public:
     void set_cutoff(float cutoff) noexcept {
         // Simple approximation: coef = 2 * pi * fc
         // More accurate: coef = 1 - exp(-2 * pi * fc)
-        coef_ = cutoff * detail::k2Pi;
+        coef_ = cutoff * k2Pi;
         if (coef_ > 1.0f) coef_ = 1.0f;
     }
     
@@ -76,7 +62,7 @@ public:
     /// @param cutoff Normalized cutoff frequency (0.0 to 0.5)
     /// @param Q Resonance (0.707 = Butterworth, higher = more resonant)
     void set_lowpass(float cutoff, float Q = 0.707f) noexcept {
-        float omega = cutoff * detail::k2Pi;
+        float omega = cutoff * k2Pi;
         float sin_omega = std::sin(omega);
         float cos_omega = std::cos(omega);
         float alpha = sin_omega / (2.0f * Q);
@@ -93,7 +79,7 @@ public:
     
     /// Configure as highpass
     void set_highpass(float cutoff, float Q = 0.707f) noexcept {
-        float omega = cutoff * detail::k2Pi;
+        float omega = cutoff * k2Pi;
         float sin_omega = std::sin(omega);
         float cos_omega = std::cos(omega);
         float alpha = sin_omega / (2.0f * Q);
@@ -110,7 +96,7 @@ public:
     
     /// Configure as bandpass
     void set_bandpass(float cutoff, float Q = 1.0f) noexcept {
-        float omega = cutoff * detail::k2Pi;
+        float omega = cutoff * k2Pi;
         float sin_omega = std::sin(omega);
         float cos_omega = std::cos(omega);
         float alpha = sin_omega / (2.0f * Q);
@@ -127,7 +113,7 @@ public:
     
     /// Configure as notch
     void set_notch(float cutoff, float Q = 1.0f) noexcept {
-        float omega = cutoff * detail::k2Pi;
+        float omega = cutoff * k2Pi;
         float sin_omega = std::sin(omega);
         float cos_omega = std::cos(omega);
         float alpha = sin_omega / (2.0f * Q);
@@ -185,7 +171,7 @@ public:
         
         // f = 2 * sin(pi * fc) - the cutoff coefficient
         // For better stability at high frequencies, use approximation
-        float w = cutoff * detail::kPi;
+        float w = cutoff * kPi;
         f_ = 2.0f * std::sin(w);
         
         // Clamp f for stability (theoretical limit is 2, practical is lower)

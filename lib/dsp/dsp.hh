@@ -13,26 +13,12 @@
 
 #pragma once
 
+#include "constants.hh"
 #include "oscillator.hh"
 #include "filter.hh"
 #include "envelope.hh"
 
-#if __has_include(<numbers>) && __cplusplus >= 202002L
-#include <numbers>
-#endif
-
 namespace umi::dsp {
-
-// ============================================================================
-// Mathematical Constants
-// ============================================================================
-
-#if defined(__cpp_lib_math_constants) || (defined(__cpp_lib_math_constants) && __cpp_lib_math_constants >= 201907L)
-inline constexpr float kPi = std::numbers::pi_v<float>;
-#else
-inline constexpr float kPi = 3.14159265358979323846f;
-#endif
-inline constexpr float k2Pi = kPi * 2.0f;
 
 // ============================================================================
 // Utility Functions

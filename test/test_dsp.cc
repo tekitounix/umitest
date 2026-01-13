@@ -365,6 +365,132 @@ static void test_lerp() {
 }
 
 // ============================================================================
+// Edge Case Tests
+// ============================================================================
+
+static void test_edge_cases_oscillators() {
+    std::printf("\n[Edge Cases: Oscillators]\n");
+
+    // Very high frequency (near Nyquist)
+    umi::dsp::Sine sine;
+    float sample = sine.tick(0.49f);  // Near Nyquist
+    check(std::isfinite(sample), "sine handles near-Nyquist freq");
+
+    // Very low frequency
+    umi::dsp::SawBL saw;
+    sample = saw.tick(0.0001f);  // ~4.8 Hz at 48kHz
+    check(std::isfinite(sample), "saw handles very low freq");
+
+    // Zero frequency
+    umi::dsp::Triangle tri;
+    sample = tri.tick(0.0f);
+    check(std::isfinite(sample), "triangle handles zero freq");
+
+    // Phase wrap boundary
+    umi::dsp::Phase phase(0.999f);
+    phase.tick(0.01f);
+    check(phase.value() >= 0.0f && phase.value() < 1.0f, "phase wraps correctly at boundary");
+}
+
+static void test_edge_cases_filters() {
+    std::printf("\n[Edge Cases: Filters]\n");
+
+    // Very high cutoff
+    umi::dsp::OnePole lp;
+    lp.set_cutoff(0.49f);
+    float out = lp.tick(1.0f);
+    check(std::isfinite(out), "onepole handles high cutoff");
+
+    // Very low cutoff
+    lp.set_cutoff(0.0001f);
+    out = lp.tick(1.0f);
+    check(std::isfinite(out), "onepole handles very low cutoff");
+
+    // Zero cutoff
+    lp.set_cutoff(0.0f);
+    lp.reset();
+    out = lp.tick(1.0f);
+    check(std::isfinite(out), "onepole handles zero cutoff");
+
+    // SVF with extreme resonance
+    umi::dsp::SVF svf;
+    svf.set_params(0.1f, 1.0f);  // Max resonance
+    svf.tick(1.0f);
+    check(std::isfinite(svf.lp()), "SVF handles max resonance");
+    check(std::isfinite(svf.hp()), "SVF HP with max resonance");
+    check(std::isfinite(svf.bp()), "SVF BP with max resonance");
+
+    // Biquad with extreme Q
+    umi::dsp::Biquad bq;
+    bq.set_lowpass(0.1f, 10.0f);  // High Q
+    out = bq.tick(1.0f);
+    check(std::isfinite(out), "biquad handles high Q");
+}
+
+static void test_edge_cases_envelope() {
+    std::printf("\n[Edge Cases: Envelope]\n");
+
+    // Zero attack/decay/release times
+    umi::dsp::ADSR env;
+    env.set_params(0.0f, 0.0f, 0.5f, 0.0f);  // All zero times
+    env.trigger();
+    float dt = 1.0f / 48000.0f;
+    float val = env.tick(dt);
+    check(std::isfinite(val), "ADSR handles zero times");
+
+    // Very long times
+    env.set_params(10000.0f, 10000.0f, 0.5f, 10000.0f);  // 10 seconds each
+    env.trigger();
+    val = env.tick(dt);
+    check(std::isfinite(val), "ADSR handles very long times");
+
+    // Immediate re-trigger during attack
+    env.set_params(100.0f, 100.0f, 0.5f, 100.0f);
+    env.trigger();
+    for (int i = 0; i < 10; ++i) val = env.tick(dt);
+    env.trigger();  // Re-trigger
+    val = env.tick(dt);
+    check(std::isfinite(val), "ADSR handles re-trigger");
+
+    // Ramp with zero samples
+    umi::dsp::Ramp ramp;
+    ramp.set_target(1.0f, 0);  // Immediate
+    check(near(ramp.value(), 1.0f), "ramp handles zero samples");
+}
+
+static void test_edge_cases_utility() {
+    std::printf("\n[Edge Cases: Utility]\n");
+
+    // MIDI note boundaries
+    float freq = umi::dsp::midi_to_freq(0);
+    check(std::isfinite(freq) && freq > 0, "midi_to_freq handles note 0");
+
+    freq = umi::dsp::midi_to_freq(127);
+    check(std::isfinite(freq) && freq > 0, "midi_to_freq handles note 127");
+
+    // Extreme dB values
+    float gain = umi::dsp::db_to_gain(-120.0f);
+    check(std::isfinite(gain) && gain >= 0, "db_to_gain handles -120dB");
+
+    gain = umi::dsp::db_to_gain(20.0f);
+    check(std::isfinite(gain) && gain > 0, "db_to_gain handles +20dB");
+
+    // gain_to_db edge case
+    float db = umi::dsp::gain_to_db(0.0001f);
+    check(std::isfinite(db), "gain_to_db handles small gain");
+
+    // hard_clip
+    check(near(umi::dsp::hard_clip(0.5f), 0.5f), "hard_clip passthrough");
+    check(near(umi::dsp::hard_clip(1.5f), 1.0f), "hard_clip clips positive");
+    check(near(umi::dsp::hard_clip(-1.5f), -1.0f), "hard_clip clips negative");
+    check(near(umi::dsp::hard_clip(0.5f, 0.3f), 0.3f), "hard_clip custom limit");
+
+    // lerp edge cases
+    check(near(umi::dsp::lerp(0.0f, 1.0f, -0.5f), -0.5f), "lerp extrapolates below");
+    check(near(umi::dsp::lerp(0.0f, 1.0f, 1.5f), 1.5f), "lerp extrapolates above");
+}
+
+// ============================================================================
 // Main
 // ============================================================================
 
@@ -394,6 +520,12 @@ int main() {
     test_db_gain();
     test_soft_clip();
     test_lerp();
+
+    // Edge cases
+    test_edge_cases_oscillators();
+    test_edge_cases_filters();
+    test_edge_cases_envelope();
+    test_edge_cases_utility();
 
     // Summary
     std::printf("\n=================================\n");

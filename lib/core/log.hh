@@ -5,6 +5,18 @@
 
 #include <cstdint>
 
+// Thread-safe globals on platforms with atomic support
+#if __has_include(<atomic>) && !defined(UMI_NO_ATOMIC)
+#include <atomic>
+#define UMI_ATOMIC_PTR(T) std::atomic<T>
+#define UMI_ATOMIC_LOAD(x) (x).load(std::memory_order_relaxed)
+#define UMI_ATOMIC_STORE(x, v) (x).store(v, std::memory_order_relaxed)
+#else
+#define UMI_ATOMIC_PTR(T) T
+#define UMI_ATOMIC_LOAD(x) (x)
+#define UMI_ATOMIC_STORE(x, v) ((x) = (v))
+#endif
+
 namespace umi {
 
 // ============================================================================
@@ -35,20 +47,20 @@ inline void default_log_handler(LogLevel level, const char* tag, const char* msg
     (void)msg;
 }
 
-/// Global log handler
-inline LogHandler g_log_handler = default_log_handler;
+/// Global log handler (thread-safe on supported platforms)
+inline UMI_ATOMIC_PTR(LogHandler) g_log_handler{default_log_handler};
 
-/// Global minimum log level
-inline LogLevel g_log_level = LogLevel::Info;
+/// Global minimum log level (thread-safe on supported platforms)
+inline UMI_ATOMIC_PTR(LogLevel) g_log_level{LogLevel::Info};
 
 /// Set log handler
 inline void set_log_handler(LogHandler handler) {
-    g_log_handler = handler;
+    UMI_ATOMIC_STORE(g_log_handler, handler);
 }
 
 /// Set minimum log level
 inline void set_log_level(LogLevel level) {
-    g_log_level = level;
+    UMI_ATOMIC_STORE(g_log_level, level);
 }
 
 // ============================================================================
@@ -58,8 +70,10 @@ inline void set_log_level(LogLevel level) {
 namespace detail {
 
 inline void log(LogLevel level, const char* tag, const char* msg) {
-    if (level >= g_log_level && g_log_handler) {
-        g_log_handler(level, tag, msg);
+    auto handler = UMI_ATOMIC_LOAD(g_log_handler);
+    auto min_level = UMI_ATOMIC_LOAD(g_log_level);
+    if (level >= min_level && handler) {
+        handler(level, tag, msg);
     }
 }
 

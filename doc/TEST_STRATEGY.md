@@ -18,12 +18,8 @@ UMI-OSのテスト戦略は3つの環境をカバーします:
 
 | ファイル | 対象 | 状態 |
 |---------|------|------|
-| `test_processor.cc` | Processor API, AudioContext, EventQueue | ✓ |
-| `test_kernel.cc` | umios Kernel (タスク、タイマー、通知、SpscQueue) | ✓ |
-| `test_audio.cc` | AudioEngine (ライフサイクル、DSP負荷、スタンバイ) | ✓ |
-| `test_midi.cc` | MIDI Message, Event, EventQueue, EventReader | ✓ |
-| `test_dsp.cc` | Oscillator, Filter, Envelope, Utility | ✓ |
-| `renode_test.cc` | ARM実機エミュレーション | ✓ |
+| `test_dsp.cc` | Oscillator, Filter, Envelope, Utility | ✓ 53 tests |
+| `renode_test.cc` | ARM実機エミュレーション（UART出力） | ✓ |
 
 ### テスト実行
 
@@ -33,7 +29,6 @@ xmake test
 
 # 個別実行
 xmake run test_dsp
-xmake run test_processor
 ```
 
 ### テストフレームワーク
@@ -55,20 +50,35 @@ void check(bool cond, const char* msg) {
 
 ### ヘッドレステスト (`test/test-headless.mjs`)
 
-Node.js でWASMモジュールをテスト:
+Node.js でUMIMモジュールをテスト:
 
 ```bash
 # ビルド + テスト
 xmake f -p wasm -a wasm32 --toolchain=emcc
-xmake build umim_synth
+xmake build umim_synth umim_delay umim_volume
 node test/test-headless.mjs
 ```
 
-### テスト内容
+### テスト内容 (22 tests)
 
-- WASMモジュールのロード確認
-- DSP関数の動作確認
-- メモリ割り当て/解放
+- UMIMモジュールのロード確認 (synth, delay, volume)
+- パラメータ introspection API
+- パラメータ set/get roundtrip
+- オーディオ処理 (umi_process)
+- Note on/off (シンセのみ)
+- モジュール間パッチング (synth → delay → volume チェイン)
+
+### ブラウザテスト (`test/browser.spec.ts`)
+
+Playwright でブラウザ統合テスト:
+
+```bash
+npx playwright test test/browser.spec.ts
+```
+
+- ページロード確認
+- AudioContext/AudioWorklet 可用性
+- WASMモジュールのHTTP取得
 
 ---
 
@@ -108,17 +118,22 @@ xmake robot
 ```
 push/PR
    ↓
-┌─────────────────────────────────────────┐
-│  GitHub Actions                          │
-│  ├── host-tests (ubuntu, macos)         │
-│  │   └── xmake build && xmake test      │
-│  ├── wasm-tests                          │
-│  │   └── Emscripten → Node.js テスト    │
-│  ├── arm-build                           │
-│  │   └── クロスコンパイル確認           │
-│  └── renode-tests (optional)             │
-│       └── Robot Framework               │
-└─────────────────────────────────────────┘
+┌─────────────────────────────────────────────┐
+│  GitHub Actions                             │
+│  ├── host-tests (ubuntu, macos)             │
+│  │   ├── xmake build test_dsp               │
+│  │   ├── xmake test                          │
+│  │   └── カバレッジ計測 (ubuntu, lcov)       │
+│  ├── wasm-tests                              │
+│  │   ├── Emscripten ビルド                  │
+│  │   └── Node.js テスト (22 tests)          │
+│  ├── browser-tests                           │
+│  │   └── Playwright (Chrome)                │
+│  ├── arm-build                               │
+│  │   └── クロスコンパイル確認               │
+│  └── renode-tests (optional, disabled)       │
+│       └── Robot Framework                   │
+└─────────────────────────────────────────────┘
 ```
 
 ### 実行タイミング

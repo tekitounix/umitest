@@ -7,11 +7,7 @@
 #pragma once
 
 #include <cmath>
-#include <cstdint>
-
-#if __has_include(<numbers>) && __cplusplus >= 202002L
-#include <numbers>
-#endif
+#include "constants.hh"
 
 namespace umi::dsp {
 
@@ -73,11 +69,6 @@ public:
     void set_phase(float p) noexcept { phase_.set(p); }
 
 private:
-#if defined(__cpp_lib_math_constants)
-    static constexpr float k2Pi = std::numbers::pi_v<float> * 2.0f;
-#else
-    static constexpr float k2Pi = 3.14159265358979323846f * 2.0f;
-#endif
     Phase phase_;
 };
 

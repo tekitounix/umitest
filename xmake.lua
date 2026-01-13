@@ -92,11 +92,13 @@ end
 -- Toolchain: ARM GCC (Cross-compilation)
 -- =====================================================================
 
+-- Try to find ARM GCC: first check known paths, then fall back to PATH
 local arm_gcc_path = nil
 local arm_paths = {
     "/Applications/ArmGNUToolchain/14.2.rel1/arm-none-eabi",
     "/usr/local/arm-none-eabi",
     "/opt/arm-none-eabi",
+    "/opt/homebrew/arm-none-eabi",
 }
 for _, p in ipairs(arm_paths) do
     if os.isdir(p) then
@@ -105,7 +107,16 @@ for _, p in ipairs(arm_paths) do
     end
 end
 
+-- If not found in known paths, try to find via PATH
 local has_arm_toolchain = arm_gcc_path ~= nil
+if not has_arm_toolchain then
+    local gcc_path = os.which("arm-none-eabi-gcc")
+    if gcc_path then
+        -- Extract SDK dir from bin path: /path/to/bin/arm-none-eabi-gcc -> /path/to
+        arm_gcc_path = path.directory(path.directory(gcc_path))
+        has_arm_toolchain = true
+    end
+end
 
 if has_arm_toolchain then
     toolchain("arm-none-eabi")
@@ -307,68 +318,36 @@ rule("wasm-worklet")
     end)
 rule_end()
 
--- UMIM Module: Synth
-target("umim_synth")
-    set_kind("binary")
-    set_group("umim")
-    set_default(false)
-    set_plat("wasm")
-    set_arch("wasm32")
-    set_toolchains("emcc")
-    set_targetdir(".build/umim")
-    set_filename("synth.js")
+-- UMIM common settings
+local umim_exported_funcs = "['_malloc','_free','_umi_create','_umi_process','_umi_note_on','_umi_note_off','_umi_set_param','_umi_get_param','_umi_get_param_count','_umi_get_param_name','_umi_get_param_min','_umi_get_param_max','_umi_get_param_default','_umi_get_param_curve','_umi_get_param_unit','_umi_process_cc']"
+local umim_runtime_methods = "['ccall','cwrap','UTF8ToString','HEAPF32','HEAP8']"
 
-    add_includedirs("core", "lib")
-    add_files("examples/workbench/umim/synth/synth_wasm.cc")
+local function umim_target(name, source_file)
+    target("umim_" .. name)
+        set_kind("binary")
+        set_group("umim")
+        set_default(false)
+        set_plat("wasm")
+        set_arch("wasm32")
+        set_toolchains("emcc")
+        set_targetdir(".build/umim")
+        set_filename(name .. ".js")
 
-    add_cxflags("-fno-exceptions", "-fno-rtti", "-O3", {force = true})
-    add_ldflags("-sWASM=1", "-sALLOW_MEMORY_GROWTH=1", {force = true})
-    add_ldflags("-sEXPORTED_FUNCTIONS=['_malloc','_free','_umi_create','_umi_process','_umi_note_on','_umi_note_off','_umi_set_param','_umi_get_param','_umi_get_param_count','_umi_get_param_name','_umi_get_param_min','_umi_get_param_max','_umi_get_param_default','_umi_get_param_curve','_umi_get_param_unit','_umi_process_cc']", {force = true})
-    add_ldflags("-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','UTF8ToString','HEAPF32','HEAP8']", {force = true})
-    add_ldflags("-sMODULARIZE=1", "-sEXPORT_ES6=1", "-sENVIRONMENT=web,worker,node", {force = true})
-target_end()
+        add_includedirs("core", "lib")
+        add_files(source_file)
 
--- UMIM Module: Delay
-target("umim_delay")
-    set_kind("binary")
-    set_group("umim")
-    set_default(false)
-    set_plat("wasm")
-    set_arch("wasm32")
-    set_toolchains("emcc")
-    set_targetdir(".build/umim")
-    set_filename("delay.js")
+        add_cxflags("-fno-exceptions", "-fno-rtti", "-O3", {force = true})
+        add_ldflags("-sWASM=1", "-sALLOW_MEMORY_GROWTH=1", {force = true})
+        add_ldflags("-sEXPORTED_FUNCTIONS=" .. umim_exported_funcs, {force = true})
+        add_ldflags("-sEXPORTED_RUNTIME_METHODS=" .. umim_runtime_methods, {force = true})
+        add_ldflags("-sMODULARIZE=1", "-sEXPORT_ES6=1", "-sENVIRONMENT=web,worker,node", {force = true})
+    target_end()
+end
 
-    add_includedirs("core", "lib")
-    add_files("examples/workbench/umim/delay/delay_wasm.cc")
-
-    add_cxflags("-fno-exceptions", "-fno-rtti", "-O3", {force = true})
-    add_ldflags("-sWASM=1", "-sALLOW_MEMORY_GROWTH=1", {force = true})
-    add_ldflags("-sEXPORTED_FUNCTIONS=['_malloc','_free','_umi_create','_umi_process','_umi_note_on','_umi_note_off','_umi_set_param','_umi_get_param','_umi_get_param_count','_umi_get_param_name','_umi_get_param_min','_umi_get_param_max','_umi_get_param_default','_umi_get_param_curve','_umi_get_param_unit','_umi_process_cc']", {force = true})
-    add_ldflags("-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','UTF8ToString','HEAPF32','HEAP8']", {force = true})
-    add_ldflags("-sMODULARIZE=1", "-sEXPORT_ES6=1", "-sENVIRONMENT=web,worker,node", {force = true})
-target_end()
-
--- UMIM Module: Volume
-target("umim_volume")
-    set_kind("binary")
-    set_group("umim")
-    set_default(false)
-    set_plat("wasm")
-    set_arch("wasm32")
-    set_toolchains("emcc")
-    set_targetdir(".build/umim")
-    set_filename("volume.js")
-
-    add_includedirs("core", "lib")
-    add_files("examples/workbench/umim/volume/volume.cc")
-
-    add_cxflags("-fno-exceptions", "-fno-rtti", "-O3", {force = true})
-    add_ldflags("-sWASM=1", "-sALLOW_MEMORY_GROWTH=1", {force = true})
-    add_ldflags("-sEXPORTED_FUNCTIONS=['_malloc','_free','_umi_create','_umi_process','_umi_note_on','_umi_note_off','_umi_set_param','_umi_get_param','_umi_get_param_count','_umi_get_param_name','_umi_get_param_min','_umi_get_param_max','_umi_get_param_default','_umi_get_param_curve','_umi_get_param_unit','_umi_process_cc']", {force = true})
-    add_ldflags("-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','UTF8ToString','HEAPF32','HEAP8']", {force = true})
-    add_ldflags("-sMODULARIZE=1", "-sEXPORT_ES6=1", "-sENVIRONMENT=web,worker,node", {force = true})
-target_end()
+-- UMIM Modules
+umim_target("synth", "examples/workbench/umim/synth/synth_wasm.cc")
+umim_target("delay", "examples/workbench/umim/delay/delay_wasm.cc")
+umim_target("volume", "examples/workbench/umim/volume/volume.cc")
 
 end  -- if has_emscripten
 
@@ -570,24 +549,24 @@ task("info")
     }
 task_end()
 
--- WASM build and serve
+-- WASM build
 task("wasm")
     set_category("action")
     on_run(function ()
-        print("Building WASM targets...")
-        os.exec("xmake build wasm_test")
-        
+        print("Building UMIM modules...")
+        os.exec("xmake build umim_synth umim_delay umim_volume")
+
         print("\n" .. string.rep("=", 60))
         print("WASM build complete!")
-        print("Output: .build/wasm/")
+        print("Output: .build/umim/")
         print(string.rep("=", 60))
-        
+
         -- List generated files
-        os.exec("ls -la .build/wasm/")
+        os.exec("ls -la .build/umim/")
     end)
     set_menu {
         usage = "xmake wasm",
-        description = "Build WASM targets"
+        description = "Build UMIM WASM modules"
     }
 task_end()
 
@@ -595,11 +574,11 @@ task_end()
 task("wasm-test")
     set_category("action")
     on_run(function ()
-        print("Building WASM test module...")
-        os.exec("xmake build wasm_test")
-        
+        print("Building UMIM modules...")
+        os.exec("xmake build umim_synth umim_delay umim_volume")
+
         print("\nRunning WASM tests in Node.js...")
-        os.exec("node web/test-headless.mjs")
+        os.exec("node test/test-headless.mjs")
     end)
     set_menu {
         usage = "xmake wasm-test",
@@ -607,19 +586,19 @@ task("wasm-test")
     }
 task_end()
 
--- WASM serve for testing
+-- WASM serve for workbench
 task("wasm-serve")
     set_category("action")
     on_run(function ()
-        print("Building WASM synth...")
-        os.exec("xmake build wasm_synth")
-        
+        print("Building UMIM modules...")
+        os.exec("xmake build umim_synth umim_delay umim_volume")
+
         print("\nStarting local server...")
-        print("Open: http://localhost:8080/web/")
-        os.exec("cd web && python3 -m http.server 8080")
+        print("Open: http://localhost:8080/")
+        os.exec("cd examples/workbench && python3 -m http.server 8080")
     end)
     set_menu {
         usage = "xmake wasm-serve",
-        description = "Build and serve WASM synth"
+        description = "Build and serve WASM workbench"
     }
 task_end()
