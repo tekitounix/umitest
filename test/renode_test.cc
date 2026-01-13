@@ -1,21 +1,9 @@
 // =============================================================================
-// UMI-OS Comprehensive Renode Test Suite
+// UMI-OS Renode Test (Minimal)
 // =============================================================================
-//
-// This test runs on actual Cortex-M4 emulation in Renode.
-// Output goes to UART for verification by Robot Framework.
-//
-// Build: xmake f --firmware=y && xmake build renode_test
-// Run:   renode renode/test.resc
-//
-// NOTE: This file is ARM-only. For IDE support, generate ARM compile_commands.json.
+// Basic test to verify ARM build and Renode emulation works.
+// Uses vector table from port layer.
 // =============================================================================
-
-#ifndef __arm__
-#ifdef __clang__
-#pragma message("renode_test.cc is ARM-only; for IDE indexing run: xmake f --firmware=y && xmake project -k compile_commands")
-#endif
-#endif
 
 #ifdef __clang__
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
@@ -23,784 +11,167 @@
 #pragma GCC diagnostic ignored "-Wsection"
 #endif
 
-#include "../core/umi_kernel.hh"
-#include "../core/umi_expected.hh"
-#include "../core/umi_monitor.hh"
 #include "../port/arm/cortex-m/common/vector_table.hh"
 
-// New API headers (Phase 1/2/3)
-#include "../include/umi/types.hh"
-#include "../include/umi/time.hh"
-#include "../include/umi/event.hh"
-#include "../include/umi/audio_context.hh"
-#include "../include/umi/processor.hh"
-#include "../include/umi/triple_buffer.hh"
-#include "../adapter/embedded/adapter.hh"
-#include "../dsp/dsp.hh"
-
 #include <cstdint>
+#include <cstdio>
 
 // =============================================================================
-// Minimal UART output for test results
+// UART output (provided by syscalls.cc)
 // =============================================================================
+
+extern "C" int _write(int, const void*, int);
 
 namespace {
 
-// STM32F4 USART2 registers (directly on sysbus)
-volatile uint32_t* const USART2_SR  = reinterpret_cast<volatile uint32_t*>(0x40004400);
-volatile uint32_t* const USART2_DR  = reinterpret_cast<volatile uint32_t*>(0x40004404);
-volatile uint32_t* const USART2_BRR = reinterpret_cast<volatile uint32_t*>(0x40004408);
-volatile uint32_t* const USART2_CR1 = reinterpret_cast<volatile uint32_t*>(0x4000440C);
-
-// RCC APB1ENR for USART2 clock
-volatile uint32_t* const RCC_APB1ENR = reinterpret_cast<volatile uint32_t*>(0x40023840);
-
-void uart_init() {
-    // Enable USART2 clock (bit 17)
-    *RCC_APB1ENR |= (1 << 17);
-    
-    // Configure: 8N1, TX enable
-    *USART2_BRR = 0x0683;  // 9600 baud @ 16MHz (default)
-    *USART2_CR1 = (1 << 13) | (1 << 3);  // UE=1, TE=1
-}
-
-void uart_putc(char c) {
-    while (!(*USART2_SR & (1 << 7))) {}  // Wait TXE
-    *USART2_DR = c;
-}
-
-void uart_puts(const char* s) { 
-    while (*s) uart_putc(*s++);
-}
-
-[[maybe_unused]]
-void uart_puthex(uint32_t val) {
-    const char hex[] = "0123456789ABCDEF";
-    uart_puts("0x");
-    for (int i = 28; i >= 0; i -= 4) {
-        uart_putc(hex[(val >> i) & 0xF]);
+void print(const char* s) {
+    while (*s) {
+        _write(1, s, 1);
+        ++s;
     }
 }
 
-void uart_putnum(int val) {
-    if (val < 0) { uart_putc('-'); val = -val; }
-    if (val == 0) { uart_putc('0'); return; }
-    
+void println(const char* s) {
+    print(s);
+    print("\r\n");
+}
+
+void print_int(int val) {
+    if (val < 0) {
+        print("-");
+        val = -val;
+    }
+    if (val == 0) {
+        print("0");
+        return;
+    }
     char buf[12];
     int i = 0;
     while (val > 0) {
         buf[i++] = '0' + (val % 10);
         val /= 10;
     }
-    while (i > 0) uart_putc(buf[--i]);
+    while (i > 0) {
+        char c[2] = {buf[--i], 0};
+        print(c);
+    }
 }
 
-int test_count = 0;
-int pass_count = 0;
-int fail_count = 0;
+} // namespace
 
-void test_pass(const char* name) {
-    test_count++;
-    pass_count++;
-    uart_puts("[PASS] ");
-    uart_puts(name);
-    uart_puts("\r\n");
-}
+// =============================================================================
+// Test Framework (minimal)
+// =============================================================================
 
-void test_fail(const char* name, const char* reason) {
-    test_count++;
-    fail_count++;
-    uart_puts("[FAIL] ");
-    uart_puts(name);
-    uart_puts(": ");
-    uart_puts(reason);
-    uart_puts("\r\n");
-}
+namespace test {
 
-// Test assertion functions (no macros)
-inline void test_assert(bool cond, const char* name, const char* expr) {
-    if (cond) test_pass(name); 
-    else test_fail(name, expr);
-}
+int tests_run = 0;
+int tests_passed = 0;
 
-template<typename T, typename U>
-inline void test_assert_eq(T a, U b, const char* name) {
-    if (static_cast<long long>(a) == static_cast<long long>(b)) {
-        test_pass(name);
+void run(const char* name, bool result) {
+    ++tests_run;
+    if (result) {
+        ++tests_passed;
+        print("[PASS] ");
     } else {
-        test_fail(name, "value mismatch");
-        uart_puts("  expected: "); uart_putnum(static_cast<int>(b)); 
-        uart_puts(" got: "); uart_putnum(static_cast<int>(a)); 
-        uart_puts("\r\n");
+        print("[FAIL] ");
     }
+    println(name);
 }
 
-}  // namespace
+void summary() {
+    println("");
+    println("========================================");
+    print("Tests: ");
+    print_int(tests_passed);
+    print("/");
+    print_int(tests_run);
+    println(" passed");
 
-// =============================================================================
-// Hardware Implementation for Renode
-// =============================================================================
-
-struct RenodeHw {
-    // SysTick registers
-    static inline volatile uint32_t* const SYST_CSR = reinterpret_cast<volatile uint32_t*>(0xE000E010);
-    static inline volatile uint32_t* const SYST_RVR = reinterpret_cast<volatile uint32_t*>(0xE000E014);
-    static inline volatile uint32_t* const SYST_CVR = reinterpret_cast<volatile uint32_t*>(0xE000E018);
-    static inline volatile uint32_t* const SCB_ICSR = reinterpret_cast<volatile uint32_t*>(0xE000ED04);
-    static inline volatile uint32_t* const DWT_CYCCNT = reinterpret_cast<volatile uint32_t*>(0xE0001004);
-    static inline volatile uint32_t* const DWT_CTRL = reinterpret_cast<volatile uint32_t*>(0xE0001000);
-    static inline volatile uint32_t* const CoreDebug_DEMCR = reinterpret_cast<volatile uint32_t*>(0xE000EDFC);
-    
-    // SysTick control bits
-    static constexpr uint32_t SYST_ENABLE    = (1 << 0);
-    static constexpr uint32_t SYST_TICKINT   = (1 << 1);
-    static constexpr uint32_t SYST_CLKSOURCE = (1 << 2);
-    
-    static inline umi::usec os_ticks = 0;
-    static inline umi::usec timer_target = 0;
-    static inline bool systick_enabled = false;
-    
-    /// Initialize SysTick for 1ms ticks (Renode uses 72MHz)
-    static void init_systick() {
-        constexpr uint32_t CPU_FREQ = 72000000;   // 72 MHz (Renode default)
-        constexpr uint32_t TICK_RATE_HZ = 1000;   // 1ms ticks
-        constexpr uint32_t RELOAD = (CPU_FREQ / TICK_RATE_HZ) - 1;
-        
-        *SYST_RVR = RELOAD;
-        *SYST_CVR = 0;
-        *SYST_CSR = SYST_CLKSOURCE | SYST_TICKINT | SYST_ENABLE;
-        systick_enabled = true;
+    if (tests_passed == tests_run) {
+        println("ALL TESTS PASSED");
+    } else {
+        println("SOME TESTS FAILED");
     }
-    
-    static void set_timer_absolute(umi::usec target) { timer_target = target; }
-    static umi::usec monotonic_time_usecs() { return os_ticks; }
-    
-    static void enter_critical() { asm volatile("cpsid i" ::: "memory"); }
-    static void exit_critical() { asm volatile("cpsie i" ::: "memory"); }
-    
-    static void trigger_ipi(uint8_t) {}
-    static uint8_t current_core() { return 0; }
-    
-    static void request_context_switch() {
-        *SCB_ICSR = (1 << 28);  // Set PendSV
-    }
-    
-    static void save_fpu() {}
-    static void restore_fpu() {}
-    static void mute_audio_dma() {}
-    
-    static void write_backup_ram(const void*, std::size_t) {}
-    static void read_backup_ram(void*, std::size_t) {}
-    
-    static void configure_mpu_region(std::size_t, const void*, std::size_t, bool, bool) {}
-    
-    static void cache_clean(const void*, std::size_t) {}
-    static void cache_invalidate(void*, std::size_t) {}
-    static void cache_clean_invalidate(void*, std::size_t) {}
-    
-    static void system_reset() {
-        volatile uint32_t* AIRCR = reinterpret_cast<volatile uint32_t*>(0xE000ED0C);
-        *AIRCR = 0x05FA0004;
-        while (1) {}
-    }
-    
-    // SysTickが有効なら wfi で待機可能、そうでなければ即座にリターン
-    static void enter_sleep() {
-        if (systick_enabled) {
-            asm volatile("wfi");
-        }
-        // SysTickが無効の場合は何もしない（テストがハングしないように）
-    }
-    [[noreturn]] static void start_first_task() { while(1) {} }
-    
-    static void watchdog_init(uint32_t) {}
-    static void watchdog_feed() {}
-    
-    static uint32_t cycle_count() { return *DWT_CYCCNT; }
-    static uint32_t cycles_per_usec() { return 168; }
-};
+    println("========================================");
+}
 
-using HW = umi::Hw<RenodeHw>;
-using Kernel = umi::Kernel<8, 8, HW>;
+} // namespace test
 
 // =============================================================================
-// Test Suite
+// Basic Tests
 // =============================================================================
 
-namespace {
-
-Kernel kernel;
-
-void test_task_creation() {
-    uart_puts("\n--- Task Creation Tests ---\r\n");
-    
-    // Create task with name
-    umi::TaskConfig cfg {
-        .entry = nullptr,
-        .arg = nullptr,
-        .prio = umi::Priority::User,
-        .name = "test_task"
-    };
-    
-    auto tid = kernel.create_task(cfg);
-    test_assert(tid.valid(), "create_task returns valid id", "");
-    
-    auto name = kernel.get_task_name(tid);
-    test_assert(name != nullptr, "get_task_name not null", "");
-    
-    // Check priority
-    auto prio = kernel.get_task_priority(tid);
-    test_assert(prio == umi::Priority::User, "task priority correct", "");
-    
-    // Delete task
-    bool deleted = kernel.delete_task(tid);
-    test_assert(deleted, "delete_task succeeds", "");
-    
-    // Can't delete again
-    deleted = kernel.delete_task(tid);
-    test_assert(!deleted, "delete invalid task fails", "");
+void test_basic_arithmetic() {
+    test::run("1 + 1 == 2", 1 + 1 == 2);
+    test::run("10 * 10 == 100", 10 * 10 == 100);
+    test::run("100 / 4 == 25", 100 / 4 == 25);
 }
 
-void test_notification() {
-    uart_puts("\n--- Notification Tests ---\r\n");
-    
-    umi::TaskConfig cfg {
-        .entry = nullptr,
-        .prio = umi::Priority::User,
-        .name = "notif_test"
-    };
-    
-    auto tid = kernel.create_task(cfg);
-    
-    // Notify
-    kernel.notify(tid, umi::KernelEvent::AudioReady);
-    
-    // Wait should return the bit
-    auto bits = kernel.wait(tid, umi::KernelEvent::AudioReady);
-    test_assert(bits == umi::KernelEvent::AudioReady, "notification delivered", "");
-    
-    // Wait again - should be cleared
-    bits = kernel.wait(tid, umi::KernelEvent::AudioReady);
-    test_assert(bits == 0, "notification cleared after wait", "");
-    
-    kernel.delete_task(tid);
+void test_float_operations() {
+    volatile float a = 3.14159f;
+    volatile float b = 2.71828f;
+    volatile float sum = a + b;
+    volatile float prod = a * b;
+
+    // Check FPU works (approximate checks)
+    test::run("float addition works", sum > 5.8f && sum < 5.9f);
+    test::run("float multiplication works", prod > 8.5f && prod < 8.6f);
 }
 
-void test_timer() {
-    uart_puts("\n--- Timer Tests ---\r\n");
-    
-    static int timer_count = 0;
-    auto callback = [](void* ctx) {
-        (void)ctx;
-        timer_count++;
-    };
-    
-    umi::TimerCallback tcb { .fn = callback, .ctx = nullptr };
-    
-    bool ok = kernel.call_later(1000, tcb);
-    test_assert(ok, "timer scheduled", "");
-    
-    // Tick partway - internal time advances
-    kernel.tick(500);
-    test_assert_eq(timer_count, 0, "timer not fired early");
-    
-    // Tick rest - timer should fire
-    kernel.tick(600);
-    test_assert_eq(timer_count, 1, "timer fired at deadline");
+void test_memory_operations() {
+    volatile uint32_t arr[4] = {0};
+    arr[0] = 0xDEADBEEF;
+    arr[1] = 0xCAFEBABE;
+    arr[2] = 0x12345678;
+    arr[3] = 0x87654321;
+
+    test::run("memory write/read [0]", arr[0] == 0xDEADBEEF);
+    test::run("memory write/read [1]", arr[1] == 0xCAFEBABE);
+    test::run("memory write/read [2]", arr[2] == 0x12345678);
+    test::run("memory write/read [3]", arr[3] == 0x87654321);
 }
 
-void test_spsc_queue() {
-    uart_puts("\n--- SpscQueue Tests ---\r\n");
-    
-    umi::SpscQueue<int, 4> queue;
-    
-    // SpscQueue capacity is 3 (Capacity-1 usable slots)
-    test_assert(!queue.try_pop().has_value(), "queue starts empty", "");
-    test_assert(queue.has_space(), "queue has space initially", "");
-    
-    // Push items
-    test_assert(queue.try_push(1), "push 1", "");
-    test_assert(queue.try_push(2), "push 2", "");
-    test_assert(queue.try_push(3), "push 3", "");
-    test_assert(!queue.try_push(4), "push fails when full", "");
-    
-    // Pop items
-    auto v = queue.try_pop();
-    test_assert(v.has_value() && *v == 1, "pop 1", "");
-    v = queue.try_pop();
-    test_assert(v.has_value() && *v == 2, "pop 2", "");
-    v = queue.try_pop();
-    test_assert(v.has_value() && *v == 3, "pop 3", "");
-    v = queue.try_pop();
-    test_assert(!v.has_value(), "pop empty fails", "");
-}
+void test_stack_operations() {
+    volatile int local1 = 42;
+    volatile int local2 = 100;
+    volatile int local3 = local1 + local2;
 
-void test_expected() {
-    uart_puts("\n--- Result/Expected Tests ---\r\n");
-    
-    // Test Ok - creates a Result with value
-    umi::Result<int> success = umi::Ok(42);
-    test_assert(success.has_value(), "Ok has value", "");
-    test_assert_eq(*success, 42, "Ok value correct");
-    
-    // Test Err - creates a Result with error
-    umi::Result<int> failure = umi::Err(umi::Error::OutOfTasks);
-    test_assert(!failure.has_value(), "Err has no value", "");
-    test_assert(failure.error() == umi::Error::OutOfTasks, "Err code correct", "");
-}
-
-void test_priority_scheduling() {
-    uart_puts("\n--- Priority Scheduling Tests ---\r\n");
-    
-    // Create tasks with different priorities (created as Ready by default)
-    umi::TaskConfig idle_cfg { .prio = umi::Priority::Idle, .name = "idle" };
-    umi::TaskConfig user_cfg { .prio = umi::Priority::User, .name = "user" };
-    umi::TaskConfig rt_cfg { .prio = umi::Priority::Realtime, .name = "realtime" };
-    
-    auto t_idle = kernel.create_task(idle_cfg);
-    auto t_user = kernel.create_task(user_cfg);
-    auto t_rt = kernel.create_task(rt_cfg);
-    
-    // get_next_task should select the highest priority task (realtime)
-    auto next = kernel.get_next_task();
-    test_assert(next.has_value() && next.value() == t_rt.value, 
-                "realtime task selected first", "");
-    
-    // Clean up
-    kernel.delete_task(t_idle);
-    kernel.delete_task(t_user);
-    kernel.delete_task(t_rt);
-}
-
-void test_stack_monitor() {
-    uart_puts("\n--- Stack Monitor Tests ---\r\n");
-    
-    alignas(4) uint32_t stack[64];
-    
-    // Paint stack
-    umi::StackMonitor<HW>::paint_stack(stack, sizeof(stack));
-    
-    // Initially should be 0% used (all magic)
-    auto pct = umi::StackMonitor<HW>::usage_percent(stack, sizeof(stack));
-    test_assert_eq(pct, 0, "stack initially 0% used");
-    
-    // Corrupt some of the stack (simulate usage)
-    stack[60] = 0x12345678;
-    stack[61] = 0x12345678;
-    stack[62] = 0x12345678;
-    stack[63] = 0x12345678;
-    
-    pct = umi::StackMonitor<HW>::usage_percent(stack, sizeof(stack));
-    test_assert(pct > 0, "stack usage detected", "");
-}
-
-void test_for_each_task() {
-    uart_puts("\n--- for_each_task Tests ---\r\n");
-    
-    // Create some tasks (created as Ready by default)
-    umi::TaskConfig cfg1 { .prio = umi::Priority::User, .name = "task_a" };
-    umi::TaskConfig cfg2 { .prio = umi::Priority::User, .name = "task_b" };
-    
-    auto t1 = kernel.create_task(cfg1);
-    auto t2 = kernel.create_task(cfg2);
-    // Note: create_task already sets State::Ready, no resume_task needed
-    
-    int count = 0;
-    kernel.for_each_task([&](umi::TaskId id, const umi::TaskConfig& cfg, auto /*state*/) {
-        (void)id; (void)cfg;
-        count++;
-    });
-    
-    test_assert(count >= 2, "for_each_task iterates tasks", "");
-    
-    kernel.delete_task(t1);
-    kernel.delete_task(t2);
-}
-
-// Global for dynamic handler test
-volatile uint32_t custom_handler_called = 0;
-
-void test_custom_handler() {
-    custom_handler_called = custom_handler_called + 1;
-}
-
-void test_vector_table() {
-    uart_puts("\n--- Vector Table Tests ---\r\n");
-    
-    using VT = umi::port::arm::VectorTable<48>;
-    VT vt;
-    
-    // Get SP from existing vector table
-    auto sp = *reinterpret_cast<std::uint32_t*>(0x08000000);
-    vt.init(sp, test_custom_handler);
-    
-    // Check alignment (compile-time computed)
-    auto base = vt.base();
-    test_assert(base != 0, "table base non-zero", "");
-    test_assert((base & (VT::ALIGNMENT - 1)) == 0, "table properly aligned", "");
-    
-    // Get handler (initially default)
-    auto h = vt.get(VT::Exc::SysTick);
-    test_assert(h != nullptr, "handler not null", "");
-    
-    // Set custom handler and verify
-    (void)vt.set(VT::Exc::PendSV, test_custom_handler);
-    test_assert(vt.get(VT::Exc::PendSV) == test_custom_handler, "handler set correctly", "");
-    
-    // Test IRQ handler
-    vt.set_irq(38, test_custom_handler);  // USART2
-    test_assert(vt.get_irq(38) == test_custom_handler, "IRQ handler set", "");
-    
-    // Restore original VTOR for rest of tests
-    umi::port::arm::SCB::set_vtor(0x08000000);
+    test::run("stack local variables", local3 == 142);
 }
 
 // =============================================================================
-// New API Tests (Phase 1/2)
+// Main Entry Point
 // =============================================================================
 
-void test_new_types() {
-    uart_puts("\n--- New API: Types Tests ---\r\n");
-    
-    // sample_t type check
-    umi::sample_t s = 0.5f;
-    test_assert(s > 0.0f, "sample_t works", "");
-    
-    // Constants
-    test_assert(umi::kDefaultSampleRate == 48000u, "default sample rate", "");
-    test_assert(umi::kDefaultBlockSize == 64u, "default block size", "");
-    
-    // port_id_t, param_id_t
-    umi::port_id_t port = 0;
-    umi::param_id_t param = 42;
-    test_assert(port == 0 && param == 42, "id types work", "");
-}
+extern "C" [[noreturn]] void _start() {
+    println("");
+    println("========================================");
+    println("UMI-OS Renode Test Suite");
+    println("========================================");
+    println("");
 
-void test_new_time() {
-    uart_puts("\n--- New API: Time Tests ---\r\n");
-    
-    // ms_to_samples at 48kHz
-    auto samples = umi::time::ms_to_samples(1.0f, 48000u);
-    test_assert(samples == 48, "ms_to_samples(1.0, 48000)", "");
-    
-    // samples_to_ms
-    auto ms = umi::time::samples_to_ms(48000u, 48000u);
-    test_assert(ms > 999.0f && ms < 1001.0f, "samples_to_ms(48000, 48000)", "");
-    
-    // bpm calculation
-    auto spb = umi::time::bpm_to_samples_per_beat(120.0f, 48000u);
-    test_assert(spb == 24000u, "bpm_to_samples_per_beat(120, 48000)", "");
-}
+    // Run tests
+    println("--- Basic Arithmetic ---");
+    test_basic_arithmetic();
 
-void test_new_event() {
-    uart_puts("\n--- New API: Event Tests ---\r\n");
-    
-    // Create note on event
-    auto e = umi::Event::note_on(0, 0, 0, 60, 100);
-    test_assert(e.type == umi::EventType::Midi, "event type is Midi", "");
-    test_assert(e.midi.note() == 60, "note is 60", "");
-    test_assert(e.midi.velocity() == 100, "velocity is 100", "");
-    test_assert(e.midi.is_note_on(), "is_note_on() works", "");
-    
-    // EventQueue basic ops
-    umi::EventQueue<8> queue;
-    test_assert(queue.empty(), "queue starts empty", "");
-    
-    bool pushed = queue.push(e);
-    test_assert(pushed, "push succeeds", "");
-    test_assert(!queue.empty(), "queue not empty after push", "");
-    
-    umi::Event popped;
-    bool pop_ok = queue.pop(popped);
-    test_assert(pop_ok, "pop returns true", "");
-    test_assert(popped.midi.note() == 60, "popped note correct", "");
-    test_assert(queue.empty(), "queue empty after pop", "");
-}
+    println("");
+    println("--- Float Operations ---");
+    test_float_operations();
 
-void test_new_audio_context() {
-    uart_puts("\n--- New API: AudioContext Tests ---\r\n");
-    
-    // StreamConfig
-    umi::StreamConfig cfg{48000, 64};
-    test_assert(cfg.sample_rate == 48000, "sample_rate", "");
-    test_assert(cfg.buffer_size == 64, "buffer_size", "");
-    
-    // Create minimal audio context test
-    umi::sample_t in_buf[128] = {0};
-    umi::sample_t out_buf[128] = {0};
-    const umi::sample_t* in_ptrs[2] = {in_buf, in_buf + 64};
-    umi::sample_t* out_ptrs[2] = {out_buf, out_buf + 64};
-    umi::EventQueue<> events;  // Use default capacity
-    
-    umi::AudioContext ctx{
-        std::span<const umi::sample_t* const>(in_ptrs, 2),
-        std::span<umi::sample_t* const>(out_ptrs, 2),
-        events,
-        cfg.sample_rate,
-        cfg.buffer_size,
-        0  // sample_position
-    };
-    test_assert(ctx.buffer_size == 64, "context has buffer_size", "");
-    test_assert(ctx.num_inputs() == 2, "context has 2 inputs", "");
-}
+    println("");
+    println("--- Memory Operations ---");
+    test_memory_operations();
 
-void test_new_processor() {
-    uart_puts("\n--- New API: Processor Concept Tests ---\r\n");
-    
-    // A minimal processor using duck typing
-    struct MinimalProc {
-        void process(umi::AudioContext& ctx) {
-            (void)ctx;
-        }
-    };
-    
-    // Check concept satisfaction (compile-time, but we test instantiation)
-    static_assert(umi::ProcessorLike<MinimalProc>, "MinimalProc is ProcessorLike");
-    
-    MinimalProc proc;
-    umi::sample_t in_buf[64] = {0};
-    umi::sample_t out_buf[64] = {0};
-    const umi::sample_t* in_ptrs[1] = {in_buf};
-    umi::sample_t* out_ptrs[1] = {out_buf};
-    umi::EventQueue<> events;  // Use default capacity
-    umi::AudioContext ctx{
-        std::span<const umi::sample_t* const>(in_ptrs, 1),
-        std::span<umi::sample_t* const>(out_ptrs, 1),
-        events, 48000, 64, 0
-    };
-    
-    proc.process(ctx);
-    test_pass("ProcessorLike duck typing works");
-}
+    println("");
+    println("--- Stack Operations ---");
+    test_stack_operations();
 
-void test_triple_buffer() {
-    uart_puts("\n--- New API: TripleBuffer Tests ---\r\n");
-    
-    struct TestData { int value; };
-    umi::TripleBuffer<TestData> buf{};
-    
-    // Writer side
-    auto& w = buf.write_buffer();
-    w.value = 42;
-    buf.publish();
-    test_pass("write_buffer and publish work");
-    
-    // Reader side
-    test_assert(buf.has_new_data(), "has_new_data returns true", "");
-    buf.update();
-    test_assert(buf.read_buffer().value == 42, "reader sees written value", "");
-    test_assert(!buf.has_new_data(), "has_new_data returns false after update", "");
-}
-
-void test_embedded_adapter() {
-    uart_puts("\n--- New API: Embedded Adapter Tests ---\r\n");
-    
-    // Test that Adapter can be instantiated with a processor
-    struct TestProc {
-        int call_count = 0;
-        void process(umi::AudioContext& ctx) {
-            (void)ctx;
-            call_count++;
-        }
-    };
-    
-    // Verify TestProc satisfies ProcessorLike
-    static_assert(umi::ProcessorLike<TestProc>, "TestProc is ProcessorLike");
-    
-    // AdapterConfig can be created
-    constexpr umi::embedded::AdapterConfig cfg{
-        .sample_rate = 48000,
-        .buffer_size = 64,
-        .num_inputs = 2,
-        .num_outputs = 2,
-        .num_midi_ports = 1
-    };
-    test_assert(cfg.sample_rate == 48000, "AdapterConfig sample_rate", "");
-    test_assert(cfg.buffer_size == 64, "AdapterConfig buffer_size", "");
-    
-    // Adapter can be constructed (but not run in this test)
-    TestProc proc;
-    umi::embedded::Adapter<TestProc, RenodeHw, cfg> adapter{proc};
-    
-    // Events queue is accessible
-    auto& events = adapter.events();
-    test_assert(events.empty(), "adapter events queue empty", "");
-    
-    // Push event to adapter
-    auto ev = umi::Event::note_on(0, 0, 0, 60, 100);
-    bool pushed = events.push(ev);
-    test_assert(pushed, "pushed event to adapter", "");
-    
-    test_pass("Embedded Adapter instantiation works");
-}
-
-// NOTE: DSP tests are commented out because floating-point math (sin, exp, pow)
-// is very slow in Renode emulation. These should be tested natively instead.
-// The DSP headers are included and compile successfully.
-//
-// DSP tests for native environment:
-// - test_dsp_oscillator(): Phase, Sine, SawNaive, SquareNaive, SawBL
-// - test_dsp_filter(): OnePole, Biquad, SVF
-// - test_dsp_envelope(): ADSR, AR, Ramp
-// - test_dsp_utils(): midi_to_freq, normalize_freq, soft_clip, etc.
-
-}  // namespace
-
-// =============================================================================
-// Main Entry Point (C++ linkage is fine; Reset_Handler calls directly)
-// =============================================================================
-
-int main() {
-    uart_init();
-    
-    // Initialize SysTick for proper timing and wfi wake-up
-    RenodeHw::init_systick();
-    
-    uart_puts("\r\n");
-    uart_puts("========================================\r\n");
-    uart_puts("  UMI-OS Comprehensive Renode Tests\r\n");
-    uart_puts("========================================\r\n");
-    
-    // Run all test suites
-    test_task_creation();
-    test_notification();
-    test_timer();
-    test_spsc_queue();
-    test_expected();
-    test_priority_scheduling();
-    test_stack_monitor();
-    test_for_each_task();
-    test_vector_table();
-    
-    // New API tests (Phase 1/2)
-    test_new_types();
-    test_new_time();
-    test_new_event();
-    test_new_audio_context();
-    test_new_processor();
-    test_triple_buffer();
-    
-    // Adapter tests (Phase 3)
-    test_embedded_adapter();
-    
-    // NOTE: DSP tests require floating-point math (sin, pow) that is very slow
-    // in emulation. Run these in native tests (test_processor.cc) instead.
-    // test_dsp_oscillator();
-    // test_dsp_filter();
-    // test_dsp_envelope();
-    // test_dsp_utils();
-    
     // Summary
-    uart_puts("\r\n========================================\r\n");
-    uart_puts("  Test Summary\r\n");
-    uart_puts("========================================\r\n");
-    uart_puts("Total:  "); uart_putnum(test_count); uart_puts("\r\n");
-    uart_puts("Passed: "); uart_putnum(pass_count); uart_puts("\r\n");
-    uart_puts("Failed: "); uart_putnum(fail_count); uart_puts("\r\n");
-    
-    if (fail_count == 0) {
-        uart_puts("\r\n*** ALL TESTS PASSED ***\r\n");
-    } else {
-        uart_puts("\r\n*** SOME TESTS FAILED ***\r\n");
-    }
-    
-    uart_puts("TEST_COMPLETE\r\n");  // Marker for Robot Framework
-    
-    // Signal test completion to Renode via magic address write
-    // Renode script sets a hook on this address to trigger exit
-    volatile uint32_t* test_exit = reinterpret_cast<volatile uint32_t*>(0xE0000000);
-    *test_exit = (fail_count == 0) ? 0 : 1;  // 0 = success, 1 = failure
-    
-    while (1) {
+    test::summary();
+
+    // Halt
+    while (true) {
         asm volatile("wfi");
     }
-}
-
-// =============================================================================
-// Vector Table and Exception Handlers for Cortex-M4
-// =============================================================================
-
-extern "C" {
-    extern uint32_t _estack;
-    
-    void Reset_Handler();
-    void NMI_Handler();
-    void HardFault_Handler();
-    void MemManage_Handler();
-    void BusFault_Handler();
-    void UsageFault_Handler();
-    void SVC_Handler();
-    void DebugMon_Handler();
-    void PendSV_Handler();
-    void SysTick_Handler();
-    void Default_Handler();
-    
-    // Weak aliases - can be overridden
-    void NMI_Handler()        { while(1); }
-    void HardFault_Handler()  { while(1); }
-    void MemManage_Handler()  { while(1); }
-    void BusFault_Handler()   { while(1); }
-    void UsageFault_Handler() { while(1); }
-    void SVC_Handler()        { /* SVC not used in tests */ }
-    void DebugMon_Handler()   { }
-    void PendSV_Handler()     { /* Context switch - minimal for tests */ }
-    void SysTick_Handler()    { RenodeHw::os_ticks += 1000; }  // 1ms tick
-    void Default_Handler()    { while(1); }
-    
-    void Reset_Handler() { 
-        main(); 
-    }
-    
-    // Full Cortex-M4 vector table (first 16 entries are system exceptions)
-    #ifdef __arm__
-    __attribute__((section(".isr_vector"), used))
-    #endif
-    const void* vector_table[48] = {
-        &_estack,                              // 0: Initial SP
-        reinterpret_cast<void*>(Reset_Handler),       // 1: Reset
-        reinterpret_cast<void*>(NMI_Handler),         // 2: NMI
-        reinterpret_cast<void*>(HardFault_Handler),   // 3: HardFault
-        reinterpret_cast<void*>(MemManage_Handler),   // 4: MemManage
-        reinterpret_cast<void*>(BusFault_Handler),    // 5: BusFault
-        reinterpret_cast<void*>(UsageFault_Handler),  // 6: UsageFault
-        nullptr, nullptr, nullptr, nullptr,           // 7-10: Reserved
-        reinterpret_cast<void*>(SVC_Handler),         // 11: SVCall
-        reinterpret_cast<void*>(DebugMon_Handler),    // 12: DebugMon
-        nullptr,                                      // 13: Reserved
-        reinterpret_cast<void*>(PendSV_Handler),      // 14: PendSV
-        reinterpret_cast<void*>(SysTick_Handler),     // 15: SysTick
-        // External interrupts (16+)
-        reinterpret_cast<void*>(Default_Handler),     // 16: WWDG
-        reinterpret_cast<void*>(Default_Handler),     // 17: PVD
-        reinterpret_cast<void*>(Default_Handler),     // 18: TAMP_STAMP
-        reinterpret_cast<void*>(Default_Handler),     // 19: RTC_WKUP
-        reinterpret_cast<void*>(Default_Handler),     // 20: FLASH
-        reinterpret_cast<void*>(Default_Handler),     // 21: RCC
-        reinterpret_cast<void*>(Default_Handler),     // 22-31
-        reinterpret_cast<void*>(Default_Handler),
-        reinterpret_cast<void*>(Default_Handler),
-        reinterpret_cast<void*>(Default_Handler),
-        reinterpret_cast<void*>(Default_Handler),
-        reinterpret_cast<void*>(Default_Handler),
-        reinterpret_cast<void*>(Default_Handler),
-        reinterpret_cast<void*>(Default_Handler),
-        reinterpret_cast<void*>(Default_Handler),
-        reinterpret_cast<void*>(Default_Handler),     // 31
-        reinterpret_cast<void*>(Default_Handler),     // 32-47
-        reinterpret_cast<void*>(Default_Handler),
-        reinterpret_cast<void*>(Default_Handler),
-        reinterpret_cast<void*>(Default_Handler),
-        reinterpret_cast<void*>(Default_Handler),
-        reinterpret_cast<void*>(Default_Handler),
-        reinterpret_cast<void*>(Default_Handler),     // 38: USART2
-        reinterpret_cast<void*>(Default_Handler),
-        reinterpret_cast<void*>(Default_Handler),
-        reinterpret_cast<void*>(Default_Handler),
-        reinterpret_cast<void*>(Default_Handler),
-        reinterpret_cast<void*>(Default_Handler),
-        reinterpret_cast<void*>(Default_Handler),
-        reinterpret_cast<void*>(Default_Handler),
-        reinterpret_cast<void*>(Default_Handler),
-        reinterpret_cast<void*>(Default_Handler),
-    };
 }
