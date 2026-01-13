@@ -43,6 +43,9 @@ add_requires("coding-rules", {optional = true})
 -- Global Configuration
 -- =====================================================================
 
+-- Build directory (統一: .build/)
+set_config("buildir", ".build")
+
 -- Language standard
 set_languages("c++23")
 
