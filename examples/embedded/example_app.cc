@@ -14,10 +14,10 @@
 #include <chrono>
 #include <array>
 
-#include <umi/processor.hh>
-#include <umi/audio_context.hh>
-#include <umi/event.hh>
-#include <umi/coro.hh>
+#include <core/processor.hh>
+#include <core/audio_context.hh>
+#include <core/event.hh>
+#include <core/coro.hh>
 
 // =====================================================================
 // Syscall Interface (provided by kernel)
@@ -214,7 +214,7 @@ extern "C" void umi_audio_process(float* input, float* output,
     
     // Create AudioContext
     // Note: In real implementation, events would come from kernel's event queue
-    static umi::EventQueue<64> events;
+    static umi::EventQueue<> events;  // Default capacity (256)
     
     std::array<float, 1024> out_buf;
     float* out_ptr = out_buf.data();
@@ -225,6 +225,7 @@ extern "C" void umi_audio_process(float* input, float* output,
         .events = events,
         .sample_rate = sample_rate,
         .buffer_size = static_cast<std::uint32_t>(frames),
+        .dt = 1.0f / static_cast<float>(sample_rate),
         .sample_position = 0
     };
     
