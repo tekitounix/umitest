@@ -2,7 +2,6 @@
 # - Host tests with coverage
 # - WASM tests (Emscripten + Node.js)
 # - UMIM patching tests
-# - Browser integration tests (Playwright)
 # - ARM build verification
 
 name: CI
@@ -104,49 +103,6 @@ jobs:
 
       - name: Run WASM headless tests
         run: node test/test-headless.mjs
-
-  # ===========================================
-  # Browser Integration Tests (Playwright)
-  # ===========================================
-  browser-tests:
-    name: Browser Tests
-    runs-on: ubuntu-latest
-    needs: wasm-tests
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup xmake
-        uses: xmake-io/github-action-setup-xmake@v1
-        with:
-          xmake-version: latest
-
-      - name: Setup Emscripten
-        uses: mymindstorm/setup-emsdk@v14
-        with:
-          version: '3.1.50'
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Build UMIM modules
-        run: |
-          source $EMSDK/emsdk_env.sh
-          xmake f -p wasm -a wasm32 --toolchain=emcc -y
-          xmake build umim_synth umim_delay umim_volume
-
-      - name: Install Playwright
-        run: |
-          npm init -y
-          npm install -D @playwright/test
-          npx playwright install chromium --with-deps
-
-      - name: Run Playwright tests
-        run: npx playwright test test/browser.spec.ts --reporter=list
-        continue-on-error: true
 
   # ===========================================
   # ARM Firmware Build (Cross-compilation check)

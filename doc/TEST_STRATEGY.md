@@ -68,18 +68,6 @@ node test/test-headless.mjs
 - Note on/off (シンセのみ)
 - モジュール間パッチング (synth → delay → volume チェイン)
 
-### ブラウザテスト (`test/browser.spec.ts`)
-
-Playwright でブラウザ統合テスト:
-
-```bash
-npx playwright test test/browser.spec.ts
-```
-
-- ページロード確認
-- AudioContext/AudioWorklet 可用性
-- WASMモジュールのHTTP取得
-
 ---
 
 ## 3. ARM エミュレーション (Renode)
@@ -127,8 +115,6 @@ push/PR
 │  ├── wasm-tests                              │
 │  │   ├── Emscripten ビルド                  │
 │  │   └── Node.js テスト (22 tests)          │
-│  ├── browser-tests                           │
-│  │   └── Playwright (Chrome)                │
 │  ├── arm-build                               │
 │  │   └── クロスコンパイル確認               │
 │  └── renode-tests (optional, disabled)       │

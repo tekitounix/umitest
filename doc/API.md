@@ -19,7 +19,7 @@
 オーディオ処理コールバックに渡されるコンテキスト。
 
 ```cpp
-#include <umi/audio_context.hh>
+#include <core/audio_context.hh>
 
 struct AudioContext {
     std::span<const sample_t* const> inputs;   // 入力バッファ
@@ -65,7 +65,7 @@ void MyProcessor::process(umi::AudioContext& ctx) {
 プロセッサの型制約を定義する C++20 concepts。
 
 ```cpp
-#include <umi/processor.hh>
+#include <core/processor.hh>
 
 // 基本的なプロセッサ
 template<typename P>
@@ -99,7 +99,7 @@ any.control(ctrl_ctx);      // 制御コールバック
 サンプル精度のイベント処理。
 
 ```cpp
-#include <umi/event.hh>
+#include <core/event.hh>
 
 // イベントの作成
 auto note_on = umi::Event::note_on(sample_pos, channel, note, velocity);
@@ -125,7 +125,7 @@ while (queue.pop_until(current_sample, e)) {
 パラメータのメタデータ。
 
 ```cpp
-#include <umi/processor.hh>
+#include <core/processor.hh>
 
 umi::ParamDescriptor freq{
     .id = 0,
@@ -317,7 +317,7 @@ float db = umi::dsp::gain_to_db(0.5f);     // ≈ -6.0
 ## エラーハンドリング
 
 ```cpp
-#include <umi/error.hh>
+#include <core/error.hh>
 ```
 
 ### Error 列挙型
