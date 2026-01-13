@@ -142,63 +142,16 @@ target_end()
 -- =====================================================================
 -- These run on the development machine for rapid iteration
 
-target("test_processor")
+target("test_dsp")
     set_kind("binary")
     set_group("tests/host")
     set_default(true)
     set_targetdir(".build")
-    
-    add_files("test/test_processor.cc")
-    add_deps("umi_core")
-    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
-    
-    on_run(function (target)
-        os.execv(target:targetfile())
-    end)
-target_end()
 
-target("test_kernel")
-    set_kind("binary")
-    set_group("tests/host")
-    set_default(true)
-    set_targetdir(".build")
-    
-    add_files("test/test_kernel.cc")
-    add_deps("umi_core")
-    
-    -- Host-specific: embedded constraints
+    add_files("test/test_dsp.cc")
+    add_includedirs("lib")
     add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
-    
-    on_run(function (target)
-        os.execv(target:targetfile())
-    end)
-target_end()
 
-target("test_audio")
-    set_kind("binary")
-    set_group("tests/host")
-    set_default(true)
-    set_targetdir(".build")
-    
-    add_files("test/test_audio.cc")
-    add_deps("umi_core")
-    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
-    
-    on_run(function (target)
-        os.execv(target:targetfile())
-    end)
-target_end()
-
-target("test_midi")
-    set_kind("binary")
-    set_group("tests/host")
-    set_default(true)
-    set_targetdir(".build")
-    
-    add_files("test/test_midi.cc")
-    add_deps("umi_core")
-    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
-    
     on_run(function (target)
         os.execv(target:targetfile())
     end)
@@ -265,7 +218,7 @@ target("firmware")
     
     -- Sources
     add_files("port/board/stm32f4/syscalls.cc")
-    add_files("examples/example_app.cc")
+    add_files("examples/embedded/example_app.cc")
 target_end()
 
 target("renode_test")
@@ -342,57 +295,67 @@ rule("wasm-worklet")
     end)
 rule_end()
 
--- Minimal WASM test (no AudioWorklet, for basic verification)
-target("wasm_test")
+-- UMIM Module: Synth
+target("umim_synth")
     set_kind("binary")
-    set_group("wasm")
+    set_group("umim")
     set_default(false)
     set_plat("wasm")
     set_arch("wasm32")
     set_toolchains("emcc")
-    set_targetdir(".build/wasm")
-    set_filename("umi_test.js")
-    
-    add_deps("umi_core")
-    add_includedirs(".", "core", "port", "include", "dsp", "adapter")
-    add_files("adapter/wasm/test_wasm.cc")
-    
+    set_targetdir(".build/umim")
+    set_filename("synth.js")
+
+    add_includedirs("core", "lib")
+    add_files("examples/workbench/umim/synth/synth_wasm.cc")
+
     add_cxflags("-fno-exceptions", "-fno-rtti", "-O3", {force = true})
-    add_ldflags("-sWASM=1", {force = true})
-    add_ldflags("-sALLOW_MEMORY_GROWTH=1", {force = true})
-    add_ldflags("-sEXPORTED_FUNCTIONS=['_malloc','_free','_umi_test_types','_umi_test_dsp']", {force = true})
-    add_ldflags("-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap']", {force = true})
-    add_ldflags("-sMODULARIZE=1", {force = true})
-    add_ldflags("-sEXPORT_ES6=1", {force = true})
-    add_ldflags("-sENVIRONMENT=web,node", {force = true})
+    add_ldflags("-sWASM=1", "-sALLOW_MEMORY_GROWTH=1", {force = true})
+    add_ldflags("-sEXPORTED_FUNCTIONS=['_malloc','_free','_umi_create','_umi_process','_umi_note_on','_umi_note_off','_umi_set_param','_umi_get_param','_umi_get_param_count','_umi_get_param_name','_umi_get_param_min','_umi_get_param_max','_umi_get_param_default','_umi_get_param_curve','_umi_get_param_unit','_umi_process_cc']", {force = true})
+    add_ldflags("-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','UTF8ToString']", {force = true})
+    add_ldflags("-sMODULARIZE=1", "-sEXPORT_ES6=1", "-sENVIRONMENT=web,worker", {force = true})
 target_end()
 
--- Full WASM Synth with AudioWorklet
-target("wasm_synth")
+-- UMIM Module: Delay
+target("umim_delay")
     set_kind("binary")
-    set_group("wasm")
+    set_group("umim")
     set_default(false)
     set_plat("wasm")
     set_arch("wasm32")
     set_toolchains("emcc")
-    set_targetdir(".build/wasm")
-    set_filename("umi_synth.js")
-    
-    add_deps("umi_core")
-    add_includedirs(".", "core", "port", "include", "dsp", "adapter")
-    add_files("adapter/wasm/synth_wasm.cc")
-    
+    set_targetdir(".build/umim")
+    set_filename("delay.js")
+
+    add_includedirs("core", "lib")
+    add_files("examples/workbench/umim/delay/delay_wasm.cc")
+
     add_cxflags("-fno-exceptions", "-fno-rtti", "-O3", {force = true})
-    add_ldflags("-sWASM=1", {force = true})
-    add_ldflags("-sALLOW_MEMORY_GROWTH=1", {force = true})
-    add_ldflags("-sSTACK_SIZE=65536", {force = true})
-    add_ldflags("-sAUDIO_WORKLET=1", {force = true})
-    add_ldflags("-sWASM_WORKERS=1", {force = true})
-    add_ldflags("-sEXPORTED_FUNCTIONS=['_malloc','_free','_umi_create','_umi_destroy','_umi_process','_umi_note_on','_umi_note_off','_umi_set_param','_umi_get_buffer_ptr']", {force = true})
-    add_ldflags("-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap']", {force = true})
-    add_ldflags("-sMODULARIZE=1", {force = true})
-    add_ldflags("-sEXPORT_ES6=1", {force = true})
-    add_ldflags("-sENVIRONMENT=web,worker", {force = true})
+    add_ldflags("-sWASM=1", "-sALLOW_MEMORY_GROWTH=1", {force = true})
+    add_ldflags("-sEXPORTED_FUNCTIONS=['_malloc','_free','_umi_create','_umi_process','_umi_note_on','_umi_note_off','_umi_set_param','_umi_get_param','_umi_get_param_count','_umi_get_param_name','_umi_get_param_min','_umi_get_param_max','_umi_get_param_default','_umi_get_param_curve','_umi_get_param_unit','_umi_process_cc']", {force = true})
+    add_ldflags("-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','UTF8ToString']", {force = true})
+    add_ldflags("-sMODULARIZE=1", "-sEXPORT_ES6=1", "-sENVIRONMENT=web,worker", {force = true})
+target_end()
+
+-- UMIM Module: Volume
+target("umim_volume")
+    set_kind("binary")
+    set_group("umim")
+    set_default(false)
+    set_plat("wasm")
+    set_arch("wasm32")
+    set_toolchains("emcc")
+    set_targetdir(".build/umim")
+    set_filename("volume.js")
+
+    add_includedirs("core", "lib")
+    add_files("examples/workbench/umim/volume/volume.cc")
+
+    add_cxflags("-fno-exceptions", "-fno-rtti", "-O3", {force = true})
+    add_ldflags("-sWASM=1", "-sALLOW_MEMORY_GROWTH=1", {force = true})
+    add_ldflags("-sEXPORTED_FUNCTIONS=['_malloc','_free','_umi_create','_umi_process','_umi_note_on','_umi_note_off','_umi_set_param','_umi_get_param','_umi_get_param_count','_umi_get_param_name','_umi_get_param_min','_umi_get_param_max','_umi_get_param_default','_umi_get_param_curve','_umi_get_param_unit','_umi_process_cc']", {force = true})
+    add_ldflags("-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','UTF8ToString']", {force = true})
+    add_ldflags("-sMODULARIZE=1", "-sEXPORT_ES6=1", "-sENVIRONMENT=web,worker", {force = true})
 target_end()
 
 end  -- if has_emscripten
@@ -406,19 +369,17 @@ task("test")
     set_category("action")
     on_run(function ()
         import("core.project.project")
-        
-        -- Build host tests individually
-        os.exec("xmake build test_kernel")
-        os.exec("xmake build test_audio")
-        os.exec("xmake build test_midi")
-        
+
+        -- Build host tests
+        os.exec("xmake build test_dsp")
+
         print("\n" .. string.rep("=", 60))
         print("Running Host Unit Tests")
         print(string.rep("=", 60) .. "\n")
-        
-        local tests = {"test_kernel", "test_audio", "test_midi"}
+
+        local tests = {"test_dsp"}
         local failed = {}
-        
+
         for _, name in ipairs(tests) do
             print(">>> " .. name)
             local target = project.target(name)
@@ -428,7 +389,7 @@ task("test")
             end
             print("")
         end
-        
+
         print(string.rep("=", 60))
         if #failed > 0 then
             print("FAILED: " .. table.concat(failed, ", "))
