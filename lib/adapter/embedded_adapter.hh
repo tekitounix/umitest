@@ -126,13 +126,14 @@ private:
             // Build context
             AudioContext ctx{
                 std::span<const sample_t* const>(
-                    const_cast<const sample_t**>(input_ptrs_.data()), 
+                    const_cast<const sample_t**>(input_ptrs_.data()),
                     Config.num_inputs
                 ),
                 std::span<sample_t* const>(output_ptrs_.data(), Config.num_outputs),
                 process_events_,
                 Config.sample_rate,
                 Config.buffer_size,
+                1.0f / static_cast<float>(Config.sample_rate),  // dt
                 sample_position_
             };
             

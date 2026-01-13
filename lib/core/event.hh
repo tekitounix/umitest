@@ -173,8 +173,9 @@ public:
     }
     
     /// Pop event from specific port
+    /// @note O(n) operation - use sparingly, prefer pop_until() for hot paths
     [[nodiscard]] bool pop_from(port_id_t port_id, Event& out) noexcept {
-        // Simple implementation: scan for matching port
+        // Simple implementation: linear scan for matching port
         size_t pos = read_pos_;
         while (pos != write_pos_) {
             if (events_[pos].port_id == port_id) {

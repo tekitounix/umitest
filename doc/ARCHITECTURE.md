@@ -149,12 +149,12 @@ static constexpr PortDescriptor ports_[] = {
 
 ### バックエンド切替
 
-| バックエンド | 対象 | 特徴 |
+| バックエンド | 対象 | 状態 |
 |-------------|------|------|
-| **umios core** | Cortex-M | 独自ミニマルRTOS、最小フットプリント |
-| **FreeRTOS** | ESP32, STM32 | FreeRTOS API互換 |
-| **Zephyr** | 多様なMCU | Zephyr RTOS統合 |
-| **POSIX** | Linux, macOS | ホストテスト用 |
+| **umios core** | Cortex-M | ✓ 実装中 |
+| **POSIX** | Linux, macOS | ✓ ホストテスト用 |
+| **FreeRTOS** | ESP32, STM32 | 計画中 |
+| **Zephyr** | 多様なMCU | 計画中 |
 
 ### 保護レベル
 

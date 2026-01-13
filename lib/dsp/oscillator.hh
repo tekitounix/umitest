@@ -77,6 +77,7 @@ private:
 // ============================================================================
 
 /// Naive sawtooth oscillator (will alias at high frequencies)
+/// @deprecated Use SawBL for production - this is for educational comparison
 class SawNaive {
 public:
     SawNaive() = default;
@@ -98,6 +99,7 @@ private:
 // ============================================================================
 
 /// Naive square wave oscillator (will alias at high frequencies)
+/// @deprecated Use SquareBL for production - this is for educational comparison
 class SquareNaive {
 public:
     SquareNaive() = default;
