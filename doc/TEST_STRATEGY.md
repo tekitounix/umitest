@@ -16,10 +16,15 @@ UMI-OSのテスト戦略は3つの環境をカバーします:
 
 ### 現在のテスト
 
-| ファイル | 対象 | 状態 |
-|---------|------|------|
-| `test_dsp.cc` | Oscillator, Filter, Envelope, Utility | ✓ 53 tests |
-| `renode_test.cc` | ARM実機エミュレーション（UART出力） | ✓ |
+| ファイル | 対象 | テスト数 |
+|---------|------|----------|
+| `test_dsp.cc` | Oscillator, Filter, Envelope, Utility | 79 |
+| `test_kernel.cc` | Task, Timer, Notification, SpscQueue | 101 |
+| `test_audio.cc` | AudioContext, Lifecycle, DSP Load | 多数 |
+| `test_midi.cc` | MIDI Message, EventQueue, EventReader | 152 |
+| `renode_test.cc` | ARM実機エミュレーション（UART出力） | - |
+
+**合計: 330+ テスト**
 
 ### テスト実行
 
@@ -29,20 +34,43 @@ xmake test
 
 # 個別実行
 xmake run test_dsp
+xmake run test_kernel
+xmake run test_audio
+xmake run test_midi
 ```
 
 ### テストフレームワーク
 
-独自の軽量フレームワークを使用（外部依存なし、組み込み向け）:
+共通の軽量フレームワーク `test/test_common.hh` を使用（外部依存なし、組み込み向け）:
 
 ```cpp
-void check(bool cond, const char* msg) {
-    if (!cond) {
-        std::printf("FAIL: %s\n", msg);
-        std::exit(1);
-    }
-}
+#include "test_common.hh"
+using umi::test::check;
+
+SECTION("My Feature");
+check(result == expected, "description");
+CHECK_EQ(a, b, "values match");
+CHECK_NEAR(actual, expected, "float comparison");
+
+TEST_SUMMARY();  // 結果サマリー出力
 ```
+
+### Kernel テストカバレッジ
+
+| 機能 | テスト状況 |
+|------|-----------|
+| Task create/delete/suspend/resume | ✓ |
+| Priority scheduling (Realtime > Server > User > Idle) | ✓ |
+| User priority round-robin | ✓ |
+| Core affinity | ✓ |
+| Timer queue (ticked mode) | ✓ |
+| Timer IRQ (tickless) | ✓ |
+| Notification (notify/wait/wait_block) | ✓ |
+| SpscQueue (SPSC lock-free queue) | ✓ |
+| LoadMonitor / Stopwatch | ✓ |
+| MPU configuration | ✓ |
+| Shared memory | ✓ |
+| for_each_task iteration | ✓ |
 
 ---
 
@@ -109,8 +137,8 @@ push/PR
 ┌─────────────────────────────────────────────┐
 │  GitHub Actions                             │
 │  ├── host-tests (ubuntu, macos)             │
-│  │   ├── xmake build test_dsp               │
-│  │   ├── xmake test                          │
+│  │   ├── xmake build (全テストターゲット)    │
+│  │   ├── xmake test (330+ tests)            │
 │  │   └── カバレッジ計測 (ubuntu, lcov)       │
 │  ├── wasm-tests                              │
 │  │   ├── Emscripten ビルド                  │
@@ -129,7 +157,16 @@ push/PR
 
 ---
 
-## 5. テスト方針
+## 5. テスト設計方針
+
+### 仕様ベース vs 実装ベース
+
+| アプローチ | 用途 | 例 |
+|-----------|------|-----|
+| **仕様ベース** | API契約のテスト | SpscQueue の FIFO順序保証 |
+| **実装ベース** | 内部ロジック検証 | FPU save/restore の呼び出し回数 |
+
+基本は仕様ベースでAPI契約を検証し、クリティカルな内部動作は実装ベースで補完します。
 
 ### 組み込み制約
 
@@ -141,19 +178,12 @@ push/PR
 
 ### カバレッジ目標
 
-| モジュール | 目標 |
+| モジュール | 状態 |
 |-----------|------|
-| `lib/core/` | 主要API全て |
-| `lib/dsp/` | 全DSPコンポーネント |
-| `lib/adapter/` | UMIM エクスポート関数 |
-
-### 追加予定
-
-| テスト | 対象 | 優先度 |
-|--------|------|--------|
-| `test_umim.cc` | UMIMモジュール統合 | 中 |
-| `test_patching.cc` | モジュール間接続 | 低 (将来) |
-| カバレッジ計測 | llvm-cov / gcov | 低 |
+| `lib/core/` (AudioContext, Event, etc.) | ✓ 網羅 |
+| `lib/core/umi_kernel.hh` (RTOS) | ✓ 網羅 |
+| `lib/dsp/` | ✓ 網羅 |
+| `lib/adapter/` | UMIM経由でテスト |
 
 ---
 
