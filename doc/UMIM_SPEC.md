@@ -41,6 +41,8 @@ void umi_create(float sample_rate);
 void umi_destroy(void);  // オプション
 ```
 
+`umi_create()` は Processor の `init()` メソッドを呼ぶ（存在する場合）。
+
 ### オーディオ処理
 
 ```c
@@ -143,22 +145,33 @@ UMIC付きの場合。Controllerのイベント処理が追加される。
 
 ### 手動エクスポート
 
+マクロを使わない場合の実装例。
+
 ```cpp
 static Volume g_proc;
+static float g_sample_rate = 48000.0f;
 
 extern "C" {
 
 void umi_create(float sr) {
-    // 初期化
+    g_sample_rate = sr;
+    // Processor::init() があれば呼ぶ
 }
 
 void umi_process(const float* in, float* out, uint32_t frames) {
     const float* inputs[] = {in};
     float* outputs[] = {out};
+    EventQueue<> events;  // 空のイベントキュー
+
     AudioContext ctx{
-        .inputs = inputs,
-        .outputs = outputs,
+        .inputs = {inputs, 1},
+        .outputs = {outputs, 1},
+        .input_events = {},
+        .output_events = events,
+        .sample_rate = static_cast<uint32_t>(g_sample_rate),
         .buffer_size = frames,
+        .dt = 1.0f / g_sample_rate,
+        .sample_position = 0,
     };
     g_proc.process(ctx);
 }
@@ -248,8 +261,8 @@ mv volume.wasm volume.umim
 モジュールはポートを宣言し、ホストが可能な範囲で接続。
 
 ```cpp
-// モジュールが宣言
-constexpr Port ports[] = {
+// モジュールが宣言（PortDescriptor は UMIP_SPEC 参照）
+constexpr PortDescriptor ports[] = {
     {0, "audio_in",  Continuous, In},
     {1, "audio_out", Continuous, Out},
     {2, "cv_in",     Continuous, In},   // オプショナル

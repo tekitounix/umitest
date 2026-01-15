@@ -135,6 +135,18 @@ enum class PortKind : uint8_t {
     Continuous,  // オーディオレート（Audio, CV）
     Event,       // 非同期（MIDI, Trigger）
 };
+
+enum class PortDirection : uint8_t {
+    In,
+    Out,
+};
+
+enum class TypeHint : uint8_t {
+    None,
+    MidiBytes,      // 標準MIDI
+    ParamChange,    // パラメータ変更
+    Trigger,        // ゲート/トリガー
+};
 ```
 
 ### ポート構成例

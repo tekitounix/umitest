@@ -142,9 +142,11 @@ void SynthController::on_events(std::span<const Event> events) {
 
 ```cpp
 void SynthController::on_encoder(int id, int delta) {
-    if (id == 0) {
-        float v = get_param(selected_param_);
-        set_param(selected_param_, v + delta * 0.01f);
+    if (!proc) return;
+    // selected_param に応じてメンバに直接アクセス
+    switch (selected_param_) {
+        case 0: proc->cutoff += delta * 10.0f; break;
+        case 1: proc->resonance += delta * 0.01f; break;
     }
 }
 
