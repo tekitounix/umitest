@@ -30,8 +30,13 @@ set_xmakever("2.8.0")
 -- Custom Package Repository (ARM Embedded Toolchain)
 -- =====================================================================
 
--- For local development: add_repositories("arm-embedded .tools/arm-embedded-xmake-repo")
-add_repositories("arm-embedded https://github.com/tekitounix/arm-embedded-xmake-repo.git")
+-- Local development: use .tools/ for editing packages
+-- CI / new setup: auto-fetch from GitHub
+if os.isdir(".tools/arm-embedded-xmake-repo") then
+    add_repositories("arm-embedded .tools/arm-embedded-xmake-repo")
+else
+    add_repositories("arm-embedded https://github.com/tekitounix/arm-embedded-xmake-repo.git")
+end
 
 -- Request ARM toolchains and embedded support
 add_requires("arm-embedded", {optional = true})
@@ -175,7 +180,52 @@ target("test_dsp")
     set_targetdir(".build")
 
     add_files("test/test_dsp.cc")
-    add_includedirs("lib")
+    add_includedirs("lib", "test")
+    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
+
+    on_run(function (target)
+        os.execv(target:targetfile())
+    end)
+target_end()
+
+target("test_kernel")
+    set_kind("binary")
+    set_group("tests/host")
+    set_default(true)
+    set_targetdir(".build")
+
+    add_files("test/test_kernel.cc")
+    add_includedirs("lib", "test")
+    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
+
+    on_run(function (target)
+        os.execv(target:targetfile())
+    end)
+target_end()
+
+target("test_audio")
+    set_kind("binary")
+    set_group("tests/host")
+    set_default(true)
+    set_targetdir(".build")
+
+    add_files("test/test_audio.cc")
+    add_includedirs("lib", "test")
+    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
+
+    on_run(function (target)
+        os.execv(target:targetfile())
+    end)
+target_end()
+
+target("test_midi")
+    set_kind("binary")
+    set_group("tests/host")
+    set_default(true)
+    set_targetdir(".build")
+
+    add_files("test/test_midi.cc")
+    add_includedirs("lib", "test")
     add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
 
     on_run(function (target)
@@ -236,7 +286,7 @@ target("firmware")
     
     add_rules("cortex-m4f")
     add_deps("umi_core")
-    add_includedirs(".", "core", "port")
+    add_includedirs(".", "core", "port", "lib")
     add_defines("STM32F4", "BOARD_STM32F4")
     
     -- Linker script
@@ -253,27 +303,57 @@ target("renode_test")
     set_default(false)
     set_targetdir(".build")
     set_filename("renode_test.elf")
-    
+
     add_rules("cortex-m4f")
     add_deps("umi_core")
     add_includedirs(".", "core", "port", "include")
     add_defines("STM32F4", "BOARD_STM32F4")
-    
+
     -- Optimize for size with debug info
     add_cxflags("-Os", "-g", {force = true})
-    
+
     -- Linker script
     add_ldflags("-Tport/board/stm32f4/linker.ld", {force = true})
-    
+
     -- Sources
     add_files("test/renode_test.cc")
     add_files("port/board/stm32f4/syscalls.cc")
-    
+
     -- Run with Renode
     on_run(function (target)
         local renode = "/Applications/Renode.app/Contents/MacOS/Renode"
         if not os.isfile(renode) then renode = "renode" end
         os.execv(renode, {"--console", "--disable-xwt", "-e", "include @renode/test.resc"})
+    end)
+target_end()
+
+target("synth_example")
+    set_kind("binary")
+    set_group("examples")
+    set_default(false)
+    set_targetdir(".build")
+    set_filename("synth_example.elf")
+
+    add_rules("cortex-m4f")
+    add_deps("umi_core")
+    add_includedirs(".", "core", "port", "lib")
+    add_defines("STM32F4", "BOARD_STM32F4")
+
+    -- Optimize for size with debug info
+    add_cxflags("-Os", "-g", {force = true})
+
+    -- Linker script
+    add_ldflags("-Tport/board/stm32f4/linker.ld", {force = true})
+
+    -- Sources
+    add_files("examples/synth/synth_example.cc")
+    add_files("port/board/stm32f4/syscalls.cc")
+
+    -- Run with Renode
+    on_run(function (target)
+        local renode = "/Applications/Renode.app/Contents/MacOS/Renode"
+        if not os.isfile(renode) then renode = "renode" end
+        os.execv(renode, {"--console", "--disable-xwt", "-e", "include @renode/synth.resc"})
     end)
 target_end()
 
@@ -321,8 +401,29 @@ rule("wasm-worklet")
     end)
 rule_end()
 
--- UMIM common settings
-local umim_exported_funcs = "['_malloc','_free','_umi_create','_umi_process','_umi_note_on','_umi_note_off','_umi_set_param','_umi_get_param','_umi_get_param_count','_umi_get_param_name','_umi_get_param_min','_umi_get_param_max','_umi_get_param_default','_umi_get_param_curve','_umi_get_param_unit','_umi_process_cc']"
+-- UMIM exported functions (port-based API + legacy compatibility)
+local umim_exported_funcs = "[" .. table.concat({
+    "'_malloc'", "'_free'",
+    -- Lifecycle
+    "'_umi_create'", "'_umi_destroy'",
+    -- Port API (new)
+    "'_umi_get_port_count'", "'_umi_get_port_name'",
+    "'_umi_get_port_direction'", "'_umi_get_port_kind'",
+    "'_umi_set_port_buffer'", "'_umi_get_port_buffer'",
+    -- Event API (new)
+    "'_umi_send_event'", "'_umi_recv_event'", "'_umi_clear_events'",
+    -- Audio processing
+    "'_umi_process'", "'_umi_process_simple'",
+    -- Parameter API
+    "'_umi_set_param'", "'_umi_get_param'", "'_umi_get_param_count'",
+    "'_umi_get_param_name'", "'_umi_get_param_min'", "'_umi_get_param_max'",
+    "'_umi_get_param_default'", "'_umi_get_param_curve'", "'_umi_get_param_unit'",
+    -- Legacy API (backward compatibility)
+    "'_umi_note_on'", "'_umi_note_off'", "'_umi_process_cc'",
+    -- Plugin info
+    "'_umi_get_processor_name'", "'_umi_get_name'", "'_umi_get_vendor'",
+    "'_umi_get_version'", "'_umi_get_type'"
+}, ",") .. "]"
 local umim_runtime_methods = "['ccall','cwrap','UTF8ToString','HEAPF32','HEAP8']"
 
 local function umim_target(name, source_file)
@@ -336,19 +437,23 @@ local function umim_target(name, source_file)
         set_targetdir(".build/umim")
         set_filename(name .. ".js")
 
-        add_includedirs("core", "lib")
+        add_includedirs("core", "lib", "lib/adapter", "examples/synth")
         add_files(source_file)
 
         add_cxflags("-fno-exceptions", "-fno-rtti", "-O3", {force = true})
         add_ldflags("-sWASM=1", "-sALLOW_MEMORY_GROWTH=1", {force = true})
         add_ldflags("-sEXPORTED_FUNCTIONS=" .. umim_exported_funcs, {force = true})
         add_ldflags("-sEXPORTED_RUNTIME_METHODS=" .. umim_runtime_methods, {force = true})
-        add_ldflags("-sMODULARIZE=1", "-sEXPORT_ES6=1", "-sENVIRONMENT=web,worker,node", {force = true})
+        -- AudioWorklet compatible: synchronous WASM init
+        add_ldflags("-sENVIRONMENT=web,worker", {force = true})
+        add_ldflags("-sWASM_ASYNC_COMPILATION=0", {force = true})
+        add_ldflags("--pre-js=examples/workbench/worklet/worklet-preamble.js", {force = true})
+        add_ldflags("--post-js=examples/workbench/worklet/umi-processor-sync.js", {force = true})
     target_end()
 end
 
 -- UMIM Modules
-umim_target("synth", "examples/workbench/umim/synth/synth_wasm.cc")
+umim_target("synth", "examples/synth/synth_wasm.cc")
 umim_target("delay", "examples/workbench/umim/delay/delay_wasm.cc")
 umim_target("volume", "examples/workbench/umim/volume/volume.cc")
 
@@ -364,14 +469,17 @@ task("test")
     on_run(function ()
         import("core.project.project")
 
-        -- Build host tests
-        os.exec("xmake build test_dsp")
+        local tests = {"test_dsp", "test_kernel", "test_audio", "test_midi"}
+
+        -- Build each test target individually
+        for _, name in ipairs(tests) do
+            os.exec("xmake build " .. name)
+        end
 
         print("\n" .. string.rep("=", 60))
         print("Running Host Unit Tests")
         print(string.rep("=", 60) .. "\n")
 
-        local tests = {"test_dsp"}
         local failed = {}
 
         for _, name in ipairs(tests) do
@@ -389,7 +497,7 @@ task("test")
             print("FAILED: " .. table.concat(failed, ", "))
             os.exit(1)
         else
-            print("All tests passed ✓")
+            print("All tests passed!")
         end
     end)
     set_menu {
@@ -439,6 +547,34 @@ task("renode-test")
     set_menu {
         usage = "xmake renode-test",
         description = "Run Renode automated tests"
+    }
+task_end()
+
+-- Synth example with Renode
+task("renode-synth")
+    set_category("action")
+    on_run(function ()
+        print("Building synth example for Renode...")
+        os.exec("xmake build synth_example")
+
+        print("\nRunning Synth example in Renode...")
+        local renode = "/Applications/Renode.app/Contents/MacOS/Renode"
+        if not os.isfile(renode) then renode = "renode" end
+
+        os.execv(renode, {"--console", "--disable-xwt", "-e", "include @renode/synth.resc"})
+
+        -- Display results
+        local logfile = ".build/synth_uart.log"
+        if os.isfile(logfile) then
+            print("\n" .. string.rep("=", 60))
+            print("UART Output")
+            print(string.rep("=", 60))
+            os.exec("cat " .. logfile)
+        end
+    end)
+    set_menu {
+        usage = "xmake renode-synth",
+        description = "Run synth example in Renode emulator"
     }
 task_end()
 

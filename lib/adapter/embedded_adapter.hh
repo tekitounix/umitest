@@ -6,11 +6,11 @@
 
 #pragma once
 
-#include "../../include/umi/processor.hh"
-#include "../../include/umi/audio_context.hh"
-#include "../../include/umi/event.hh"
-#include "../../include/umi/types.hh"
-#include "../../core/umi_kernel.hh"
+#include <core/processor.hh>
+#include <core/audio_context.hh>
+#include <core/event.hh>
+#include <core/types.hh>
+#include <core/umi_kernel.hh>
 
 #include <array>
 #include <span>

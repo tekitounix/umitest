@@ -2,7 +2,7 @@
 // UMI-OS Host/Test Stub Hardware Implementation
 #pragma once
 
-#include "../../../core/umi_kernel.hh"
+#include <core/umi_kernel.hh>
 
 namespace umi::board::stub {
 

@@ -8,7 +8,7 @@
 #include "../../vendor/stm32/stm32f4/gpio.hh"
 #include "../../vendor/stm32/stm32f4/uart.hh"
 // IWYU pragma: end_exports
-#include "../../../core/umi_kernel.hh"
+#include <core/umi_kernel.hh>
 
 namespace umi::board::stm32f4 {
 

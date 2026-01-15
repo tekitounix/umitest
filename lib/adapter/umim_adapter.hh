@@ -10,10 +10,10 @@
 #pragma once
 
 #include <cstdint>
-#include <array>
 #include <type_traits>
-#include <cmath>
-#include <algorithm>
+
+// Include shared DSP components
+#include <dsp/dsp.hh>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -25,7 +25,7 @@
 namespace umi {
 
 // ============================================================================
-// Common Types (self-contained)
+// Common Types
 // ============================================================================
 
 using sample_t = float;
@@ -41,10 +41,10 @@ struct EventQueue {
         uint8_t type;
         uint8_t data[3];
     };
-    
+
     Event events[Capacity];
     size_t count = 0;
-    
+
     auto begin() const { return events; }
     auto end() const { return events + count; }
     bool empty() const { return count == 0; }
@@ -64,157 +64,15 @@ struct AudioContext {
     uint32_t buffer_size;
     float dt;
     uint64_t sample_position;
-    
+
     const sample_t* input(size_t ch) const {
         return ch < num_inputs ? inputs[ch] : nullptr;
     }
-    
+
     sample_t* output(size_t ch) const {
         return ch < num_outputs ? outputs[ch] : nullptr;
     }
 };
-
-// ============================================================================
-// DSP Utilities (self-contained)
-// ============================================================================
-
-namespace dsp {
-
-inline constexpr float PI = 3.14159265358979323846f;
-
-// MIDI note to frequency
-inline float midi_to_freq(uint8_t note) {
-    return 440.0f * std::pow(2.0f, (note - 69) / 12.0f);
-}
-
-// Soft clip distortion
-inline float soft_clip(float x) {
-    if (x > 1.0f) return 1.0f - 1.0f / (1.0f + (x - 1.0f));
-    if (x < -1.0f) return -1.0f + 1.0f / (1.0f - (x + 1.0f));
-    return x;
-}
-
-// ============================================================================
-// ADSR Envelope
-// ============================================================================
-
-class ADSR {
-public:
-    enum class State { Idle, Attack, Decay, Sustain, Release };
-    
-    void set_params(float attack_ms, float decay_ms, float sustain, float release_ms) {
-        attack_ms_ = attack_ms;
-        decay_ms_ = decay_ms;
-        sustain_ = sustain;
-        release_ms_ = release_ms;
-    }
-    
-    void trigger() {
-        state_ = State::Attack;
-        level_ = 0.0f;
-    }
-    
-    void release() {
-        if (state_ != State::Idle) state_ = State::Release;
-    }
-    
-    float tick(float dt) {
-        float rate;
-        switch (state_) {
-            case State::Attack:
-                rate = 1000.0f / (attack_ms_ + 0.01f) * dt;
-                level_ += rate;
-                if (level_ >= 1.0f) { level_ = 1.0f; state_ = State::Decay; }
-                break;
-            case State::Decay:
-                rate = 1000.0f / (decay_ms_ + 0.01f) * dt;
-                level_ -= rate * (1.0f - sustain_);
-                if (level_ <= sustain_) { level_ = sustain_; state_ = State::Sustain; }
-                break;
-            case State::Sustain:
-                level_ = sustain_;
-                break;
-            case State::Release:
-                rate = 1000.0f / (release_ms_ + 0.01f) * dt;
-                level_ -= rate * sustain_;
-                if (level_ <= 0.0f) { level_ = 0.0f; state_ = State::Idle; }
-                break;
-            default:
-                break;
-        }
-        return level_;
-    }
-    
-    State state() const { return state_; }
-    
-private:
-    State state_ = State::Idle;
-    float level_ = 0.0f;
-    float attack_ms_ = 10.0f;
-    float decay_ms_ = 100.0f;
-    float sustain_ = 0.6f;
-    float release_ms_ = 200.0f;
-};
-
-// ============================================================================
-// State Variable Filter (SVF)
-// ============================================================================
-
-class SVF {
-public:
-    void set_params(float cutoff_norm, float resonance) {
-        g_ = std::tan(PI * std::clamp(cutoff_norm, 0.001f, 0.49f));
-        k_ = 2.0f - 2.0f * std::clamp(resonance, 0.0f, 0.99f);
-    }
-    
-    void tick(float in) {
-        float hp = (in - k_ * s1_ - s2_) / (1.0f + k_ * g_ + g_ * g_);
-        float bp = g_ * hp + s1_;
-        lp_ = g_ * bp + s2_;
-        s1_ = g_ * hp + bp;
-        s2_ = g_ * bp + lp_;
-    }
-    
-    float lp() const { return lp_; }
-    float bp() const { return s1_; }
-    float hp() const { return (lp_ - s1_ * k_ - s2_) / (1.0f + k_ * g_ + g_ * g_); }
-    
-private:
-    float g_ = 0.0f, k_ = 2.0f;
-    float s1_ = 0.0f, s2_ = 0.0f;
-    float lp_ = 0.0f;
-};
-
-// ============================================================================
-// Band-Limited Sawtooth Oscillator (PolyBLEP)
-// ============================================================================
-
-class SawBL {
-public:
-    float tick(float freq_norm) {
-        phase_ += freq_norm;
-        if (phase_ >= 1.0f) phase_ -= 1.0f;
-        
-        float t = phase_;
-        float saw = 2.0f * t - 1.0f;
-        
-        // PolyBLEP correction at discontinuity
-        if (t < freq_norm) {
-            float x = t / freq_norm;
-            saw += (2.0f * x - x * x - 1.0f);
-        } else if (t > 1.0f - freq_norm) {
-            float x = (t - 1.0f) / freq_norm + 1.0f;
-            saw += (2.0f * x - x * x - 1.0f);
-        }
-        
-        return saw;
-    }
-    
-private:
-    float phase_ = 0.0f;
-};
-
-} // namespace dsp
 
 } // namespace umi
 
