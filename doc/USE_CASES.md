@@ -58,7 +58,7 @@ struct Volume {
 #include "volume.hh"
 #include <umi/umim.hh>
 
-constexpr umi::ParamMeta params[] = {
+constexpr umi::ParamMeta<Volume> params[] = {
     {&Volume::volume, "Volume", 0.0f, 1.0f, 1.0f},
 };
 
@@ -115,7 +115,7 @@ private:
 ### メタデータ
 
 ```cpp
-constexpr umi::ParamMeta params[] = {
+constexpr umi::ParamMeta<Delay> params[] = {
     {&Delay::time,     "Time",     0.01f, 2.0f,  0.3f},
     {&Delay::feedback, "Feedback", 0.0f,  0.99f, 0.5f},
     {&Delay::mix,      "Mix",      0.0f,  1.0f,  0.5f},
@@ -172,7 +172,7 @@ private:
 ### メタデータ
 
 ```cpp
-constexpr umi::ParamMeta params[] = {
+constexpr umi::ParamMeta<Synth> params[] = {
     {&Synth::attack,  "Attack",  0.001f, 2.0f, 0.01f},
     {&Synth::decay,   "Decay",   0.001f, 2.0f, 0.1f},
     {&Synth::sustain, "Sustain", 0.0f,   1.0f, 0.7f},
@@ -354,7 +354,7 @@ struct Effect {
     void process(AudioContext& ctx);
 };
 
-constexpr ParamMeta params[] = {{&Effect::param, "Param", 0, 1, 1}};
+constexpr ParamMeta<Effect> params[] = {{&Effect::param, "Param", 0, 1, 1}};
 UMIM_EXPORT(Effect, params);
 ```
 

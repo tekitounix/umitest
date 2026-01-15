@@ -56,6 +56,21 @@ struct Processor {
 };
 ```
 
+### オプション
+
+```cpp
+struct Processor {
+    // 初期化（サンプルレート依存の準備が必要な場合）
+    void init(float sample_rate);
+
+    // 状態保存（パラメータ以外の内部状態がある場合）
+    size_t save_state(std::span<uint8_t> buffer);
+    bool load_state(std::span<const uint8_t> data);
+};
+```
+
+`init()` は `umi_create()` 時にアダプタから呼ばれる。バッファ事前確保等に使用。
+
 ### パラメータ
 
 メンバ変数として定義。外部から直接アクセス。
@@ -71,16 +86,6 @@ struct Volume {
 ```
 
 `set_param()`/`get_param()` は不要。アダプタがメンバポインタ経由でアクセス。
-
-### オプション
-
-```cpp
-struct Processor {
-    // 状態保存（パラメータ以外の内部状態がある場合）
-    size_t save_state(std::span<uint8_t> buffer);
-    bool load_state(std::span<const uint8_t> data);
-};
-```
 
 ## AudioContext
 
@@ -151,21 +156,31 @@ constexpr PortDescriptor filter_ports[] = {
 
 ## パラメータメタデータ
 
-Processor外部で静的に定義。
+Processor外部で静的に定義。テンプレートでProcessor型を指定。
 
 ```cpp
+template<typename P>
 struct ParamMeta {
-    float Processor::* ptr;  // メンバポインタ
+    float P::* ptr;           // メンバポインタ
     const char* name;
     float min;
     float max;
     float default_value;
 };
 
-constexpr ParamMeta volume_params[] = {
+// 使用例
+constexpr ParamMeta<Volume> volume_params[] = {
     {&Volume::volume, "Volume", 0.0f, 1.0f, 1.0f},
 };
+
+// 複数パラメータ
+constexpr ParamMeta<Synth> synth_params[] = {
+    {&Synth::cutoff,    "Cutoff",    20.0f, 20000.0f, 1000.0f},
+    {&Synth::resonance, "Resonance", 0.0f,  1.0f,     0.5f},
+};
 ```
+
+アダプタはメンバポインタ経由で `processor.*ptr` としてアクセス。
 
 ## イベント
 

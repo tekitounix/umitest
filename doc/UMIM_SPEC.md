@@ -89,14 +89,14 @@ struct Volume {
     }
 };
 
-constexpr umi::ParamMeta params[] = {
+constexpr umi::ParamMeta<Volume> params[] = {
     {&Volume::volume, "Volume", 0.0f, 1.0f, 1.0f},
 };
 
 UMIM_EXPORT(Volume, params);
 ```
 
-アダプタがメンバポインタ経由で `umi_set_param()` / `umi_get_param()` を生成。
+マクロがメンバポインタ経由で `umi_set_param()` / `umi_get_param()` を自動生成。
 
 ### UMIC付き UMIM
 
@@ -106,12 +106,39 @@ UMIM_EXPORT(Volume, params);
 #include "synth_controller.hh"  // UMIC
 #include <umi/umim.hh>
 
-constexpr umi::ParamMeta params[] = {
+constexpr umi::ParamMeta<Synth> params[] = {
     {&Synth::cutoff, "Cutoff", 20.0f, 20000.0f, 1000.0f},
     {&Synth::resonance, "Resonance", 0.0f, 1.0f, 0.5f},
 };
 
 UMIM_EXPORT_WITH_CONTROLLER(Synth, SynthController, params);
+```
+
+## エクスポートマクロ
+
+### UMIM_EXPORT(Processor, params)
+
+UMICなしの場合。Processorとパラメータ配列からWASMエクスポートを生成。
+
+```cpp
+// 生成されるエクスポート:
+// - umi_create(float sr)
+// - umi_process(const float* in, float* out, uint32_t frames)
+// - umi_set_param(uint32_t i, float v)  ← params[i].ptr経由でメンバアクセス
+// - umi_get_param(uint32_t i)
+// - umi_get_param_count()
+// - umi_get_param_name(uint32_t i)
+// - umi_get_param_min/max/default(uint32_t i)
+```
+
+### UMIM_EXPORT_WITH_CONTROLLER(Processor, Controller, params)
+
+UMIC付きの場合。Controllerのイベント処理が追加される。
+
+```cpp
+// 追加で生成:
+// - イベントをController→Processorの順で処理
+// - Controller::on_events() が呼ばれる（あれば）
 ```
 
 ### 手動エクスポート
