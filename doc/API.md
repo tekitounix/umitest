@@ -7,8 +7,9 @@
 ## 目次
 
 1. [Core モジュール (lib/core/)](#core-モジュール)
-2. [DSP モジュール (lib/dsp/)](#dsp-モジュール)
-3. [エラーハンドリング](#エラーハンドリング)
+2. [Kernel モジュール](#kernel-モジュール)
+3. [DSP モジュール (lib/dsp/)](#dsp-モジュール)
+4. [エラーハンドリング](#エラーハンドリング)
 
 ---
 
@@ -189,6 +190,201 @@ float normalized = freq.normalize(440.0f);   // → 0.021...
 float display = freq.denormalize(0.5f);      // → 10010.0
 float clamped = freq.clamp(50000.0f);        // → 20000.0
 ```
+
+---
+
+## Kernel モジュール
+
+umios カーネルは組み込み向けリアルタイムタスクスケジューラです。
+
+```cpp
+#include <core/umi_kernel.hh>
+```
+
+---
+
+### Kernel クラス
+
+```cpp
+template <std::size_t MaxTasks, std::size_t MaxTimers, class HW>
+class umi::Kernel;
+
+// 使用例 (STM32F4)
+#include <port/board/stm32f4/hw_impl.hh>
+using MyKernel = umi::board::stm32f4::Kernel<8, 8>;
+MyKernel kernel;
+```
+
+#### Task Management
+
+| メソッド | 説明 |
+|----------|------|
+| `create_task(cfg)` | タスクを作成 (`TaskId` を返す) |
+| `resume_task(id)` | タスクを Ready 状態に |
+| `suspend_task(id)` | タスクを Blocked 状態に |
+| `delete_task(id)` | タスクを削除 |
+| `current_task()` | 現在実行中のタスクID |
+| `get_task_name(id)` | タスク名を取得 |
+| `get_task_priority(id)` | 優先度を取得 |
+
+#### タスク作成例
+
+```cpp
+umi::TaskConfig cfg{
+    .entry = [](void*) { /* task code */ },
+    .arg = nullptr,
+    .prio = umi::Priority::User,
+    .name = "my_task"
+};
+auto task_id = kernel.create_task(cfg);
+kernel.resume_task(task_id);
+```
+
+---
+
+### Priority (優先度)
+
+```cpp
+enum class Priority : uint8_t {
+    Realtime = 0,  // オーディオ処理、DMA - 最高優先度
+    Server   = 1,  // ドライバ、I/O
+    User     = 2,  // アプリケーション (ラウンドロビン)
+    Idle     = 3,  // バックグラウンド - 最低優先度
+};
+```
+
+---
+
+### Notification (タスク通知)
+
+ISRやタスク間でイベントを通知するロックフリー機構。
+
+```cpp
+// 通知を送信 (ISR-safe)
+kernel.notify(task_id, umi::KernelEvent::MidiReady);
+
+// 非ブロッキング受信 (Realtime タスク向け)
+uint32_t bits = kernel.wait(task_id, umi::KernelEvent::MidiReady);
+
+// ブロッキング受信 (User タスク向け)
+uint32_t bits = kernel.wait_block(task_id,
+    umi::KernelEvent::AudioReady | umi::KernelEvent::MidiReady);
+```
+
+#### イベント定数
+
+```cpp
+namespace umi::KernelEvent {
+    constexpr uint32_t AudioReady = 1 << 0;
+    constexpr uint32_t MidiReady  = 1 << 1;
+    constexpr uint32_t VSync      = 1 << 2;
+}
+```
+
+---
+
+### SpscQueue (ロックフリーキュー)
+
+Single Producer Single Consumer キュー。ISR-task 間通信に最適。
+
+```cpp
+umi::SpscQueue<int, 64> queue;  // 64要素、2のべき乗
+
+// Producer (ISR or task)
+queue.try_push(42);
+
+// Consumer (task)
+if (auto val = queue.try_pop()) {
+    process(*val);
+}
+
+// バッチ読み取り
+std::array<int, 16> buf;
+size_t n = queue.read_all(buf);
+```
+
+| メソッド | 説明 |
+|----------|------|
+| `try_push(item)` | アイテムを追加 (full なら false) |
+| `try_pop()` | アイテムを取り出し (`optional`) |
+| `peek()` | 先頭を覗く (消費しない) |
+| `read_all(span)` | まとめて読み取り |
+| `size_approx()` | 概算サイズ |
+| `empty_approx()` | 空かどうか (概算) |
+
+---
+
+### TimerQueue (タイマー)
+
+```cpp
+// 1秒後にコールバック
+kernel.call_later(1000000, {
+    .fn = [](void* ctx) { /* callback */ },
+    .ctx = nullptr
+});
+
+// 現在時刻 (マイクロ秒)
+umi::usec now = kernel.time();
+```
+
+---
+
+### LoadMonitor (CPU負荷監視)
+
+```cpp
+umi::LoadMonitor<HW, 8> load;  // 8サンプル移動平均
+
+void audio_callback() {
+    load.begin();
+    // ... 処理 ...
+    load.end(budget_cycles);
+
+    float pct = umi::LoadMonitor<HW>::to_percent(load.instant());
+}
+
+load.instant();   // 瞬時負荷 (0-10000)
+load.average();   // 平均負荷
+load.peak();      // ピーク負荷
+```
+
+---
+
+### Stopwatch (ストップウォッチ)
+
+```cpp
+umi::Stopwatch<HW> sw;
+sw.start();
+// ... 処理 ...
+uint32_t cycles = sw.stop();
+umi::usec us = sw.elapsed_usecs();
+```
+
+---
+
+### Hardware Abstraction (HAL)
+
+新しいボードに移植する場合、`Hw` 構造体を実装します。
+
+```cpp
+struct MyBoardHw {
+    // タイマー
+    static void set_timer_absolute(umi::usec target);
+    static umi::usec monotonic_time_usecs();
+
+    // クリティカルセクション
+    static void enter_critical();
+    static void exit_critical();
+
+    // コンテキストスイッチ
+    static void request_context_switch();
+
+    // ... 他のメソッドは port/board/stm32f4/hw_impl.hh 参照
+};
+
+using Kernel = umi::Kernel<8, 8, umi::Hw<MyBoardHw>>;
+```
+
+詳細は [port/README.md](../port/README.md) を参照。
 
 ---
 

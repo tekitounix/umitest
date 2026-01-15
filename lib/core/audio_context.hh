@@ -10,6 +10,7 @@
 #include <span>
 #include <cstdint>
 #include <algorithm>
+#include <array>
 
 namespace umi {
 
@@ -95,10 +96,56 @@ struct AudioContext {
     }
 };
 
+/// Parameter state container for control thread
+/// Thread-safe parameter storage with dirty flags
+template<size_t MaxParams = 32>
+struct ParamState {
+    std::array<float, MaxParams> values{};
+    std::array<bool, MaxParams> dirty{};
+
+    /// Set parameter value and mark dirty
+    void set(param_id_t id, float value) noexcept {
+        if (id < MaxParams) {
+            values[id] = value;
+            dirty[id] = true;
+        }
+    }
+
+    /// Get parameter value
+    [[nodiscard]] float get(param_id_t id) const noexcept {
+        return id < MaxParams ? values[id] : 0.0f;
+    }
+
+    /// Check if parameter changed since last clear
+    [[nodiscard]] bool is_dirty(param_id_t id) const noexcept {
+        return id < MaxParams && dirty[id];
+    }
+
+    /// Clear dirty flag
+    void clear_dirty(param_id_t id) noexcept {
+        if (id < MaxParams) dirty[id] = false;
+    }
+
+    /// Clear all dirty flags
+    void clear_all_dirty() noexcept {
+        dirty.fill(false);
+    }
+};
+
 /// Control context for Processor::control() callback
+/// Used for non-realtime operations (parameter smoothing, UI sync, etc.)
 struct ControlContext {
-    EventQueue<>& events;
-    // ParamState& params;  // TODO: Add when ParamState is implemented
+    /// Time since last control() call in seconds
+    float delta_time = 0.0f;
+
+    /// Current sample position (reference value)
+    sample_position_t sample_pos = 0;
+
+    /// Event queue for non-time-critical events
+    EventQueue<>* events = nullptr;
+
+    /// Parameter state (optional)
+    ParamState<>* params = nullptr;
 };
 
 } // namespace umi
