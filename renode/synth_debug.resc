@@ -1,0 +1,27 @@
+# Renode script for debugging UMI-OS Synth Example
+# Usage: renode renode/synth_debug.resc
+
+using sysbus
+
+mach create "umi_synth"
+
+# Load custom UMI-OS platform description
+machine LoadPlatformDescription $CWD/renode/stm32f4_test.repl
+
+# Load the synth example ELF
+sysbus LoadELF $CWD/.build/synth_example.elf
+
+# Set VTOR to point to flash (0x08000000) where vector table is located
+sysbus WriteDoubleWord 0xE000ED08 0x08000000
+
+# Show UART in console
+showAnalyzer usart2
+
+echo "=== UMI-OS Synth Debug Session ==="
+echo "Commands:"
+echo "  start              - Start emulation"
+echo "  pause              - Pause emulation"
+echo "  step               - Single step"
+echo "  cpu PC             - Show program counter"
+echo "  sysbus ReadDoubleWord <addr> - Read memory"
+echo ""
