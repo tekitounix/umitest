@@ -65,18 +65,21 @@ UMICは**Controller**に相当。
 
 ```cpp
 struct Controller {
-    Processor* proc = nullptr;
+    Processor& proc;
 
-    void set_processor(Processor& p) { proc = &p; }
+    explicit Controller(Processor& p) : proc(p) {}
 };
 ```
 
-Processorのパラメータ（メンバ変数）には `proc->` で直接アクセス。
+Processorのパラメータ（メンバ変数）には `proc.` で直接アクセス。
 
-### オプション
+### オプションメソッド
 
 ```cpp
 struct Controller {
+    Processor& proc;
+    explicit Controller(Processor& p) : proc(p) {}
+
     // イベント処理（SysEx, Program Change等）
     void on_events(std::span<const Event> events);
 
@@ -93,14 +96,15 @@ struct Controller {
 };
 ```
 
+すべてのメソッドはオプション。必要なものだけ実装。
+
 ## パラメータアクセス
 
 ControllerはProcessorのメンバ変数に直接アクセス。
 
 ```cpp
 void on_encoder(int id, int delta) {
-    if (!proc) return;
-    proc->volume += delta * 0.01f;  // 直接アクセス
+    proc.volume += delta * 0.01f;  // 直接アクセス
 }
 ```
 
@@ -127,9 +131,9 @@ void SynthController::on_events(std::span<const Event> events) {
             handle_sysex(e);
         } else if (e.midi.is_program_change()) {
             load_preset(e.midi.program());
-        } else if (midi_learn_active_ && e.midi.is_cc()) {
-            cc_mapping_[e.midi.cc_number()] = selected_param_;
-            midi_learn_active_ = false;
+        } else if (midi_learn_active && e.midi.is_cc()) {
+            cc_mapping[e.midi.cc_number()] = selected_param;
+            midi_learn_active = false;
         }
         // Note, CC等はUMIPで処理
     }
@@ -142,17 +146,16 @@ void SynthController::on_events(std::span<const Event> events) {
 
 ```cpp
 void SynthController::on_encoder(int id, int delta) {
-    if (!proc) return;
     // selected_param に応じてメンバに直接アクセス
-    switch (selected_param_) {
-        case 0: proc->cutoff += delta * 10.0f; break;
-        case 1: proc->resonance += delta * 0.01f; break;
+    switch (selected_param) {
+        case 0: proc.cutoff += delta * 10.0f; break;
+        case 1: proc.resonance += delta * 0.01f; break;
     }
 }
 
 void SynthController::on_button(int id, bool pressed) {
     if (id == LEARN_BUTTON && pressed) {
-        midi_learn_active_ = true;
+        midi_learn_active = true;
     }
 }
 ```
@@ -163,9 +166,9 @@ void SynthController::on_button(int id, bool pressed) {
 
 ```cpp
 struct VolumeController {
-    Volume* proc = nullptr;
+    Volume& proc;
 
-    void set_processor(Volume& p) { proc = &p; }
+    explicit VolumeController(Volume& p) : proc(p) {}
 };
 ```
 
@@ -173,7 +176,7 @@ struct VolumeController {
 
 ```cpp
 struct SynthController {
-    Synth* proc = nullptr;
+    Synth& proc;
 
     // UI状態
     int page = 0;
@@ -181,8 +184,7 @@ struct SynthController {
     bool midi_learn_active = false;
     std::array<int, 128> cc_mapping{};
 
-    void set_processor(Synth& p) {
-        proc = &p;
+    explicit SynthController(Synth& p) : proc(p) {
         cc_mapping[74] = 0;  // CC74 → Cutoff
     }
 

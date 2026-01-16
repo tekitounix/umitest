@@ -196,7 +196,7 @@ MIDI LearnやUI状態が必要な場合。
 ```cpp
 // synth_controller.hh
 struct SynthController {
-    Synth* proc = nullptr;
+    Synth& proc;
 
     // UI状態
     int page = 0;
@@ -204,8 +204,7 @@ struct SynthController {
     bool midi_learn_active = false;
     std::array<int, 128> cc_mapping{};
 
-    void set_processor(Synth& p) {
-        proc = &p;
+    explicit SynthController(Synth& p) : proc(p) {
         cc_mapping[74] = 4;  // CC74 → Cutoff
     }
 
@@ -221,9 +220,8 @@ struct SynthController {
     }
 
     void on_encoder(int id, int delta) {
-        if (!proc) return;
         // selected_param に応じてパラメータ変更
-        // proc->cutoff += delta * 10.0f; など
+        // proc.cutoff += delta * 10.0f; など
     }
 
     void on_button(int id, bool pressed) {
@@ -366,14 +364,150 @@ UMIM_EXPORT(Effect, params);
 struct Processor { /* ... */ };
 
 struct Controller {
-    Processor* proc = nullptr;
+    Processor& proc;
     int page = 0;
-    void set_processor(Processor& p) { proc = &p; }
+    explicit Controller(Processor& p) : proc(p) {}
     void on_encoder(int id, int delta);
 };
 
 UMIM_EXPORT_WITH_CONTROLLER(Processor, Controller, params);
 ```
+
+---
+
+## 7. プリセット管理
+
+### 方式選択
+
+| 方式 | 実装 | 用途 |
+|------|------|------|
+| ホスト管理（推奨） | UMIP のみ | DAW、汎用ホスト |
+| モジュール内管理 | UMIP + UMIC | 専用ハードウェア |
+
+### ホスト管理（推奨）
+
+モジュールはパラメータを公開するだけ。プリセットはホストが管理。
+
+```cpp
+// モジュール側 - パラメータを公開するだけ
+struct Synth {
+    float cutoff = 1000.0f;
+    float resonance = 0.5f;
+    float attack = 0.01f;
+
+    void process(AudioContext& ctx) { /* ... */ }
+};
+
+constexpr umi::ParamMeta<Synth> params[] = {
+    {&Synth::cutoff,    "Cutoff",    20.0f, 20000.0f, 1000.0f},
+    {&Synth::resonance, "Resonance", 0.0f,  1.0f,     0.5f},
+    {&Synth::attack,    "Attack",    0.001f, 2.0f,    0.01f},
+};
+
+UMIM_EXPORT(Synth, params);
+```
+
+ホスト側で `umi_get/set_param()` を使ってプリセットを保存・復元。
+
+```javascript
+// JavaScript ホスト例
+class PresetManager {
+    constructor(plugin) {
+        this.plugin = plugin;
+        this.paramCount = plugin.exports.umi_get_param_count();
+    }
+
+    capture() {
+        const values = [];
+        for (let i = 0; i < this.paramCount; i++) {
+            values.push(this.plugin.exports.umi_get_param(i));
+        }
+        return values;
+    }
+
+    apply(values) {
+        for (let i = 0; i < values.length; i++) {
+            this.plugin.exports.umi_set_param(i, values[i]);
+        }
+    }
+
+    save(name) {
+        return { name, values: this.capture() };
+    }
+
+    load(preset) {
+        this.apply(preset.values);
+    }
+}
+```
+
+**メリット:**
+- モジュールがシンプル（UMIC不要）
+- ホストがUI/保存形式を統一可能
+- ヘッドレス維持
+
+### モジュール内管理
+
+専用ハードウェアや独自プリセット形式が必要な場合。
+
+```cpp
+// UMIC でプリセット管理
+struct SynthController {
+    Synth& proc;
+    int current_preset = 0;
+
+    struct Preset {
+        float cutoff, resonance, attack;
+        const char* name;
+    };
+
+    static constexpr Preset presets[] = {
+        {1000.0f, 0.5f, 0.01f, "Init"},
+        {200.0f,  0.8f, 0.5f,  "Pad"},
+        {4000.0f, 0.2f, 0.001f, "Lead"},
+    };
+
+    explicit SynthController(Synth& p) : proc(p) {
+        load_preset(0);
+    }
+
+    void load_preset(int index) {
+        if (index < 0 || index >= 3) return;
+        current_preset = index;
+        proc.cutoff = presets[index].cutoff;
+        proc.resonance = presets[index].resonance;
+        proc.attack = presets[index].attack;
+    }
+
+    // MIDI Program Change 対応
+    void on_events(std::span<const Event> events) {
+        for (const auto& e : events) {
+            if (e.type == EventType::Midi &&
+                e.midi.command() == MidiData::PROGRAM_CHANGE) {
+                load_preset(e.midi.note() % 3);
+            }
+        }
+    }
+
+    // 状態保存
+    size_t save_state(std::span<uint8_t> buffer) {
+        if (buffer.size() < 1) return 0;
+        buffer[0] = static_cast<uint8_t>(current_preset);
+        return 1;
+    }
+
+    bool load_state(std::span<const uint8_t> data) {
+        if (data.empty()) return false;
+        load_preset(data[0]);
+        return true;
+    }
+};
+```
+
+**用途:**
+- 専用ハードウェアシンセ
+- 独自プリセット形式
+- Program Change でのプリセット切り替え
 
 ---
 

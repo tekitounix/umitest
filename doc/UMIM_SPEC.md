@@ -124,8 +124,8 @@ UMICなしの場合。Processorとパラメータ配列からWASMエクスポー
 
 ```cpp
 // 生成されるエクスポート:
-// - umi_create(float sr)
-// - umi_process(const float* in, float* out, uint32_t frames)
+// - umi_create(void)
+// - umi_process(const float* in, float* out, uint32_t frames, uint32_t sr)
 // - umi_set_param(uint32_t i, float v)  ← params[i].ptr経由でメンバアクセス
 // - umi_get_param(uint32_t i)
 // - umi_get_param_count()
@@ -198,7 +198,8 @@ uint32_t umi_get_param_count() { return 1; }
 | `umi_get_param_count` | パラメータ数 |
 | `umi_set_param` | パラメータ設定 |
 | `umi_get_param` | パラメータ取得 |
-| `malloc` / `free` | メモリ管理 |
+
+※ `malloc`/`free` はホストがWASMメモリを管理する場合に必要。モジュール内部での動的確保は`umi_process()`外で行うこと。
 
 ## オプションエクスポート
 
@@ -220,11 +221,11 @@ const response = await fetch('volume.umim');
 const module = await WebAssembly.instantiate(await response.arrayBuffer());
 const plugin = module.instance.exports;
 
-plugin.umi_create(audioContext.sampleRate);
+plugin.umi_create();
 
 // AudioWorkletProcessor内
 process(inputs, outputs) {
-    plugin.umi_process(inputPtr, outputPtr, 128);
+    plugin.umi_process(inputPtr, outputPtr, 128, sampleRate);
     return true;
 }
 ```
@@ -238,8 +239,8 @@ auto instance = wasm_runtime_instantiate(module);
 auto umi_create = wasm_lookup(instance, "umi_create");
 auto umi_process = wasm_lookup(instance, "umi_process");
 
-wasm_call(umi_create, sample_rate);
-wasm_call(umi_process, input, output, frames);
+wasm_call(umi_create);
+wasm_call(umi_process, input, output, frames, sample_rate);
 ```
 
 ## ビルド
@@ -263,15 +264,18 @@ mv volume.wasm volume.umim
 ```cpp
 // モジュールが宣言（PortDescriptor は UMIP_SPEC 参照）
 constexpr PortDescriptor ports[] = {
-    {0, "audio_in",  Continuous, In},
-    {1, "audio_out", Continuous, Out},
-    {2, "cv_in",     Continuous, In},   // オプショナル
+    {0, "audio_in",  PortKind::Continuous, PortDirection::In,  1, TypeHint::None},
+    {1, "audio_out", PortKind::Continuous, PortDirection::Out, 1, TypeHint::None},
+    {2, "cv_in",     PortKind::Continuous, PortDirection::In,  1, TypeHint::None},  // オプショナル
 };
 
 // モジュール側で未接続を許容
 void process(AudioContext& ctx) {
     const float* cv = ctx.input(2);
-    float mod = cv ? cv[i] : 0.0f;  // 未接続なら0
+    for (uint32_t i = 0; i < ctx.buffer_size; ++i) {
+        float mod = cv ? cv[i] : 0.0f;  // 未接続なら0
+        // ...
+    }
 }
 ```
 
