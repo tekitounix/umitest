@@ -12,8 +12,8 @@
 #include <cstdint>
 #include <type_traits>
 
-// Include shared DSP components
-#include <dsp/dsp.hh>
+// Include shared DSP components (from umidsp library)
+#include <dsp/dsp.hh>  // lib/umidsp/include/dsp/
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -51,20 +51,31 @@ struct EventQueue {
 };
 
 // ============================================================================
-// Audio Context
+// Audio Context (WASM/C ABI用)
 // ============================================================================
+// Note: UMIP仕様では std::span を使用するが、WASM環境ではC ABIが必要なため
+//       ポインタ配列形式を使用。これは意図的な設計であり、
+//       embedded_adapter.hh のAudioContext も同様にC互換性のためポインタ配列を使用。
+//       ネイティブC++環境では lib/core/audio_context.hh の std::span 版を使用。
 
 struct AudioContext {
+    // バッファアクセス（C ABI互換：ポインタ配列）
     const sample_t* const* inputs;
     sample_t* const* outputs;
     size_t num_inputs;
     size_t num_outputs;
-    EventQueue<>& events;
+
+    // イベント（WASM向け: EventQueue参照）
+    const EventQueue<>& input_events;  // 読み取り専用
+    EventQueue<>& output_events;
+
+    // タイミング
     uint32_t sample_rate;
     uint32_t buffer_size;
-    float dt;
-    uint64_t sample_position;
+    float dt;                   // 1.0 / sample_rate（事前計算）
+    uint64_t sample_position;   // 累積サンプル位置
 
+    // ヘルパー関数
     const sample_t* input(size_t ch) const {
         return ch < num_inputs ? inputs[ch] : nullptr;
     }
@@ -82,12 +93,20 @@ namespace umi::umim {
 // Parameter Metadata (common format for all adapters)
 // ============================================================================
 
+/// パラメータのスケーリングカーブ
+enum class ParamCurve : uint8_t {
+    Linear = 0,     // 線形（デフォルト）
+    Log    = 1,     // 対数（周波数向け）
+    Exp    = 2,     // 指数（音量向け）
+};
+
 struct Param {
+    uint16_t id;            // 永続ID（プリセット/オートメーション互換用）
     const char* name;
     float min;
     float max;
     float default_value;
-    uint8_t curve;      // 0=linear, 1=log
+    ParamCurve curve;       // スケーリングカーブ
     const char* unit;
 };
 
@@ -144,14 +163,16 @@ public:
     static void process(const float* input, float* output, uint32_t frames, uint32_t sample_rate) {
         const umi::sample_t* inputs_arr[] = {input};
         umi::sample_t* outputs_arr[] = {output};
-        umi::EventQueue<> events;
+        umi::EventQueue<> input_events;
+        umi::EventQueue<> output_events;
 
         umi::AudioContext ctx{
             .inputs = inputs_arr,
             .outputs = outputs_arr,
             .num_inputs = 1,
             .num_outputs = 1,
-            .events = events,
+            .input_events = input_events,
+            .output_events = output_events,
             .sample_rate = sample_rate,
             .buffer_size = frames,
             .dt = 1.0f / sample_rate,
@@ -201,7 +222,11 @@ public:
     }
     
     static uint8_t get_param_curve(uint32_t i) {
-        return i < ParamCount ? Params[i].curve : 0;
+        return i < ParamCount ? static_cast<uint8_t>(Params[i].curve) : 0;
+    }
+
+    static uint16_t get_param_id(uint32_t i) {
+        return i < ParamCount ? Params[i].id : 0;
     }
     
     static const char* get_param_unit(uint32_t i) {
@@ -237,6 +262,7 @@ public:
         UMIM_EXPORT_ATTR float umi_get_param_max(uint32_t i) { return _UmiAdapter::get_param_max(i); } \
         UMIM_EXPORT_ATTR float umi_get_param_default(uint32_t i) { return _UmiAdapter::get_param_default(i); } \
         UMIM_EXPORT_ATTR uint8_t umi_get_param_curve(uint32_t i) { return _UmiAdapter::get_param_curve(i); } \
+        UMIM_EXPORT_ATTR uint16_t umi_get_param_id(uint32_t i) { return _UmiAdapter::get_param_id(i); } \
         UMIM_EXPORT_ATTR const char* umi_get_param_unit(uint32_t i) { return _UmiAdapter::get_param_unit(i); } \
         UMIM_EXPORT_ATTR void umi_process_cc(uint8_t, uint8_t, uint8_t) {} \
     }

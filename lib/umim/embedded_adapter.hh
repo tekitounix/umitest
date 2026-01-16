@@ -6,11 +6,11 @@
 
 #pragma once
 
-#include <core/processor.hh>
-#include <core/audio_context.hh>
-#include <core/event.hh>
-#include <core/types.hh>
-#include <core/umi_kernel.hh>
+#include <umios/processor.hh>
+#include <umios/audio_context.hh>
+#include <umios/event.hh>
+#include <umios/types.hh>
+#include <umios/umi_kernel.hh>
 
 #include <array>
 #include <span>
@@ -123,18 +123,19 @@ private:
             // Swap event buffers
             swap_event_buffers();
             
-            // Build context
+            // Build context (using std::span for type safety)
             AudioContext ctx{
-                std::span<const sample_t* const>(
+                .inputs = std::span<const sample_t* const>(
                     const_cast<const sample_t**>(input_ptrs_.data()),
                     Config.num_inputs
                 ),
-                std::span<sample_t* const>(output_ptrs_.data(), Config.num_outputs),
-                process_events_,
-                Config.sample_rate,
-                Config.buffer_size,
-                1.0f / static_cast<float>(Config.sample_rate),  // dt
-                sample_position_
+                .outputs = std::span<sample_t* const>(output_ptrs_.data(), Config.num_outputs),
+                .input_events = std::span<const Event>{},  // process_events_から変換
+                .output_events = process_events_,
+                .sample_rate = Config.sample_rate,
+                .buffer_size = Config.buffer_size,
+                .dt = 1.0f / static_cast<float>(Config.sample_rate),
+                .sample_position = sample_position_
             };
             
             // Measure processing time
