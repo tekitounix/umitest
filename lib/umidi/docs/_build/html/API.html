@@ -1,0 +1,957 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Reference &mdash; umidi Documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/collapsible-lists/css/tree_view.css?v=a885cde7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=8d563738"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/collapsible-lists/js/CollapsibleLists.compressed.js?v=73120307"></script>
+      <script src="_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="api/library_root.html" />
+    <link rel="prev" title="Object Transfer Protocol" href="OBJECT.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            umidi
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+<div class="language-switcher" style="margin-top: 10px; padding: 8px; background: #f0f0f0; border-radius: 4px;">
+  <span style="font-size: 0.85em; color: #333;">Language:</span>
+  
+    <strong style="color: #2980b9;">EN</strong> |
+    <a href="ja/index.html" style="color: #2980b9; text-decoration: underline;">JA</a>
+  
+</div>
+
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="README.html">umidi - UMI-OS MIDI Library</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="README.html#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#quick-start">Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#documentation">Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#directory-structure">Directory Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#independence">Independence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#license">License</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="design.html">umidi Design Document</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="design.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design.html#architecture">Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="design.html#layer-structure">Layer Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="design.html#core-design-ump-opt-format">Core Design: UMP-Opt Format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="design.html#type-checking-optimization">Type Checking Optimization</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="design.html#module-reference">Module Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="design.html#core">core/</a></li>
+<li class="toctree-l3"><a class="reference internal" href="design.html#messages">messages/</a></li>
+<li class="toctree-l3"><a class="reference internal" href="design.html#protocol">protocol/</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="design.html#usage-patterns">Usage Patterns</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="design.html#basic-parsing">Basic Parsing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="design.html#type-safe-dispatch">Type-Safe Dispatch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="design.html#factory-methods">Factory Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="design.html#performance-considerations">Performance Considerations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="design.html#memory">Memory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="design.html#timing">Timing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="design.html#thread-safety">Thread Safety</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design.html#error-handling">Error Handling</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#basic-midi-parsing">Basic MIDI Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#running-status-support">Running Status Support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#type-safe-message-wrappers">Type-Safe Message Wrappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#message-dispatch">Message Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#midi-output">MIDI Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#sysex-communication">SysEx Communication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#pitch-bend-handling">Pitch Bend Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#building-umi-protocol-messages">Building UMI Protocol Messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#interrupt-safe-usage">Interrupt-Safe Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="CORE.html">Core Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="CORE.html#ump32-core-ump-hh">UMP32 (core/ump.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="CORE.html#memory-layout">Memory Layout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CORE.html#type-checking">Type Checking</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CORE.html#api">API</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="CORE.html#ump64-core-ump-hh">UMP64 (core/ump.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CORE.html#parser-core-parser-hh">Parser (core/parser.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="CORE.html#usage-example">Usage Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="CORE.html#serializer-core-parser-hh">Serializer (core/parser.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CORE.html#result-core-result-hh">Result (core/result.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CORE.html#sysexbuffer-core-sysex-buffer-hh">SysExBuffer (core/sysex_buffer.hh)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="MESSAGES.html">Message Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="MESSAGES.html#channel-voice-messages-messages-channel-voice-hh">Channel Voice Messages (messages/channel_voice.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="MESSAGES.html#noteon">NoteOn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MESSAGES.html#noteoff">NoteOff</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MESSAGES.html#controlchange">ControlChange</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MESSAGES.html#programchange">ProgramChange</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MESSAGES.html#pitchbend">PitchBend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MESSAGES.html#channelpressure">ChannelPressure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MESSAGES.html#polypressure">PolyPressure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MESSAGES.html#message-dispatch">Message Dispatch</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="MESSAGES.html#system-messages-messages-system-hh">System Messages (messages/system.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="MESSAGES.html#real-time-messages">Real-time Messages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MESSAGES.html#system-common-messages">System Common Messages</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="MESSAGES.html#sysex-messages-messages-sysex-hh">SysEx Messages (messages/sysex.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="MESSAGES.html#sysex7">SysEx7</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MESSAGES.html#sysexparser">SysExParser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MESSAGES.html#sysexserializer">SysExSerializer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="MESSAGES.html#utility-messages-messages-utility-hh">Utility Messages (messages/utility.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="MESSAGES.html#jr-timestamp-jitter-reduction">JR Timestamp (Jitter Reduction)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MESSAGES.html#jr-timestamp-tracker">JR Timestamp Tracker</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MESSAGES.html#jr-clock">JR Clock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="MESSAGES.html#noop">NOOP</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="CC.html">Control Change</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="CC.html#cc-types-cc-types-hh">CC Types (cc/types.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="CC.html#bit-cc">7-bit CC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CC.html#bit-cc-msb-lsb-pair">14-bit CC (MSB/LSB pair)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CC.html#switch-cc">Switch CC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CC.html#rpn-nrpn">RPN/NRPN</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="CC.html#standard-cc-definitions-cc-standards-hh">Standard CC Definitions (cc/standards.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="CC.html#bit-controllers">14-bit Controllers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CC.html#switch-controllers">Switch Controllers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CC.html#sound-controllers">Sound Controllers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CC.html#effect-depths">Effect Depths</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CC.html#channel-mode">Channel Mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CC.html#standard-rpns">Standard RPNs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CC.html#pitch-bend-sensitivity-helper">Pitch Bend Sensitivity Helper</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="CC.html#rpn-nrpn-decoder-cc-decoder-hh">RPN/NRPN Decoder (cc/decoder.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="CC.html#usage-example">Usage Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="CC.html#template-static-decoder-codec-decoder-hh">Template Static Decoder (codec/decoder.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="CC.html#pre-configured-decoders">Pre-configured Decoders</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="PROTOCOL.html">UMI SysEx Protocol</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="PROTOCOL.html#protocol-overview">Protocol Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PROTOCOL.html#bit-encoding-protocol-umi-sysex-hh">7-bit Encoding (protocol/umi_sysex.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PROTOCOL.html#command-categories">Command Categories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PROTOCOL.html#standard-io-protocol-umi-sysex-hh">Standard IO (protocol/umi_sysex.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="PROTOCOL.html#standardio-class">StandardIO Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="PROTOCOL.html#commands">Commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="PROTOCOL.html#message-builder">Message Builder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PROTOCOL.html#message-parser">Message Parser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PROTOCOL.html#firmware-update-protocol-umi-firmware-hh">Firmware Update (protocol/umi_firmware.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="PROTOCOL.html#firmwareheader">FirmwareHeader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="PROTOCOL.html#firmwareheaderbuilder">FirmwareHeaderBuilder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="PROTOCOL.html#firmwarevalidator">FirmwareValidator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="PROTOCOL.html#firmware-commands">Firmware Commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="PROTOCOL.html#a-b-partition-bootloader-protocol-umi-bootloader-hh">A/B Partition Bootloader (protocol/umi_bootloader.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="PROTOCOL.html#bootconfig">BootConfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="PROTOCOL.html#platform-configurations">Platform Configurations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="PROTOCOL.html#bootloaderinterface">BootloaderInterface</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="PROTOCOL.html#authentication-protocol-umi-auth-hh">Authentication (protocol/umi_auth.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="PROTOCOL.html#authenticator">Authenticator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="PROTOCOL.html#authclient">AuthClient</a></li>
+<li class="toctree-l3"><a class="reference internal" href="PROTOCOL.html#auth-commands">Auth Commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="PROTOCOL.html#session-management-protocol-umi-session-hh">Session Management (protocol/umi_session.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="PROTOCOL.html#timeoutconfig">TimeoutConfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="PROTOCOL.html#sessiontimer">SessionTimer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="PROTOCOL.html#flowcontrolsender">FlowControlSender</a></li>
+<li class="toctree-l3"><a class="reference internal" href="PROTOCOL.html#flowcontrolreceiver">FlowControlReceiver</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="PROTOCOL.html#securefirmwareupdate-complete-handler">SecureFirmwareUpdate (Complete Handler)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="TRANSPORT.html">Transport Abstraction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="TRANSPORT.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TRANSPORT.html#transport-types-protocol-umi-transport-hh">Transport Types (protocol/umi_transport.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TRANSPORT.html#transport-capabilities">Transport Capabilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TRANSPORT.html#transport-interface">Transport Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TRANSPORT.html#bulk-framing">Bulk Framing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TRANSPORT.html#sysex-transport">SysEx Transport</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TRANSPORT.html#bulk-transport">Bulk Transport</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TRANSPORT.html#transport-handler">Transport Handler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TRANSPORT.html#transport-manager">Transport Manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TRANSPORT.html#usage-example">Usage Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TRANSPORT.html#web-client-fallback-strategy">Web Client Fallback Strategy</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="STATE.html">State Synchronization</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="STATE.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="STATE.html#device-states-protocol-umi-state-hh">Device States (protocol/umi_state.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="STATE.html#state-commands-0x28-0x2f">State Commands (0x28-0x2F)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="STATE.html#state-report">State Report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="STATE.html#resume-info">Resume Info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="STATE.html#boot-verification">Boot Verification</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="STATE.html#boot-flow">Boot Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="STATE.html#state-manager">State Manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="STATE.html#state-protocol-handler">State Protocol Handler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="STATE.html#stateful-firmware-update">Stateful Firmware Update</a></li>
+<li class="toctree-l2"><a class="reference internal" href="STATE.html#usage-example">Usage Example</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="STATE.html#device-side-bootloader">Device-side (Bootloader)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="STATE.html#device-side-application">Device-side (Application)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="STATE.html#host-side-web-client">Host-side (Web Client)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="OBJECT.html">Object Transfer Protocol</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="OBJECT.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OBJECT.html#object-types-protocol-umi-object-hh">Object Types (protocol/umi_object.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OBJECT.html#object-flags">Object Flags</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OBJECT.html#object-header-80-bytes">Object Header (80 bytes)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OBJECT.html#type-specific-metadata">Type-Specific Metadata</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="OBJECT.html#sequence-metadata">Sequence Metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="OBJECT.html#sample-metadata">Sample Metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="OBJECT.html#preset-metadata">Preset Metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="OBJECT.html#config-metadata">Config Metadata</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="OBJECT.html#object-commands-0x40-0x5f">Object Commands (0x40-0x5F)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="OBJECT.html#management-commands-0x40-0x4f">Management Commands (0x40-0x4F)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="OBJECT.html#action-commands-0x50-0x5f">Action Commands (0x50-0x5F)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="OBJECT.html#object-error-codes">Object Error Codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OBJECT.html#storage-info">Storage Info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OBJECT.html#object-storage-interface">Object Storage Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OBJECT.html#ram-object-storage">RAM Object Storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OBJECT.html#object-transfer-handler">Object Transfer Handler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OBJECT.html#usage-example">Usage Example</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="OBJECT.html#storing-a-sequence">Storing a Sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="OBJECT.html#reading-a-preset">Reading a Preset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="OBJECT.html#host-side-web-client">Host-side (Web Client)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#namespaces">Namespaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#core-types">Core Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ump32">UMP32</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ump64">UMP64</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parser">Parser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#result">Result</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#event">Event</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#message-types">Message Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#channel-voice">Channel Voice</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#utility">Utility</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#control-change">Control Change</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rpn-nrpn-decoder">RPN/NRPN Decoder</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#protocol">Protocol</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sysex-encoding">SysEx Encoding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#message-builder-parser">Message Builder/Parser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#firmware-update">Firmware Update</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport">Transport</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#state-management">State Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#object-transfer">Object Transfer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#value-conversions">Value Conversions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#platform-aliases">Platform Aliases</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/library_root.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/library_root.html#file-hierarchy">File Hierarchy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/library_root.html#full-api">Full API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/library_root.html#namespaces">Namespaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/library_root.html#classes-and-structs">Classes and Structs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/library_root.html#enums">Enums</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/library_root.html#functions">Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/library_root.html#variables">Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/library_root.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">umidi</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">API Reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/API.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading"></a></h1>
+<p>Complete API reference for umidi library.</p>
+<section id="namespaces">
+<h2>Namespaces<a class="headerlink" href="#namespaces" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Namespace</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">umidi</span></code></p></td>
+<td><p>Root namespace</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">umidi::message</span></code></p></td>
+<td><p>Message types (NoteOn, CC, etc.)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">umidi::cc</span></code></p></td>
+<td><p>Control Change definitions</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">umidi::protocol</span></code></p></td>
+<td><p>UMI Protocol (SysEx, FW Update, etc.)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">umidi::convert</span></code></p></td>
+<td><p>Value conversion utilities</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="core-types">
+<h2>Core Types<a class="headerlink" href="#core-types" title="Link to this heading"></a></h2>
+<section id="ump32">
+<h3>UMP32<a class="headerlink" href="#ump32" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">umidi</span><span class="w"> </span><span class="p">{</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">UMP32</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">word</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Constructors</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">UMP32</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="k">explicit</span><span class="w"> </span><span class="n">UMP32</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">w</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">UMP32</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">mt</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">status</span><span class="p">,</span>
+<span class="w">                    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">data1</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">data2</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Accessors</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="nf">message_type</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="nf">group</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="nf">status</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="nf">channel</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="nf">data1</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="nf">data2</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="nf">note</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="nf">velocity</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="nf">cc_number</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="nf">cc_value</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint16_t</span><span class="w"> </span><span class="nf">pitch_bend_value</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Type checks</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">is_note_on</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">is_note_off</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">is_cc</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">is_pitch_bend</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">is_program_change</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">is_channel_pressure</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">is_poly_pressure</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">is_realtime</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">is_system_common</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Factory methods (all constexpr, noexcept, nodiscard)</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">UMP32</span><span class="w"> </span><span class="nf">note_on</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">ch</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">note</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">vel</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">UMP32</span><span class="w"> </span><span class="nf">note_off</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">ch</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">note</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">vel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">UMP32</span><span class="w"> </span><span class="nf">cc</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">ch</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">cc_num</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">val</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">UMP32</span><span class="w"> </span><span class="nf">pitch_bend</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">ch</span><span class="p">,</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">UMP32</span><span class="w"> </span><span class="nf">program_change</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">ch</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">program</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">UMP32</span><span class="w"> </span><span class="nf">channel_pressure</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">ch</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">pressure</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">UMP32</span><span class="w"> </span><span class="nf">poly_pressure</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">ch</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">note</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">pressure</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">UMP32</span><span class="w"> </span><span class="nf">timing_clock</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">UMP32</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">UMP32</span><span class="w"> </span><span class="nf">continue_msg</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">UMP32</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">UMP32</span><span class="w"> </span><span class="nf">active_sensing</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">UMP32</span><span class="w"> </span><span class="nf">system_reset</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">UMP32</span><span class="w"> </span><span class="nf">tune_request</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">UMP32</span><span class="w"> </span><span class="nf">mtc_quarter_frame</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">UMP32</span><span class="w"> </span><span class="nf">song_position</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">beats</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">UMP32</span><span class="w"> </span><span class="nf">song_select</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">song</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace umidi</span>
+</pre></div>
+</div>
+</section>
+<section id="ump64">
+<h3>UMP64<a class="headerlink" href="#ump64" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">umidi</span><span class="w"> </span><span class="p">{</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">UMP64</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">word0</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">word1</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">UMP64</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="n">UMP64</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">w0</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">w1</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="nf">message_type</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="nf">group</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="nf">sysex_status</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="nf">sysex_num_bytes</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">UMP64</span><span class="w"> </span><span class="nf">sysex7_complete</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">len</span><span class="p">);</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">UMP64</span><span class="w"> </span><span class="nf">sysex7_start</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">len</span><span class="p">);</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">UMP64</span><span class="w"> </span><span class="nf">sysex7_continue</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">len</span><span class="p">);</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">UMP64</span><span class="w"> </span><span class="nf">sysex7_end</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">len</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace umidi</span>
+</pre></div>
+</div>
+</section>
+<section id="parser">
+<h3>Parser<a class="headerlink" href="#parser" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">umidi</span><span class="w"> </span><span class="p">{</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Parser</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">Parser</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">byte</span><span class="p">,</span><span class="w"> </span><span class="n">UMP32</span><span class="o">&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">parse_running</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">byte</span><span class="p">,</span><span class="w"> </span><span class="n">UMP32</span><span class="o">&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">reset</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">set_group</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Serializer</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">serialize</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UMP32</span><span class="o">&amp;</span><span class="w"> </span><span class="n">ump</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="nf">serialize_running</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UMP32</span><span class="o">&amp;</span><span class="w"> </span><span class="n">ump</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">out</span><span class="p">,</span>
+<span class="w">                                    </span><span class="kt">uint8_t</span><span class="o">&amp;</span><span class="w"> </span><span class="n">running_status</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace umidi</span>
+</pre></div>
+</div>
+</section>
+<section id="result">
+<h3>Result<a class="headerlink" href="#result" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">umidi</span><span class="w"> </span><span class="p">{</span>
+
+<span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ErrorCode</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Ok</span><span class="p">,</span><span class="w"> </span><span class="n">IncompleteMessage</span><span class="p">,</span><span class="w"> </span><span class="n">InvalidStatus</span><span class="p">,</span><span class="w"> </span><span class="n">BufferOverflow</span><span class="p">,</span>
+<span class="w">    </span><span class="n">InvalidData</span><span class="p">,</span><span class="w"> </span><span class="n">InvalidMessageType</span><span class="p">,</span><span class="w"> </span><span class="n">ChannelFiltered</span><span class="p">,</span>
+<span class="w">    </span><span class="n">NotImplemented</span><span class="p">,</span><span class="w"> </span><span class="n">NotSupported</span>
+<span class="p">};</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">Error</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">ErrorCode</span><span class="w"> </span><span class="n">code</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">context</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">Error</span><span class="w"> </span><span class="nf">incomplete</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">Error</span><span class="w"> </span><span class="nf">invalid_status</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">status</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">Error</span><span class="w"> </span><span class="nf">buffer_overflow</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">Error</span><span class="w"> </span><span class="nf">channel_filtered</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">ch</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">Result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">expected</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="w"> </span><span class="n">Error</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<span class="n">Result</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Ok</span><span class="p">(</span><span class="n">T</span><span class="w"> </span><span class="n">value</span><span class="p">);</span>
+
+<span class="n">std</span><span class="o">::</span><span class="n">unexpected</span><span class="o">&lt;</span><span class="n">Error</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Err</span><span class="p">(</span><span class="n">ErrorCode</span><span class="w"> </span><span class="n">code</span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">unexpected</span><span class="o">&lt;</span><span class="n">Error</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Err</span><span class="p">(</span><span class="n">Error</span><span class="w"> </span><span class="n">error</span><span class="p">);</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace umidi</span>
+</pre></div>
+</div>
+</section>
+<section id="event">
+<h3>Event<a class="headerlink" href="#event" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">umidi</span><span class="w"> </span><span class="p">{</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">Event</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">sample_pos</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UMP32</span><span class="w"> </span><span class="n">ump</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Convenience accessors (delegate to ump)</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">is_note_on</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">is_note_off</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="nf">note</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="nf">velocity</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="nf">channel</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">static_assert</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Event</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">8</span><span class="p">);</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">Capacity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">256</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">EventQueue</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">EventQueue</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">push</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Event</span><span class="o">&amp;</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">pop</span><span class="p">(</span><span class="n">Event</span><span class="o">&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">pop_until</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">sample_pos</span><span class="p">,</span><span class="w"> </span><span class="n">Event</span><span class="o">&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">peek</span><span class="p">(</span><span class="n">Event</span><span class="o">&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">clear</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">is_empty</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">is_full</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="nf">size</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace umidi</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="message-types">
+<h2>Message Types<a class="headerlink" href="#message-types" title="Link to this heading"></a></h2>
+<section id="channel-voice">
+<h3>Channel Voice<a class="headerlink" href="#channel-voice" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">umidi</span><span class="o">::</span><span class="nn">message</span><span class="w"> </span><span class="p">{</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">NoteOn</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UMP32</span><span class="w"> </span><span class="n">ump</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">is_valid</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="nf">channel</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="nf">note</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="nf">velocity</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="nf">group</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">NoteOn</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">ch</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">note</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">vel</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">NoteOn</span><span class="o">&gt;</span><span class="w"> </span><span class="n">from_ump</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UMP32</span><span class="o">&amp;</span><span class="w"> </span><span class="n">ump</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">NoteOff</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* similar */</span><span class="w"> </span><span class="p">};</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">ControlChange</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* similar */</span><span class="w"> </span><span class="p">};</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">ProgramChange</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* similar */</span><span class="w"> </span><span class="p">};</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">PitchBend</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* similar */</span><span class="w"> </span><span class="p">};</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">ChannelPressure</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* similar */</span><span class="w"> </span><span class="p">};</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">PolyPressure</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* similar */</span><span class="w"> </span><span class="p">};</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">Handler</span><span class="o">&gt;</span>
+<span class="kt">void</span><span class="w"> </span><span class="n">dispatch</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UMP32</span><span class="o">&amp;</span><span class="w"> </span><span class="n">ump</span><span class="p">,</span><span class="w"> </span><span class="n">Handler</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">handler</span><span class="p">);</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace umidi::message</span>
+</pre></div>
+</div>
+</section>
+<section id="utility">
+<h3>Utility<a class="headerlink" href="#utility" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">umidi</span><span class="o">::</span><span class="nn">message</span><span class="w"> </span><span class="p">{</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">JRTimestamp</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UMP32</span><span class="w"> </span><span class="n">ump</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kt">uint16_t</span><span class="w"> </span><span class="nf">timestamp</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="nf">to_microseconds</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">JRTimestamp</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">ts</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">JRTimestamp</span><span class="w"> </span><span class="nf">from_microseconds</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">us</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">JRTimestampTracker</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">set_sample_rate</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">rate</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">JRTimestamp</span><span class="o">&amp;</span><span class="w"> </span><span class="n">ts</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">has_timestamp</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="nf">get_sample_offset</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">clear</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace umidi::message</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="control-change">
+<h2>Control Change<a class="headerlink" href="#control-change" title="Link to this heading"></a></h2>
+<section id="rpn-nrpn-decoder">
+<h3>RPN/NRPN Decoder<a class="headerlink" href="#rpn-nrpn-decoder" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">umidi</span><span class="o">::</span><span class="nn">cc</span><span class="w"> </span><span class="p">{</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ParameterNumberDecoder</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">Result</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">parameter_number</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">value</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">bool</span><span class="w"> </span><span class="n">is_nrpn</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">bool</span><span class="w"> </span><span class="n">complete</span><span class="p">;</span>
+<span class="w">    </span><span class="p">};</span>
+
+<span class="w">    </span><span class="n">Result</span><span class="w"> </span><span class="nf">decode</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">channel</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">cc_num</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">is_selected</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">channel</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kt">uint16_t</span><span class="w"> </span><span class="nf">get_selected</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">channel</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">is_nrpn_selected</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">channel</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">reset</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">reset_channel</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">channel</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">namespace</span><span class="w"> </span><span class="nn">pitch_bend_sensitivity</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">Value</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">semitones</span><span class="p">;</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">cents</span><span class="p">;</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="n">Value</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">rpn_value</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint16_t</span><span class="w"> </span><span class="nf">format</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">semitones</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">cents</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace umidi::cc</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="protocol">
+<h2>Protocol<a class="headerlink" href="#protocol" title="Link to this heading"></a></h2>
+<section id="sysex-encoding">
+<h3>SysEx Encoding<a class="headerlink" href="#sysex-encoding" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">umidi</span><span class="o">::</span><span class="nn">protocol</span><span class="w"> </span><span class="p">{</span>
+
+<span class="kt">size_t</span><span class="w"> </span><span class="nf">encode_7bit</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">in_len</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="kt">size_t</span><span class="w"> </span><span class="nf">decode_7bit</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">in_len</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="kt">uint8_t</span><span class="w"> </span><span class="nf">calculate_checksum</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="kt">uint32_t</span><span class="w"> </span><span class="nf">crc32</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace umidi::protocol</span>
+</pre></div>
+</div>
+</section>
+<section id="message-builder-parser">
+<h3>Message Builder/Parser<a class="headerlink" href="#message-builder-parser" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">umidi</span><span class="o">::</span><span class="nn">protocol</span><span class="w"> </span><span class="p">{</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">MaxSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">256</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MessageBuilder</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">begin</span><span class="p">(</span><span class="n">Command</span><span class="w"> </span><span class="n">cmd</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">sequence</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">add_byte</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">add_u32</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">add_data</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">add_raw</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="nf">finalize</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="nf">data</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">ParsedMessage</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">valid</span><span class="p">;</span>
+<span class="w">    </span><span class="n">Command</span><span class="w"> </span><span class="n">command</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">sequence</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">payload</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">payload_len</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="nf">decode_payload</span><span class="p">(</span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">max_len</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="n">ParsedMessage</span><span class="w"> </span><span class="nf">parse_message</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace umidi::protocol</span>
+</pre></div>
+</div>
+</section>
+<section id="firmware-update">
+<h3>Firmware Update<a class="headerlink" href="#firmware-update" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">umidi</span><span class="o">::</span><span class="nn">protocol</span><span class="w"> </span><span class="p">{</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">FirmwareHeader</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* 128 bytes */</span><span class="w"> </span><span class="p">};</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">FirmwareHeaderBuilder</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">FirmwareHeaderBuilder</span><span class="o">&amp;</span><span class="w"> </span><span class="n">version</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">major</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">minor</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">patch</span><span class="p">);</span>
+<span class="w">    </span><span class="n">FirmwareHeaderBuilder</span><span class="o">&amp;</span><span class="w"> </span><span class="nf">board</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">board_id</span><span class="p">);</span>
+<span class="w">    </span><span class="n">FirmwareHeaderBuilder</span><span class="o">&amp;</span><span class="w"> </span><span class="nf">image_size</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">size</span><span class="p">);</span>
+<span class="w">    </span><span class="n">FirmwareHeaderBuilder</span><span class="o">&amp;</span><span class="w"> </span><span class="nf">flags</span><span class="p">(</span><span class="n">FirmwareFlags</span><span class="w"> </span><span class="n">f</span><span class="p">);</span>
+<span class="w">    </span><span class="n">FirmwareHeader</span><span class="w"> </span><span class="nf">build</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">MaxBoardIdLen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">16</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FirmwareValidator</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">set_public_key</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">key</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">set_board_id</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">require_signature</span><span class="p">(</span><span class="kt">bool</span><span class="w"> </span><span class="n">required</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="n">ValidationResult</span><span class="w"> </span><span class="nf">validate_header</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">FirmwareHeader</span><span class="o">&amp;</span><span class="w"> </span><span class="n">header</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">PlatformConfig</span><span class="o">*</span><span class="w"> </span><span class="n">Config</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">MaxChunkSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">256</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SecureFirmwareUpdate</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">init</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">FlashInterface</span><span class="o">&amp;</span><span class="w"> </span><span class="n">flash</span><span class="p">,</span>
+<span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">public_key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">nullptr</span><span class="p">,</span>
+<span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">shared_secret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">nullptr</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">SendFn</span><span class="o">&gt;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">process</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="p">,</span>
+<span class="w">                 </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">current_time</span><span class="p">,</span><span class="w"> </span><span class="n">SendFn</span><span class="w"> </span><span class="n">send_fn</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">UpdateState</span><span class="w"> </span><span class="nf">state</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="nf">progress</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">reboot_requested</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace umidi::protocol</span>
+</pre></div>
+</div>
+</section>
+<section id="transport">
+<h3>Transport<a class="headerlink" href="#transport" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">umidi</span><span class="o">::</span><span class="nn">protocol</span><span class="w"> </span><span class="p">{</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Transport</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="n">TransportType</span><span class="w"> </span><span class="n">type</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">TransportCapabilities</span><span class="o">&amp;</span><span class="w"> </span><span class="nf">capabilities</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">is_connected</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="nf">send</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="nf">receive</span><span class="p">(</span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">max_len</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">flush</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">reset</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">TxBufSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">512</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">RxBufSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">512</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SysExTransport</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Transport</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* ... */</span><span class="w"> </span><span class="p">};</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">TxBufSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1024</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">RxBufSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1024</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BulkTransport</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Transport</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* ... */</span><span class="w"> </span><span class="p">};</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">MaxTransports</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TransportManager</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">register_transport</span><span class="p">(</span><span class="n">Transport</span><span class="o">*</span><span class="w"> </span><span class="n">transport</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="n">Transport</span><span class="o">*</span><span class="w"> </span><span class="nf">get_best</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="n">Transport</span><span class="o">*</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="n">TransportType</span><span class="w"> </span><span class="n">type</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">any_connected</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace umidi::protocol</span>
+</pre></div>
+</div>
+</section>
+<section id="state-management">
+<h3>State Management<a class="headerlink" href="#state-management" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">umidi</span><span class="o">::</span><span class="nn">protocol</span><span class="w"> </span><span class="p">{</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">StateReport</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* 16 bytes */</span><span class="w"> </span><span class="p">};</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">ResumeInfo</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* 20 bytes */</span><span class="w"> </span><span class="p">};</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">BootVerification</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* 16 bytes */</span><span class="w"> </span><span class="p">};</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">StateManager</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">init</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="n">DeviceState</span><span class="w"> </span><span class="nf">state</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">set_state</span><span class="p">(</span><span class="n">DeviceState</span><span class="w"> </span><span class="n">new_state</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="n">StateReport</span><span class="w"> </span><span class="nf">build_report</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="n">ResumeInfo</span><span class="w"> </span><span class="nf">build_resume_info</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">firmware_hash</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">chunk_size</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">PlatformConfig</span><span class="o">*</span><span class="w"> </span><span class="n">Config</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">MaxChunkSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">256</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">StatefulFirmwareUpdate</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">init</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">FlashInterface</span><span class="o">&amp;</span><span class="w"> </span><span class="n">flash</span><span class="p">,</span>
+<span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">public_key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">nullptr</span><span class="p">,</span>
+<span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">shared_secret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">nullptr</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">SendFn</span><span class="o">&gt;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">process</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="p">,</span>
+<span class="w">                 </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">current_time</span><span class="p">,</span><span class="w"> </span><span class="n">SendFn</span><span class="w"> </span><span class="n">send_fn</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">mark_boot_success</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="nf">should_rollback</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace umidi::protocol</span>
+</pre></div>
+</div>
+</section>
+<section id="object-transfer">
+<h3>Object Transfer<a class="headerlink" href="#object-transfer" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">umidi</span><span class="o">::</span><span class="nn">protocol</span><span class="w"> </span><span class="p">{</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">ObjectHeader</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* 80 bytes */</span><span class="w"> </span><span class="p">};</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">SequenceMetadata</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* 16 bytes */</span><span class="w"> </span><span class="p">};</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">SampleMetadata</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* 16 bytes */</span><span class="w"> </span><span class="p">};</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">PresetMetadata</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* 16 bytes */</span><span class="w"> </span><span class="p">};</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">StorageInfo</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* 16 bytes */</span><span class="w"> </span><span class="p">};</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ObjectStorage</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">list</span><span class="p">(</span><span class="n">ObjectType</span><span class="w"> </span><span class="n">type</span><span class="p">,</span><span class="w"> </span><span class="n">ObjectHeader</span><span class="o">*</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">max_count</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">get_header</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">ObjectHeader</span><span class="o">&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="nf">read_data</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">offset</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">write_begin</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ObjectHeader</span><span class="o">&amp;</span><span class="w"> </span><span class="n">header</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">write_data</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">offset</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">write_commit</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">write_abort</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">remove</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="n">StorageInfo</span><span class="w"> </span><span class="nf">get_storage_info</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="nf">generate_id</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">MaxObjects</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">MaxDataSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">65536</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RAMObjectStorage</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">ObjectStorage</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* ... */</span><span class="w"> </span><span class="p">};</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">MaxChunkSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">256</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ObjectTransferHandler</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">ObjectTransferHandler</span><span class="p">(</span><span class="n">ObjectStorage</span><span class="o">&amp;</span><span class="w"> </span><span class="n">storage</span><span class="p">,</span><span class="w"> </span><span class="n">StateManager</span><span class="o">&amp;</span><span class="w"> </span><span class="n">state</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">SendFn</span><span class="o">&gt;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">process</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="p">,</span><span class="w"> </span><span class="n">SendFn</span><span class="w"> </span><span class="n">send_fn</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace umidi::protocol</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="value-conversions">
+<h2>Value Conversions<a class="headerlink" href="#value-conversions" title="Link to this heading"></a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">umidi</span><span class="o">::</span><span class="nn">convert</span><span class="w"> </span><span class="p">{</span>
+
+<span class="c1">// Velocity conversion</span>
+<span class="kt">uint8_t</span><span class="w"> </span><span class="nf">velocity_16_to_7</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">velocity_16</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="kt">uint16_t</span><span class="w"> </span><span class="nf">velocity_7_to_16</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">velocity_7</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="c1">// Controller value conversion</span>
+<span class="kt">uint16_t</span><span class="w"> </span><span class="nf">cc_7_to_14</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">value_7</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="kt">uint8_t</span><span class="w"> </span><span class="nf">cc_14_to_7</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">value_14</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="kt">uint32_t</span><span class="w"> </span><span class="nf">cc_7_to_32</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">value_7</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="kt">uint8_t</span><span class="w"> </span><span class="nf">cc_32_to_7</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">value_32</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="c1">// Pitch bend conversion</span>
+<span class="kt">uint32_t</span><span class="w"> </span><span class="nf">pitch_bend_14_to_32</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">bend_14</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="kt">uint16_t</span><span class="w"> </span><span class="nf">pitch_bend_32_to_14</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">bend_32</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="kt">float</span><span class="w"> </span><span class="nf">pitch_bend_to_semitones</span><span class="p">(</span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">range</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">2.0f</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="c1">// Frequency conversion</span>
+<span class="kt">float</span><span class="w"> </span><span class="nf">note_to_frequency</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">note</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">a4_freq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">440.0f</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="kt">uint8_t</span><span class="w"> </span><span class="nf">frequency_to_note</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">freq</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">a4_freq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">440.0f</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace umidi::convert</span>
+</pre></div>
+</div>
+</section>
+<section id="platform-aliases">
+<h2>Platform Aliases<a class="headerlink" href="#platform-aliases" title="Link to this heading"></a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">umidi</span><span class="o">::</span><span class="nn">protocol</span><span class="w"> </span><span class="p">{</span>
+
+<span class="c1">// SecureFirmwareUpdate</span>
+<span class="k">using</span><span class="w"> </span><span class="n">SecureFirmwareUpdateSTM32F4</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SecureFirmwareUpdate</span><span class="o">&lt;&amp;</span><span class="n">platforms</span><span class="o">::</span><span class="n">STM32F4_512K</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">SecureFirmwareUpdateSTM32H7</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SecureFirmwareUpdate</span><span class="o">&lt;&amp;</span><span class="n">platforms</span><span class="o">::</span><span class="n">STM32H7_2M</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">SecureFirmwareUpdateESP32</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SecureFirmwareUpdate</span><span class="o">&lt;&amp;</span><span class="n">platforms</span><span class="o">::</span><span class="n">ESP32_4M</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">SecureFirmwareUpdateRP2040</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SecureFirmwareUpdate</span><span class="o">&lt;&amp;</span><span class="n">platforms</span><span class="o">::</span><span class="n">RP2040_2M</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="c1">// StatefulFirmwareUpdate</span>
+<span class="k">using</span><span class="w"> </span><span class="n">StatefulFirmwareUpdateSTM32F4</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StatefulFirmwareUpdate</span><span class="o">&lt;&amp;</span><span class="n">platforms</span><span class="o">::</span><span class="n">STM32F4_512K</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">StatefulFirmwareUpdateSTM32H7</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StatefulFirmwareUpdate</span><span class="o">&lt;&amp;</span><span class="n">platforms</span><span class="o">::</span><span class="n">STM32H7_2M</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">StatefulFirmwareUpdateESP32</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StatefulFirmwareUpdate</span><span class="o">&lt;&amp;</span><span class="n">platforms</span><span class="o">::</span><span class="n">ESP32_4M</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">StatefulFirmwareUpdateRP2040</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StatefulFirmwareUpdate</span><span class="o">&lt;&amp;</span><span class="n">platforms</span><span class="o">::</span><span class="n">RP2040_2M</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace umidi::protocol</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="OBJECT.html" class="btn btn-neutral float-left" title="Object Transfer Protocol" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api/library_root.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, UMI-OS Project.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

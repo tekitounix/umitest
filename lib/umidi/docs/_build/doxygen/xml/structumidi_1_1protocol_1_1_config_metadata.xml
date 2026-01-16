@@ -1,0 +1,153 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1protocol_1_1_config_metadata" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::protocol::ConfigMetadata</compoundname>
+    <sectiondef kind="public-type">
+      <memberdef kind="enum" id="structumidi_1_1protocol_1_1_config_metadata_1a9deb5f9bc88f1250fed806ba0de5941f" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>ConfigType</name>
+        <qualifiedname>umidi::protocol::ConfigMetadata::ConfigType</qualifiedname>
+        <enumvalue id="structumidi_1_1protocol_1_1_config_metadata_1a9deb5f9bc88f1250fed806ba0de5941fa6eecfba72d12922ee1dead07a0ef3334" prot="public">
+          <name>GLOBAL</name>
+          <initializer>= 0</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="structumidi_1_1protocol_1_1_config_metadata_1a9deb5f9bc88f1250fed806ba0de5941fa46f18c989bcd3e6eaa843fe3225ff380" prot="public">
+          <name>MIDI</name>
+          <initializer>= 1</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="structumidi_1_1protocol_1_1_config_metadata_1a9deb5f9bc88f1250fed806ba0de5941fae423b8bde9bfbfd7e9409b23b23aed91" prot="public">
+          <name>AUDIO</name>
+          <initializer>= 2</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="structumidi_1_1protocol_1_1_config_metadata_1a9deb5f9bc88f1250fed806ba0de5941fac97ad854bf48c774ad3d0863fe1ec8cd" prot="public">
+          <name>DISPLAY</name>
+          <initializer>= 3</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="structumidi_1_1protocol_1_1_config_metadata_1a9deb5f9bc88f1250fed806ba0de5941fae56516ff34a16dd1ff3515d65371b54f" prot="public">
+          <name>CONTROLS</name>
+          <initializer>= 4</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="structumidi_1_1protocol_1_1_config_metadata_1a9deb5f9bc88f1250fed806ba0de5941fa2e40ad879e955201df4dedbf8d479a12" prot="public">
+          <name>USER</name>
+          <initializer>= 128</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="203" column="5" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="203" bodyend="210"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_config_metadata_1a2b272d5a59d59cd131f725fe3f371d53" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::ConfigMetadata::config_version</definition>
+        <argsstring></argsstring>
+        <name>config_version</name>
+        <qualifiedname>umidi::protocol::ConfigMetadata::config_version</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="197" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="197" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_config_metadata_1a4c86703c4e3bb83436734ab98d9208a4" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::ConfigMetadata::config_type</definition>
+        <argsstring></argsstring>
+        <name>config_type</name>
+        <qualifiedname>umidi::protocol::ConfigMetadata::config_type</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="198" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="198" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_config_metadata_1ad3973e954db18de4e25163361dfda9ab" prot="public" static="no" mutable="no">
+        <type>uint16_t</type>
+        <definition>uint16_t umidi::protocol::ConfigMetadata::reserved1</definition>
+        <argsstring></argsstring>
+        <name>reserved1</name>
+        <qualifiedname>umidi::protocol::ConfigMetadata::reserved1</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="199" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="199" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_config_metadata_1ae0111fccef51f37134663b866bf0217f" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::ConfigMetadata::target_device</definition>
+        <argsstring></argsstring>
+        <name>target_device</name>
+        <qualifiedname>umidi::protocol::ConfigMetadata::target_device</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="200" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="200" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_config_metadata_1ac457d8071cd84eb978615f253520f59a" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::ConfigMetadata::reserved2[2]</definition>
+        <argsstring>[2]</argsstring>
+        <name>reserved2</name>
+        <qualifiedname>umidi::protocol::ConfigMetadata::reserved2</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="201" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="201" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/umi_object.hh" line="196" column="1" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="196" bodyend="211"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1protocol_1_1_config_metadata_1a4c86703c4e3bb83436734ab98d9208a4" prot="public" virt="non-virtual"><scope>umidi::protocol::ConfigMetadata</scope><name>config_type</name></member>
+      <member refid="structumidi_1_1protocol_1_1_config_metadata_1a2b272d5a59d59cd131f725fe3f371d53" prot="public" virt="non-virtual"><scope>umidi::protocol::ConfigMetadata</scope><name>config_version</name></member>
+      <member refid="structumidi_1_1protocol_1_1_config_metadata_1a9deb5f9bc88f1250fed806ba0de5941f" prot="public" virt="non-virtual"><scope>umidi::protocol::ConfigMetadata</scope><name>ConfigType</name></member>
+      <member refid="structumidi_1_1protocol_1_1_config_metadata_1ad3973e954db18de4e25163361dfda9ab" prot="public" virt="non-virtual"><scope>umidi::protocol::ConfigMetadata</scope><name>reserved1</name></member>
+      <member refid="structumidi_1_1protocol_1_1_config_metadata_1ac457d8071cd84eb978615f253520f59a" prot="public" virt="non-virtual"><scope>umidi::protocol::ConfigMetadata</scope><name>reserved2</name></member>
+      <member refid="structumidi_1_1protocol_1_1_config_metadata_1ae0111fccef51f37134663b866bf0217f" prot="public" virt="non-virtual"><scope>umidi::protocol::ConfigMetadata</scope><name>target_device</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

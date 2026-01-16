@@ -1,0 +1,287 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1protocol_1_1_firmware_header" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::protocol::FirmwareHeader</compoundname>
+    <includes refid="umi__firmware_8hh" local="no">umi_firmware.hh</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_firmware_header_1addf5c434b7600e0f23be932df86796ad" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::FirmwareHeader::magic</definition>
+        <argsstring></argsstring>
+        <name>magic</name>
+        <qualifiedname>umidi::protocol::FirmwareHeader::magic</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="47" column="14" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="47" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_firmware_header_1af7423b3bc3d8bb8efe5ef10b602510ef" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::FirmwareHeader::header_version</definition>
+        <argsstring></argsstring>
+        <name>header_version</name>
+        <qualifiedname>umidi::protocol::FirmwareHeader::header_version</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="48" column="14" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="48" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_firmware_header_1a58dfedce1355d3dff4a20b34b44a765f" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::FirmwareHeader::flags</definition>
+        <argsstring></argsstring>
+        <name>flags</name>
+        <qualifiedname>umidi::protocol::FirmwareHeader::flags</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="49" column="14" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="49" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_firmware_header_1af4c607a37a0b00d227694a105692298a" prot="public" static="no" mutable="no">
+        <type>uint16_t</type>
+        <definition>uint16_t umidi::protocol::FirmwareHeader::reserved1</definition>
+        <argsstring></argsstring>
+        <name>reserved1</name>
+        <qualifiedname>umidi::protocol::FirmwareHeader::reserved1</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="50" column="14" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="50" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_firmware_header_1a117f97294591a932bfed2a30bcc4b09f" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::FirmwareHeader::fw_version_major</definition>
+        <argsstring></argsstring>
+        <name>fw_version_major</name>
+        <qualifiedname>umidi::protocol::FirmwareHeader::fw_version_major</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="52" column="14" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="52" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_firmware_header_1ab0f4a9b3263415ec0954f142f99d1171" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::FirmwareHeader::fw_version_minor</definition>
+        <argsstring></argsstring>
+        <name>fw_version_minor</name>
+        <qualifiedname>umidi::protocol::FirmwareHeader::fw_version_minor</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="53" column="14" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="53" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_firmware_header_1abc45fe07477f95cb3ad6a73a06c0dca7" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::FirmwareHeader::fw_version_patch</definition>
+        <argsstring></argsstring>
+        <name>fw_version_patch</name>
+        <qualifiedname>umidi::protocol::FirmwareHeader::fw_version_patch</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="54" column="14" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="54" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_firmware_header_1a4e3af9d7dc6bea54bf0d21515f4ccb1f" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::FirmwareHeader::fw_build_number</definition>
+        <argsstring></argsstring>
+        <name>fw_build_number</name>
+        <qualifiedname>umidi::protocol::FirmwareHeader::fw_build_number</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="55" column="14" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="55" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_firmware_header_1ae3ff4bc7e0204bdf6d1977eed241593b" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::FirmwareHeader::image_size</definition>
+        <argsstring></argsstring>
+        <name>image_size</name>
+        <qualifiedname>umidi::protocol::FirmwareHeader::image_size</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="57" column="14" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="57" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_firmware_header_1a92924e08e076a10e9713c78dc455b995" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::FirmwareHeader::image_crc32</definition>
+        <argsstring></argsstring>
+        <name>image_crc32</name>
+        <qualifiedname>umidi::protocol::FirmwareHeader::image_crc32</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="58" column="14" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="58" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_firmware_header_1a9c1f34124abedfe1189f47f222a37ac4" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::FirmwareHeader::load_address</definition>
+        <argsstring></argsstring>
+        <name>load_address</name>
+        <qualifiedname>umidi::protocol::FirmwareHeader::load_address</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="59" column="14" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="59" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_firmware_header_1a753255a571a2f43b9dced8e28dddf9bb" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::FirmwareHeader::entry_point</definition>
+        <argsstring></argsstring>
+        <name>entry_point</name>
+        <qualifiedname>umidi::protocol::FirmwareHeader::entry_point</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="60" column="14" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="60" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_firmware_header_1a2c8511969734b4bb90be746fbbc4cbcf" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::FirmwareHeader::target_board[16]</definition>
+        <argsstring>[16]</argsstring>
+        <name>target_board</name>
+        <qualifiedname>umidi::protocol::FirmwareHeader::target_board</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="62" column="14" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="62" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_firmware_header_1a3a2425f81840cda0a747524f888d3ced" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::FirmwareHeader::fw_hash[32]</definition>
+        <argsstring>[32]</argsstring>
+        <name>fw_hash</name>
+        <qualifiedname>umidi::protocol::FirmwareHeader::fw_hash</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="63" column="14" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="63" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_firmware_header_1ac7047fa5ebf2dd3f35a8ab28ebd31b27" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::FirmwareHeader::min_bootloader</definition>
+        <argsstring></argsstring>
+        <name>min_bootloader</name>
+        <qualifiedname>umidi::protocol::FirmwareHeader::min_bootloader</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="65" column="14" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="65" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_firmware_header_1ae16ecb6467a7f2eb3915053d8abd7524" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::FirmwareHeader::rollback_version</definition>
+        <argsstring></argsstring>
+        <name>rollback_version</name>
+        <qualifiedname>umidi::protocol::FirmwareHeader::rollback_version</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="66" column="14" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="66" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_firmware_header_1a10b872bd061577e8b00be8e220986841" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::FirmwareHeader::timestamp</definition>
+        <argsstring></argsstring>
+        <name>timestamp</name>
+        <qualifiedname>umidi::protocol::FirmwareHeader::timestamp</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="67" column="14" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="67" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_firmware_header_1a783b7f75129bc1c42b89221ae7aa4057" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::FirmwareHeader::reserved2[7]</definition>
+        <argsstring>[7]</argsstring>
+        <name>reserved2</name>
+        <qualifiedname>umidi::protocol::FirmwareHeader::reserved2</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="68" column="14" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="68" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Firmware header (128 bytes, aligned) </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/umi_firmware.hh" line="46" column="1" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="46" bodyend="71"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1protocol_1_1_firmware_header_1a753255a571a2f43b9dced8e28dddf9bb" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeader</scope><name>entry_point</name></member>
+      <member refid="structumidi_1_1protocol_1_1_firmware_header_1a58dfedce1355d3dff4a20b34b44a765f" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeader</scope><name>flags</name></member>
+      <member refid="structumidi_1_1protocol_1_1_firmware_header_1a4e3af9d7dc6bea54bf0d21515f4ccb1f" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeader</scope><name>fw_build_number</name></member>
+      <member refid="structumidi_1_1protocol_1_1_firmware_header_1a3a2425f81840cda0a747524f888d3ced" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeader</scope><name>fw_hash</name></member>
+      <member refid="structumidi_1_1protocol_1_1_firmware_header_1a117f97294591a932bfed2a30bcc4b09f" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeader</scope><name>fw_version_major</name></member>
+      <member refid="structumidi_1_1protocol_1_1_firmware_header_1ab0f4a9b3263415ec0954f142f99d1171" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeader</scope><name>fw_version_minor</name></member>
+      <member refid="structumidi_1_1protocol_1_1_firmware_header_1abc45fe07477f95cb3ad6a73a06c0dca7" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeader</scope><name>fw_version_patch</name></member>
+      <member refid="structumidi_1_1protocol_1_1_firmware_header_1af7423b3bc3d8bb8efe5ef10b602510ef" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeader</scope><name>header_version</name></member>
+      <member refid="structumidi_1_1protocol_1_1_firmware_header_1a92924e08e076a10e9713c78dc455b995" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeader</scope><name>image_crc32</name></member>
+      <member refid="structumidi_1_1protocol_1_1_firmware_header_1ae3ff4bc7e0204bdf6d1977eed241593b" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeader</scope><name>image_size</name></member>
+      <member refid="structumidi_1_1protocol_1_1_firmware_header_1a9c1f34124abedfe1189f47f222a37ac4" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeader</scope><name>load_address</name></member>
+      <member refid="structumidi_1_1protocol_1_1_firmware_header_1addf5c434b7600e0f23be932df86796ad" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeader</scope><name>magic</name></member>
+      <member refid="structumidi_1_1protocol_1_1_firmware_header_1ac7047fa5ebf2dd3f35a8ab28ebd31b27" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeader</scope><name>min_bootloader</name></member>
+      <member refid="structumidi_1_1protocol_1_1_firmware_header_1af4c607a37a0b00d227694a105692298a" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeader</scope><name>reserved1</name></member>
+      <member refid="structumidi_1_1protocol_1_1_firmware_header_1a783b7f75129bc1c42b89221ae7aa4057" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeader</scope><name>reserved2</name></member>
+      <member refid="structumidi_1_1protocol_1_1_firmware_header_1ae16ecb6467a7f2eb3915053d8abd7524" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeader</scope><name>rollback_version</name></member>
+      <member refid="structumidi_1_1protocol_1_1_firmware_header_1a2c8511969734b4bb90be746fbbc4cbcf" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeader</scope><name>target_board</name></member>
+      <member refid="structumidi_1_1protocol_1_1_firmware_header_1a10b872bd061577e8b00be8e220986841" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeader</scope><name>timestamp</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

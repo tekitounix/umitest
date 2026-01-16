@@ -1,0 +1,84 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1codec_1_1message__traits" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::codec::message_traits</compoundname>
+    <templateparamlist>
+      <param>
+        <type>typename T</type>
+      </param>
+    </templateparamlist>
+    <sectiondef kind="public-static-attrib">
+      <memberdef kind="variable" id="structumidi_1_1codec_1_1message__traits_1abd2a82cf6f0fef5191e5e07744b2d996" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>bool</type>
+        <definition>bool umidi::codec::message_traits&lt; T &gt;::is_channel_voice</definition>
+        <argsstring></argsstring>
+        <name>is_channel_voice</name>
+        <qualifiedname>umidi::codec::message_traits::is_channel_voice</qualifiedname>
+        <initializer>= false</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="23" column="27" bodyfile="include/umidi/codec/decoder.hh" bodystart="23" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1codec_1_1message__traits_1ab7df1f5fce4fa2d2b079928ad956bd3b" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>bool</type>
+        <definition>bool umidi::codec::message_traits&lt; T &gt;::is_system</definition>
+        <argsstring></argsstring>
+        <name>is_system</name>
+        <qualifiedname>umidi::codec::message_traits::is_system</qualifiedname>
+        <initializer>= false</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="24" column="27" bodyfile="include/umidi/codec/decoder.hh" bodystart="24" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1codec_1_1message__traits_1ad50096368cf9dc914a8281b64ae88047" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>bool</type>
+        <definition>bool umidi::codec::message_traits&lt; T &gt;::is_sysex</definition>
+        <argsstring></argsstring>
+        <name>is_sysex</name>
+        <qualifiedname>umidi::codec::message_traits::is_sysex</qualifiedname>
+        <initializer>= false</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="25" column="27" bodyfile="include/umidi/codec/decoder.hh" bodystart="25" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1codec_1_1message__traits_1ab4f6749fc6143a6527edd8c68a9dc5ef" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>bool</type>
+        <definition>bool umidi::codec::message_traits&lt; T &gt;::is_utility</definition>
+        <argsstring></argsstring>
+        <name>is_utility</name>
+        <qualifiedname>umidi::codec::message_traits::is_utility</qualifiedname>
+        <initializer>= false</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="26" column="27" bodyfile="include/umidi/codec/decoder.hh" bodystart="26" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/codec/decoder.hh" line="22" column="1" bodyfile="include/umidi/codec/decoder.hh" bodystart="22" bodyend="27"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1codec_1_1message__traits_1abd2a82cf6f0fef5191e5e07744b2d996" prot="public" virt="non-virtual"><scope>umidi::codec::message_traits</scope><name>is_channel_voice</name></member>
+      <member refid="structumidi_1_1codec_1_1message__traits_1ad50096368cf9dc914a8281b64ae88047" prot="public" virt="non-virtual"><scope>umidi::codec::message_traits</scope><name>is_sysex</name></member>
+      <member refid="structumidi_1_1codec_1_1message__traits_1ab7df1f5fce4fa2d2b079928ad956bd3b" prot="public" virt="non-virtual"><scope>umidi::codec::message_traits</scope><name>is_system</name></member>
+      <member refid="structumidi_1_1codec_1_1message__traits_1ab4f6749fc6143a6527edd8c68a9dc5ef" prot="public" virt="non-virtual"><scope>umidi::codec::message_traits</scope><name>is_utility</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

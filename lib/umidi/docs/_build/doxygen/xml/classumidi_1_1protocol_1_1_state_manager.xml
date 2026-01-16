@@ -1,0 +1,576 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="classumidi_1_1protocol_1_1_state_manager" kind="class" language="C++" prot="public">
+    <compoundname>umidi::protocol::StateManager</compoundname>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_state_manager_1a6f0acf35e270f5c06adf2e76e0924ced" prot="private" static="no" mutable="no">
+        <type>DeviceState</type>
+        <definition>DeviceState umidi::protocol::StateManager::state_</definition>
+        <argsstring></argsstring>
+        <name>state_</name>
+        <qualifiedname>umidi::protocol::StateManager::state_</qualifiedname>
+        <initializer>= DeviceState::IDLE</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="296" column="17" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="296" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_state_manager_1ad617bc9e1b76834210919edb02a2856c" prot="private" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::StateManager::progress_</definition>
+        <argsstring></argsstring>
+        <name>progress_</name>
+        <qualifiedname>umidi::protocol::StateManager::progress_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="297" column="13" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="297" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_state_manager_1aea39d0a11566eba0036dd4214b42fce9" prot="private" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::StateManager::last_error_</definition>
+        <argsstring></argsstring>
+        <name>last_error_</name>
+        <qualifiedname>umidi::protocol::StateManager::last_error_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="298" column="13" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="298" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_state_manager_1a832e209bc9a073ef25e76dcbe10257a1" prot="private" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::StateManager::last_ack_seq_</definition>
+        <argsstring></argsstring>
+        <name>last_ack_seq_</name>
+        <qualifiedname>umidi::protocol::StateManager::last_ack_seq_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="299" column="13" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="299" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_state_manager_1a89da7da84daf0f3c76d8347fa2571e56" prot="private" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::StateManager::flags_</definition>
+        <argsstring></argsstring>
+        <name>flags_</name>
+        <qualifiedname>umidi::protocol::StateManager::flags_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="300" column="13" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="300" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_state_manager_1a3183d03614b36d50bf2d1d501144db3a" prot="private" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::StateManager::subscriber_count_</definition>
+        <argsstring></argsstring>
+        <name>subscriber_count_</name>
+        <qualifiedname>umidi::protocol::StateManager::subscriber_count_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="301" column="13" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="301" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_state_manager_1a1052e77f3200bd6e3681b7d6973e22a4" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool umidi::protocol::StateManager::state_changed_</definition>
+        <argsstring></argsstring>
+        <name>state_changed_</name>
+        <qualifiedname>umidi::protocol::StateManager::state_changed_</qualifiedname>
+        <initializer>= false</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="302" column="10" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="302" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_state_manager_1a7b9c56bb79d3ec4d6b5158ad46b10eb8" prot="private" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::StateManager::session_id_</definition>
+        <argsstring></argsstring>
+        <name>session_id_</name>
+        <qualifiedname>umidi::protocol::StateManager::session_id_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="304" column="14" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="304" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_state_manager_1ad79a0cff642cd96221faea57fba7143f" prot="private" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::StateManager::received_bytes_</definition>
+        <argsstring></argsstring>
+        <name>received_bytes_</name>
+        <qualifiedname>umidi::protocol::StateManager::received_bytes_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="305" column="14" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="305" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_state_manager_1a136af43bbe1479a262f64c9b9bb1fcb0" prot="private" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::StateManager::total_bytes_</definition>
+        <argsstring></argsstring>
+        <name>total_bytes_</name>
+        <qualifiedname>umidi::protocol::StateManager::total_bytes_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="306" column="14" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="306" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="private-static-attrib">
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_state_manager_1ac01ea64959b3178048da42125c991ebe" prot="private" static="yes" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::StateManager::session_counter_</definition>
+        <argsstring></argsstring>
+        <name>session_counter_</name>
+        <qualifiedname>umidi::protocol::StateManager::session_counter_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="308" column="28" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="308" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_state_manager_1aa889e527bc2043fd9fe25b9f2a99297a" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::StateManager::init</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>init</name>
+        <qualifiedname>umidi::protocol::StateManager::init</qualifiedname>
+        <briefdescription>
+<para>Initialize state manager. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="176" column="10" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="176" bodyend="186"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_state_manager_1a50498a28534c521199b15ecd314ab1b3" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>DeviceState</type>
+        <definition>DeviceState umidi::protocol::StateManager::state</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>state</name>
+        <qualifiedname>umidi::protocol::StateManager::state</qualifiedname>
+        <briefdescription>
+<para>Get current state. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="189" column="18" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="189" bodyend="189"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_state_manager_1a9aac6cfe2ce4eeb3fe01c6874b708cbb" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::StateManager::set_state</definition>
+        <argsstring>(DeviceState new_state) noexcept</argsstring>
+        <name>set_state</name>
+        <qualifiedname>umidi::protocol::StateManager::set_state</qualifiedname>
+        <param>
+          <type>DeviceState</type>
+          <declname>new_state</declname>
+        </param>
+        <briefdescription>
+<para>Set current state (triggers notification if subscribed) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="192" column="10" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="192" bodyend="197"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_state_manager_1a86d5604bf16ddb1d87aa4383475343ca" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::StateManager::set_progress</definition>
+        <argsstring>(uint8_t percent, uint32_t received, uint32_t total) noexcept</argsstring>
+        <name>set_progress</name>
+        <qualifiedname>umidi::protocol::StateManager::set_progress</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>percent</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>received</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>total</declname>
+        </param>
+        <briefdescription>
+<para>Update progress. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="200" column="10" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="200" bodyend="204"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_state_manager_1a9be134cf3b2d60919859cda9ba28eae0" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::StateManager::start_session</definition>
+        <argsstring>(uint32_t total_size) noexcept</argsstring>
+        <name>start_session</name>
+        <qualifiedname>umidi::protocol::StateManager::start_session</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>total_size</declname>
+        </param>
+        <briefdescription>
+<para>Start a new session. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="207" column="14" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="207" bodyend="216"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_state_manager_1aef4be9208243dc79bc16b46159c91d2a" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::StateManager::record_received</definition>
+        <argsstring>(uint32_t bytes, uint8_t seq) noexcept</argsstring>
+        <name>record_received</name>
+        <qualifiedname>umidi::protocol::StateManager::record_received</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>bytes</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>seq</declname>
+        </param>
+        <briefdescription>
+<para>Record received data. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="219" column="10" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="219" bodyend="223"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_state_manager_1a9dfb3c1e629e415ab300da935f7e1ce1" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::StateManager::set_error</definition>
+        <argsstring>(uint8_t error_code) noexcept</argsstring>
+        <name>set_error</name>
+        <qualifiedname>umidi::protocol::StateManager::set_error</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>error_code</declname>
+        </param>
+        <briefdescription>
+<para>Set error state. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="226" column="10" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="226" bodyend="229"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_state_manager_1ad7352864f34840f81f7804054a5563e1" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::StateManager::clear_error</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>clear_error</name>
+        <qualifiedname>umidi::protocol::StateManager::clear_error</qualifiedname>
+        <briefdescription>
+<para>Clear error and return to idle. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="232" column="10" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="232" bodyend="235"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_state_manager_1a3519a0a2eed83d51a1fbfe7564dffca9" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>StateReport</type>
+        <definition>StateReport umidi::protocol::StateManager::build_report</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>build_report</name>
+        <qualifiedname>umidi::protocol::StateManager::build_report</qualifiedname>
+        <briefdescription>
+<para>Build state report. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="238" column="18" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="238" bodyend="249"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_state_manager_1a48bd50d41b1feac1c211654b8bd2d7f8" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>ResumeInfo</type>
+        <definition>ResumeInfo umidi::protocol::StateManager::build_resume_info</definition>
+        <argsstring>(uint32_t firmware_hash, uint8_t chunk_size) const noexcept</argsstring>
+        <name>build_resume_info</name>
+        <qualifiedname>umidi::protocol::StateManager::build_resume_info</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>firmware_hash</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>chunk_size</declname>
+        </param>
+        <briefdescription>
+<para>Build resume info. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="252" column="17" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="252" bodyend="262"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_state_manager_1acfd63133909530792648c9b65c21044e" prot="public" static="no" nodiscard="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::StateManager::check_state_changed</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>check_state_changed</name>
+        <qualifiedname>umidi::protocol::StateManager::check_state_changed</qualifiedname>
+        <briefdescription>
+<para>Check if state changed (and clear flag) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="265" column="11" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="265" bodyend="269"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_state_manager_1a5c97410c21d56eae74897841c07f1b9d" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::StateManager::add_subscriber</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>add_subscriber</name>
+        <qualifiedname>umidi::protocol::StateManager::add_subscriber</qualifiedname>
+        <briefdescription>
+<para>Subscriber management. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="272" column="10" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="272" bodyend="274"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_state_manager_1a0688c0146443b7756c7fbe181494e486" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::StateManager::remove_subscriber</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>remove_subscriber</name>
+        <qualifiedname>umidi::protocol::StateManager::remove_subscriber</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="276" column="10" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="276" bodyend="278"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_state_manager_1a0b633bce77b7e2d2d3032be16984debc" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::StateManager::has_subscribers</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>has_subscribers</name>
+        <qualifiedname>umidi::protocol::StateManager::has_subscribers</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="280" column="11" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="280" bodyend="282"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_state_manager_1ad6199f308f9764ca20ef06bcbb4a7b7a" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::StateManager::set_flag</definition>
+        <argsstring>(uint8_t flag) noexcept</argsstring>
+        <name>set_flag</name>
+        <qualifiedname>umidi::protocol::StateManager::set_flag</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>flag</declname>
+        </param>
+        <briefdescription>
+<para>Flag management. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="285" column="10" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="285" bodyend="285"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_state_manager_1a54997672739b097dede202ce6d2eedf0" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::StateManager::clear_flag</definition>
+        <argsstring>(uint8_t flag) noexcept</argsstring>
+        <name>clear_flag</name>
+        <qualifiedname>umidi::protocol::StateManager::clear_flag</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>flag</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="286" column="10" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="286" bodyend="286"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_state_manager_1a8ec53003f055a987383d18c999bf77a5" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::StateManager::has_flag</definition>
+        <argsstring>(uint8_t flag) const noexcept</argsstring>
+        <name>has_flag</name>
+        <qualifiedname>umidi::protocol::StateManager::has_flag</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>flag</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="287" column="11" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="287" bodyend="287"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_state_manager_1a505371367fc2ebcdecb05d7701f737e3" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::StateManager::session_id</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>session_id</name>
+        <qualifiedname>umidi::protocol::StateManager::session_id</qualifiedname>
+        <briefdescription>
+<para>Session info. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="290" column="15" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="290" bodyend="290"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_state_manager_1a7ca0c2d4f9bc42df1d769d6bce319c21" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::StateManager::received_bytes</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>received_bytes</name>
+        <qualifiedname>umidi::protocol::StateManager::received_bytes</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="291" column="15" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="291" bodyend="291"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_state_manager_1a8d01d9b32631e8493267494c4b022330" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::StateManager::total_bytes</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>total_bytes</name>
+        <qualifiedname>umidi::protocol::StateManager::total_bytes</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="292" column="15" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="292" bodyend="292"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_state_manager_1ad16e402bba11d188a461cf79571a442b" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::StateManager::last_ack_seq</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>last_ack_seq</name>
+        <qualifiedname>umidi::protocol::StateManager::last_ack_seq</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="293" column="14" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="293" bodyend="293"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/umi_state.hh" line="173" column="1" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="173" bodyend="309"/>
+    <listofallmembers>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1a5c97410c21d56eae74897841c07f1b9d" prot="public" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>add_subscriber</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1a3519a0a2eed83d51a1fbfe7564dffca9" prot="public" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>build_report</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1a48bd50d41b1feac1c211654b8bd2d7f8" prot="public" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>build_resume_info</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1acfd63133909530792648c9b65c21044e" prot="public" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>check_state_changed</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1ad7352864f34840f81f7804054a5563e1" prot="public" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>clear_error</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1a54997672739b097dede202ce6d2eedf0" prot="public" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>clear_flag</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1a89da7da84daf0f3c76d8347fa2571e56" prot="private" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>flags_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1a8ec53003f055a987383d18c999bf77a5" prot="public" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>has_flag</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1a0b633bce77b7e2d2d3032be16984debc" prot="public" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>has_subscribers</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1aa889e527bc2043fd9fe25b9f2a99297a" prot="public" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>init</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1ad16e402bba11d188a461cf79571a442b" prot="public" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>last_ack_seq</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1a832e209bc9a073ef25e76dcbe10257a1" prot="private" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>last_ack_seq_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1aea39d0a11566eba0036dd4214b42fce9" prot="private" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>last_error_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1ad617bc9e1b76834210919edb02a2856c" prot="private" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>progress_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1a7ca0c2d4f9bc42df1d769d6bce319c21" prot="public" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>received_bytes</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1ad79a0cff642cd96221faea57fba7143f" prot="private" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>received_bytes_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1aef4be9208243dc79bc16b46159c91d2a" prot="public" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>record_received</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1a0688c0146443b7756c7fbe181494e486" prot="public" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>remove_subscriber</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1ac01ea64959b3178048da42125c991ebe" prot="private" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>session_counter_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1a505371367fc2ebcdecb05d7701f737e3" prot="public" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>session_id</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1a7b9c56bb79d3ec4d6b5158ad46b10eb8" prot="private" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>session_id_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1a9dfb3c1e629e415ab300da935f7e1ce1" prot="public" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>set_error</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1ad6199f308f9764ca20ef06bcbb4a7b7a" prot="public" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>set_flag</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1a86d5604bf16ddb1d87aa4383475343ca" prot="public" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>set_progress</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1a9aac6cfe2ce4eeb3fe01c6874b708cbb" prot="public" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>set_state</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1a9be134cf3b2d60919859cda9ba28eae0" prot="public" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>start_session</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1a50498a28534c521199b15ecd314ab1b3" prot="public" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>state</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1a6f0acf35e270f5c06adf2e76e0924ced" prot="private" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>state_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1a1052e77f3200bd6e3681b7d6973e22a4" prot="private" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>state_changed_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1a3183d03614b36d50bf2d1d501144db3a" prot="private" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>subscriber_count_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1a8d01d9b32631e8493267494c4b022330" prot="public" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>total_bytes</name></member>
+      <member refid="classumidi_1_1protocol_1_1_state_manager_1a136af43bbe1479a262f64c9b9bb1fcb0" prot="private" virt="non-virtual"><scope>umidi::protocol::StateManager</scope><name>total_bytes_</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

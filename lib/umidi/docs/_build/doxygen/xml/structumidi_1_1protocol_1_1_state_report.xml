@@ -1,0 +1,263 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1protocol_1_1_state_report" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::protocol::StateReport</compoundname>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_state_report_1ad6e0855b04bd842c6bc19d76d597404d" prot="public" static="no" mutable="no">
+        <type>DeviceState</type>
+        <definition>DeviceState umidi::protocol::StateReport::state</definition>
+        <argsstring></argsstring>
+        <name>state</name>
+        <qualifiedname>umidi::protocol::StateReport::state</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="49" column="17" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="49" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_state_report_1a342fa25bc264974d2cbd035be479c9bf" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::StateReport::progress_percent</definition>
+        <argsstring></argsstring>
+        <name>progress_percent</name>
+        <qualifiedname>umidi::protocol::StateReport::progress_percent</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="50" column="13" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="50" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_state_report_1a610fad8a8240a7c9761be35b7d1525b3" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::StateReport::last_error</definition>
+        <argsstring></argsstring>
+        <name>last_error</name>
+        <qualifiedname>umidi::protocol::StateReport::last_error</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="51" column="13" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="51" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_state_report_1ab233a8a191bc845e8189b59b32043b6b" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::StateReport::last_ack_seq</definition>
+        <argsstring></argsstring>
+        <name>last_ack_seq</name>
+        <qualifiedname>umidi::protocol::StateReport::last_ack_seq</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="52" column="13" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="52" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_state_report_1a4f0c21e590bbfea07a5b904d9f78ced6" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::StateReport::session_id</definition>
+        <argsstring></argsstring>
+        <name>session_id</name>
+        <qualifiedname>umidi::protocol::StateReport::session_id</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="53" column="14" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="53" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_state_report_1a5c56318ff40fbce253ca9c5722c786eb" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::StateReport::received_bytes</definition>
+        <argsstring></argsstring>
+        <name>received_bytes</name>
+        <qualifiedname>umidi::protocol::StateReport::received_bytes</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="54" column="14" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="54" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_state_report_1a41d022dcbd71db4c54cbe9f0dcb2dad7" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::StateReport::flags</definition>
+        <argsstring></argsstring>
+        <name>flags</name>
+        <qualifiedname>umidi::protocol::StateReport::flags</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="55" column="13" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="55" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_state_report_1aa78241552085b96ad32cc58d7ec894bf" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::StateReport::reserved[3]</definition>
+        <argsstring>[3]</argsstring>
+        <name>reserved</name>
+        <qualifiedname>umidi::protocol::StateReport::reserved</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="56" column="13" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="56" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-attrib">
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_state_report_1a69fa534e133979ae3131e31d23959594" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::StateReport::FLAG_RESUMABLE</definition>
+        <argsstring></argsstring>
+        <name>FLAG_RESUMABLE</name>
+        <qualifiedname>umidi::protocol::StateReport::FLAG_RESUMABLE</qualifiedname>
+        <initializer>= 0x01</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="59" column="30" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="59" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_state_report_1aa9379316f5bd926dfa9214a9c0dc42ae" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::StateReport::FLAG_AUTHENTICATED</definition>
+        <argsstring></argsstring>
+        <name>FLAG_AUTHENTICATED</name>
+        <qualifiedname>umidi::protocol::StateReport::FLAG_AUTHENTICATED</qualifiedname>
+        <initializer>= 0x02</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="60" column="30" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="60" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_state_report_1a04652ddb7ab1a94381f96b8fec746897" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::StateReport::FLAG_ROLLBACK_AVAIL</definition>
+        <argsstring></argsstring>
+        <name>FLAG_ROLLBACK_AVAIL</name>
+        <qualifiedname>umidi::protocol::StateReport::FLAG_ROLLBACK_AVAIL</qualifiedname>
+        <initializer>= 0x04</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="61" column="30" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="61" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_state_report_1a80979be86eb80c0894f26831888a72ed" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::StateReport::FLAG_UPDATE_PENDING</definition>
+        <argsstring></argsstring>
+        <name>FLAG_UPDATE_PENDING</name>
+        <qualifiedname>umidi::protocol::StateReport::FLAG_UPDATE_PENDING</qualifiedname>
+        <initializer>= 0x08</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="62" column="30" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="62" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="structumidi_1_1protocol_1_1_state_report_1ab848fdae8f41f4cdd0e8636c0aaac899" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::StateReport::is_resumable</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>is_resumable</name>
+        <qualifiedname>umidi::protocol::StateReport::is_resumable</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="64" column="21" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="64" bodyend="66"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1protocol_1_1_state_report_1a817df13108e6c5778c445b0f8bf994bd" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::StateReport::is_authenticated</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>is_authenticated</name>
+        <qualifiedname>umidi::protocol::StateReport::is_authenticated</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="68" column="21" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="68" bodyend="70"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1protocol_1_1_state_report_1a969673efdfecd4c7c511eabd94429dc8" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::StateReport::rollback_available</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>rollback_available</name>
+        <qualifiedname>umidi::protocol::StateReport::rollback_available</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="72" column="21" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="72" bodyend="74"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1protocol_1_1_state_report_1a147c042c38fd52ddf0317cdc144048e9" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::StateReport::update_pending</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>update_pending</name>
+        <qualifiedname>umidi::protocol::StateReport::update_pending</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="76" column="21" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="76" bodyend="78"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/umi_state.hh" line="48" column="1" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="48" bodyend="79"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1protocol_1_1_state_report_1aa9379316f5bd926dfa9214a9c0dc42ae" prot="public" virt="non-virtual"><scope>umidi::protocol::StateReport</scope><name>FLAG_AUTHENTICATED</name></member>
+      <member refid="structumidi_1_1protocol_1_1_state_report_1a69fa534e133979ae3131e31d23959594" prot="public" virt="non-virtual"><scope>umidi::protocol::StateReport</scope><name>FLAG_RESUMABLE</name></member>
+      <member refid="structumidi_1_1protocol_1_1_state_report_1a04652ddb7ab1a94381f96b8fec746897" prot="public" virt="non-virtual"><scope>umidi::protocol::StateReport</scope><name>FLAG_ROLLBACK_AVAIL</name></member>
+      <member refid="structumidi_1_1protocol_1_1_state_report_1a80979be86eb80c0894f26831888a72ed" prot="public" virt="non-virtual"><scope>umidi::protocol::StateReport</scope><name>FLAG_UPDATE_PENDING</name></member>
+      <member refid="structumidi_1_1protocol_1_1_state_report_1a41d022dcbd71db4c54cbe9f0dcb2dad7" prot="public" virt="non-virtual"><scope>umidi::protocol::StateReport</scope><name>flags</name></member>
+      <member refid="structumidi_1_1protocol_1_1_state_report_1a817df13108e6c5778c445b0f8bf994bd" prot="public" virt="non-virtual"><scope>umidi::protocol::StateReport</scope><name>is_authenticated</name></member>
+      <member refid="structumidi_1_1protocol_1_1_state_report_1ab848fdae8f41f4cdd0e8636c0aaac899" prot="public" virt="non-virtual"><scope>umidi::protocol::StateReport</scope><name>is_resumable</name></member>
+      <member refid="structumidi_1_1protocol_1_1_state_report_1ab233a8a191bc845e8189b59b32043b6b" prot="public" virt="non-virtual"><scope>umidi::protocol::StateReport</scope><name>last_ack_seq</name></member>
+      <member refid="structumidi_1_1protocol_1_1_state_report_1a610fad8a8240a7c9761be35b7d1525b3" prot="public" virt="non-virtual"><scope>umidi::protocol::StateReport</scope><name>last_error</name></member>
+      <member refid="structumidi_1_1protocol_1_1_state_report_1a342fa25bc264974d2cbd035be479c9bf" prot="public" virt="non-virtual"><scope>umidi::protocol::StateReport</scope><name>progress_percent</name></member>
+      <member refid="structumidi_1_1protocol_1_1_state_report_1a5c56318ff40fbce253ca9c5722c786eb" prot="public" virt="non-virtual"><scope>umidi::protocol::StateReport</scope><name>received_bytes</name></member>
+      <member refid="structumidi_1_1protocol_1_1_state_report_1aa78241552085b96ad32cc58d7ec894bf" prot="public" virt="non-virtual"><scope>umidi::protocol::StateReport</scope><name>reserved</name></member>
+      <member refid="structumidi_1_1protocol_1_1_state_report_1a969673efdfecd4c7c511eabd94429dc8" prot="public" virt="non-virtual"><scope>umidi::protocol::StateReport</scope><name>rollback_available</name></member>
+      <member refid="structumidi_1_1protocol_1_1_state_report_1a4f0c21e590bbfea07a5b904d9f78ced6" prot="public" virt="non-virtual"><scope>umidi::protocol::StateReport</scope><name>session_id</name></member>
+      <member refid="structumidi_1_1protocol_1_1_state_report_1ad6e0855b04bd842c6bc19d76d597404d" prot="public" virt="non-virtual"><scope>umidi::protocol::StateReport</scope><name>state</name></member>
+      <member refid="structumidi_1_1protocol_1_1_state_report_1a147c042c38fd52ddf0317cdc144048e9" prot="public" virt="non-virtual"><scope>umidi::protocol::StateReport</scope><name>update_pending</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,296 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>使用例 &mdash; umidi ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=144c8c96"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/translations.js?v=4755f45a"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="genindex.html" />
+    <link rel="search" title="検索" href="search.html" />
+    <link rel="prev" title="umidi 設計ドキュメント" href="design.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            umidi
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+<div class="language-switcher" style="margin-top: 10px; padding: 8px; background: #f0f0f0; border-radius: 4px;">
+  <span style="font-size: 0.85em; color: #333;">Language:</span>
+  
+    <a href="../index.html" style="color: #2980b9; text-decoration: underline;">EN</a> |
+    <strong style="color: #2980b9;">JA</strong>
+  
+</div>
+
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="README.html">umidi - UMI-OS MIDIライブラリ</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="README.html#id1">特徴</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#id2">クイックスタート</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#id3">ディレクトリ構成</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#id4">独立性</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#id5">要件</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#id6">ライセンス</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="design.html">umidi 設計ドキュメント</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="design.html#id1">概要</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design.html#id2">アーキテクチャ</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="design.html#id3">レイヤー構造</a></li>
+<li class="toctree-l3"><a class="reference internal" href="design.html#ump-opt">コア設計: UMP-Opt形式</a></li>
+<li class="toctree-l3"><a class="reference internal" href="design.html#id4">型チェックの最適化</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="design.html#id5">パフォーマンス考慮事項</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="design.html#id6">メモリ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="design.html#id7">タイミング</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="design.html#id8">スレッドセーフティ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design.html#id9">エラーハンドリング</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">使用例</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#midi">基本的なMIDIパース</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">型安全なメッセージラッパー</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">メッセージディスパッチ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">MIDI出力</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sysex">SysEx通信</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">割り込み安全な使用</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">umidi</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">使用例</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/examples.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>使用例<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
+<p>このページではumidiライブラリの実践的な使用例を紹介します。</p>
+<section id="midi">
+<h2>基本的なMIDIパース<a class="headerlink" href="#midi" title="Link to this heading"></a></h2>
+<p>MIDIバイトストリームをパースしてメッセージを処理:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;umidi/core/ump.hh&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;umidi/core/parser.hh&gt;</span>
+
+<span class="n">umidi</span><span class="o">::</span><span class="n">Parser</span><span class="w"> </span><span class="n">parser</span><span class="p">;</span>
+<span class="n">umidi</span><span class="o">::</span><span class="n">UMP32</span><span class="w"> </span><span class="n">ump</span><span class="p">;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">process_midi_byte</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">byte</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">parser</span><span class="p">.</span><span class="n">parse</span><span class="p">(</span><span class="n">byte</span><span class="p">,</span><span class="w"> </span><span class="n">ump</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ump</span><span class="p">.</span><span class="n">is_note_on</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">synth</span><span class="p">.</span><span class="n">note_on</span><span class="p">(</span><span class="n">ump</span><span class="p">.</span><span class="n">channel</span><span class="p">(),</span><span class="w"> </span><span class="n">ump</span><span class="p">.</span><span class="n">note</span><span class="p">(),</span><span class="w"> </span><span class="n">ump</span><span class="p">.</span><span class="n">velocity</span><span class="p">());</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ump</span><span class="p">.</span><span class="n">is_note_off</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">synth</span><span class="p">.</span><span class="n">note_off</span><span class="p">(</span><span class="n">ump</span><span class="p">.</span><span class="n">channel</span><span class="p">(),</span><span class="w"> </span><span class="n">ump</span><span class="p">.</span><span class="n">note</span><span class="p">());</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ump</span><span class="p">.</span><span class="n">is_cc</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">params</span><span class="p">.</span><span class="n">set_cc</span><span class="p">(</span><span class="n">ump</span><span class="p">.</span><span class="n">cc_number</span><span class="p">(),</span><span class="w"> </span><span class="n">ump</span><span class="p">.</span><span class="n">cc_value</span><span class="p">());</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h2>型安全なメッセージラッパー<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<p>コンパイル時の型安全性のためにメッセージラッパーを使用:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;umidi/messages/channel_voice.hh&gt;</span>
+
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">umidi</span><span class="o">::</span><span class="nn">message</span><span class="p">;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">handle_note</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">NoteOn</span><span class="o">&amp;</span><span class="w"> </span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Note %d on channel %d, velocity %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="n">msg</span><span class="p">.</span><span class="n">note</span><span class="p">(),</span><span class="w"> </span><span class="n">msg</span><span class="p">.</span><span class="n">channel</span><span class="p">(),</span><span class="w"> </span><span class="n">msg</span><span class="p">.</span><span class="n">velocity</span><span class="p">());</span>
+<span class="p">}</span>
+
+<span class="c1">// メッセージ作成</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">note</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">NoteOn</span><span class="o">::</span><span class="n">create</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span><span class="w">  </span><span class="c1">// チャンネル0、中央C、ベロシティ100</span>
+<span class="n">handle_note</span><span class="p">(</span><span class="n">note</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h2>メッセージディスパッチ<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<p>型に基づいてハンドラーにディスパッチ:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;umidi/messages/channel_voice.hh&gt;</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Synthesizer</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">process</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">umidi</span><span class="o">::</span><span class="n">UMP32</span><span class="o">&amp;</span><span class="w"> </span><span class="n">ump</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">umidi</span><span class="o">::</span><span class="n">message</span><span class="o">::</span><span class="n">dispatch</span><span class="p">(</span><span class="n">ump</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="k">this</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">handle</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+<span class="w">        </span><span class="p">});</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="k">private</span><span class="o">:</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">handle</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">umidi</span><span class="o">::</span><span class="n">message</span><span class="o">::</span><span class="n">NoteOn</span><span class="o">&amp;</span><span class="w"> </span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">voice_on</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">note</span><span class="p">(),</span><span class="w"> </span><span class="n">msg</span><span class="p">.</span><span class="n">velocity</span><span class="p">());</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">handle</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">umidi</span><span class="o">::</span><span class="n">message</span><span class="o">::</span><span class="n">NoteOff</span><span class="o">&amp;</span><span class="w"> </span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">voice_off</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">note</span><span class="p">());</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">handle</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">umidi</span><span class="o">::</span><span class="n">message</span><span class="o">::</span><span class="n">ControlChange</span><span class="o">&amp;</span><span class="w"> </span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">controller</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">  </span><span class="c1">// モジュレーションホイール</span>
+<span class="w">            </span><span class="n">set_modulation</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">value</span><span class="p">());</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// その他のメッセージ型用のキャッチオール</span>
+<span class="w">    </span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">handle</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h2>MIDI出力<a class="headerlink" href="#id4" title="Link to this heading"></a></h2>
+<p>UMP32をMIDI 1.0バイトに変換:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;umidi/core/parser.hh&gt;</span><span class="c1">  // Serializerを含む</span>
+
+<span class="n">umidi</span><span class="o">::</span><span class="n">UMP32</span><span class="w"> </span><span class="n">ump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">umidi</span><span class="o">::</span><span class="n">UMP32</span><span class="o">::</span><span class="n">note_on</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span>
+
+<span class="kt">uint8_t</span><span class="w"> </span><span class="n">buffer</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span>
+<span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">umidi</span><span class="o">::</span><span class="n">Serializer</span><span class="o">::</span><span class="n">serialize</span><span class="p">(</span><span class="n">ump</span><span class="p">,</span><span class="w"> </span><span class="n">buffer</span><span class="p">);</span>
+
+<span class="n">midi_send</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span><span class="w"> </span><span class="n">len</span><span class="p">);</span><span class="w">  </span><span class="c1">// 3バイト送信: 0x90 0x3C 0x64</span>
+</pre></div>
+</div>
+</section>
+<section id="sysex">
+<h2>SysEx通信<a class="headerlink" href="#sysex" title="Link to this heading"></a></h2>
+<p>双方向通信用のUMI SysExプロトコル:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;umidi/protocol/message.hh&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;umidi/protocol/standard_io.hh&gt;</span>
+
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">umidi</span><span class="o">::</span><span class="nn">protocol</span><span class="p">;</span>
+
+<span class="n">StandardIO</span><span class="o">&lt;</span><span class="mi">512</span><span class="p">,</span><span class="w"> </span><span class="mi">512</span><span class="o">&gt;</span><span class="w"> </span><span class="n">stdio</span><span class="p">;</span>
+
+<span class="c1">// ホストにテキスト送信</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">print</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">text</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">stdio</span><span class="p">.</span><span class="n">write_stdout</span><span class="p">(</span>
+<span class="w">        </span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">text</span><span class="p">),</span>
+<span class="w">        </span><span class="n">strlen</span><span class="p">(</span><span class="n">text</span><span class="p">),</span>
+<span class="w">        </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">midi_send_sysex</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">len</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// stdin用コールバック設定</span>
+<span class="n">stdio</span><span class="p">.</span><span class="n">set_stdin_callback</span><span class="p">(</span>
+<span class="w">    </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">process_command</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">len</span><span class="p">);</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="k">nullptr</span>
+<span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="id5">
+<h2>割り込み安全な使用<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
+<p>リアルタイムオーディオコールバック用:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// すべての操作がロックフリーで決定論的</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">audio_callback</span><span class="p">(</span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">midi_in</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">midi_len</span><span class="p">,</span>
+<span class="w">                    </span><span class="kt">float</span><span class="o">*</span><span class="w"> </span><span class="n">audio_out</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">frames</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// MIDIパース（バイトあたり一定時間）</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">midi_len</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">umidi</span><span class="o">::</span><span class="n">UMP32</span><span class="w"> </span><span class="n">ump</span><span class="p">;</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">parser_</span><span class="p">.</span><span class="n">parse</span><span class="p">(</span><span class="n">midi_in</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="w"> </span><span class="n">ump</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="c1">// メッセージ処理（一定時間）</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ump</span><span class="p">.</span><span class="n">is_note_on</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">synth_</span><span class="p">.</span><span class="n">note_on</span><span class="p">(</span><span class="n">ump</span><span class="p">.</span><span class="n">note</span><span class="p">(),</span><span class="w"> </span><span class="n">ump</span><span class="p">.</span><span class="n">velocity</span><span class="p">());</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// オーディオ生成</span>
+<span class="w">    </span><span class="n">synth_</span><span class="p">.</span><span class="n">render</span><span class="p">(</span><span class="n">audio_out</span><span class="p">,</span><span class="w"> </span><span class="n">frames</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="design.html" class="btn btn-neutral float-left" title="umidi 設計ドキュメント" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, UMI-OS Project.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

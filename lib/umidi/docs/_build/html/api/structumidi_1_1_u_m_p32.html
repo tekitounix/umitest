@@ -1,0 +1,746 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Struct UMP32 &mdash; umidi Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/collapsible-lists/css/tree_view.css?v=a885cde7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js?v=73120307"></script>
+      <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Struct UMP64" href="structumidi_1_1_u_m_p64.html" />
+    <link rel="prev" title="Struct TransportCapabilities" href="structumidi_1_1protocol_1_1_transport_capabilities.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            umidi
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+<div class="language-switcher" style="margin-top: 10px; padding: 8px; background: #f0f0f0; border-radius: 4px;">
+  <span style="font-size: 0.85em; color: #333;">Language:</span>
+  
+    <strong style="color: #2980b9;">EN</strong> |
+    <a href="ja/index.html" style="color: #2980b9; text-decoration: underline;">JA</a>
+  
+</div>
+
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../README.html">umidi - UMI-OS MIDI Library</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../README.html#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../README.html#quick-start">Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../README.html#documentation">Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../README.html#directory-structure">Directory Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../README.html#independence">Independence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../README.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../README.html#license">License</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../design.html">umidi Design Document</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../design.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../design.html#architecture">Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#layer-structure">Layer Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#core-design-ump-opt-format">Core Design: UMP-Opt Format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#type-checking-optimization">Type Checking Optimization</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../design.html#module-reference">Module Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#core">core/</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#messages">messages/</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#protocol">protocol/</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../design.html#usage-patterns">Usage Patterns</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#basic-parsing">Basic Parsing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#type-safe-dispatch">Type-Safe Dispatch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#factory-methods">Factory Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../design.html#performance-considerations">Performance Considerations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#memory">Memory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#timing">Timing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../design.html#thread-safety">Thread Safety</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../design.html#error-handling">Error Handling</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#basic-midi-parsing">Basic MIDI Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#running-status-support">Running Status Support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#type-safe-message-wrappers">Type-Safe Message Wrappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#message-dispatch">Message Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#midi-output">MIDI Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#sysex-communication">SysEx Communication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#pitch-bend-handling">Pitch Bend Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#building-umi-protocol-messages">Building UMI Protocol Messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#interrupt-safe-usage">Interrupt-Safe Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../CORE.html">Core Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../CORE.html#ump32-core-ump-hh">UMP32 (core/ump.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../CORE.html#memory-layout">Memory Layout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CORE.html#type-checking">Type Checking</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CORE.html#api">API</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../CORE.html#ump64-core-ump-hh">UMP64 (core/ump.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../CORE.html#parser-core-parser-hh">Parser (core/parser.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../CORE.html#usage-example">Usage Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../CORE.html#serializer-core-parser-hh">Serializer (core/parser.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../CORE.html#result-core-result-hh">Result (core/result.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../CORE.html#sysexbuffer-core-sysex-buffer-hh">SysExBuffer (core/sysex_buffer.hh)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../MESSAGES.html">Message Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../MESSAGES.html#channel-voice-messages-messages-channel-voice-hh">Channel Voice Messages (messages/channel_voice.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#noteon">NoteOn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#noteoff">NoteOff</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#controlchange">ControlChange</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#programchange">ProgramChange</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#pitchbend">PitchBend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#channelpressure">ChannelPressure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#polypressure">PolyPressure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#message-dispatch">Message Dispatch</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../MESSAGES.html#system-messages-messages-system-hh">System Messages (messages/system.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#real-time-messages">Real-time Messages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#system-common-messages">System Common Messages</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../MESSAGES.html#sysex-messages-messages-sysex-hh">SysEx Messages (messages/sysex.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#sysex7">SysEx7</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#sysexparser">SysExParser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#sysexserializer">SysExSerializer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../MESSAGES.html#utility-messages-messages-utility-hh">Utility Messages (messages/utility.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#jr-timestamp-jitter-reduction">JR Timestamp (Jitter Reduction)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#jr-timestamp-tracker">JR Timestamp Tracker</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#jr-clock">JR Clock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#noop">NOOP</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../CC.html">Control Change</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../CC.html#cc-types-cc-types-hh">CC Types (cc/types.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#bit-cc">7-bit CC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#bit-cc-msb-lsb-pair">14-bit CC (MSB/LSB pair)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#switch-cc">Switch CC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#rpn-nrpn">RPN/NRPN</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../CC.html#standard-cc-definitions-cc-standards-hh">Standard CC Definitions (cc/standards.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#bit-controllers">14-bit Controllers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#switch-controllers">Switch Controllers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#sound-controllers">Sound Controllers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#effect-depths">Effect Depths</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#channel-mode">Channel Mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#standard-rpns">Standard RPNs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#pitch-bend-sensitivity-helper">Pitch Bend Sensitivity Helper</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../CC.html#rpn-nrpn-decoder-cc-decoder-hh">RPN/NRPN Decoder (cc/decoder.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#usage-example">Usage Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../CC.html#template-static-decoder-codec-decoder-hh">Template Static Decoder (codec/decoder.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#pre-configured-decoders">Pre-configured Decoders</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../PROTOCOL.html">UMI SysEx Protocol</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#protocol-overview">Protocol Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#bit-encoding-protocol-umi-sysex-hh">7-bit Encoding (protocol/umi_sysex.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#command-categories">Command Categories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#standard-io-protocol-umi-sysex-hh">Standard IO (protocol/umi_sysex.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#standardio-class">StandardIO Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#commands">Commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#message-builder">Message Builder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#message-parser">Message Parser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#firmware-update-protocol-umi-firmware-hh">Firmware Update (protocol/umi_firmware.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#firmwareheader">FirmwareHeader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#firmwareheaderbuilder">FirmwareHeaderBuilder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#firmwarevalidator">FirmwareValidator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#firmware-commands">Firmware Commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#a-b-partition-bootloader-protocol-umi-bootloader-hh">A/B Partition Bootloader (protocol/umi_bootloader.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#bootconfig">BootConfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#platform-configurations">Platform Configurations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#bootloaderinterface">BootloaderInterface</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#authentication-protocol-umi-auth-hh">Authentication (protocol/umi_auth.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#authenticator">Authenticator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#authclient">AuthClient</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#auth-commands">Auth Commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#session-management-protocol-umi-session-hh">Session Management (protocol/umi_session.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#timeoutconfig">TimeoutConfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#sessiontimer">SessionTimer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#flowcontrolsender">FlowControlSender</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#flowcontrolreceiver">FlowControlReceiver</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#securefirmwareupdate-complete-handler">SecureFirmwareUpdate (Complete Handler)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../TRANSPORT.html">Transport Abstraction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#transport-types-protocol-umi-transport-hh">Transport Types (protocol/umi_transport.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#transport-capabilities">Transport Capabilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#transport-interface">Transport Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#bulk-framing">Bulk Framing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#sysex-transport">SysEx Transport</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#bulk-transport">Bulk Transport</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#transport-handler">Transport Handler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#transport-manager">Transport Manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#usage-example">Usage Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#web-client-fallback-strategy">Web Client Fallback Strategy</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../STATE.html">State Synchronization</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#device-states-protocol-umi-state-hh">Device States (protocol/umi_state.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#state-commands-0x28-0x2f">State Commands (0x28-0x2F)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#state-report">State Report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#resume-info">Resume Info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#boot-verification">Boot Verification</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../STATE.html#boot-flow">Boot Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#state-manager">State Manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#state-protocol-handler">State Protocol Handler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#stateful-firmware-update">Stateful Firmware Update</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#usage-example">Usage Example</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../STATE.html#device-side-bootloader">Device-side (Bootloader)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../STATE.html#device-side-application">Device-side (Application)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../STATE.html#host-side-web-client">Host-side (Web Client)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../OBJECT.html">Object Transfer Protocol</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#object-types-protocol-umi-object-hh">Object Types (protocol/umi_object.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#object-flags">Object Flags</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#object-header-80-bytes">Object Header (80 bytes)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#type-specific-metadata">Type-Specific Metadata</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#sequence-metadata">Sequence Metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#sample-metadata">Sample Metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#preset-metadata">Preset Metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#config-metadata">Config Metadata</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#object-commands-0x40-0x5f">Object Commands (0x40-0x5F)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#management-commands-0x40-0x4f">Management Commands (0x40-0x4F)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#action-commands-0x50-0x5f">Action Commands (0x50-0x5F)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#object-error-codes">Object Error Codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#storage-info">Storage Info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#object-storage-interface">Object Storage Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#ram-object-storage">RAM Object Storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#object-transfer-handler">Object Transfer Handler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#usage-example">Usage Example</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#storing-a-sequence">Storing a Sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#reading-a-preset">Reading a Preset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#host-side-web-client">Host-side (Web Client)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../API.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../API.html#namespaces">Namespaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../API.html#core-types">Core Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#ump32">UMP32</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#ump64">UMP64</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#parser">Parser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#result">Result</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#event">Event</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../API.html#message-types">Message Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#channel-voice">Channel Voice</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#utility">Utility</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../API.html#control-change">Control Change</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#rpn-nrpn-decoder">RPN/NRPN Decoder</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../API.html#protocol">Protocol</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#sysex-encoding">SysEx Encoding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#message-builder-parser">Message Builder/Parser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#firmware-update">Firmware Update</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#transport">Transport</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#state-management">State Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#object-transfer">Object Transfer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../API.html#value-conversions">Value Conversions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../API.html#platform-aliases">Platform Aliases</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="library_root.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="library_root.html#file-hierarchy">File Hierarchy</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="library_root.html#full-api">Full API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#namespaces">Namespaces</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="library_root.html#classes-and-structs">Classes and Structs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#enums">Enums</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#functions">Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#variables">Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">umidi</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="library_root.html">API Reference</a></li>
+      <li class="breadcrumb-item active">Struct UMP32</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/structumidi_1_1_u_m_p32.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="struct-ump32">
+<span id="exhale-struct-structumidi-1-1-u-m-p32"></span><h1>Struct UMP32<a class="headerlink" href="#struct-ump32" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p>Defined in <a class="reference internal" href="file_include_umidi_core_ump.hh.html#file-include-umidi-core-ump-hh"><span class="std std-ref">File ump.hh</span></a></p></li>
+</ul>
+<section id="struct-documentation">
+<h2>Struct Documentation<a class="headerlink" href="#struct-documentation" title="Link to this heading"></a></h2>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP32E">
+<span id="_CPPv3N5umidi5UMP32E"></span><span id="_CPPv2N5umidi5UMP32E"></span><span id="umidi::UMP32"></span><span class="target" id="structumidi_1_1_u_m_p32"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">UMP32</span></span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP32E" title="Link to this definition"></a><br /></dt>
+<dd><p>32-bit Universal MIDI Packet (Optimized). </p>
+<p>Stores as single uint32_t for efficient comparison and manipulation. Layout: [MT:4][Group:4][Status:8][Data1:8][Data2:8]</p>
+<p><dl>
+<dt><strong>Example:</strong></dt><dd><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">auto</span> <span class="n">note_on</span> <span class="o">=</span> <span class="n">UMP32</span><span class="p">::</span><span class="n">note_on</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">100</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">note_on</span><span class="o">.</span><span class="n">is_note_on</span><span class="p">())</span> <span class="p">{</span>
+    <span class="n">process_note</span><span class="p">(</span><span class="n">note_on</span><span class="o">.</span><span class="n">note</span><span class="p">(),</span> <span class="n">note_on</span><span class="o">.</span><span class="n">velocity</span><span class="p">());</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP325UMP32Ev">
+<span id="_CPPv3N5umidi5UMP325UMP32Ev"></span><span id="_CPPv2N5umidi5UMP325UMP32Ev"></span><span id="umidi::UMP32::UMP32CE"></span><span class="target" id="structumidi_1_1_u_m_p32_1a7619235e74b71aaa0adcab1219b12006"></span><span class="k"><span class="pre">constexpr</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">UMP32</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">default</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP325UMP32Ev" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP325UMP32E8uint32_t">
+<span id="_CPPv3N5umidi5UMP325UMP32E8uint32_t"></span><span id="_CPPv2N5umidi5UMP325UMP32E8uint32_t"></span><span id="umidi::UMP32::UMP32__uint32_tCE"></span><span class="target" id="structumidi_1_1_u_m_p32_1a8bcf3914924b80fda6e4433d164483ee"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">explicit</span></span><span class="w"> </span><span class="k"><span class="pre">constexpr</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">UMP32</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">raw</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP325UMP32E8uint32_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP325UMP32E7uint8_t7uint8_t7uint8_t7uint8_t7uint8_t">
+<span id="_CPPv3N5umidi5UMP325UMP32E7uint8_t7uint8_t7uint8_t7uint8_t7uint8_t"></span><span id="_CPPv2N5umidi5UMP325UMP32E7uint8_t7uint8_t7uint8_t7uint8_t7uint8_t"></span><span id="umidi::UMP32::UMP32__uint8_t.uint8_t.uint8_t.uint8_t.uint8_tCE"></span><span class="target" id="structumidi_1_1_u_m_p32_1ad27f035be1aae650a315a7c476cbe0a7"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">constexpr</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">UMP32</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">mt</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">group</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">status</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">d1</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">d2</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP325UMP32E7uint8_t7uint8_t7uint8_t7uint8_t7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP322mtEv">
+<span id="_CPPv3NK5umidi5UMP322mtEv"></span><span id="_CPPv2NK5umidi5UMP322mtEv"></span><span id="umidi::UMP32::mtC"></span><span class="target" id="structumidi_1_1_u_m_p32_1a47911b80202cc005edb118aad0dbab75"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">mt</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP322mtEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP325groupEv">
+<span id="_CPPv3NK5umidi5UMP325groupEv"></span><span id="_CPPv2NK5umidi5UMP325groupEv"></span><span id="umidi::UMP32::groupC"></span><span class="target" id="structumidi_1_1_u_m_p32_1a4ff8d81e63980e22cfe5ce05d5d2050f"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">group</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP325groupEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP326statusEv">
+<span id="_CPPv3NK5umidi5UMP326statusEv"></span><span id="_CPPv2NK5umidi5UMP326statusEv"></span><span id="umidi::UMP32::statusC"></span><span class="target" id="structumidi_1_1_u_m_p32_1a2df070c338216fa2d16275cd49e45982"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">status</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP326statusEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP325data1Ev">
+<span id="_CPPv3NK5umidi5UMP325data1Ev"></span><span id="_CPPv2NK5umidi5UMP325data1Ev"></span><span id="umidi::UMP32::data1C"></span><span class="target" id="structumidi_1_1_u_m_p32_1a6779b6dac45d0bcd7a67de1d87dd0183"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">data1</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP325data1Ev" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP325data2Ev">
+<span id="_CPPv3NK5umidi5UMP325data2Ev"></span><span id="_CPPv2NK5umidi5UMP325data2Ev"></span><span id="umidi::UMP32::data2C"></span><span class="target" id="structumidi_1_1_u_m_p32_1a57a622d69eae02d952172f24480c7849"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">data2</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP325data2Ev" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP327channelEv">
+<span id="_CPPv3NK5umidi5UMP327channelEv"></span><span id="_CPPv2NK5umidi5UMP327channelEv"></span><span id="umidi::UMP32::channelC"></span><span class="target" id="structumidi_1_1_u_m_p32_1a83d96148697dca7adff0c626808cf300"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">channel</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP327channelEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP327commandEv">
+<span id="_CPPv3NK5umidi5UMP327commandEv"></span><span id="_CPPv2NK5umidi5UMP327commandEv"></span><span id="umidi::UMP32::commandC"></span><span class="target" id="structumidi_1_1_u_m_p32_1aea283d76f2e7fb2d88e46ce28bd6cd56"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">command</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP327commandEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP3212set_mt_groupE7uint8_t7uint8_t">
+<span id="_CPPv3N5umidi5UMP3212set_mt_groupE7uint8_t7uint8_t"></span><span id="_CPPv2N5umidi5UMP3212set_mt_groupE7uint8_t7uint8_t"></span><span id="umidi::UMP32::set_mt_group__uint8_t.uint8_t"></span><span class="target" id="structumidi_1_1_u_m_p32_1afb6495724adc8813a17439448d66c7dd"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">set_mt_group</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">mt</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">g</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP3212set_mt_groupE7uint8_t7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP3210set_statusE7uint8_t">
+<span id="_CPPv3N5umidi5UMP3210set_statusE7uint8_t"></span><span id="_CPPv2N5umidi5UMP3210set_statusE7uint8_t"></span><span id="umidi::UMP32::set_status__uint8_t"></span><span class="target" id="structumidi_1_1_u_m_p32_1afe8f667de5315c0590296f97a27c5488"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">set_status</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">s</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP3210set_statusE7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP329set_data1E7uint8_t">
+<span id="_CPPv3N5umidi5UMP329set_data1E7uint8_t"></span><span id="_CPPv2N5umidi5UMP329set_data1E7uint8_t"></span><span id="umidi::UMP32::set_data1__uint8_t"></span><span class="target" id="structumidi_1_1_u_m_p32_1a6fef79b7e5a6f90f4f0e93ec6e9409b2"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">set_data1</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">d</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP329set_data1E7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP329set_data2E7uint8_t">
+<span id="_CPPv3N5umidi5UMP329set_data2E7uint8_t"></span><span id="_CPPv2N5umidi5UMP329set_data2E7uint8_t"></span><span id="umidi::UMP32::set_data2__uint8_t"></span><span class="target" id="structumidi_1_1_u_m_p32_1a8b3b7fd6065c281dc0bd9a0053846029"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">set_data2</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">d</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP329set_data2E7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP3210is_note_onEv">
+<span id="_CPPv3NK5umidi5UMP3210is_note_onEv"></span><span id="_CPPv2NK5umidi5UMP3210is_note_onEv"></span><span id="umidi::UMP32::is_note_onC"></span><span class="target" id="structumidi_1_1_u_m_p32_1a2513ae7e791613e63e277c00e19c5f9e"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_note_on</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP3210is_note_onEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP3211is_note_offEv">
+<span id="_CPPv3NK5umidi5UMP3211is_note_offEv"></span><span id="_CPPv2NK5umidi5UMP3211is_note_offEv"></span><span id="umidi::UMP32::is_note_offC"></span><span class="target" id="structumidi_1_1_u_m_p32_1aa59add3603bf619e9b75fda2edfdf251"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_note_off</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP3211is_note_offEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP325is_ccEv">
+<span id="_CPPv3NK5umidi5UMP325is_ccEv"></span><span id="_CPPv2NK5umidi5UMP325is_ccEv"></span><span id="umidi::UMP32::is_ccC"></span><span class="target" id="structumidi_1_1_u_m_p32_1a6000e1e63efd9a134e27362653732cc7"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_cc</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP325is_ccEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP3217is_program_changeEv">
+<span id="_CPPv3NK5umidi5UMP3217is_program_changeEv"></span><span id="_CPPv2NK5umidi5UMP3217is_program_changeEv"></span><span id="umidi::UMP32::is_program_changeC"></span><span class="target" id="structumidi_1_1_u_m_p32_1a5c94091738cad0f78b40a4383f34cc61"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_program_change</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP3217is_program_changeEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP3219is_channel_pressureEv">
+<span id="_CPPv3NK5umidi5UMP3219is_channel_pressureEv"></span><span id="_CPPv2NK5umidi5UMP3219is_channel_pressureEv"></span><span id="umidi::UMP32::is_channel_pressureC"></span><span class="target" id="structumidi_1_1_u_m_p32_1a94cafe0cd1814e0d51f31d4ea03d2e0f"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_channel_pressure</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP3219is_channel_pressureEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP3213is_pitch_bendEv">
+<span id="_CPPv3NK5umidi5UMP3213is_pitch_bendEv"></span><span id="_CPPv2NK5umidi5UMP3213is_pitch_bendEv"></span><span id="umidi::UMP32::is_pitch_bendC"></span><span class="target" id="structumidi_1_1_u_m_p32_1a42e5d2846077f820eb23ac5c5d1443f8"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_pitch_bend</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP3213is_pitch_bendEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP3216is_poly_pressureEv">
+<span id="_CPPv3NK5umidi5UMP3216is_poly_pressureEv"></span><span id="_CPPv2NK5umidi5UMP3216is_poly_pressureEv"></span><span id="umidi::UMP32::is_poly_pressureC"></span><span class="target" id="structumidi_1_1_u_m_p32_1ad6df584dbf6be44e6c6be318ebda91ca"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_poly_pressure</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP3216is_poly_pressureEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP3211is_midi1_cvEv">
+<span id="_CPPv3NK5umidi5UMP3211is_midi1_cvEv"></span><span id="_CPPv2NK5umidi5UMP3211is_midi1_cvEv"></span><span id="umidi::UMP32::is_midi1_cvC"></span><span class="target" id="structumidi_1_1_u_m_p32_1ac9b9b1fd8370e62d2262348723915c7a"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_midi1_cv</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP3211is_midi1_cvEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP329is_systemEv">
+<span id="_CPPv3NK5umidi5UMP329is_systemEv"></span><span id="_CPPv2NK5umidi5UMP329is_systemEv"></span><span id="umidi::UMP32::is_systemC"></span><span class="target" id="structumidi_1_1_u_m_p32_1a935717f75033eaba8159e458f70bd767"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_system</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP329is_systemEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP3211is_realtimeEv">
+<span id="_CPPv3NK5umidi5UMP3211is_realtimeEv"></span><span id="_CPPv2NK5umidi5UMP3211is_realtimeEv"></span><span id="umidi::UMP32::is_realtimeC"></span><span class="target" id="structumidi_1_1_u_m_p32_1ab2184644df45f6de04658438203c2def"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_realtime</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP3211is_realtimeEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP324noteEv">
+<span id="_CPPv3NK5umidi5UMP324noteEv"></span><span id="_CPPv2NK5umidi5UMP324noteEv"></span><span id="umidi::UMP32::noteC"></span><span class="target" id="structumidi_1_1_u_m_p32_1ace24f9b9fbe2b030d11de940dc6005dc"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">note</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP324noteEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP328velocityEv">
+<span id="_CPPv3NK5umidi5UMP328velocityEv"></span><span id="_CPPv2NK5umidi5UMP328velocityEv"></span><span id="umidi::UMP32::velocityC"></span><span class="target" id="structumidi_1_1_u_m_p32_1abc5fdcc9ece0f2a5d9a336314793f16e"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">velocity</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP328velocityEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP329cc_numberEv">
+<span id="_CPPv3NK5umidi5UMP329cc_numberEv"></span><span id="_CPPv2NK5umidi5UMP329cc_numberEv"></span><span id="umidi::UMP32::cc_numberC"></span><span class="target" id="structumidi_1_1_u_m_p32_1a101d811d99e3c02158d22a28770e031f"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">cc_number</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP329cc_numberEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP328cc_valueEv">
+<span id="_CPPv3NK5umidi5UMP328cc_valueEv"></span><span id="_CPPv2NK5umidi5UMP328cc_valueEv"></span><span id="umidi::UMP32::cc_valueC"></span><span class="target" id="structumidi_1_1_u_m_p32_1ad11eb95e3db51334a7537fe50719799c"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">cc_value</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP328cc_valueEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP327programEv">
+<span id="_CPPv3NK5umidi5UMP327programEv"></span><span id="_CPPv2NK5umidi5UMP327programEv"></span><span id="umidi::UMP32::programC"></span><span class="target" id="structumidi_1_1_u_m_p32_1a0374bcedda09edeffd9b3e1a89873b37"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">program</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP327programEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP328pressureEv">
+<span id="_CPPv3NK5umidi5UMP328pressureEv"></span><span id="_CPPv2NK5umidi5UMP328pressureEv"></span><span id="umidi::UMP32::pressureC"></span><span class="target" id="structumidi_1_1_u_m_p32_1ae5f8d1a5022352c41bdd681117039aeb"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">pressure</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP328pressureEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP3216pitch_bend_valueEv">
+<span id="_CPPv3NK5umidi5UMP3216pitch_bend_valueEv"></span><span id="_CPPv2NK5umidi5UMP3216pitch_bend_valueEv"></span><span id="umidi::UMP32::pitch_bend_valueC"></span><span class="target" id="structumidi_1_1_u_m_p32_1a42387ecdf934b07a3ca0de3c1fa9795d"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint16_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">pitch_bend_value</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP3216pitch_bend_valueEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP323rawEv">
+<span id="_CPPv3NK5umidi5UMP323rawEv"></span><span id="_CPPv2NK5umidi5UMP323rawEv"></span><span id="umidi::UMP32::rawC"></span><span class="target" id="structumidi_1_1_u_m_p32_1ab25474404d5881be4df6afb8f786dffb"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">raw</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP323rawEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP3215is_timing_clockEv">
+<span id="_CPPv3NK5umidi5UMP3215is_timing_clockEv"></span><span id="_CPPv2NK5umidi5UMP3215is_timing_clockEv"></span><span id="umidi::UMP32::is_timing_clockC"></span><span class="target" id="structumidi_1_1_u_m_p32_1a0328dc55133c369a24a46c9b627244f9"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_timing_clock</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP3215is_timing_clockEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP328is_startEv">
+<span id="_CPPv3NK5umidi5UMP328is_startEv"></span><span id="_CPPv2NK5umidi5UMP328is_startEv"></span><span id="umidi::UMP32::is_startC"></span><span class="target" id="structumidi_1_1_u_m_p32_1aa1b8cbe4dd0a9400df3f9d17a93666b2"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_start</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP328is_startEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP327is_stopEv">
+<span id="_CPPv3NK5umidi5UMP327is_stopEv"></span><span id="_CPPv2NK5umidi5UMP327is_stopEv"></span><span id="umidi::UMP32::is_stopC"></span><span class="target" id="structumidi_1_1_u_m_p32_1aed98a8164719d44027ea98522610a538"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_stop</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP327is_stopEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP3211is_continueEv">
+<span id="_CPPv3NK5umidi5UMP3211is_continueEv"></span><span id="_CPPv2NK5umidi5UMP3211is_continueEv"></span><span id="umidi::UMP32::is_continueC"></span><span class="target" id="structumidi_1_1_u_m_p32_1afcd8a8da9d9a67f58c81db1c789e85c7"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_continue</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP3211is_continueEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP3217is_active_sensingEv">
+<span id="_CPPv3NK5umidi5UMP3217is_active_sensingEv"></span><span id="_CPPv2NK5umidi5UMP3217is_active_sensingEv"></span><span id="umidi::UMP32::is_active_sensingC"></span><span class="target" id="structumidi_1_1_u_m_p32_1a77e1e5f5ad442f999d49bf224d7a46f9"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_active_sensing</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP3217is_active_sensingEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP3215is_system_resetEv">
+<span id="_CPPv3NK5umidi5UMP3215is_system_resetEv"></span><span id="_CPPv2NK5umidi5UMP3215is_system_resetEv"></span><span id="umidi::UMP32::is_system_resetC"></span><span class="target" id="structumidi_1_1_u_m_p32_1a084b81eabb7290fd18d17ae30366c08a"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_system_reset</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP3215is_system_resetEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP3215is_tune_requestEv">
+<span id="_CPPv3NK5umidi5UMP3215is_tune_requestEv"></span><span id="_CPPv2NK5umidi5UMP3215is_tune_requestEv"></span><span id="umidi::UMP32::is_tune_requestC"></span><span class="target" id="structumidi_1_1_u_m_p32_1a0b9cab06191e2728848a5f68990be4a8"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_tune_request</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP3215is_tune_requestEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP328mtc_dataEv">
+<span id="_CPPv3NK5umidi5UMP328mtc_dataEv"></span><span id="_CPPv2NK5umidi5UMP328mtc_dataEv"></span><span id="umidi::UMP32::mtc_dataC"></span><span class="target" id="structumidi_1_1_u_m_p32_1aca7b4f68a10201a0ac4ee8e6a43d2f4f"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">mtc_data</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP328mtc_dataEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP3213song_positionEv">
+<span id="_CPPv3NK5umidi5UMP3213song_positionEv"></span><span id="_CPPv2NK5umidi5UMP3213song_positionEv"></span><span id="umidi::UMP32::song_positionC"></span><span class="target" id="structumidi_1_1_u_m_p32_1a20b582f6f40549243814bfa6ea1a0fba"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint16_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">song_position</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP3213song_positionEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP3211song_numberEv">
+<span id="_CPPv3NK5umidi5UMP3211song_numberEv"></span><span id="_CPPv2NK5umidi5UMP3211song_numberEv"></span><span id="umidi::UMP32::song_numberC"></span><span class="target" id="structumidi_1_1_u_m_p32_1ac86008983b5073f170339b8183d528ca"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">song_number</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP3211song_numberEv" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP32eqERK5UMP32">
+<span id="_CPPv3NK5umidi5UMP32eqERK5UMP32"></span><span id="_CPPv2NK5umidi5UMP32eqERK5UMP32"></span><span id="umidi::UMP32::eq-operator__UMP32CRC"></span><span class="target" id="structumidi_1_1_u_m_p32_1aad96373f10de6076b62b023a4eb44d60"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">==</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5umidi5UMP32E" title="umidi::UMP32"><span class="n"><span class="pre">UMP32</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">other</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP32eqERK5UMP32" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK5umidi5UMP32neERK5UMP32">
+<span id="_CPPv3NK5umidi5UMP32neERK5UMP32"></span><span id="_CPPv2NK5umidi5UMP32neERK5UMP32"></span><span id="umidi::UMP32::neq-operator__UMP32CRC"></span><span class="target" id="structumidi_1_1_u_m_p32_1a533c241169210384bcdf1e8e023ccb7f"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">!=</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5umidi5UMP32E" title="umidi::UMP32"><span class="n"><span class="pre">UMP32</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">other</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4NK5umidi5UMP32neERK5UMP32" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP324wordE">
+<span id="_CPPv3N5umidi5UMP324wordE"></span><span id="_CPPv2N5umidi5UMP324wordE"></span><span id="umidi::UMP32::word__uint32_t"></span><span class="target" id="structumidi_1_1_u_m_p32_1a2a91b99d4fcc225dfcba6dcf4eb99440"></span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">word</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP324wordE" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-static-functions">Public Static Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP326createE7uint8_t7uint8_t7uint8_t7uint8_t7uint8_t">
+<span id="_CPPv3N5umidi5UMP326createE7uint8_t7uint8_t7uint8_t7uint8_t7uint8_t"></span><span id="_CPPv2N5umidi5UMP326createE7uint8_t7uint8_t7uint8_t7uint8_t7uint8_t"></span><span id="umidi::UMP32::create__uint8_t.uint8_t.uint8_t.uint8_t.uint8_t"></span><span class="target" id="structumidi_1_1_u_m_p32_1a9eaa70efc934e282e57ffe9bfb5e15b9"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5umidi5UMP32E" title="umidi::UMP32"><span class="n"><span class="pre">UMP32</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">create</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">mt</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">group</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">status</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">d1</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">d2</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP326createE7uint8_t7uint8_t7uint8_t7uint8_t7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP327note_onE7uint8_t7uint8_t7uint8_t7uint8_t">
+<span id="_CPPv3N5umidi5UMP327note_onE7uint8_t7uint8_t7uint8_t7uint8_t"></span><span id="_CPPv2N5umidi5UMP327note_onE7uint8_t7uint8_t7uint8_t7uint8_t"></span><span id="umidi::UMP32::note_on__uint8_t.uint8_t.uint8_t.uint8_t"></span><span class="target" id="structumidi_1_1_u_m_p32_1a2a82f2fd9a34528342078104bf734bb0"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5umidi5UMP32E" title="umidi::UMP32"><span class="n"><span class="pre">UMP32</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">note_on</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">channel</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">note</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">velocity</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">group</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP327note_onE7uint8_t7uint8_t7uint8_t7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP328note_offE7uint8_t7uint8_t7uint8_t7uint8_t">
+<span id="_CPPv3N5umidi5UMP328note_offE7uint8_t7uint8_t7uint8_t7uint8_t"></span><span id="_CPPv2N5umidi5UMP328note_offE7uint8_t7uint8_t7uint8_t7uint8_t"></span><span id="umidi::UMP32::note_off__uint8_t.uint8_t.uint8_t.uint8_t"></span><span class="target" id="structumidi_1_1_u_m_p32_1abfa8773dca670ed01ebb5e348ad8b44f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5umidi5UMP32E" title="umidi::UMP32"><span class="n"><span class="pre">UMP32</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">note_off</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">channel</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">note</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">velocity</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">group</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP328note_offE7uint8_t7uint8_t7uint8_t7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP322ccE7uint8_t7uint8_t7uint8_t7uint8_t">
+<span id="_CPPv3N5umidi5UMP322ccE7uint8_t7uint8_t7uint8_t7uint8_t"></span><span id="_CPPv2N5umidi5UMP322ccE7uint8_t7uint8_t7uint8_t7uint8_t"></span><span id="umidi::UMP32::cc__uint8_t.uint8_t.uint8_t.uint8_t"></span><span class="target" id="structumidi_1_1_u_m_p32_1a4d74551799204f2449273aa9b01e4ef3"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5umidi5UMP32E" title="umidi::UMP32"><span class="n"><span class="pre">UMP32</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">cc</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">channel</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">cc_num</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">value</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">group</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP322ccE7uint8_t7uint8_t7uint8_t7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP3214program_changeE7uint8_t7uint8_t7uint8_t">
+<span id="_CPPv3N5umidi5UMP3214program_changeE7uint8_t7uint8_t7uint8_t"></span><span id="_CPPv2N5umidi5UMP3214program_changeE7uint8_t7uint8_t7uint8_t"></span><span id="umidi::UMP32::program_change__uint8_t.uint8_t.uint8_t"></span><span class="target" id="structumidi_1_1_u_m_p32_1a9b450430db800f6af0a7dd350e41dd92"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5umidi5UMP32E" title="umidi::UMP32"><span class="n"><span class="pre">UMP32</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">program_change</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">channel</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">program</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">group</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP3214program_changeE7uint8_t7uint8_t7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP3210pitch_bendE7uint8_t8uint16_t7uint8_t">
+<span id="_CPPv3N5umidi5UMP3210pitch_bendE7uint8_t8uint16_t7uint8_t"></span><span id="_CPPv2N5umidi5UMP3210pitch_bendE7uint8_t8uint16_t7uint8_t"></span><span id="umidi::UMP32::pitch_bend__uint8_t.uint16_t.uint8_t"></span><span class="target" id="structumidi_1_1_u_m_p32_1aaf46b4c8adb458ea59e681e9cd7294ac"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5umidi5UMP32E" title="umidi::UMP32"><span class="n"><span class="pre">UMP32</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">pitch_bend</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">channel</span></span>, <span class="n"><span class="pre">uint16_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">value</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">group</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP3210pitch_bendE7uint8_t8uint16_t7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP3212timing_clockE7uint8_t">
+<span id="_CPPv3N5umidi5UMP3212timing_clockE7uint8_t"></span><span id="_CPPv2N5umidi5UMP3212timing_clockE7uint8_t"></span><span id="umidi::UMP32::timing_clock__uint8_t"></span><span class="target" id="structumidi_1_1_u_m_p32_1ab7f15d9d0cd1faeb6a9e41f1b91c5eb4"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5umidi5UMP32E" title="umidi::UMP32"><span class="n"><span class="pre">UMP32</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">timing_clock</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">group</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP3212timing_clockE7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP325startE7uint8_t">
+<span id="_CPPv3N5umidi5UMP325startE7uint8_t"></span><span id="_CPPv2N5umidi5UMP325startE7uint8_t"></span><span id="umidi::UMP32::start__uint8_t"></span><span class="target" id="structumidi_1_1_u_m_p32_1a6c870c75e6cab5b51ac2e2a3bd12e8ea"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5umidi5UMP32E" title="umidi::UMP32"><span class="n"><span class="pre">UMP32</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">start</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">group</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP325startE7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP324stopE7uint8_t">
+<span id="_CPPv3N5umidi5UMP324stopE7uint8_t"></span><span id="_CPPv2N5umidi5UMP324stopE7uint8_t"></span><span id="umidi::UMP32::stop__uint8_t"></span><span class="target" id="structumidi_1_1_u_m_p32_1aeac06e8ec8cb764e2807681d4b4d8b6f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5umidi5UMP32E" title="umidi::UMP32"><span class="n"><span class="pre">UMP32</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">stop</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">group</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP324stopE7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP3212continue_msgE7uint8_t">
+<span id="_CPPv3N5umidi5UMP3212continue_msgE7uint8_t"></span><span id="_CPPv2N5umidi5UMP3212continue_msgE7uint8_t"></span><span id="umidi::UMP32::continue_msg__uint8_t"></span><span class="target" id="structumidi_1_1_u_m_p32_1a7220a235ac275f498a416e8e4a2c2c25"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5umidi5UMP32E" title="umidi::UMP32"><span class="n"><span class="pre">UMP32</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">continue_msg</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">group</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP3212continue_msgE7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP3214active_sensingE7uint8_t">
+<span id="_CPPv3N5umidi5UMP3214active_sensingE7uint8_t"></span><span id="_CPPv2N5umidi5UMP3214active_sensingE7uint8_t"></span><span id="umidi::UMP32::active_sensing__uint8_t"></span><span class="target" id="structumidi_1_1_u_m_p32_1afc693123bbdaacc7fe426f5362f48f7f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5umidi5UMP32E" title="umidi::UMP32"><span class="n"><span class="pre">UMP32</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">active_sensing</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">group</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP3214active_sensingE7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP3212system_resetE7uint8_t">
+<span id="_CPPv3N5umidi5UMP3212system_resetE7uint8_t"></span><span id="_CPPv2N5umidi5UMP3212system_resetE7uint8_t"></span><span id="umidi::UMP32::system_reset__uint8_t"></span><span class="target" id="structumidi_1_1_u_m_p32_1a2c116d54a7ec3c5e23a3029338ba4abb"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5umidi5UMP32E" title="umidi::UMP32"><span class="n"><span class="pre">UMP32</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">system_reset</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">group</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP3212system_resetE7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP3212tune_requestE7uint8_t">
+<span id="_CPPv3N5umidi5UMP3212tune_requestE7uint8_t"></span><span id="_CPPv2N5umidi5UMP3212tune_requestE7uint8_t"></span><span id="umidi::UMP32::tune_request__uint8_t"></span><span class="target" id="structumidi_1_1_u_m_p32_1a25f71ca7a9cd18331e5276bed3e57ea5"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5umidi5UMP32E" title="umidi::UMP32"><span class="n"><span class="pre">UMP32</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">tune_request</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">group</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP3212tune_requestE7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP3217mtc_quarter_frameE7uint8_t7uint8_t">
+<span id="_CPPv3N5umidi5UMP3217mtc_quarter_frameE7uint8_t7uint8_t"></span><span id="_CPPv2N5umidi5UMP3217mtc_quarter_frameE7uint8_t7uint8_t"></span><span id="umidi::UMP32::mtc_quarter_frame__uint8_t.uint8_t"></span><span class="target" id="structumidi_1_1_u_m_p32_1a14e1c8a9cacbd4fbad0575875430b820"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5umidi5UMP32E" title="umidi::UMP32"><span class="n"><span class="pre">UMP32</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">mtc_quarter_frame</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">data</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">group</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP3217mtc_quarter_frameE7uint8_t7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP3213song_positionE8uint16_t7uint8_t">
+<span id="_CPPv3N5umidi5UMP3213song_positionE8uint16_t7uint8_t"></span><span id="_CPPv2N5umidi5UMP3213song_positionE8uint16_t7uint8_t"></span><span id="umidi::UMP32::song_position__uint16_t.uint8_t"></span><span class="target" id="structumidi_1_1_u_m_p32_1a9ed3e7d43f24d1107e0488ed9856bc24"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5umidi5UMP32E" title="umidi::UMP32"><span class="n"><span class="pre">UMP32</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">song_position</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint16_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">beats</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">group</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP3213song_positionE8uint16_t7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP3211song_selectE7uint8_t7uint8_t">
+<span id="_CPPv3N5umidi5UMP3211song_selectE7uint8_t7uint8_t"></span><span id="_CPPv2N5umidi5UMP3211song_selectE7uint8_t7uint8_t"></span><span id="umidi::UMP32::song_select__uint8_t.uint8_t"></span><span class="target" id="structumidi_1_1_u_m_p32_1aaa912e9b56a6d4e067924a823f3bfcf8"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5umidi5UMP32E" title="umidi::UMP32"><span class="n"><span class="pre">UMP32</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">song_select</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">song</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">group</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP3211song_selectE7uint8_t7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP3216channel_pressureE7uint8_t7uint8_t7uint8_t">
+<span id="_CPPv3N5umidi5UMP3216channel_pressureE7uint8_t7uint8_t7uint8_t"></span><span id="_CPPv2N5umidi5UMP3216channel_pressureE7uint8_t7uint8_t7uint8_t"></span><span id="umidi::UMP32::channel_pressure__uint8_t.uint8_t.uint8_t"></span><span class="target" id="structumidi_1_1_u_m_p32_1a69795de3d8168f20541097403474c63c"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5umidi5UMP32E" title="umidi::UMP32"><span class="n"><span class="pre">UMP32</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">channel_pressure</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">channel</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">pressure</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">group</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP3216channel_pressureE7uint8_t7uint8_t7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N5umidi5UMP3213poly_pressureE7uint8_t7uint8_t7uint8_t7uint8_t">
+<span id="_CPPv3N5umidi5UMP3213poly_pressureE7uint8_t7uint8_t7uint8_t7uint8_t"></span><span id="_CPPv2N5umidi5UMP3213poly_pressureE7uint8_t7uint8_t7uint8_t7uint8_t"></span><span id="umidi::UMP32::poly_pressure__uint8_t.uint8_t.uint8_t.uint8_t"></span><span class="target" id="structumidi_1_1_u_m_p32_1a9abd2e89fce35c890d9fc66747cbb4dc"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N5umidi5UMP32E" title="umidi::UMP32"><span class="n"><span class="pre">UMP32</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">poly_pressure</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">channel</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">note</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">pressure</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">group</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">noexcept</span></span><a class="headerlink" href="#_CPPv4N5umidi5UMP3213poly_pressureE7uint8_t7uint8_t7uint8_t7uint8_t" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="structumidi_1_1protocol_1_1_transport_capabilities.html" class="btn btn-neutral float-left" title="Struct TransportCapabilities" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="structumidi_1_1_u_m_p64.html" class="btn btn-neutral float-right" title="Struct UMP64" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, UMI-OS Project.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

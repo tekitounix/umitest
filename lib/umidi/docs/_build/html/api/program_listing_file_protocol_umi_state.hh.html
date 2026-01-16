@@ -1,0 +1,978 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Program Listing for File umi_state.hh &mdash; umidi Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/collapsible-lists/css/tree_view.css?v=a885cde7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js?v=73120307"></script>
+      <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            umidi
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+<div class="language-switcher" style="margin-top: 10px; padding: 8px; background: #f0f0f0; border-radius: 4px;">
+  <span style="font-size: 0.85em; color: #333;">Language:</span>
+  
+    <strong style="color: #2980b9;">EN</strong> |
+    <a href="ja/index.html" style="color: #2980b9; text-decoration: underline;">JA</a>
+  
+</div>
+
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../README.html">umidi - UMI-OS MIDI Library</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../README.html#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../README.html#quick-start">Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../README.html#documentation">Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../README.html#directory-structure">Directory Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../README.html#independence">Independence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../README.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../README.html#license">License</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../design.html">umidi Design Document</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../design.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../design.html#architecture">Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#layer-structure">Layer Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#core-design-ump-opt-format">Core Design: UMP-Opt Format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#type-checking-optimization">Type Checking Optimization</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../design.html#module-reference">Module Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#core">core/</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#messages">messages/</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#protocol">protocol/</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../design.html#usage-patterns">Usage Patterns</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#basic-parsing">Basic Parsing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#type-safe-dispatch">Type-Safe Dispatch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#factory-methods">Factory Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../design.html#performance-considerations">Performance Considerations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#memory">Memory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#timing">Timing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../design.html#thread-safety">Thread Safety</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../design.html#error-handling">Error Handling</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#basic-midi-parsing">Basic MIDI Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#running-status-support">Running Status Support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#type-safe-message-wrappers">Type-Safe Message Wrappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#message-dispatch">Message Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#midi-output">MIDI Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#sysex-communication">SysEx Communication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#pitch-bend-handling">Pitch Bend Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#building-umi-protocol-messages">Building UMI Protocol Messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#interrupt-safe-usage">Interrupt-Safe Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../CORE.html">Core Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../CORE.html#ump32-core-ump-hh">UMP32 (core/ump.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../CORE.html#memory-layout">Memory Layout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CORE.html#type-checking">Type Checking</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CORE.html#api">API</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../CORE.html#ump64-core-ump-hh">UMP64 (core/ump.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../CORE.html#parser-core-parser-hh">Parser (core/parser.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../CORE.html#usage-example">Usage Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../CORE.html#serializer-core-parser-hh">Serializer (core/parser.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../CORE.html#result-core-result-hh">Result (core/result.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../CORE.html#sysexbuffer-core-sysex-buffer-hh">SysExBuffer (core/sysex_buffer.hh)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../MESSAGES.html">Message Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../MESSAGES.html#channel-voice-messages-messages-channel-voice-hh">Channel Voice Messages (messages/channel_voice.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#noteon">NoteOn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#noteoff">NoteOff</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#controlchange">ControlChange</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#programchange">ProgramChange</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#pitchbend">PitchBend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#channelpressure">ChannelPressure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#polypressure">PolyPressure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#message-dispatch">Message Dispatch</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../MESSAGES.html#system-messages-messages-system-hh">System Messages (messages/system.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#real-time-messages">Real-time Messages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#system-common-messages">System Common Messages</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../MESSAGES.html#sysex-messages-messages-sysex-hh">SysEx Messages (messages/sysex.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#sysex7">SysEx7</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#sysexparser">SysExParser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#sysexserializer">SysExSerializer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../MESSAGES.html#utility-messages-messages-utility-hh">Utility Messages (messages/utility.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#jr-timestamp-jitter-reduction">JR Timestamp (Jitter Reduction)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#jr-timestamp-tracker">JR Timestamp Tracker</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#jr-clock">JR Clock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#noop">NOOP</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../CC.html">Control Change</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../CC.html#cc-types-cc-types-hh">CC Types (cc/types.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#bit-cc">7-bit CC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#bit-cc-msb-lsb-pair">14-bit CC (MSB/LSB pair)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#switch-cc">Switch CC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#rpn-nrpn">RPN/NRPN</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../CC.html#standard-cc-definitions-cc-standards-hh">Standard CC Definitions (cc/standards.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#bit-controllers">14-bit Controllers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#switch-controllers">Switch Controllers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#sound-controllers">Sound Controllers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#effect-depths">Effect Depths</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#channel-mode">Channel Mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#standard-rpns">Standard RPNs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#pitch-bend-sensitivity-helper">Pitch Bend Sensitivity Helper</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../CC.html#rpn-nrpn-decoder-cc-decoder-hh">RPN/NRPN Decoder (cc/decoder.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#usage-example">Usage Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../CC.html#template-static-decoder-codec-decoder-hh">Template Static Decoder (codec/decoder.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#pre-configured-decoders">Pre-configured Decoders</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../PROTOCOL.html">UMI SysEx Protocol</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#protocol-overview">Protocol Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#bit-encoding-protocol-umi-sysex-hh">7-bit Encoding (protocol/umi_sysex.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#command-categories">Command Categories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#standard-io-protocol-umi-sysex-hh">Standard IO (protocol/umi_sysex.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#standardio-class">StandardIO Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#commands">Commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#message-builder">Message Builder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#message-parser">Message Parser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#firmware-update-protocol-umi-firmware-hh">Firmware Update (protocol/umi_firmware.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#firmwareheader">FirmwareHeader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#firmwareheaderbuilder">FirmwareHeaderBuilder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#firmwarevalidator">FirmwareValidator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#firmware-commands">Firmware Commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#a-b-partition-bootloader-protocol-umi-bootloader-hh">A/B Partition Bootloader (protocol/umi_bootloader.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#bootconfig">BootConfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#platform-configurations">Platform Configurations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#bootloaderinterface">BootloaderInterface</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#authentication-protocol-umi-auth-hh">Authentication (protocol/umi_auth.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#authenticator">Authenticator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#authclient">AuthClient</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#auth-commands">Auth Commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#session-management-protocol-umi-session-hh">Session Management (protocol/umi_session.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#timeoutconfig">TimeoutConfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#sessiontimer">SessionTimer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#flowcontrolsender">FlowControlSender</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#flowcontrolreceiver">FlowControlReceiver</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#securefirmwareupdate-complete-handler">SecureFirmwareUpdate (Complete Handler)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../TRANSPORT.html">Transport Abstraction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#transport-types-protocol-umi-transport-hh">Transport Types (protocol/umi_transport.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#transport-capabilities">Transport Capabilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#transport-interface">Transport Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#bulk-framing">Bulk Framing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#sysex-transport">SysEx Transport</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#bulk-transport">Bulk Transport</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#transport-handler">Transport Handler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#transport-manager">Transport Manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#usage-example">Usage Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#web-client-fallback-strategy">Web Client Fallback Strategy</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../STATE.html">State Synchronization</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#device-states-protocol-umi-state-hh">Device States (protocol/umi_state.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#state-commands-0x28-0x2f">State Commands (0x28-0x2F)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#state-report">State Report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#resume-info">Resume Info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#boot-verification">Boot Verification</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../STATE.html#boot-flow">Boot Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#state-manager">State Manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#state-protocol-handler">State Protocol Handler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#stateful-firmware-update">Stateful Firmware Update</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#usage-example">Usage Example</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../STATE.html#device-side-bootloader">Device-side (Bootloader)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../STATE.html#device-side-application">Device-side (Application)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../STATE.html#host-side-web-client">Host-side (Web Client)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../OBJECT.html">Object Transfer Protocol</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#object-types-protocol-umi-object-hh">Object Types (protocol/umi_object.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#object-flags">Object Flags</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#object-header-80-bytes">Object Header (80 bytes)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#type-specific-metadata">Type-Specific Metadata</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#sequence-metadata">Sequence Metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#sample-metadata">Sample Metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#preset-metadata">Preset Metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#config-metadata">Config Metadata</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#object-commands-0x40-0x5f">Object Commands (0x40-0x5F)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#management-commands-0x40-0x4f">Management Commands (0x40-0x4F)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#action-commands-0x50-0x5f">Action Commands (0x50-0x5F)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#object-error-codes">Object Error Codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#storage-info">Storage Info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#object-storage-interface">Object Storage Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#ram-object-storage">RAM Object Storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#object-transfer-handler">Object Transfer Handler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#usage-example">Usage Example</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#storing-a-sequence">Storing a Sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#reading-a-preset">Reading a Preset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#host-side-web-client">Host-side (Web Client)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../API.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../API.html#namespaces">Namespaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../API.html#core-types">Core Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#ump32">UMP32</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#ump64">UMP64</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#parser">Parser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#result">Result</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#event">Event</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../API.html#message-types">Message Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#channel-voice">Channel Voice</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#utility">Utility</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../API.html#control-change">Control Change</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#rpn-nrpn-decoder">RPN/NRPN Decoder</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../API.html#protocol">Protocol</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#sysex-encoding">SysEx Encoding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#message-builder-parser">Message Builder/Parser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#firmware-update">Firmware Update</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#transport">Transport</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#state-management">State Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#object-transfer">Object Transfer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../API.html#value-conversions">Value Conversions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../API.html#platform-aliases">Platform Aliases</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="library_root.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="library_root.html#file-hierarchy">File Hierarchy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="library_root.html#full-api">Full API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#namespaces">Namespaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#classes-and-structs">Classes and Structs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#enums">Enums</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#functions">Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#variables">Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">umidi</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Program Listing for File umi_state.hh</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/program_listing_file_protocol_umi_state.hh.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="program-listing-for-file-umi-state-hh">
+<span id="program-listing-file-protocol-umi-state-hh"></span><h1>Program Listing for File umi_state.hh<a class="headerlink" href="#program-listing-for-file-umi-state-hh" title="Link to this heading"></a></h1>
+<p>↰ <a class="reference internal" href="file_protocol_umi_state.hh.html#file-protocol-umi-state-hh"><span class="std std-ref">Return to documentation for file</span></a> (<code class="docutils literal notranslate"><span class="pre">protocol/umi_state.hh</span></code>)</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// SPDX-License-Identifier: MIT</span>
+<span class="c1">// UMI-OS MIDI Library - State Synchronization Protocol</span>
+<span class="c1">// For WebMIDI/WebUSB anti-brick and resume support</span>
+<span class="cp">#pragma once</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;umi_sysex.hh&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;umi_bootloader.hh&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cstdint&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cstddef&gt;</span>
+
+<span class="k">namespace</span><span class="w"> </span><span class="nn">umidi</span><span class="o">::</span><span class="nn">protocol</span><span class="w"> </span><span class="p">{</span>
+
+<span class="c1">// =============================================================================</span>
+<span class="c1">// Device State</span>
+<span class="c1">// =============================================================================</span>
+
+<span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">DeviceState</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">IDLE</span><span class="w">            </span><span class="o">=</span><span class="w"> </span><span class="mh">0x00</span><span class="p">,</span><span class="w">  </span><span class="c1">// Ready for operations</span>
+<span class="w">    </span><span class="n">UPDATE_STARTING</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x01</span><span class="p">,</span><span class="w">  </span><span class="c1">// Update initialization</span>
+<span class="w">    </span><span class="n">UPDATE_RECEIVING</span><span class="o">=</span><span class="w"> </span><span class="mh">0x02</span><span class="p">,</span><span class="w">  </span><span class="c1">// Receiving firmware data</span>
+<span class="w">    </span><span class="n">UPDATE_VERIFYING</span><span class="o">=</span><span class="w"> </span><span class="mh">0x03</span><span class="p">,</span><span class="w">  </span><span class="c1">// Verifying firmware</span>
+<span class="w">    </span><span class="n">UPDATE_READY</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mh">0x04</span><span class="p">,</span><span class="w">  </span><span class="c1">// Verified, ready to commit</span>
+<span class="w">    </span><span class="n">UPDATE_COMMITTED</span><span class="o">=</span><span class="w"> </span><span class="mh">0x05</span><span class="p">,</span><span class="w">  </span><span class="c1">// Committed, ready to reboot</span>
+<span class="w">    </span><span class="n">OBJECT_TRANSFER</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x06</span><span class="p">,</span><span class="w">  </span><span class="c1">// Object transfer in progress</span>
+<span class="w">    </span><span class="n">ERROR</span><span class="w">           </span><span class="o">=</span><span class="w"> </span><span class="mh">0x0F</span><span class="p">,</span><span class="w">  </span><span class="c1">// Error state</span>
+<span class="p">};</span>
+
+<span class="c1">// =============================================================================</span>
+<span class="c1">// State Commands (0x28-0x2F)</span>
+<span class="c1">// =============================================================================</span>
+
+<span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">StateCommand</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">STATE_QUERY</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mh">0x28</span><span class="p">,</span><span class="w">  </span><span class="c1">// Query current state</span>
+<span class="w">    </span><span class="n">STATE_REPORT</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mh">0x29</span><span class="p">,</span><span class="w">  </span><span class="c1">// State report (response or unsolicited)</span>
+<span class="w">    </span><span class="n">STATE_SUBSCRIBE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x2A</span><span class="p">,</span><span class="w">  </span><span class="c1">// Subscribe to state changes</span>
+<span class="w">    </span><span class="n">STATE_UNSUBSCRIBE</span><span class="o">=</span><span class="w"> </span><span class="mh">0x2B</span><span class="p">,</span><span class="w"> </span><span class="c1">// Unsubscribe from state changes</span>
+<span class="w">    </span><span class="n">RESUME_QUERY</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mh">0x2C</span><span class="p">,</span><span class="w">  </span><span class="c1">// Query resume info</span>
+<span class="w">    </span><span class="n">RESUME_INFO</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mh">0x2D</span><span class="p">,</span><span class="w">  </span><span class="c1">// Resume info response</span>
+<span class="w">    </span><span class="n">FW_RESUME</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="mh">0x2E</span><span class="p">,</span><span class="w">  </span><span class="c1">// Resume firmware update</span>
+<span class="w">    </span><span class="n">BOOT_SUCCESS</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mh">0x2F</span><span class="p">,</span><span class="w">  </span><span class="c1">// Mark boot as successful</span>
+<span class="p">};</span>
+
+<span class="c1">// =============================================================================</span>
+<span class="c1">// State Report Structure</span>
+<span class="c1">// =============================================================================</span>
+<span class="c1">// Sent in response to STATE_QUERY or when state changes (if subscribed)</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">StateReport</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">DeviceState</span><span class="w"> </span><span class="n">state</span><span class="p">;</span><span class="w">           </span><span class="c1">// Current device state       [0]</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">progress_percent</span><span class="p">;</span><span class="w">    </span><span class="c1">// Progress (0-100)           [1]</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">last_error</span><span class="p">;</span><span class="w">          </span><span class="c1">// Last error code            [2]</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">last_ack_seq</span><span class="p">;</span><span class="w">        </span><span class="c1">// Last acknowledged seq      [3]</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">;</span><span class="w">         </span><span class="c1">// Current session ID         [4-7]</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">received_bytes</span><span class="p">;</span><span class="w">     </span><span class="c1">// Bytes received so far      [8-11]</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">flags</span><span class="p">;</span><span class="w">               </span><span class="c1">// State flags                [12]</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">reserved</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span><span class="w">         </span><span class="c1">// Reserved for alignment     [13-15]</span>
+
+<span class="w">    </span><span class="c1">// Flags</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">FLAG_RESUMABLE</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mh">0x01</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">FLAG_AUTHENTICATED</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mh">0x02</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">FLAG_ROLLBACK_AVAIL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x04</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">FLAG_UPDATE_PENDING</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x08</span><span class="p">;</span>
+
+<span class="w">    </span><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">is_resumable</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">flags</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">FLAG_RESUMABLE</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">is_authenticated</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">flags</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">FLAG_AUTHENTICATED</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">rollback_available</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">flags</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">FLAG_ROLLBACK_AVAIL</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">update_pending</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">flags</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">FLAG_UPDATE_PENDING</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="k">static_assert</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">StateReport</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;StateReport must be 16 bytes&quot;</span><span class="p">);</span>
+
+<span class="c1">// =============================================================================</span>
+<span class="c1">// Resume Info Structure</span>
+<span class="c1">// =============================================================================</span>
+<span class="c1">// Contains information needed to resume an interrupted transfer</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">ResumeInfo</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">;</span><span class="w">         </span><span class="c1">// Session identifier</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">firmware_hash</span><span class="p">;</span><span class="w">      </span><span class="c1">// First 4 bytes of firmware hash (for verification)</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">received_bytes</span><span class="p">;</span><span class="w">     </span><span class="c1">// Bytes already received</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">total_bytes</span><span class="p">;</span><span class="w">        </span><span class="c1">// Total expected bytes</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">last_ack_seq</span><span class="p">;</span><span class="w">        </span><span class="c1">// Last acknowledged sequence</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">chunk_size</span><span class="p">;</span><span class="w">          </span><span class="c1">// Chunk size used (for alignment)</span>
+<span class="w">    </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">reserved</span><span class="p">;</span>
+
+<span class="w">    </span><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">can_resume</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">new_session_id</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">new_hash</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">session_id</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">new_session_id</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">firmware_hash</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">new_hash</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">next_offset</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">received_bytes</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="k">static_assert</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">ResumeInfo</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;ResumeInfo must be 20 bytes&quot;</span><span class="p">);</span>
+
+<span class="c1">// =============================================================================</span>
+<span class="c1">// Boot Verification</span>
+<span class="c1">// =============================================================================</span>
+<span class="c1">// Tracks boot success to enable automatic rollback on failure</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">BootVerification</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">MAGIC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x554D4256</span><span class="p">;</span><span class="w">  </span><span class="c1">// &quot;UMBV&quot;</span>
+
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">magic</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">boot_count</span><span class="p">;</span><span class="w">          </span><span class="c1">// Incremented each boot, reset on success</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">max_attempts</span><span class="p">;</span><span class="w">        </span><span class="c1">// Maximum boot attempts before rollback</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">verified</span><span class="p">;</span><span class="w">            </span><span class="c1">// 1 = boot verified successful</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">reserved</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">last_success_time</span><span class="p">;</span><span class="w">  </span><span class="c1">// Timestamp of last successful boot</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">checksum</span><span class="p">;</span>
+
+<span class="w">    </span><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">is_valid</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">magic</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">MAGIC</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">should_rollback</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">is_valid</span><span class="p">()</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">verified</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">boot_count</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">max_attempts</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">increment_boot</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">boot_count</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">255</span><span class="p">)</span><span class="w"> </span><span class="o">++</span><span class="n">boot_count</span><span class="p">;</span>
+<span class="w">        </span><span class="n">verified</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">mark_success</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">timestamp</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">verified</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">        </span><span class="n">boot_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">last_success_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">timestamp</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">init</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">max_boot_attempts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">magic</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MAGIC</span><span class="p">;</span>
+<span class="w">        </span><span class="n">boot_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">max_attempts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">max_boot_attempts</span><span class="p">;</span>
+<span class="w">        </span><span class="n">verified</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">        </span><span class="n">last_success_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">compute_checksum</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">magic</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="n">boot_count</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="n">max_attempts</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="n">verified</span><span class="p">;</span>
+<span class="w">        </span><span class="n">sum</span><span class="w"> </span><span class="o">^=</span><span class="w"> </span><span class="n">last_success_time</span><span class="p">;</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">sum</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">update_checksum</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">checksum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">compute_checksum</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">verify_checksum</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">checksum</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">compute_checksum</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="k">static_assert</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">BootVerification</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;BootVerification must be 16 bytes&quot;</span><span class="p">);</span>
+
+<span class="c1">// =============================================================================</span>
+<span class="c1">// State Manager</span>
+<span class="c1">// =============================================================================</span>
+<span class="c1">// Manages device state and handles state sync commands</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">StateManager</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">init</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">state_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DeviceState</span><span class="o">::</span><span class="n">IDLE</span><span class="p">;</span>
+<span class="w">        </span><span class="n">progress_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">session_id_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">received_bytes_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">total_bytes_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">last_error_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">last_ack_seq_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">flags_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">subscriber_count_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span><span class="w"> </span><span class="n">DeviceState</span><span class="w"> </span><span class="n">state</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">state_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">set_state</span><span class="p">(</span><span class="n">DeviceState</span><span class="w"> </span><span class="n">new_state</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">state_</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">new_state</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">state_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">new_state</span><span class="p">;</span>
+<span class="w">            </span><span class="n">state_changed_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">set_progress</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">percent</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">received</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">total</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">progress_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">percent</span><span class="p">;</span>
+<span class="w">        </span><span class="n">received_bytes_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">received</span><span class="p">;</span>
+<span class="w">        </span><span class="n">total_bytes_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">total</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">start_session</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">total_size</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Generate session ID from timestamp-like counter</span>
+<span class="w">        </span><span class="n">session_id_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">++</span><span class="n">session_counter_</span><span class="p">;</span>
+<span class="w">        </span><span class="n">total_bytes_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">total_size</span><span class="p">;</span>
+<span class="w">        </span><span class="n">received_bytes_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">last_ack_seq_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">flags_</span><span class="w"> </span><span class="o">|=</span><span class="w"> </span><span class="n">StateReport</span><span class="o">::</span><span class="n">FLAG_RESUMABLE</span><span class="p">;</span>
+<span class="w">        </span><span class="n">set_state</span><span class="p">(</span><span class="n">DeviceState</span><span class="o">::</span><span class="n">UPDATE_STARTING</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">session_id_</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">record_received</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">bytes</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">seq</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">received_bytes_</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">bytes</span><span class="p">;</span>
+<span class="w">        </span><span class="n">last_ack_seq_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">seq</span><span class="p">;</span>
+<span class="w">        </span><span class="n">progress_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">uint8_t</span><span class="p">((</span><span class="n">received_bytes_</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">total_bytes_</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">set_error</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">error_code</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">last_error_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">error_code</span><span class="p">;</span>
+<span class="w">        </span><span class="n">set_state</span><span class="p">(</span><span class="n">DeviceState</span><span class="o">::</span><span class="n">ERROR</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">clear_error</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">last_error_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">set_state</span><span class="p">(</span><span class="n">DeviceState</span><span class="o">::</span><span class="n">IDLE</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span><span class="w"> </span><span class="n">StateReport</span><span class="w"> </span><span class="n">build_report</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">StateReport</span><span class="p">{</span>
+<span class="w">            </span><span class="p">.</span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state_</span><span class="p">,</span>
+<span class="w">            </span><span class="p">.</span><span class="n">progress_percent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">progress_</span><span class="p">,</span>
+<span class="w">            </span><span class="p">.</span><span class="n">last_error</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">last_error_</span><span class="p">,</span>
+<span class="w">            </span><span class="p">.</span><span class="n">last_ack_seq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">last_ack_seq_</span><span class="p">,</span>
+<span class="w">            </span><span class="p">.</span><span class="n">session_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">session_id_</span><span class="p">,</span>
+<span class="w">            </span><span class="p">.</span><span class="n">received_bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">received_bytes_</span><span class="p">,</span>
+<span class="w">            </span><span class="p">.</span><span class="n">flags</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">flags_</span><span class="p">,</span>
+<span class="w">            </span><span class="p">.</span><span class="n">reserved</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">},</span>
+<span class="w">        </span><span class="p">};</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span><span class="w"> </span><span class="n">ResumeInfo</span><span class="w"> </span><span class="n">build_resume_info</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">firmware_hash</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">chunk_size</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">ResumeInfo</span><span class="p">{</span>
+<span class="w">            </span><span class="p">.</span><span class="n">session_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">session_id_</span><span class="p">,</span>
+<span class="w">            </span><span class="p">.</span><span class="n">firmware_hash</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">firmware_hash</span><span class="p">,</span>
+<span class="w">            </span><span class="p">.</span><span class="n">received_bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">received_bytes_</span><span class="p">,</span>
+<span class="w">            </span><span class="p">.</span><span class="n">total_bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">total_bytes_</span><span class="p">,</span>
+<span class="w">            </span><span class="p">.</span><span class="n">last_ack_seq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">last_ack_seq_</span><span class="p">,</span>
+<span class="w">            </span><span class="p">.</span><span class="n">chunk_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">chunk_size</span><span class="p">,</span>
+<span class="w">            </span><span class="p">.</span><span class="n">reserved</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">        </span><span class="p">};</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">check_state_changed</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">bool</span><span class="w"> </span><span class="n">changed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state_changed_</span><span class="p">;</span>
+<span class="w">        </span><span class="n">state_changed_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">changed</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">add_subscriber</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">subscriber_count_</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">255</span><span class="p">)</span><span class="w"> </span><span class="o">++</span><span class="n">subscriber_count_</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">remove_subscriber</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">subscriber_count_</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">--</span><span class="n">subscriber_count_</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">has_subscribers</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">subscriber_count_</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">set_flag</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">flag</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">flags_</span><span class="w"> </span><span class="o">|=</span><span class="w"> </span><span class="n">flag</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">clear_flag</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">flag</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">flags_</span><span class="w"> </span><span class="o">&amp;=</span><span class="w"> </span><span class="o">~</span><span class="n">flag</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">has_flag</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">flag</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">flags_</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">flag</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+
+<span class="w">    </span><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">session_id_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">received_bytes</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">received_bytes_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">total_bytes</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">total_bytes_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">last_ack_seq</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">last_ack_seq_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+
+<span class="k">private</span><span class="o">:</span>
+<span class="w">    </span><span class="n">DeviceState</span><span class="w"> </span><span class="n">state_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DeviceState</span><span class="o">::</span><span class="n">IDLE</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">progress_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">last_error_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">last_ack_seq_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">flags_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">subscriber_count_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">state_changed_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_id_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">received_bytes_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">total_bytes_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="kr">inline</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">session_counter_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="c1">// =============================================================================</span>
+<span class="c1">// State Protocol Handler</span>
+<span class="c1">// =============================================================================</span>
+<span class="c1">// Processes state-related commands</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">StateProtocolHandler</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">StateProtocolHandler</span><span class="p">(</span><span class="n">StateManager</span><span class="o">&amp;</span><span class="w"> </span><span class="n">state_mgr</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">state_</span><span class="p">(</span><span class="n">state_mgr</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">SendFn</span><span class="o">&gt;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">process</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="p">,</span><span class="w"> </span><span class="n">SendFn</span><span class="w"> </span><span class="n">send_fn</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">len</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">cmd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">StateCommand</span><span class="o">&gt;</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+
+<span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">StateCommand</span><span class="o">::</span><span class="no">STATE_QUERY</span><span class="p">:</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">handle_state_query</span><span class="p">(</span><span class="n">send_fn</span><span class="p">);</span>
+
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">StateCommand</span><span class="o">::</span><span class="no">STATE_SUBSCRIBE</span><span class="p">:</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">handle_subscribe</span><span class="p">(</span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="n">send_fn</span><span class="p">);</span>
+
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">StateCommand</span><span class="o">::</span><span class="no">STATE_UNSUBSCRIBE</span><span class="p">:</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">handle_subscribe</span><span class="p">(</span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="n">send_fn</span><span class="p">);</span>
+
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">StateCommand</span><span class="o">::</span><span class="no">RESUME_QUERY</span><span class="p">:</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">handle_resume_query</span><span class="p">(</span><span class="n">send_fn</span><span class="p">);</span>
+
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">StateCommand</span><span class="o">::</span><span class="no">BOOT_SUCCESS</span><span class="p">:</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">handle_boot_success</span><span class="p">(</span><span class="n">send_fn</span><span class="p">);</span>
+
+<span class="w">        </span><span class="k">default</span><span class="o">:</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">SendFn</span><span class="o">&gt;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">check_notifications</span><span class="p">(</span><span class="n">SendFn</span><span class="w"> </span><span class="n">send_fn</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">state_</span><span class="p">.</span><span class="n">has_subscribers</span><span class="p">()</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">state_</span><span class="p">.</span><span class="n">check_state_changed</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">send_state_report</span><span class="p">(</span><span class="n">send_fn</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">set_boot_verification</span><span class="p">(</span><span class="n">BootVerification</span><span class="o">*</span><span class="w"> </span><span class="n">boot_verif</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">boot_verification_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">boot_verif</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">set_resume_context</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">firmware_hash</span><span class="p">,</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">chunk_size</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">resume_firmware_hash_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">firmware_hash</span><span class="p">;</span>
+<span class="w">        </span><span class="n">resume_chunk_size_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">chunk_size</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="k">private</span><span class="o">:</span>
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">SendFn</span><span class="o">&gt;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">handle_state_query</span><span class="p">(</span><span class="n">SendFn</span><span class="w"> </span><span class="n">send_fn</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">send_state_report</span><span class="p">(</span><span class="n">send_fn</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">SendFn</span><span class="o">&gt;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">handle_subscribe</span><span class="p">(</span><span class="kt">bool</span><span class="w"> </span><span class="n">subscribe</span><span class="p">,</span><span class="w"> </span><span class="n">SendFn</span><span class="w"> </span><span class="n">send_fn</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">subscribe</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">state_</span><span class="p">.</span><span class="n">add_subscriber</span><span class="p">();</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">state_</span><span class="p">.</span><span class="n">remove_subscriber</span><span class="p">();</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="c1">// Send current state as confirmation</span>
+<span class="w">        </span><span class="n">send_state_report</span><span class="p">(</span><span class="n">send_fn</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">SendFn</span><span class="o">&gt;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">handle_resume_query</span><span class="p">(</span><span class="n">SendFn</span><span class="w"> </span><span class="n">send_fn</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">resume_info</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state_</span><span class="p">.</span><span class="n">build_resume_info</span><span class="p">(</span><span class="n">resume_firmware_hash_</span><span class="p">,</span><span class="w"> </span><span class="n">resume_chunk_size_</span><span class="p">);</span>
+
+<span class="w">        </span><span class="n">MessageBuilder</span><span class="o">&lt;</span><span class="mi">64</span><span class="o">&gt;</span><span class="w"> </span><span class="n">builder</span><span class="p">;</span>
+<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">Command</span><span class="o">&gt;</span><span class="p">(</span><span class="n">StateCommand</span><span class="o">::</span><span class="n">RESUME_INFO</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// Encode resume info</span>
+<span class="w">        </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">info_bytes</span><span class="p">[</span><span class="k">sizeof</span><span class="p">(</span><span class="n">ResumeInfo</span><span class="p">)];</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">memcpy</span><span class="p">(</span><span class="n">info_bytes</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">resume_info</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">ResumeInfo</span><span class="p">));</span>
+<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">info_bytes</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">ResumeInfo</span><span class="p">));</span>
+
+<span class="w">        </span><span class="n">send_fn</span><span class="p">(</span><span class="n">builder</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">finalize</span><span class="p">());</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">SendFn</span><span class="o">&gt;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">handle_boot_success</span><span class="p">(</span><span class="n">SendFn</span><span class="w"> </span><span class="n">send_fn</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">boot_verification_</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">boot_verification_</span><span class="o">-&gt;</span><span class="n">mark_success</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span><span class="w">  </span><span class="c1">// TODO: pass actual timestamp</span>
+<span class="w">            </span><span class="n">boot_verification_</span><span class="o">-&gt;</span><span class="n">update_checksum</span><span class="p">();</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="c1">// Send ACK</span>
+<span class="w">        </span><span class="n">MessageBuilder</span><span class="o">&lt;</span><span class="mi">16</span><span class="o">&gt;</span><span class="w"> </span><span class="n">builder</span><span class="p">;</span>
+<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="n">Command</span><span class="o">::</span><span class="n">FW_ACK</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">        </span><span class="n">send_fn</span><span class="p">(</span><span class="n">builder</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">finalize</span><span class="p">());</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">SendFn</span><span class="o">&gt;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">send_state_report</span><span class="p">(</span><span class="n">SendFn</span><span class="w"> </span><span class="n">send_fn</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">report</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state_</span><span class="p">.</span><span class="n">build_report</span><span class="p">();</span>
+
+<span class="w">        </span><span class="n">MessageBuilder</span><span class="o">&lt;</span><span class="mi">64</span><span class="o">&gt;</span><span class="w"> </span><span class="n">builder</span><span class="p">;</span>
+<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">Command</span><span class="o">&gt;</span><span class="p">(</span><span class="n">StateCommand</span><span class="o">::</span><span class="n">STATE_REPORT</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// Encode state report</span>
+<span class="w">        </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">report_bytes</span><span class="p">[</span><span class="k">sizeof</span><span class="p">(</span><span class="n">StateReport</span><span class="p">)];</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">memcpy</span><span class="p">(</span><span class="n">report_bytes</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">report</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">StateReport</span><span class="p">));</span>
+<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">report_bytes</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">StateReport</span><span class="p">));</span>
+
+<span class="w">        </span><span class="n">send_fn</span><span class="p">(</span><span class="n">builder</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">finalize</span><span class="p">());</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">StateManager</span><span class="o">&amp;</span><span class="w"> </span><span class="n">state_</span><span class="p">;</span>
+<span class="w">    </span><span class="n">BootVerification</span><span class="o">*</span><span class="w"> </span><span class="n">boot_verification_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">nullptr</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">resume_firmware_hash_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">resume_chunk_size_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="c1">// =============================================================================</span>
+<span class="c1">// Integrated State-Aware Firmware Update</span>
+<span class="c1">// =============================================================================</span>
+<span class="c1">// Extends SecureFirmwareUpdate with state management</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">PlatformConfig</span><span class="o">*</span><span class="w"> </span><span class="n">Config</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">MaxChunkSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">256</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">StatefulFirmwareUpdate</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">init</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">FlashInterface</span><span class="o">&amp;</span><span class="w"> </span><span class="n">flash</span><span class="p">,</span>
+<span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">public_key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">nullptr</span><span class="p">,</span>
+<span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">shared_secret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">nullptr</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">fw_update_</span><span class="p">.</span><span class="n">init</span><span class="p">(</span><span class="n">flash</span><span class="p">,</span><span class="w"> </span><span class="n">public_key</span><span class="p">,</span><span class="w"> </span><span class="n">shared_secret</span><span class="p">);</span>
+<span class="w">        </span><span class="n">state_mgr_</span><span class="p">.</span><span class="n">init</span><span class="p">();</span>
+<span class="w">        </span><span class="n">state_handler_</span><span class="p">.</span><span class="n">set_boot_verification</span><span class="p">(</span><span class="o">&amp;</span><span class="n">boot_verif_</span><span class="p">);</span>
+<span class="w">        </span><span class="n">boot_verif_</span><span class="p">.</span><span class="n">init</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span><span class="w">  </span><span class="c1">// 3 boot attempts before rollback</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">SendFn</span><span class="o">&gt;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">process</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">current_time</span><span class="p">,</span><span class="w"> </span><span class="n">SendFn</span><span class="w"> </span><span class="n">send_fn</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parse_message</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">len</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">msg</span><span class="p">.</span><span class="n">valid</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+
+<span class="w">        </span><span class="c1">// Check for state commands first</span>
+<span class="w">        </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">cmd_byte</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">command</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">cmd_byte</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mh">0x28</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">cmd_byte</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0x2F</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="c1">// Decode payload for state handler</span>
+<span class="w">            </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">payload</span><span class="p">[</span><span class="mi">64</span><span class="p">];</span>
+<span class="w">            </span><span class="n">payload</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cmd_byte</span><span class="p">;</span>
+<span class="w">            </span><span class="kt">size_t</span><span class="w"> </span><span class="n">payload_len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">msg</span><span class="p">.</span><span class="n">decode_payload</span><span class="p">(</span><span class="o">&amp;</span><span class="n">payload</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">state_handler_</span><span class="p">.</span><span class="n">process</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span><span class="w"> </span><span class="n">payload_len</span><span class="p">,</span><span class="w"> </span><span class="n">send_fn</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="c1">// Handle FW_RESUME specially</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">command</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">Command</span><span class="o">&gt;</span><span class="p">(</span><span class="n">StateCommand</span><span class="o">::</span><span class="n">FW_RESUME</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">handle_resume</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="n">current_time</span><span class="p">,</span><span class="w"> </span><span class="n">send_fn</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="c1">// Delegate to firmware update handler</span>
+<span class="w">        </span><span class="kt">bool</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fw_update_</span><span class="p">.</span><span class="n">process</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">len</span><span class="p">,</span><span class="w"> </span><span class="n">current_time</span><span class="p">,</span><span class="w"> </span><span class="n">send_fn</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// Update state based on firmware update state</span>
+<span class="w">        </span><span class="n">sync_state</span><span class="p">();</span>
+
+<span class="w">        </span><span class="c1">// Send state notifications if needed</span>
+<span class="w">        </span><span class="n">state_handler_</span><span class="p">.</span><span class="n">check_notifications</span><span class="p">(</span><span class="n">send_fn</span><span class="p">);</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">result</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">mark_boot_success</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">timestamp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">boot_verif_</span><span class="p">.</span><span class="n">mark_success</span><span class="p">(</span><span class="n">timestamp</span><span class="p">);</span>
+<span class="w">        </span><span class="n">boot_verif_</span><span class="p">.</span><span class="n">update_checksum</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">should_rollback</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">boot_verif_</span><span class="p">.</span><span class="n">should_rollback</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">increment_boot_count</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">boot_verif_</span><span class="p">.</span><span class="n">increment_boot</span><span class="p">();</span>
+<span class="w">        </span><span class="n">boot_verif_</span><span class="p">.</span><span class="n">update_checksum</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">StateManager</span><span class="o">&amp;</span><span class="w"> </span><span class="n">state_manager</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">state_mgr_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">SecureFirmwareUpdate</span><span class="o">&lt;</span><span class="n">Config</span><span class="p">,</span><span class="w"> </span><span class="n">MaxChunkSize</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">firmware_update</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">fw_update_</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">BootVerification</span><span class="o">&amp;</span><span class="w"> </span><span class="n">boot_verification</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">boot_verif_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+
+<span class="k">private</span><span class="o">:</span>
+<span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">SendFn</span><span class="o">&gt;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">handle_resume</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ParsedMessage</span><span class="o">&amp;</span><span class="w"> </span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="cm">/*current_time*/</span><span class="p">,</span><span class="w"> </span><span class="n">SendFn</span><span class="w"> </span><span class="n">send_fn</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Decode resume request</span>
+<span class="w">        </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">payload</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span>
+<span class="w">        </span><span class="kt">size_t</span><span class="w"> </span><span class="n">payload_len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">msg</span><span class="p">.</span><span class="n">decode_payload</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">payload</span><span class="p">));</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">payload_len</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="c1">// Invalid resume request</span>
+<span class="w">            </span><span class="n">MessageBuilder</span><span class="o">&lt;</span><span class="mi">16</span><span class="o">&gt;</span><span class="w"> </span><span class="n">builder</span><span class="p">;</span>
+<span class="w">            </span><span class="n">builder</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="n">Command</span><span class="o">::</span><span class="n">FW_NACK</span><span class="p">,</span><span class="w"> </span><span class="n">msg</span><span class="p">.</span><span class="n">sequence</span><span class="p">);</span>
+<span class="w">            </span><span class="n">builder</span><span class="p">.</span><span class="n">add_byte</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">ErrorCode</span><span class="o">::</span><span class="n">INVALID_COMMAND</span><span class="p">));</span>
+<span class="w">            </span><span class="n">send_fn</span><span class="p">(</span><span class="n">builder</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">finalize</span><span class="p">());</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="c1">// Extract session_id and firmware_hash from request</span>
+<span class="w">        </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">req_session_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">uint32_t</span><span class="p">(</span><span class="n">payload</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">24</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="p">(</span><span class="kt">uint32_t</span><span class="p">(</span><span class="n">payload</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">16</span><span class="p">)</span><span class="w"> </span><span class="o">|</span>
+<span class="w">                                  </span><span class="p">(</span><span class="kt">uint32_t</span><span class="p">(</span><span class="n">payload</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">payload</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span>
+<span class="w">        </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">req_fw_hash</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">uint32_t</span><span class="p">(</span><span class="n">payload</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">24</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="p">(</span><span class="kt">uint32_t</span><span class="p">(</span><span class="n">payload</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">16</span><span class="p">)</span><span class="w"> </span><span class="o">|</span>
+<span class="w">                               </span><span class="p">(</span><span class="kt">uint32_t</span><span class="p">(</span><span class="n">payload</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">payload</span><span class="p">[</span><span class="mi">7</span><span class="p">];</span>
+
+<span class="w">        </span><span class="c1">// Check if we can resume</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">resume_info</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state_mgr_</span><span class="p">.</span><span class="n">build_resume_info</span><span class="p">(</span><span class="n">resume_fw_hash_</span><span class="p">,</span><span class="w"> </span><span class="n">resume_chunk_size_</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">resume_info</span><span class="p">.</span><span class="n">can_resume</span><span class="p">(</span><span class="n">req_session_id</span><span class="p">,</span><span class="w"> </span><span class="n">req_fw_hash</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="c1">// Cannot resume - session mismatch</span>
+<span class="w">            </span><span class="n">MessageBuilder</span><span class="o">&lt;</span><span class="mi">16</span><span class="o">&gt;</span><span class="w"> </span><span class="n">builder</span><span class="p">;</span>
+<span class="w">            </span><span class="n">builder</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="n">Command</span><span class="o">::</span><span class="n">FW_NACK</span><span class="p">,</span><span class="w"> </span><span class="n">msg</span><span class="p">.</span><span class="n">sequence</span><span class="p">);</span>
+<span class="w">            </span><span class="n">builder</span><span class="p">.</span><span class="n">add_byte</span><span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">ErrorCode</span><span class="o">::</span><span class="n">INVALID_SEQUENCE</span><span class="p">));</span>
+<span class="w">            </span><span class="n">send_fn</span><span class="p">(</span><span class="n">builder</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">finalize</span><span class="p">());</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="c1">// Resume accepted - send resume info</span>
+<span class="w">        </span><span class="n">MessageBuilder</span><span class="o">&lt;</span><span class="mi">64</span><span class="o">&gt;</span><span class="w"> </span><span class="n">builder</span><span class="p">;</span>
+<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="n">Command</span><span class="o">::</span><span class="n">FW_ACK</span><span class="p">,</span><span class="w"> </span><span class="n">msg</span><span class="p">.</span><span class="n">sequence</span><span class="p">);</span>
+<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="n">add_u32</span><span class="p">(</span><span class="n">resume_info</span><span class="p">.</span><span class="n">received_bytes</span><span class="p">);</span><span class="w">  </span><span class="c1">// Next expected offset</span>
+<span class="w">        </span><span class="n">builder</span><span class="p">.</span><span class="n">add_byte</span><span class="p">(</span><span class="n">resume_info</span><span class="p">.</span><span class="n">last_ack_seq</span><span class="p">);</span><span class="w">   </span><span class="c1">// Next expected seq</span>
+<span class="w">        </span><span class="n">send_fn</span><span class="p">(</span><span class="n">builder</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">finalize</span><span class="p">());</span>
+
+<span class="w">        </span><span class="n">state_mgr_</span><span class="p">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">DeviceState</span><span class="o">::</span><span class="n">UPDATE_RECEIVING</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">sync_state</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">fw_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fw_update_</span><span class="p">.</span><span class="n">state</span><span class="p">();</span>
+
+<span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">fw_state</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">UpdateState</span><span class="o">::</span><span class="no">IDLE</span><span class="p">:</span>
+<span class="w">            </span><span class="n">state_mgr_</span><span class="p">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">DeviceState</span><span class="o">::</span><span class="n">IDLE</span><span class="p">);</span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">UpdateState</span><span class="o">::</span><span class="no">RECEIVING</span><span class="p">:</span>
+<span class="w">            </span><span class="n">state_mgr_</span><span class="p">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">DeviceState</span><span class="o">::</span><span class="n">UPDATE_RECEIVING</span><span class="p">);</span>
+<span class="w">            </span><span class="n">state_mgr_</span><span class="p">.</span><span class="n">set_progress</span><span class="p">(</span>
+<span class="w">                </span><span class="kt">uint8_t</span><span class="p">(</span><span class="n">fw_update_</span><span class="p">.</span><span class="n">progress</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="p">),</span>
+<span class="w">                </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="w">  </span><span class="c1">// TODO: get actual bytes from fw_update</span>
+<span class="w">            </span><span class="p">);</span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">UpdateState</span><span class="o">::</span><span class="no">VERIFYING</span><span class="p">:</span>
+<span class="w">            </span><span class="n">state_mgr_</span><span class="p">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">DeviceState</span><span class="o">::</span><span class="n">UPDATE_VERIFYING</span><span class="p">);</span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">UpdateState</span><span class="o">::</span><span class="no">READY_TO_COMMIT</span><span class="p">:</span>
+<span class="w">            </span><span class="n">state_mgr_</span><span class="p">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">DeviceState</span><span class="o">::</span><span class="n">UPDATE_READY</span><span class="p">);</span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">UpdateState</span><span class="o">::</span><span class="no">COMMITTED</span><span class="p">:</span>
+<span class="w">            </span><span class="n">state_mgr_</span><span class="p">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">DeviceState</span><span class="o">::</span><span class="n">UPDATE_COMMITTED</span><span class="p">);</span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">UpdateState</span><span class="o">::</span><span class="no">ERROR</span><span class="p">:</span>
+<span class="w">            </span><span class="n">state_mgr_</span><span class="p">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">DeviceState</span><span class="o">::</span><span class="n">ERROR</span><span class="p">);</span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">SecureFirmwareUpdate</span><span class="o">&lt;</span><span class="n">Config</span><span class="p">,</span><span class="w"> </span><span class="n">MaxChunkSize</span><span class="o">&gt;</span><span class="w"> </span><span class="n">fw_update_</span><span class="p">;</span>
+<span class="w">    </span><span class="n">StateManager</span><span class="w"> </span><span class="n">state_mgr_</span><span class="p">;</span>
+<span class="w">    </span><span class="n">StateProtocolHandler</span><span class="w"> </span><span class="n">state_handler_</span><span class="p">{</span><span class="n">state_mgr_</span><span class="p">};</span>
+<span class="w">    </span><span class="n">BootVerification</span><span class="w"> </span><span class="n">boot_verif_</span><span class="p">{};</span>
+
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">resume_fw_hash_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">resume_chunk_size_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="c1">// =============================================================================</span>
+<span class="c1">// Convenience Type Aliases</span>
+<span class="c1">// =============================================================================</span>
+
+<span class="k">using</span><span class="w"> </span><span class="n">StatefulFirmwareUpdateSTM32F4</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StatefulFirmwareUpdate</span><span class="o">&lt;&amp;</span><span class="n">platforms</span><span class="o">::</span><span class="n">STM32F4_512K</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">StatefulFirmwareUpdateSTM32H7</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StatefulFirmwareUpdate</span><span class="o">&lt;&amp;</span><span class="n">platforms</span><span class="o">::</span><span class="n">STM32H7_2M</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">StatefulFirmwareUpdateESP32</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StatefulFirmwareUpdate</span><span class="o">&lt;&amp;</span><span class="n">platforms</span><span class="o">::</span><span class="n">ESP32_4M</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">StatefulFirmwareUpdateRP2040</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StatefulFirmwareUpdate</span><span class="o">&lt;&amp;</span><span class="n">platforms</span><span class="o">::</span><span class="n">RP2040_2M</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace umidi::protocol</span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, UMI-OS Project.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

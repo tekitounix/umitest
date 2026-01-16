@@ -1,0 +1,3088 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="namespaceumidi_1_1protocol" kind="namespace" language="C++">
+    <compoundname>umidi::protocol</compoundname>
+    <innerclass refid="classumidi_1_1protocol_1_1_auth_client" prot="public">umidi::protocol::AuthClient</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_authenticator" prot="public">umidi::protocol::Authenticator</innerclass>
+    <innerclass refid="structumidi_1_1protocol_1_1_boot_config" prot="public">umidi::protocol::BootConfig</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_bootloader_interface" prot="public">umidi::protocol::BootloaderInterface</innerclass>
+    <innerclass refid="structumidi_1_1protocol_1_1_boot_verification" prot="public">umidi::protocol::BootVerification</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_bulk_transport" prot="public">umidi::protocol::BulkTransport</innerclass>
+    <innerclass refid="structumidi_1_1protocol_1_1_config_metadata" prot="public">umidi::protocol::ConfigMetadata</innerclass>
+    <innerclass refid="structumidi_1_1protocol_1_1_firmware_header" prot="public">umidi::protocol::FirmwareHeader</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_firmware_header_builder" prot="public">umidi::protocol::FirmwareHeaderBuilder</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_firmware_update" prot="public">umidi::protocol::FirmwareUpdate</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_firmware_update_session" prot="public">umidi::protocol::FirmwareUpdateSession</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_firmware_update_session_with_progress" prot="public">umidi::protocol::FirmwareUpdateSessionWithProgress</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_firmware_validator" prot="public">umidi::protocol::FirmwareValidator</innerclass>
+    <innerclass refid="structumidi_1_1protocol_1_1_flash_interface" prot="public">umidi::protocol::FlashInterface</innerclass>
+    <innerclass refid="structumidi_1_1protocol_1_1_flash_region" prot="public">umidi::protocol::FlashRegion</innerclass>
+    <innerclass refid="structumidi_1_1protocol_1_1_flow_config" prot="public">umidi::protocol::FlowConfig</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_flow_control_receiver" prot="public">umidi::protocol::FlowControlReceiver</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_flow_control_sender" prot="public">umidi::protocol::FlowControlSender</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_message_builder" prot="public">umidi::protocol::MessageBuilder</innerclass>
+    <innerclass refid="structumidi_1_1protocol_1_1_object_header" prot="public">umidi::protocol::ObjectHeader</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_object_storage" prot="public">umidi::protocol::ObjectStorage</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_object_transfer_handler" prot="public">umidi::protocol::ObjectTransferHandler</innerclass>
+    <innerclass refid="structumidi_1_1protocol_1_1_packet_state" prot="public">umidi::protocol::PacketState</innerclass>
+    <innerclass refid="structumidi_1_1protocol_1_1_parsed_message" prot="public">umidi::protocol::ParsedMessage</innerclass>
+    <innerclass refid="structumidi_1_1protocol_1_1_platform_config" prot="public">umidi::protocol::PlatformConfig</innerclass>
+    <innerclass refid="structumidi_1_1protocol_1_1_preset_metadata" prot="public">umidi::protocol::PresetMetadata</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_protocol_handler" prot="public">umidi::protocol::ProtocolHandler</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_r_a_m_object_storage" prot="public">umidi::protocol::RAMObjectStorage</innerclass>
+    <innerclass refid="structumidi_1_1protocol_1_1_resume_info" prot="public">umidi::protocol::ResumeInfo</innerclass>
+    <innerclass refid="structumidi_1_1protocol_1_1_sample_metadata" prot="public">umidi::protocol::SampleMetadata</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_secure_firmware_update" prot="public">umidi::protocol::SecureFirmwareUpdate</innerclass>
+    <innerclass refid="structumidi_1_1protocol_1_1_sequence_metadata" prot="public">umidi::protocol::SequenceMetadata</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_session_timer" prot="public">umidi::protocol::SessionTimer</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_standard_i_o" prot="public">umidi::protocol::StandardIO</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_stateful_firmware_update" prot="public">umidi::protocol::StatefulFirmwareUpdate</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_state_manager" prot="public">umidi::protocol::StateManager</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_state_protocol_handler" prot="public">umidi::protocol::StateProtocolHandler</innerclass>
+    <innerclass refid="structumidi_1_1protocol_1_1_state_report" prot="public">umidi::protocol::StateReport</innerclass>
+    <innerclass refid="structumidi_1_1protocol_1_1_storage_info" prot="public">umidi::protocol::StorageInfo</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_sys_ex_transport" prot="public">umidi::protocol::SysExTransport</innerclass>
+    <innerclass refid="structumidi_1_1protocol_1_1_timeout_config" prot="public">umidi::protocol::TimeoutConfig</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_transport" prot="public">umidi::protocol::Transport</innerclass>
+    <innerclass refid="structumidi_1_1protocol_1_1_transport_capabilities" prot="public">umidi::protocol::TransportCapabilities</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_transport_handler" prot="public">umidi::protocol::TransportHandler</innerclass>
+    <innerclass refid="classumidi_1_1protocol_1_1_transport_manager" prot="public">umidi::protocol::TransportManager</innerclass>
+    <innernamespace refid="namespaceumidi_1_1protocol_1_1bulk">umidi::protocol::bulk</innernamespace>
+    <innernamespace refid="namespaceumidi_1_1protocol_1_1platforms">umidi::protocol::platforms</innernamespace>
+    <sectiondef kind="enum">
+      <memberdef kind="enum" id="commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>Command</name>
+        <qualifiedname>umidi::protocol::Command</qualifiedname>
+        <enumvalue id="commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8abd28e73fc6f8fa13af68e2c1d94ad198" prot="public">
+          <name>STDOUT_DATA</name>
+          <initializer>= 0x01</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8ac8e41496b96e594bce9c3bbafea748c0" prot="public">
+          <name>STDERR_DATA</name>
+          <initializer>= 0x02</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8a3944a305eb715128bf54853c40b7e5fd" prot="public">
+          <name>STDIN_DATA</name>
+          <initializer>= 0x03</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8a0f75397d53f9f2d225402d3aea69b0c1" prot="public">
+          <name>STDIN_EOF</name>
+          <initializer>= 0x04</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8a7b66cdb20ced7a8efac4169900e7696c" prot="public">
+          <name>FLOW_CTRL</name>
+          <initializer>= 0x05</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8a9513ebeee97cc358f885bf54cb19f5e2" prot="public">
+          <name>FW_QUERY</name>
+          <initializer>= 0x10</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8a116db643abb436b270507cdd1b66523b" prot="public">
+          <name>FW_INFO</name>
+          <initializer>= 0x11</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8a6fe5e57a23c78a3200932f8fb2000628" prot="public">
+          <name>FW_BEGIN</name>
+          <initializer>= 0x12</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8a85f038f36ace06039d170e6662614c9b" prot="public">
+          <name>FW_DATA</name>
+          <initializer>= 0x13</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8ac25090899b63b2077d0cd703ea14c51a" prot="public">
+          <name>FW_VERIFY</name>
+          <initializer>= 0x14</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8ae3e7a42d341e754e618ff4df2e586be9" prot="public">
+          <name>FW_COMMIT</name>
+          <initializer>= 0x15</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8a6b10aaf7392315ebf988e3f87d8313a9" prot="public">
+          <name>FW_ROLLBACK</name>
+          <initializer>= 0x16</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8a3fb025254786919eeddf0da9f6d1f2b2" prot="public">
+          <name>FW_REBOOT</name>
+          <initializer>= 0x17</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8a599c669aae2f2d99b4dbdf2ed3c750f3" prot="public">
+          <name>FW_ACK</name>
+          <initializer>= 0x18</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8a8e8d4f3d1b4411c576b6b223e9aaede6" prot="public">
+          <name>FW_NACK</name>
+          <initializer>= 0x19</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8ae07ff41a486c27c095a15898dcca34d1" prot="public">
+          <name>PING</name>
+          <initializer>= 0x20</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8a15c94917c8795679ecb650ed760c27f0" prot="public">
+          <name>PONG</name>
+          <initializer>= 0x21</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8ab5859d8721cfdc0312b2838b9c985bc1" prot="public">
+          <name>RESET</name>
+          <initializer>= 0x22</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8a021321e8c168ba3ae39ce3a2e7b3ec87" prot="public">
+          <name>VERSION</name>
+          <initializer>= 0x23</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>UMI protocol commands. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/commands.hh" line="19" column="1" bodyfile="include/umidi/protocol/commands.hh" bodystart="19" bodyend="44"/>
+      </memberdef>
+      <memberdef kind="enum" id="commands_8hh_1a535223bf911d0f4570ff0c7fb31530d9" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>ErrorCode</name>
+        <qualifiedname>umidi::protocol::ErrorCode</qualifiedname>
+        <enumvalue id="commands_8hh_1a535223bf911d0f4570ff0c7fb31530d9ae0aa021e21dddbd6d8cecec71e9cf564" prot="public">
+          <name>OK</name>
+          <initializer>= 0x00</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1a535223bf911d0f4570ff0c7fb31530d9a000856510488c462ee7720e2c84d5c84" prot="public">
+          <name>INVALID_COMMAND</name>
+          <initializer>= 0x01</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1a535223bf911d0f4570ff0c7fb31530d9ac76ad5de6927c44b529791b9ff732b79" prot="public">
+          <name>INVALID_SEQUENCE</name>
+          <initializer>= 0x02</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1a535223bf911d0f4570ff0c7fb31530d9ab8da59756dfecf3e9731e1b05fe75381" prot="public">
+          <name>INVALID_CHECKSUM</name>
+          <initializer>= 0x03</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1a535223bf911d0f4570ff0c7fb31530d9ad53c9f7d5b985bba6cb80cdf8ae665e4" prot="public">
+          <name>BUFFER_OVERFLOW</name>
+          <initializer>= 0x04</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1a535223bf911d0f4570ff0c7fb31530d9acff9dd902675c0c358e6e5e2ce0500a5" prot="public">
+          <name>UPDATE_NOT_STARTED</name>
+          <initializer>= 0x05</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1a535223bf911d0f4570ff0c7fb31530d9aa1c687a90049fc6ecadbbfc03dfd863b" prot="public">
+          <name>UPDATE_IN_PROGRESS</name>
+          <initializer>= 0x06</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1a535223bf911d0f4570ff0c7fb31530d9a94f2b2b203bb3bd3b97b3cf76749a2e8" prot="public">
+          <name>VERIFY_FAILED</name>
+          <initializer>= 0x07</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1a535223bf911d0f4570ff0c7fb31530d9aead67fe5414f8130ba3c2a35c4934622" prot="public">
+          <name>SIGNATURE_INVALID</name>
+          <initializer>= 0x08</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1a535223bf911d0f4570ff0c7fb31530d9a709662958f47378b1b777b16f010c763" prot="public">
+          <name>FLASH_ERROR</name>
+          <initializer>= 0x09</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1a535223bf911d0f4570ff0c7fb31530d9a73684c6e49ddaeefa387647720859016" prot="public">
+          <name>ROLLBACK_UNAVAIL</name>
+          <initializer>= 0x0A</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1a535223bf911d0f4570ff0c7fb31530d9a070a0fb40f6c308ab544b227660aadff" prot="public">
+          <name>TIMEOUT</name>
+          <initializer>= 0x0B</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Error codes for NACK responses. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/commands.hh" line="47" column="1" bodyfile="include/umidi/protocol/commands.hh" bodystart="47" bodyend="60"/>
+      </memberdef>
+      <memberdef kind="enum" id="commands_8hh_1a4794e96786e74a58a550eecdc4b1cf50" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>FlowControl</name>
+        <qualifiedname>umidi::protocol::FlowControl</qualifiedname>
+        <enumvalue id="commands_8hh_1a4794e96786e74a58a550eecdc4b1cf50abcc505cccb013305159c69ed61b992ca" prot="public">
+          <name>XON</name>
+          <initializer>= 0x11</initializer>
+          <briefdescription>
+<para>Resume transmission. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="commands_8hh_1a4794e96786e74a58a550eecdc4b1cf50ac3538f06c87eb5e9807cfb38b5925be4" prot="public">
+          <name>XOFF</name>
+          <initializer>= 0x13</initializer>
+          <briefdescription>
+<para>Pause transmission. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Flow control states. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/commands.hh" line="63" column="1" bodyfile="include/umidi/protocol/commands.hh" bodystart="63" bodyend="66"/>
+      </memberdef>
+      <memberdef kind="enum" id="umi__auth_8hh_1a523f8b9a6f3a922b86acc73bd19dae64" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>AuthCommand</name>
+        <qualifiedname>umidi::protocol::AuthCommand</qualifiedname>
+        <enumvalue id="umi__auth_8hh_1a523f8b9a6f3a922b86acc73bd19dae64a0adc3eb7fee0464264a2bf8188ce6218" prot="public">
+          <name>AUTH_CHALLENGE_REQ</name>
+          <initializer>= 0x30</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__auth_8hh_1a523f8b9a6f3a922b86acc73bd19dae64a5a5796c9f7917f9f23eb77690029d1af" prot="public">
+          <name>AUTH_CHALLENGE</name>
+          <initializer>= 0x31</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__auth_8hh_1a523f8b9a6f3a922b86acc73bd19dae64a77f0eac241807ccab8b78e6a7375f804" prot="public">
+          <name>AUTH_RESPONSE</name>
+          <initializer>= 0x32</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__auth_8hh_1a523f8b9a6f3a922b86acc73bd19dae64a42e0e7ff28bbd85b8859feaa52c7e870" prot="public">
+          <name>AUTH_OK</name>
+          <initializer>= 0x33</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__auth_8hh_1a523f8b9a6f3a922b86acc73bd19dae64ad2657540a07dfdc6551d50c0e9401ed6" prot="public">
+          <name>AUTH_FAIL</name>
+          <initializer>= 0x34</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__auth_8hh_1a523f8b9a6f3a922b86acc73bd19dae64abae72817e366dca1f0d839f1c2ae54b8" prot="public">
+          <name>AUTH_LOGOUT</name>
+          <initializer>= 0x35</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__auth_8hh_1a523f8b9a6f3a922b86acc73bd19dae64a25e08048c7873d9681f18da1ddbbfc79" prot="public">
+          <name>AUTH_STATUS</name>
+          <initializer>= 0x36</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_auth.hh" line="31" column="1" bodyfile="include/umidi/protocol/umi_auth.hh" bodystart="31" bodyend="39"/>
+      </memberdef>
+      <memberdef kind="enum" id="umi__auth_8hh_1a8b930266096efb5c16d2caf68608dfd7" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>AuthError</name>
+        <qualifiedname>umidi::protocol::AuthError</qualifiedname>
+        <enumvalue id="umi__auth_8hh_1a8b930266096efb5c16d2caf68608dfd7ae0aa021e21dddbd6d8cecec71e9cf564" prot="public">
+          <name>OK</name>
+          <initializer>= 0x00</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__auth_8hh_1a8b930266096efb5c16d2caf68608dfd7ad29f47cbc1aa79bb5a2fefba4cc91701" prot="public">
+          <name>INVALID_CHALLENGE</name>
+          <initializer>= 0x01</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__auth_8hh_1a8b930266096efb5c16d2caf68608dfd7a44cb7794c92b9335a32aa002181ec23e" prot="public">
+          <name>INVALID_RESPONSE</name>
+          <initializer>= 0x02</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__auth_8hh_1a8b930266096efb5c16d2caf68608dfd7aee7c1374d9480eb0dafeedd8d6f1ee12" prot="public">
+          <name>SESSION_EXPIRED</name>
+          <initializer>= 0x03</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__auth_8hh_1a8b930266096efb5c16d2caf68608dfd7abff4abc7af63b54d004abcd84684a82c" prot="public">
+          <name>NOT_AUTHENTICATED</name>
+          <initializer>= 0x04</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__auth_8hh_1a8b930266096efb5c16d2caf68608dfd7adf77e709203d292b563e41c5f8873336" prot="public">
+          <name>ALREADY_AUTHENTICATED</name>
+          <initializer>= 0x05</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_auth.hh" line="42" column="1" bodyfile="include/umidi/protocol/umi_auth.hh" bodystart="42" bodyend="49"/>
+      </memberdef>
+      <memberdef kind="enum" id="umi__auth_8hh_1aa4746c1085878177b69fe82f9a92a9b6" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>AuthState</name>
+        <qualifiedname>umidi::protocol::AuthState</qualifiedname>
+        <enumvalue id="umi__auth_8hh_1aa4746c1085878177b69fe82f9a92a9b6aa5daf7f2ebbba4975d61dab1c40188c7" prot="public">
+          <name>IDLE</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__auth_8hh_1aa4746c1085878177b69fe82f9a92a9b6aee09c5088bf61b7fea0b5af917dc1321" prot="public">
+          <name>CHALLENGE_SENT</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__auth_8hh_1aa4746c1085878177b69fe82f9a92a9b6a23d7255c44bb7dbe3c5b6d1d253a31a1" prot="public">
+          <name>AUTHENTICATED</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_auth.hh" line="85" column="1" bodyfile="include/umidi/protocol/umi_auth.hh" bodystart="85" bodyend="89"/>
+      </memberdef>
+      <memberdef kind="enum" id="umi__bootloader_8hh_1a3703f324f9ced505b0f3e6e9696c71b9" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>Slot</name>
+        <qualifiedname>umidi::protocol::Slot</qualifiedname>
+        <enumvalue id="umi__bootloader_8hh_1a3703f324f9ced505b0f3e6e9696c71b9a8018bc9e69901cc7f25a3a31c096b34d" prot="public">
+          <name>SLOT_A</name>
+          <initializer>= 0</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__bootloader_8hh_1a3703f324f9ced505b0f3e6e9696c71b9ab0704ba8483a37b08b4cc7faebad5e00" prot="public">
+          <name>SLOT_B</name>
+          <initializer>= 1</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Slot identifier. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="41" column="1" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="41" bodyend="44"/>
+      </memberdef>
+      <memberdef kind="enum" id="umi__bootloader_8hh_1a84280f916f93c102252489f8f7c58ab1" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>SlotState</name>
+        <qualifiedname>umidi::protocol::SlotState</qualifiedname>
+        <enumvalue id="umi__bootloader_8hh_1a84280f916f93c102252489f8f7c58ab1aba2b45bdc11e2a4a6e86aab2ac693cbb" prot="public">
+          <name>EMPTY</name>
+          <initializer>= 0x00</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__bootloader_8hh_1a84280f916f93c102252489f8f7c58ab1ac9f1a6384b1c466d4612f513bd8e13ea" prot="public">
+          <name>VALID</name>
+          <initializer>= 0x01</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__bootloader_8hh_1a84280f916f93c102252489f8f7c58ab1ac69f06e1a9b016d133907b4e5f5864d2" prot="public">
+          <name>PENDING</name>
+          <initializer>= 0x02</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__bootloader_8hh_1a84280f916f93c102252489f8f7c58ab1accc0377a8afbf50e7094f5c23a8af223" prot="public">
+          <name>INVALID</name>
+          <initializer>= 0x03</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__bootloader_8hh_1a84280f916f93c102252489f8f7c58ab1ad32cbe23a48d1576416d9eb314876c6d" prot="public">
+          <name>BOOTING</name>
+          <initializer>= 0x04</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Slot state. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="47" column="1" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="47" bodyend="53"/>
+      </memberdef>
+      <memberdef kind="enum" id="umi__bootloader_8hh_1aea8b72ea1718571a03fbceb51748bb73" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>FlashResult</name>
+        <qualifiedname>umidi::protocol::FlashResult</qualifiedname>
+        <enumvalue id="umi__bootloader_8hh_1aea8b72ea1718571a03fbceb51748bb73ae0aa021e21dddbd6d8cecec71e9cf564" prot="public">
+          <name>OK</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__bootloader_8hh_1aea8b72ea1718571a03fbceb51748bb73adab4b17bb3f3cd2d0a22dde98bfe3243" prot="public">
+          <name>ERROR_ERASE</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__bootloader_8hh_1aea8b72ea1718571a03fbceb51748bb73a476b23072a4a1342ef1fc0ef9f3da2c4" prot="public">
+          <name>ERROR_WRITE</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__bootloader_8hh_1aea8b72ea1718571a03fbceb51748bb73a660c450cffb14312940b00f45983d29a" prot="public">
+          <name>ERROR_VERIFY</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__bootloader_8hh_1aea8b72ea1718571a03fbceb51748bb73a207bfa01f47fcd4b9b62475a95271728" prot="public">
+          <name>ERROR_LOCKED</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__bootloader_8hh_1aea8b72ea1718571a03fbceb51748bb73a0b97ddad4b1c7d7924d6aa05cd208c89" prot="public">
+          <name>ERROR_ALIGNMENT</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__bootloader_8hh_1aea8b72ea1718571a03fbceb51748bb73a82a39b97649ad240fd157179064adf0b" prot="public">
+          <name>ERROR_OUT_OF_RANGE</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Flash operation result. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="255" column="1" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="255" bodyend="263"/>
+      </memberdef>
+      <memberdef kind="enum" id="umi__firmware_8hh_1a37a516c867046d80a424e8a967e63844" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>FirmwareFlags</name>
+        <qualifiedname>umidi::protocol::FirmwareFlags</qualifiedname>
+        <enumvalue id="umi__firmware_8hh_1a37a516c867046d80a424e8a967e63844ab50339a10e1de285ac99d4c3990b8693" prot="public">
+          <name>NONE</name>
+          <initializer>= 0x00</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__firmware_8hh_1a37a516c867046d80a424e8a967e63844a6898b46a1cde8a1572e2722c44c5ab07" prot="public">
+          <name>SIGNED</name>
+          <initializer>= 0x01</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__firmware_8hh_1a37a516c867046d80a424e8a967e63844a3fe1c5068682cdee737d379207ab631f" prot="public">
+          <name>ENCRYPTED</name>
+          <initializer>= 0x02</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__firmware_8hh_1a37a516c867046d80a424e8a967e63844a724ba27218714b182f22d5b24b5e4317" prot="public">
+          <name>COMPRESSED</name>
+          <initializer>= 0x04</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__firmware_8hh_1a37a516c867046d80a424e8a967e63844ac6419163b0db59bd853a00e99775022a" prot="public">
+          <name>DEBUG_BUILD</name>
+          <initializer>= 0x08</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__firmware_8hh_1a37a516c867046d80a424e8a967e63844a2940ffbeefe8d702ee4333aaed9e55cd" prot="public">
+          <name>ALLOW_DOWNGRADE</name>
+          <initializer>= 0x10</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Firmware flags. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="76" column="1" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="76" bodyend="83"/>
+      </memberdef>
+      <memberdef kind="enum" id="umi__firmware_8hh_1adcbc061a897cbf4e790db14f6f7dae2f" prot="public" static="no" strong="yes">
+        <type>int8_t</type>
+        <name>VersionCompare</name>
+        <qualifiedname>umidi::protocol::VersionCompare</qualifiedname>
+        <enumvalue id="umi__firmware_8hh_1adcbc061a897cbf4e790db14f6f7dae2fab1f680800cb490281abf6424510c85e5" prot="public">
+          <name>OLDER</name>
+          <initializer>= -1</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__firmware_8hh_1adcbc061a897cbf4e790db14f6f7dae2fa969f331a87d8c958473c32b4d0e61a44" prot="public">
+          <name>EQUAL</name>
+          <initializer>= 0</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__firmware_8hh_1adcbc061a897cbf4e790db14f6f7dae2fac62122d172b000396b6b38a9e959fad3" prot="public">
+          <name>NEWER</name>
+          <initializer>= 1</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Version comparison result. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="86" column="1" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="86" bodyend="90"/>
+      </memberdef>
+      <memberdef kind="enum" id="umi__firmware_8hh_1ae7f47641999c91f695260019f8148afe" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>ValidationResult</name>
+        <qualifiedname>umidi::protocol::ValidationResult</qualifiedname>
+        <enumvalue id="umi__firmware_8hh_1ae7f47641999c91f695260019f8148afeae0aa021e21dddbd6d8cecec71e9cf564" prot="public">
+          <name>OK</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__firmware_8hh_1ae7f47641999c91f695260019f8148afeab33d3da4673e6f821d430e1b45d522bd" prot="public">
+          <name>INVALID_MAGIC</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__firmware_8hh_1ae7f47641999c91f695260019f8148afea38987bba776f6d03bc6c6d3e53d132f9" prot="public">
+          <name>INVALID_HEADER_VERSION</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__firmware_8hh_1ae7f47641999c91f695260019f8148afea51a0660230eb5c4b9f49430f9c2c0f05" prot="public">
+          <name>INVALID_SIZE</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__firmware_8hh_1ae7f47641999c91f695260019f8148afeac591eda9ece6daa75d5b83244ff5e64b" prot="public">
+          <name>CRC_MISMATCH</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__firmware_8hh_1ae7f47641999c91f695260019f8148afeac93ebf8fbedbcb375e9368dcfde5e59d" prot="public">
+          <name>HASH_MISMATCH</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__firmware_8hh_1ae7f47641999c91f695260019f8148afeaead67fe5414f8130ba3c2a35c4934622" prot="public">
+          <name>SIGNATURE_INVALID</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__firmware_8hh_1ae7f47641999c91f695260019f8148afea73fc98c2307f58789c8ddb62a2d09e0b" prot="public">
+          <name>BOARD_MISMATCH</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__firmware_8hh_1ae7f47641999c91f695260019f8148afeabba07447104aca720f7d3815cde64ebf" prot="public">
+          <name>VERSION_TOO_OLD</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__firmware_8hh_1ae7f47641999c91f695260019f8148afea712214d7cd00603d09581a973e602bfa" prot="public">
+          <name>BOOTLOADER_TOO_OLD</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__firmware_8hh_1ae7f47641999c91f695260019f8148afea6924e07810572197a1063dd2b95ad94d" prot="public">
+          <name>NOT_SIGNED</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Validation result. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="174" column="1" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="174" bodyend="186"/>
+      </memberdef>
+      <memberdef kind="enum" id="umi__object_8hh_1aad09cb329fca2316052a60710cd475a1" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>ObjectType</name>
+        <qualifiedname>umidi::protocol::ObjectType</qualifiedname>
+        <enumvalue id="umi__object_8hh_1aad09cb329fca2316052a60710cd475a1ae69283e6e6bd475ce96a37d62e61c08b" prot="public">
+          <name>FIRMWARE</name>
+          <initializer>= 0x00</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1aad09cb329fca2316052a60710cd475a1a2cb198a10d0a4c217ff4c15e98a97215" prot="public">
+          <name>SEQUENCE</name>
+          <initializer>= 0x01</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1aad09cb329fca2316052a60710cd475a1af5a2496cf66cb8cffe66cb1b27d7dede" prot="public">
+          <name>SAMPLE</name>
+          <initializer>= 0x02</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1aad09cb329fca2316052a60710cd475a1ae02d6531f660a4cb37e2e978136891f6" prot="public">
+          <name>PRESET</name>
+          <initializer>= 0x03</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1aad09cb329fca2316052a60710cd475a1a73e99d350a4aa6f1a5af04ec29173f73" prot="public">
+          <name>CONFIG</name>
+          <initializer>= 0x04</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1aad09cb329fca2316052a60710cd475a1a85c4ee1da7b10c76d4dfa57eef01de19" prot="public">
+          <name>WAVETABLE</name>
+          <initializer>= 0x05</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1aad09cb329fca2316052a60710cd475a1a49fcdb7a9109785bfa7eb6dda43c9202" prot="public">
+          <name>SYSEX_DUMP</name>
+          <initializer>= 0x06</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1aad09cb329fca2316052a60710cd475a1a104b9e379b1c0be4f953d7a3a08dc809" prot="public">
+          <name>MIDI_FILE</name>
+          <initializer>= 0x07</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1aad09cb329fca2316052a60710cd475a1acb2707ae2cc177f87dfaba08e4124e07" prot="public">
+          <name>USER_START</name>
+          <initializer>= 0x80</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="20" column="1" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="20" bodyend="30"/>
+      </memberdef>
+      <memberdef kind="enum" id="umi__object_8hh_1a6c8b5c0d4aba897a4de96d94f8f29546" prot="public" static="no" strong="yes">
+        <type>uint16_t</type>
+        <name>ObjectFlags</name>
+        <qualifiedname>umidi::protocol::ObjectFlags</qualifiedname>
+        <enumvalue id="umi__object_8hh_1a6c8b5c0d4aba897a4de96d94f8f29546ab50339a10e1de285ac99d4c3990b8693" prot="public">
+          <name>NONE</name>
+          <initializer>= 0x0000</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a6c8b5c0d4aba897a4de96d94f8f29546a724ba27218714b182f22d5b24b5e4317" prot="public">
+          <name>COMPRESSED</name>
+          <initializer>= 0x0001</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a6c8b5c0d4aba897a4de96d94f8f29546a3fe1c5068682cdee737d379207ab631f" prot="public">
+          <name>ENCRYPTED</name>
+          <initializer>= 0x0002</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a6c8b5c0d4aba897a4de96d94f8f29546a6898b46a1cde8a1572e2722c44c5ab07" prot="public">
+          <name>SIGNED</name>
+          <initializer>= 0x0004</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a6c8b5c0d4aba897a4de96d94f8f29546a34db6698cff32ac89724758fdaa5512e" prot="public">
+          <name>READONLY</name>
+          <initializer>= 0x0008</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a6c8b5c0d4aba897a4de96d94f8f29546afa177138f94a7ea01f549b1aa7893d03" prot="public">
+          <name>SYSTEM</name>
+          <initializer>= 0x0010</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a6c8b5c0d4aba897a4de96d94f8f29546a39e02cdeda38ebf7d4a898b900cf0776" prot="public">
+          <name>TEMPORARY</name>
+          <initializer>= 0x0020</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="36" column="1" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="36" bodyend="44"/>
+      </memberdef>
+      <memberdef kind="enum" id="umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>ObjectCommand</name>
+        <qualifiedname>umidi::protocol::ObjectCommand</qualifiedname>
+        <enumvalue id="umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636abc68fd4036fd765f237a261f9bff2023" prot="public">
+          <name>OBJ_LIST</name>
+          <initializer>= 0x40</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636acd1036376ccddfc430ac123a617656ad" prot="public">
+          <name>OBJ_LIST_RESP</name>
+          <initializer>= 0x41</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636ad3f36bba6f782aa074bb54130404dd03" prot="public">
+          <name>OBJ_INFO</name>
+          <initializer>= 0x42</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636a81097ab788b277a3f58da991735afe5d" prot="public">
+          <name>OBJ_INFO_RESP</name>
+          <initializer>= 0x43</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636aea0611be489536b11d973d391d40e310" prot="public">
+          <name>OBJ_READ_BEGIN</name>
+          <initializer>= 0x44</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636aec70aab886918d46290a714d35a6c365" prot="public">
+          <name>OBJ_READ_DATA</name>
+          <initializer>= 0x45</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636af33970be230ca1a49ddc1201a958c8f8" prot="public">
+          <name>OBJ_WRITE_BEGIN</name>
+          <initializer>= 0x46</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636a616cf61e13937b2071fc1d360544b504" prot="public">
+          <name>OBJ_WRITE_DATA</name>
+          <initializer>= 0x47</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636a7dca1500ee5feafd01b128f2f7ba4587" prot="public">
+          <name>OBJ_DELETE</name>
+          <initializer>= 0x48</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636aaffd83634795cb5f752f55ca45df902f" prot="public">
+          <name>OBJ_RENAME</name>
+          <initializer>= 0x49</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636a9a97ffea8b2d8d4d273e6ae84505d06c" prot="public">
+          <name>OBJ_VERIFY</name>
+          <initializer>= 0x4A</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636a9f8ddf51feef1e98c27537f8e1779fdf" prot="public">
+          <name>OBJ_ACK</name>
+          <initializer>= 0x4B</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636a1feda6f8fc2f088650ef7243a684d35b" prot="public">
+          <name>OBJ_NACK</name>
+          <initializer>= 0x4C</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636a301090bd63e9291ceb6bfd446774cf38" prot="public">
+          <name>OBJ_STORAGE_INFO</name>
+          <initializer>= 0x4D</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636a2041b9ef7db29c4ffd49822fba43cbdb" prot="public">
+          <name>SEQ_PLAY</name>
+          <initializer>= 0x50</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636add1f43d1fdeb70dbbf34d270e298a8f1" prot="public">
+          <name>SEQ_STOP</name>
+          <initializer>= 0x51</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636a57694e01f16246cde05f9324821d44c4" prot="public">
+          <name>SEQ_RECORD</name>
+          <initializer>= 0x52</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636ac6a1e15f5d8dc54066790a943f50d91e" prot="public">
+          <name>SAMPLE_PLAY</name>
+          <initializer>= 0x53</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636adf8de8812f071d45a192fd0438cddc92" prot="public">
+          <name>SAMPLE_STOP</name>
+          <initializer>= 0x54</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636adc2c699d4fb390e58f40aca63355a0d5" prot="public">
+          <name>PRESET_LOAD</name>
+          <initializer>= 0x55</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636a5aff2bb64854da47d150cd2236be95fc" prot="public">
+          <name>PRESET_SAVE</name>
+          <initializer>= 0x56</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636aa34d8f6c6a7d586842ee32ffaa17c828" prot="public">
+          <name>CONFIG_APPLY</name>
+          <initializer>= 0x57</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636a3cd6634e43f4656064a03b5fb12cd500" prot="public">
+          <name>CONFIG_RESET</name>
+          <initializer>= 0x58</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="219" column="1" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="219" bodyend="246"/>
+      </memberdef>
+      <memberdef kind="enum" id="umi__object_8hh_1a720ae451081b2e8a1c681c930e6ab687" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>ObjectError</name>
+        <qualifiedname>umidi::protocol::ObjectError</qualifiedname>
+        <enumvalue id="umi__object_8hh_1a720ae451081b2e8a1c681c930e6ab687ae0aa021e21dddbd6d8cecec71e9cf564" prot="public">
+          <name>OK</name>
+          <initializer>= 0x00</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a720ae451081b2e8a1c681c930e6ab687a8c02547a8a3b02382bac3557bcb2280d" prot="public">
+          <name>NOT_FOUND</name>
+          <initializer>= 0x01</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a720ae451081b2e8a1c681c930e6ab687a08e6da8e58b2bcd070be3b5274d51eed" prot="public">
+          <name>ALREADY_EXISTS</name>
+          <initializer>= 0x02</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a720ae451081b2e8a1c681c930e6ab687ad0b2f69652c96862f3cb18582d92e3ec" prot="public">
+          <name>STORAGE_FULL</name>
+          <initializer>= 0x03</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a720ae451081b2e8a1c681c930e6ab687a092170c04de9552a6503565e95b25ca3" prot="public">
+          <name>INVALID_TYPE</name>
+          <initializer>= 0x04</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a720ae451081b2e8a1c681c930e6ab687a5d0b2a5c7e6da1e3192112f4590ba199" prot="public">
+          <name>INVALID_HEADER</name>
+          <initializer>= 0x05</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a720ae451081b2e8a1c681c930e6ab687ac591eda9ece6daa75d5b83244ff5e64b" prot="public">
+          <name>CRC_MISMATCH</name>
+          <initializer>= 0x06</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a720ae451081b2e8a1c681c930e6ab687a255df50c140519133f1489ab44a389d9" prot="public">
+          <name>PERMISSION_DENIED</name>
+          <initializer>= 0x07</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a720ae451081b2e8a1c681c930e6ab687a802706a9238e2928077f97736854bad4" prot="public">
+          <name>BUSY</name>
+          <initializer>= 0x08</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a720ae451081b2e8a1c681c930e6ab687a198489bd72edc2407c15917c5323cd93" prot="public">
+          <name>IO_ERROR</name>
+          <initializer>= 0x09</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__object_8hh_1a720ae451081b2e8a1c681c930e6ab687ac76ad5de6927c44b529791b9ff732b79" prot="public">
+          <name>INVALID_SEQUENCE</name>
+          <initializer>= 0x0A</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="249" column="1" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="249" bodyend="261"/>
+      </memberdef>
+      <memberdef kind="enum" id="umi__session_8hh_1a8a8c7670daa82497cfc4048609a2816b" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>TimeoutEvent</name>
+        <qualifiedname>umidi::protocol::TimeoutEvent</qualifiedname>
+        <enumvalue id="umi__session_8hh_1a8a8c7670daa82497cfc4048609a2816bab50339a10e1de285ac99d4c3990b8693" prot="public">
+          <name>NONE</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__session_8hh_1a8a8c7670daa82497cfc4048609a2816baee7c1374d9480eb0dafeedd8d6f1ee12" prot="public">
+          <name>SESSION_EXPIRED</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__session_8hh_1a8a8c7670daa82497cfc4048609a2816ba8f34df2f6b94d77f27812a18ba480615" prot="public">
+          <name>CHUNK_TIMEOUT</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__session_8hh_1a8a8c7670daa82497cfc4048609a2816ba99e1d4e6ca2978b9d93e85e1d0b81514" prot="public">
+          <name>ACK_TIMEOUT</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__session_8hh_1a8a8c7670daa82497cfc4048609a2816babc400f93a1d9fb432dc587ddaadfd1ff" prot="public">
+          <name>IDLE_TIMEOUT</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Timeout event type. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="51" column="1" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="51" bodyend="57"/>
+      </memberdef>
+      <memberdef kind="enum" id="umi__session_8hh_1ad962baeb0d66bb3ec3db37b7ae8f5c8f" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>SessionState</name>
+        <qualifiedname>umidi::protocol::SessionState</qualifiedname>
+        <enumvalue id="umi__session_8hh_1ad962baeb0d66bb3ec3db37b7ae8f5c8faa5daf7f2ebbba4975d61dab1c40188c7" prot="public">
+          <name>IDLE</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__session_8hh_1ad962baeb0d66bb3ec3db37b7ae8f5c8fa8a474197adf70a9d0590ef49c22ad728" prot="public">
+          <name>AUTHENTICATING</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__session_8hh_1ad962baeb0d66bb3ec3db37b7ae8f5c8fa18ff74f43da410c5529f7d6fca84f115" prot="public">
+          <name>ACTIVE</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__session_8hh_1ad962baeb0d66bb3ec3db37b7ae8f5c8fadbd2e9556e489478954a3af93b797244" prot="public">
+          <name>UPDATING</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__session_8hh_1ad962baeb0d66bb3ec3db37b7ae8f5c8fabb1ca97ec761fc37101737ba0aa2e7c5" prot="public">
+          <name>ERROR</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Combined session state. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="398" column="1" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="398" bodyend="404"/>
+      </memberdef>
+      <memberdef kind="enum" id="umi__session_8hh_1a54f145a9eaae94c9a42b4caf193425a6" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>SessionEvent</name>
+        <qualifiedname>umidi::protocol::SessionEvent</qualifiedname>
+        <enumvalue id="umi__session_8hh_1a54f145a9eaae94c9a42b4caf193425a6ab50339a10e1de285ac99d4c3990b8693" prot="public">
+          <name>NONE</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__session_8hh_1a54f145a9eaae94c9a42b4caf193425a6a40b11603f93105244a1c824cd8b507f0" prot="public">
+          <name>START_REQUEST</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__session_8hh_1a54f145a9eaae94c9a42b4caf193425a6ad740e537c769ee174e1dde0a1d64d64d" prot="public">
+          <name>AUTH_SUCCESS</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__session_8hh_1a54f145a9eaae94c9a42b4caf193425a6abf593da74f0f9e405a2119e3f7f4c835" prot="public">
+          <name>AUTH_FAILURE</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__session_8hh_1a54f145a9eaae94c9a42b4caf193425a6abe526f06077fed2e1fd5c49899a60b89" prot="public">
+          <name>UPDATE_START</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__session_8hh_1a54f145a9eaae94c9a42b4caf193425a6ac1d17fe9316c9c1c6471f4bd4cb94de5" prot="public">
+          <name>UPDATE_COMPLETE</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__session_8hh_1a54f145a9eaae94c9a42b4caf193425a6a070a0fb40f6c308ab544b227660aadff" prot="public">
+          <name>TIMEOUT</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__session_8hh_1a54f145a9eaae94c9a42b4caf193425a6abb1ca97ec761fc37101737ba0aa2e7c5" prot="public">
+          <name>ERROR</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__session_8hh_1a54f145a9eaae94c9a42b4caf193425a6ab5859d8721cfdc0312b2838b9c985bc1" prot="public">
+          <name>RESET</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Session events (for state machine) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="407" column="1" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="407" bodyend="417"/>
+      </memberdef>
+      <memberdef kind="enum" id="umi__state_8hh_1aee0028e072f0a21e9917da27dd8fe02b" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>DeviceState</name>
+        <qualifiedname>umidi::protocol::DeviceState</qualifiedname>
+        <enumvalue id="umi__state_8hh_1aee0028e072f0a21e9917da27dd8fe02baa5daf7f2ebbba4975d61dab1c40188c7" prot="public">
+          <name>IDLE</name>
+          <initializer>= 0x00</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__state_8hh_1aee0028e072f0a21e9917da27dd8fe02bae7377fafb7bfb0ca4aaa744b1de290ce" prot="public">
+          <name>UPDATE_STARTING</name>
+          <initializer>= 0x01</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__state_8hh_1aee0028e072f0a21e9917da27dd8fe02ba78d5a21819210d0980f972ed0005f867" prot="public">
+          <name>UPDATE_RECEIVING</name>
+          <initializer>= 0x02</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__state_8hh_1aee0028e072f0a21e9917da27dd8fe02bab06c67366da6e9bf01233fae1a273eb0" prot="public">
+          <name>UPDATE_VERIFYING</name>
+          <initializer>= 0x03</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__state_8hh_1aee0028e072f0a21e9917da27dd8fe02ba7c33a9014a54fb3f23f9147046e47958" prot="public">
+          <name>UPDATE_READY</name>
+          <initializer>= 0x04</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__state_8hh_1aee0028e072f0a21e9917da27dd8fe02badb43491b8223a4884e724e47c4e36278" prot="public">
+          <name>UPDATE_COMMITTED</name>
+          <initializer>= 0x05</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__state_8hh_1aee0028e072f0a21e9917da27dd8fe02baf349ba0a87433b0d01fdd90e255043df" prot="public">
+          <name>OBJECT_TRANSFER</name>
+          <initializer>= 0x06</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__state_8hh_1aee0028e072f0a21e9917da27dd8fe02babb1ca97ec761fc37101737ba0aa2e7c5" prot="public">
+          <name>ERROR</name>
+          <initializer>= 0x0F</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="17" column="1" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="17" bodyend="26"/>
+      </memberdef>
+      <memberdef kind="enum" id="umi__state_8hh_1a213f7b02992b11917efe1111b9692dd2" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>StateCommand</name>
+        <qualifiedname>umidi::protocol::StateCommand</qualifiedname>
+        <enumvalue id="umi__state_8hh_1a213f7b02992b11917efe1111b9692dd2ae4b4668491142ef05f1f1f2e6ddd6fd9" prot="public">
+          <name>STATE_QUERY</name>
+          <initializer>= 0x28</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__state_8hh_1a213f7b02992b11917efe1111b9692dd2aaf323dfe08e65cda740f5e36adc8f792" prot="public">
+          <name>STATE_REPORT</name>
+          <initializer>= 0x29</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__state_8hh_1a213f7b02992b11917efe1111b9692dd2a409f75f08431dc30acb719a997f81017" prot="public">
+          <name>STATE_SUBSCRIBE</name>
+          <initializer>= 0x2A</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__state_8hh_1a213f7b02992b11917efe1111b9692dd2a6b3e7cab7401a522ed2dd5e87072d23b" prot="public">
+          <name>STATE_UNSUBSCRIBE</name>
+          <initializer>= 0x2B</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__state_8hh_1a213f7b02992b11917efe1111b9692dd2a43790f057e974b67615c320e02a09758" prot="public">
+          <name>RESUME_QUERY</name>
+          <initializer>= 0x2C</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__state_8hh_1a213f7b02992b11917efe1111b9692dd2aca74ed2dd66093ba98d467a916e4dd3e" prot="public">
+          <name>RESUME_INFO</name>
+          <initializer>= 0x2D</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__state_8hh_1a213f7b02992b11917efe1111b9692dd2a5fa94aec232681082890db371b2a08f9" prot="public">
+          <name>FW_RESUME</name>
+          <initializer>= 0x2E</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__state_8hh_1a213f7b02992b11917efe1111b9692dd2a71a3fd2135a190f2beee7096c597da8e" prot="public">
+          <name>BOOT_SUCCESS</name>
+          <initializer>= 0x2F</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="32" column="1" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="32" bodyend="41"/>
+      </memberdef>
+      <memberdef kind="enum" id="umi__sysex_8hh_1a39d24180dcd046c170749a2d896a4324" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>UpdateState</name>
+        <qualifiedname>umidi::protocol::UpdateState</qualifiedname>
+        <enumvalue id="umi__sysex_8hh_1a39d24180dcd046c170749a2d896a4324aa5daf7f2ebbba4975d61dab1c40188c7" prot="public">
+          <name>IDLE</name>
+          <briefdescription>
+<para>No update in progress. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__sysex_8hh_1a39d24180dcd046c170749a2d896a4324a0c96084902e8f21bf3bf678fdce4f2a0" prot="public">
+          <name>RECEIVING</name>
+          <briefdescription>
+<para>Receiving firmware data. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__sysex_8hh_1a39d24180dcd046c170749a2d896a4324a4ea687957de9caaad1e098e3e95aae9e" prot="public">
+          <name>VERIFYING</name>
+          <briefdescription>
+<para>Verifying firmware. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__sysex_8hh_1a39d24180dcd046c170749a2d896a4324a159772ce7eafc41a2cb896549d01bb24" prot="public">
+          <name>READY_TO_COMMIT</name>
+          <briefdescription>
+<para>Verified, ready to commit. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__sysex_8hh_1a39d24180dcd046c170749a2d896a4324a1c372d13f50af5ca9a935ebc78006e82" prot="public">
+          <name>COMMITTED</name>
+          <briefdescription>
+<para>Committed, ready to reboot. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__sysex_8hh_1a39d24180dcd046c170749a2d896a4324abb1ca97ec761fc37101737ba0aa2e7c5" prot="public">
+          <name>ERROR</name>
+          <briefdescription>
+<para>Error state. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Firmware update state. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="30" column="1" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="30" bodyend="37"/>
+      </memberdef>
+      <memberdef kind="enum" id="umi__transport_8hh_1aa6e93bf4dec760535df66babbf660767" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>TransportType</name>
+        <qualifiedname>umidi::protocol::TransportType</qualifiedname>
+        <enumvalue id="umi__transport_8hh_1aa6e93bf4dec760535df66babbf660767a8ceaa46c365ea6c4d1a2e413d94d9d47" prot="public">
+          <name>SYSEX</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__transport_8hh_1aa6e93bf4dec760535df66babbf660767a6d5b457ed4205e7f1144ef21b944e552" prot="public">
+          <name>BULK</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="umi__transport_8hh_1aa6e93bf4dec760535df66babbf660767a0140979b25d7a2ececfbfb3283f58a18" prot="public">
+          <name>SYSEX8</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="19" column="1" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="19" bodyend="23"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="typedef">
+      <memberdef kind="typedef" id="commands_8hh_1a34aa5eb48e36170c9b03b409d6ef1c82" prot="public" static="no">
+        <type>bool(*)(uint32_t offset, const uint8_t *data, size_t len, void *ctx)</type>
+        <definition>using umidi::protocol::FlashWriteCallback =  bool (*)(uint32_t offset, const uint8_t* data,
+                                    size_t len, void* ctx)</definition>
+        <argsstring></argsstring>
+        <name>FlashWriteCallback</name>
+        <qualifiedname>umidi::protocol::FlashWriteCallback</qualifiedname>
+        <briefdescription>
+<para>Flash write callback for firmware updates. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>offset</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Write offset in flash </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>data</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data to write </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>len</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data length </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ctx</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>User context </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>true on success </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/commands.hh" line="78" column="1" bodyfile="include/umidi/protocol/commands.hh" bodystart="78" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="commands_8hh_1a9508a31062c338b8a385c4007dd13345" prot="public" static="no">
+        <type>bool(*)(const uint8_t *data, size_t len, const uint8_t *signature, void *ctx)</type>
+        <definition>using umidi::protocol::SignatureVerifyCallback =  bool (*)(const uint8_t* data, size_t len,
+                                         const uint8_t* signature, void* ctx)</definition>
+        <argsstring></argsstring>
+        <name>SignatureVerifyCallback</name>
+        <qualifiedname>umidi::protocol::SignatureVerifyCallback</qualifiedname>
+        <briefdescription>
+<para>Signature verification callback. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>data</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data to verify </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>len</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data length </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>signature</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Signature bytes </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ctx</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>User context </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>true if signature is valid </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/commands.hh" line="87" column="1" bodyfile="include/umidi/protocol/commands.hh" bodystart="87" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standard__io_8hh_1a138ac55bc05c7aa193d345fe7609970c" prot="public" static="no">
+        <type>void(*)(const uint8_t *data, size_t len, void *ctx)</type>
+        <definition>using umidi::protocol::StdinCallback =  void (*)(const uint8_t* data, size_t len, void* ctx)</definition>
+        <argsstring></argsstring>
+        <name>StdinCallback</name>
+        <qualifiedname>umidi::protocol::StdinCallback</qualifiedname>
+        <briefdescription>
+<para>Callback for received stdin data. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/standard_io.hh" line="13" column="1" bodyfile="include/umidi/protocol/standard_io.hh" bodystart="13" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="umi__auth_8hh_1aeb656e26ba9c5b746eced0a193c5a797" prot="public" static="no">
+        <type>void(*)(const uint8_t *key, size_t key_len, const uint8_t *data, size_t data_len, uint8_t *out)</type>
+        <definition>using umidi::protocol::HmacSha256Fn =  void (*)(const uint8_t* key, size_t key_len,
+                               const uint8_t* data, size_t data_len,
+                               uint8_t* out)</definition>
+        <argsstring></argsstring>
+        <name>HmacSha256Fn</name>
+        <qualifiedname>umidi::protocol::HmacSha256Fn</qualifiedname>
+        <briefdescription>
+<para>HMAC-SHA256 function type. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>key</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Shared secret key </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>key_len</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Key length </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>data</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data to authenticate </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>data_len</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data length </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>out</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Output buffer (32 bytes) </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_auth.hh" line="62" column="1" bodyfile="include/umidi/protocol/umi_auth.hh" bodystart="62" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="umi__auth_8hh_1abcd7dfaf3b8aeb0ce01a2134d40c5130" prot="public" static="no">
+        <type>void(*)(uint8_t *out, size_t len)</type>
+        <definition>using umidi::protocol::RandomFn =  void (*)(uint8_t* out, size_t len)</definition>
+        <argsstring></argsstring>
+        <name>RandomFn</name>
+        <qualifiedname>umidi::protocol::RandomFn</qualifiedname>
+        <briefdescription>
+<para>Random number generator type. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>out</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Output buffer </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>len</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Requested bytes </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_auth.hh" line="69" column="1" bodyfile="include/umidi/protocol/umi_auth.hh" bodystart="69" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="umi__bootloader_8hh_1a5ea260dd736f734ff804c7a3fd865533" prot="public" static="no">
+        <type><ref refid="classumidi_1_1protocol_1_1_bootloader_interface" kindref="compound">BootloaderInterface</ref>&lt;&amp;platforms::STM32F4_512K &gt;</type>
+        <definition>using umidi::protocol::BootloaderSTM32F4 =  BootloaderInterface&lt;&amp;platforms::STM32F4_512K&gt;</definition>
+        <argsstring></argsstring>
+        <name>BootloaderSTM32F4</name>
+        <qualifiedname>umidi::protocol::BootloaderSTM32F4</qualifiedname>
+        <briefdescription>
+<para>STM32F4 bootloader interface. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="553" column="1" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="553" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="umi__bootloader_8hh_1ae8a5c897615bdf00bbcedc8a70ba1864" prot="public" static="no">
+        <type><ref refid="classumidi_1_1protocol_1_1_bootloader_interface" kindref="compound">BootloaderInterface</ref>&lt;&amp;platforms::STM32H7_2M &gt;</type>
+        <definition>using umidi::protocol::BootloaderSTM32H7 =  BootloaderInterface&lt;&amp;platforms::STM32H7_2M&gt;</definition>
+        <argsstring></argsstring>
+        <name>BootloaderSTM32H7</name>
+        <qualifiedname>umidi::protocol::BootloaderSTM32H7</qualifiedname>
+        <briefdescription>
+<para>STM32H7 bootloader interface. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="556" column="1" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="556" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="umi__bootloader_8hh_1a9910ebdbb18d58c50fd911f671374394" prot="public" static="no">
+        <type><ref refid="classumidi_1_1protocol_1_1_bootloader_interface" kindref="compound">BootloaderInterface</ref>&lt;&amp;platforms::ESP32_4M &gt;</type>
+        <definition>using umidi::protocol::BootloaderESP32 =  BootloaderInterface&lt;&amp;platforms::ESP32_4M&gt;</definition>
+        <argsstring></argsstring>
+        <name>BootloaderESP32</name>
+        <qualifiedname>umidi::protocol::BootloaderESP32</qualifiedname>
+        <briefdescription>
+<para>ESP32 bootloader interface. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="559" column="1" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="559" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="umi__bootloader_8hh_1aba3c692f6a69564dbc50909024f51605" prot="public" static="no">
+        <type><ref refid="classumidi_1_1protocol_1_1_bootloader_interface" kindref="compound">BootloaderInterface</ref>&lt;&amp;platforms::RP2040_2M &gt;</type>
+        <definition>using umidi::protocol::BootloaderRP2040 =  BootloaderInterface&lt;&amp;platforms::RP2040_2M&gt;</definition>
+        <argsstring></argsstring>
+        <name>BootloaderRP2040</name>
+        <qualifiedname>umidi::protocol::BootloaderRP2040</qualifiedname>
+        <briefdescription>
+<para>RP2040 bootloader interface. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="562" column="1" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="562" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="umi__firmware_8hh_1a4acd0a9cd880eb8d763409b33e55b502" prot="public" static="no">
+        <type>bool(*)(const uint8_t *public_key, const uint8_t *message, size_t message_len, const uint8_t *signature)</type>
+        <definition>using umidi::protocol::Ed25519VerifyFn =  bool (*)(const uint8_t* public_key,
+                                  const uint8_t* message, size_t message_len,
+                                  const uint8_t* signature)</definition>
+        <argsstring></argsstring>
+        <name>Ed25519VerifyFn</name>
+        <qualifiedname>umidi::protocol::Ed25519VerifyFn</qualifiedname>
+        <briefdescription>
+<para>Ed25519 signature verification function type. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>public_key</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Public key (32 bytes) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>message</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Message to verify </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>message_len</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Message length </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>signature</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Signature (64 bytes) </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>true if signature is valid </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="153" column="1" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="153" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="umi__firmware_8hh_1aad094a9d5b972511b435aca8d9c66df9" prot="public" static="no">
+        <type>void(*)(const uint8_t *data, size_t len, uint8_t *hash)</type>
+        <definition>using umidi::protocol::Sha256Fn =  void (*)(const uint8_t* data, size_t len, uint8_t* hash)</definition>
+        <argsstring></argsstring>
+        <name>Sha256Fn</name>
+        <qualifiedname>umidi::protocol::Sha256Fn</qualifiedname>
+        <briefdescription>
+<para>SHA-256 hash function type. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>data</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data to hash </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>len</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data length </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>hash</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Output hash (32 bytes) </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="161" column="1" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="161" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="umi__firmware_8hh_1a68cbbd7ce4c6cffc066a58332045bc91" prot="public" static="no">
+        <type>uint32_t(*)(const uint8_t *data, size_t len)</type>
+        <definition>using umidi::protocol::Crc32Fn =  uint32_t (*)(const uint8_t* data, size_t len)</definition>
+        <argsstring></argsstring>
+        <name>Crc32Fn</name>
+        <qualifiedname>umidi::protocol::Crc32Fn</qualifiedname>
+        <briefdescription>
+<para>CRC-32 function type (IEEE 802.3) </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>data</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data to checksum </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>len</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data length </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>CRC-32 value </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="167" column="1" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="167" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="umi__session_8hh_1af4db94efb89fa9b33c4f247fae895ff6" prot="public" static="no">
+        <type>void(*)(uint32_t received, uint32_t total, void *user_data)</type>
+        <definition>using umidi::protocol::ProgressCallback =  void (*)(uint32_t received, uint32_t total, void* user_data)</definition>
+        <argsstring></argsstring>
+        <name>ProgressCallback</name>
+        <qualifiedname>umidi::protocol::ProgressCallback</qualifiedname>
+        <briefdescription>
+<para>Progress callback type. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>received</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Bytes received so far </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>total</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Total bytes expected </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>user_data</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>User context </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="564" column="1" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="564" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="umi__state_8hh_1a500414826c7479bae7acdcee635ba0cd" prot="public" static="no">
+        <type>StatefulFirmwareUpdate&lt;&amp;platforms::STM32F4_512K &gt;</type>
+        <definition>using umidi::protocol::StatefulFirmwareUpdateSTM32F4 =  StatefulFirmwareUpdate&lt;&amp;platforms::STM32F4_512K&gt;</definition>
+        <argsstring></argsstring>
+        <name>StatefulFirmwareUpdateSTM32F4</name>
+        <qualifiedname>umidi::protocol::StatefulFirmwareUpdateSTM32F4</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="606" column="1" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="606" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="umi__state_8hh_1ae8cc0aaccc3784cada064c99ec4b8b89" prot="public" static="no">
+        <type>StatefulFirmwareUpdate&lt;&amp;platforms::STM32H7_2M &gt;</type>
+        <definition>using umidi::protocol::StatefulFirmwareUpdateSTM32H7 =  StatefulFirmwareUpdate&lt;&amp;platforms::STM32H7_2M&gt;</definition>
+        <argsstring></argsstring>
+        <name>StatefulFirmwareUpdateSTM32H7</name>
+        <qualifiedname>umidi::protocol::StatefulFirmwareUpdateSTM32H7</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="607" column="1" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="607" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="umi__state_8hh_1a2e77ac48efbb7ba7e35dbb90f608479b" prot="public" static="no">
+        <type>StatefulFirmwareUpdate&lt;&amp;platforms::ESP32_4M &gt;</type>
+        <definition>using umidi::protocol::StatefulFirmwareUpdateESP32 =  StatefulFirmwareUpdate&lt;&amp;platforms::ESP32_4M&gt;</definition>
+        <argsstring></argsstring>
+        <name>StatefulFirmwareUpdateESP32</name>
+        <qualifiedname>umidi::protocol::StatefulFirmwareUpdateESP32</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="608" column="1" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="608" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="umi__state_8hh_1acdd540c7ab7324a1bfe33d35cf16ac82" prot="public" static="no">
+        <type>StatefulFirmwareUpdate&lt;&amp;platforms::RP2040_2M &gt;</type>
+        <definition>using umidi::protocol::StatefulFirmwareUpdateRP2040 =  StatefulFirmwareUpdate&lt;&amp;platforms::RP2040_2M&gt;</definition>
+        <argsstring></argsstring>
+        <name>StatefulFirmwareUpdateRP2040</name>
+        <qualifiedname>umidi::protocol::StatefulFirmwareUpdateRP2040</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="609" column="1" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="609" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="umi__sysex_8hh_1a44256fe1d846754a0fda827842542944" prot="public" static="no">
+        <type><ref refid="classumidi_1_1protocol_1_1_secure_firmware_update" kindref="compound">SecureFirmwareUpdate</ref>&lt;&amp;platforms::STM32F4_512K &gt;</type>
+        <definition>using umidi::protocol::SecureFirmwareUpdateSTM32F4 =  SecureFirmwareUpdate&lt;&amp;platforms::STM32F4_512K&gt;</definition>
+        <argsstring></argsstring>
+        <name>SecureFirmwareUpdateSTM32F4</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdateSTM32F4</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="649" column="1" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="649" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="umi__sysex_8hh_1a3ecd2310e3841c30c22746f07a67ad9f" prot="public" static="no">
+        <type><ref refid="classumidi_1_1protocol_1_1_secure_firmware_update" kindref="compound">SecureFirmwareUpdate</ref>&lt;&amp;platforms::STM32H7_2M &gt;</type>
+        <definition>using umidi::protocol::SecureFirmwareUpdateSTM32H7 =  SecureFirmwareUpdate&lt;&amp;platforms::STM32H7_2M&gt;</definition>
+        <argsstring></argsstring>
+        <name>SecureFirmwareUpdateSTM32H7</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdateSTM32H7</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="650" column="1" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="650" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="umi__sysex_8hh_1ac163194dfdd0f68ebb9fef161f48ac5f" prot="public" static="no">
+        <type><ref refid="classumidi_1_1protocol_1_1_secure_firmware_update" kindref="compound">SecureFirmwareUpdate</ref>&lt;&amp;platforms::ESP32_4M &gt;</type>
+        <definition>using umidi::protocol::SecureFirmwareUpdateESP32 =  SecureFirmwareUpdate&lt;&amp;platforms::ESP32_4M&gt;</definition>
+        <argsstring></argsstring>
+        <name>SecureFirmwareUpdateESP32</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdateESP32</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="651" column="1" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="651" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="umi__sysex_8hh_1af67ef9abb1a5a146896605d5dc156ffc" prot="public" static="no">
+        <type><ref refid="classumidi_1_1protocol_1_1_secure_firmware_update" kindref="compound">SecureFirmwareUpdate</ref>&lt;&amp;platforms::RP2040_2M &gt;</type>
+        <definition>using umidi::protocol::SecureFirmwareUpdateRP2040 =  SecureFirmwareUpdate&lt;&amp;platforms::RP2040_2M&gt;</definition>
+        <argsstring></argsstring>
+        <name>SecureFirmwareUpdateRP2040</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdateRP2040</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="652" column="1" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="652" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="var">
+      <memberdef kind="variable" id="commands_8hh_1ab42fc6e5b187aca1a8833d3c89db42df" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::UMI_SYSEX_ID[]</definition>
+        <argsstring>[]</argsstring>
+        <name>UMI_SYSEX_ID</name>
+        <qualifiedname>umidi::protocol::UMI_SYSEX_ID</qualifiedname>
+        <initializer>= {0x7E, 0x7F, 0x00}</initializer>
+        <briefdescription>
+<para>UMI SysEx ID (placeholder - should register official MIDI ID) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/commands.hh" line="11" column="19" bodyfile="include/umidi/protocol/commands.hh" bodystart="11" bodyend="11"/>
+      </memberdef>
+      <memberdef kind="variable" id="commands_8hh_1a1c23706f29a6f9377031f21c3cdf450d" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>size_t</type>
+        <definition>size_t umidi::protocol::UMI_SYSEX_ID_LEN</definition>
+        <argsstring></argsstring>
+        <name>UMI_SYSEX_ID_LEN</name>
+        <qualifiedname>umidi::protocol::UMI_SYSEX_ID_LEN</qualifiedname>
+        <initializer>= 3</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/commands.hh" line="12" column="18" bodyfile="include/umidi/protocol/commands.hh" bodystart="12" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="commands_8hh_1a91cd7fe572e2f5d961c33c7f3408555d" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::PROTOCOL_VERSION_MAJOR</definition>
+        <argsstring></argsstring>
+        <name>PROTOCOL_VERSION_MAJOR</name>
+        <qualifiedname>umidi::protocol::PROTOCOL_VERSION_MAJOR</qualifiedname>
+        <initializer>= 1</initializer>
+        <briefdescription>
+<para>Protocol version. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/commands.hh" line="15" column="19" bodyfile="include/umidi/protocol/commands.hh" bodystart="15" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="commands_8hh_1a9233d78e2a26d89e218513950f47c990" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::PROTOCOL_VERSION_MINOR</definition>
+        <argsstring></argsstring>
+        <name>PROTOCOL_VERSION_MINOR</name>
+        <qualifiedname>umidi::protocol::PROTOCOL_VERSION_MINOR</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/commands.hh" line="16" column="19" bodyfile="include/umidi/protocol/commands.hh" bodystart="16" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="umi__bootloader_8hh_1a549ed7fff74f1776214ab1f0b2a5fd3f" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::BOOT_CONFIG_MAGIC</definition>
+        <argsstring></argsstring>
+        <name>BOOT_CONFIG_MAGIC</name>
+        <qualifiedname>umidi::protocol::BOOT_CONFIG_MAGIC</qualifiedname>
+        <initializer>= 0x554D4942</initializer>
+        <briefdescription>
+<para><ref refid="structumidi_1_1protocol_1_1_boot_config" kindref="compound">BootConfig</ref> magic number. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="86" column="27" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="86" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="umi__bootloader_8hh_1a5b0382f3196918caa052911db633a6d7" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::DEFAULT_MAX_BOOT_ATTEMPTS</definition>
+        <argsstring></argsstring>
+        <name>DEFAULT_MAX_BOOT_ATTEMPTS</name>
+        <qualifiedname>umidi::protocol::DEFAULT_MAX_BOOT_ATTEMPTS</qualifiedname>
+        <initializer>= 3</initializer>
+        <briefdescription>
+<para>Default max boot attempts. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="89" column="26" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="89" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="umi__firmware_8hh_1a1d31346004e36cf8b08cef3ec0c95169" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::FIRMWARE_MAGIC</definition>
+        <argsstring></argsstring>
+        <name>FIRMWARE_MAGIC</name>
+        <qualifiedname>umidi::protocol::FIRMWARE_MAGIC</qualifiedname>
+        <initializer>= 0x554D4946</initializer>
+        <briefdescription>
+<para>Magic number for UMI firmware images. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="31" column="27" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="31" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="umi__firmware_8hh_1a5bd8ec516a4cb306854712739dfa0554" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::FIRMWARE_HEADER_VERSION</definition>
+        <argsstring></argsstring>
+        <name>FIRMWARE_HEADER_VERSION</name>
+        <qualifiedname>umidi::protocol::FIRMWARE_HEADER_VERSION</qualifiedname>
+        <initializer>= 1</initializer>
+        <briefdescription>
+<para>Firmware header version. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="34" column="26" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="34" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="umi__firmware_8hh_1a05a1e64a215d1e75da098f061991b17e" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>size_t</type>
+        <definition>size_t umidi::protocol::ED25519_SIGNATURE_SIZE</definition>
+        <argsstring></argsstring>
+        <name>ED25519_SIGNATURE_SIZE</name>
+        <qualifiedname>umidi::protocol::ED25519_SIGNATURE_SIZE</qualifiedname>
+        <initializer>= 64</initializer>
+        <briefdescription>
+<para>Ed25519 signature size. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="37" column="25" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="37" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="umi__firmware_8hh_1a74c176d53636615dbc0d09b66729c568" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>size_t</type>
+        <definition>size_t umidi::protocol::ED25519_PUBLIC_KEY_SIZE</definition>
+        <argsstring></argsstring>
+        <name>ED25519_PUBLIC_KEY_SIZE</name>
+        <qualifiedname>umidi::protocol::ED25519_PUBLIC_KEY_SIZE</qualifiedname>
+        <initializer>= 32</initializer>
+        <briefdescription>
+<para>Ed25519 public key size. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="40" column="25" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="40" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="umi__firmware_8hh_1acf20ee75ebe8a1ab50d6afa497c2c949" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>size_t</type>
+        <definition>size_t umidi::protocol::SHA256_HASH_SIZE</definition>
+        <argsstring></argsstring>
+        <name>SHA256_HASH_SIZE</name>
+        <qualifiedname>umidi::protocol::SHA256_HASH_SIZE</qualifiedname>
+        <initializer>= 32</initializer>
+        <briefdescription>
+<para>SHA-256 hash size. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="43" column="25" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="43" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="umi__firmware_8hh_1ad051a35076f1926275a87dfcffbc23f0" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::CRC32_TABLE[256]</definition>
+        <argsstring>[256]</argsstring>
+        <name>CRC32_TABLE</name>
+        <qualifiedname>umidi::protocol::CRC32_TABLE</qualifiedname>
+        <briefdescription>
+<para>CRC-32 lookup table (generated from polynomial 0xEDB88320) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="493" column="27" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="493" bodyend="537"/>
+      </memberdef>
+      <memberdef kind="variable" id="umi__object_8hh_1ad525da25b077614a7977549dcf7ff2a9" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::OBJECT_MAGIC</definition>
+        <argsstring></argsstring>
+        <name>OBJECT_MAGIC</name>
+        <qualifiedname>umidi::protocol::OBJECT_MAGIC</qualifiedname>
+        <initializer>= 0x554D494F</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="18" column="20" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="18" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="umi__session_8hh_1a2f29ba9d71c05bedae8c3d85e7a1604e" prot="public" static="no" constexpr="yes" mutable="no">
+        <type><ref refid="structumidi_1_1protocol_1_1_timeout_config" kindref="compound">TimeoutConfig</ref></type>
+        <definition>TimeoutConfig umidi::protocol::DEFAULT_TIMEOUTS</definition>
+        <argsstring></argsstring>
+        <name>DEFAULT_TIMEOUTS</name>
+        <qualifiedname>umidi::protocol::DEFAULT_TIMEOUTS</qualifiedname>
+        <initializer>= {
+    .session_timeout_ms = 300000,   
+    .chunk_timeout_ms = 5000,       
+    .ack_timeout_ms = 1000,         
+    .idle_timeout_ms = 60000,       
+    .max_retries = 3,
+}</initializer>
+        <briefdescription>
+<para>Default timeout configuration. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="33" column="32" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="33" bodyend="39"/>
+      </memberdef>
+      <memberdef kind="variable" id="umi__session_8hh_1aac64472ccaf26edf408192644422e081" prot="public" static="no" constexpr="yes" mutable="no">
+        <type><ref refid="structumidi_1_1protocol_1_1_timeout_config" kindref="compound">TimeoutConfig</ref></type>
+        <definition>TimeoutConfig umidi::protocol::SLOW_CONNECTION_TIMEOUTS</definition>
+        <argsstring></argsstring>
+        <name>SLOW_CONNECTION_TIMEOUTS</name>
+        <qualifiedname>umidi::protocol::SLOW_CONNECTION_TIMEOUTS</qualifiedname>
+        <initializer>= {
+    .session_timeout_ms = 600000,   
+    .chunk_timeout_ms = 10000,      
+    .ack_timeout_ms = 3000,         
+    .idle_timeout_ms = 120000,      
+    .max_retries = 5,
+}</initializer>
+        <briefdescription>
+<para>Timeout configuration for slow connections (MIDI over USB) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="42" column="32" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="42" bodyend="48"/>
+      </memberdef>
+      <memberdef kind="variable" id="umi__session_8hh_1a6925c70fe7e3b606b2bbcdf41c90a5bf" prot="public" static="no" constexpr="yes" mutable="no">
+        <type><ref refid="structumidi_1_1protocol_1_1_flow_config" kindref="compound">FlowConfig</ref></type>
+        <definition>FlowConfig umidi::protocol::DEFAULT_FLOW</definition>
+        <argsstring></argsstring>
+        <name>DEFAULT_FLOW</name>
+        <qualifiedname>umidi::protocol::DEFAULT_FLOW</qualifiedname>
+        <initializer>= {
+    .window_size = 4,
+    .max_payload_size = 48,
+}</initializer>
+        <briefdescription>
+<para>Default flow control configuration (conservative, works on slow links) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="206" column="29" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="206" bodyend="209"/>
+      </memberdef>
+      <memberdef kind="variable" id="umi__session_8hh_1a388e39c026d1264085390710e9ef668f" prot="public" static="no" constexpr="yes" mutable="no">
+        <type><ref refid="structumidi_1_1protocol_1_1_flow_config" kindref="compound">FlowConfig</ref></type>
+        <definition>FlowConfig umidi::protocol::HIGH_THROUGHPUT_FLOW</definition>
+        <argsstring></argsstring>
+        <name>HIGH_THROUGHPUT_FLOW</name>
+        <qualifiedname>umidi::protocol::HIGH_THROUGHPUT_FLOW</qualifiedname>
+        <initializer>= {
+    .window_size = 8,
+    .max_payload_size = 128,
+}</initializer>
+        <briefdescription>
+<para>High-throughput flow control (for fast USB MIDI) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="212" column="29" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="212" bodyend="215"/>
+      </memberdef>
+      <memberdef kind="variable" id="umi__transport_8hh_1a1f3390036f67708b99b82abfe8dbde53" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>TransportCapabilities</type>
+        <definition>TransportCapabilities umidi::protocol::SYSEX_CAPABILITIES</definition>
+        <argsstring></argsstring>
+        <name>SYSEX_CAPABILITIES</name>
+        <qualifiedname>umidi::protocol::SYSEX_CAPABILITIES</qualifiedname>
+        <initializer>= {
+    .max_packet_size = 64,         
+    .max_message_size = 65536,     
+    .supports_8bit = false,
+    .supports_streaming = false,
+    .requires_encoding = true,
+}</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="38" column="40" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="38" bodyend="44"/>
+      </memberdef>
+      <memberdef kind="variable" id="umi__transport_8hh_1a8602c447823acaa61341a06ac0608274" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>TransportCapabilities</type>
+        <definition>TransportCapabilities umidi::protocol::BULK_CAPABILITIES</definition>
+        <argsstring></argsstring>
+        <name>BULK_CAPABILITIES</name>
+        <qualifiedname>umidi::protocol::BULK_CAPABILITIES</qualifiedname>
+        <initializer>= {
+    .max_packet_size = 512,        
+    .max_message_size = 1048576,   
+    .supports_8bit = true,
+    .supports_streaming = true,
+    .requires_encoding = false,
+}</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="46" column="40" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="46" bodyend="52"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="encoding_8hh_1a244c5b03a406fb569d28c7027677091b" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t umidi::protocol::encode_7bit</definition>
+        <argsstring>(const uint8_t *in, size_t in_len, uint8_t *out) noexcept</argsstring>
+        <name>encode_7bit</name>
+        <qualifiedname>umidi::protocol::encode_7bit</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>in</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>in_len</declname>
+        </param>
+        <param>
+          <type>uint8_t *</type>
+          <declname>out</declname>
+        </param>
+        <briefdescription>
+<para>Encode 8-bit data to 7-bit SysEx format. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>in</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input buffer (8-bit data) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>in_len</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input length </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>out</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Output buffer (must be at least encoded_size(in_len)) </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>Output length </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/encoding.hh" line="16" column="25" bodyfile="include/umidi/protocol/encoding.hh" bodystart="16" bodyend="33"/>
+      </memberdef>
+      <memberdef kind="function" id="encoding_8hh_1a34c6393de3128f41f63b8c4a1a44d65f" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t umidi::protocol::decode_7bit</definition>
+        <argsstring>(const uint8_t *in, size_t in_len, uint8_t *out) noexcept</argsstring>
+        <name>decode_7bit</name>
+        <qualifiedname>umidi::protocol::decode_7bit</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>in</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>in_len</declname>
+        </param>
+        <param>
+          <type>uint8_t *</type>
+          <declname>out</declname>
+        </param>
+        <briefdescription>
+<para>Decode 7-bit SysEx format to 8-bit data. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>in</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input buffer (7-bit data) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>in_len</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input length </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>out</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Output buffer </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>Output length, or 0 if invalid </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/encoding.hh" line="40" column="25" bodyfile="include/umidi/protocol/encoding.hh" bodystart="40" bodyend="60"/>
+      </memberdef>
+      <memberdef kind="function" id="encoding_8hh_1a623081b57e3d5db97ecff0bc23b1bc98" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t umidi::protocol::encoded_size</definition>
+        <argsstring>(size_t in_len) noexcept</argsstring>
+        <name>encoded_size</name>
+        <qualifiedname>umidi::protocol::encoded_size</qualifiedname>
+        <param>
+          <type>size_t</type>
+          <declname>in_len</declname>
+        </param>
+        <briefdescription>
+<para>Calculate encoded size for given input length. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/encoding.hh" line="63" column="25" bodyfile="include/umidi/protocol/encoding.hh" bodystart="63" bodyend="65"/>
+      </memberdef>
+      <memberdef kind="function" id="encoding_8hh_1ad1f5b97644b5dac264448e26e61f1970" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t umidi::protocol::decoded_size</definition>
+        <argsstring>(size_t in_len) noexcept</argsstring>
+        <name>decoded_size</name>
+        <qualifiedname>umidi::protocol::decoded_size</qualifiedname>
+        <param>
+          <type>size_t</type>
+          <declname>in_len</declname>
+        </param>
+        <briefdescription>
+<para>Calculate decoded size for given encoded length. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/encoding.hh" line="68" column="25" bodyfile="include/umidi/protocol/encoding.hh" bodystart="68" bodyend="70"/>
+      </memberdef>
+      <memberdef kind="function" id="encoding_8hh_1a97f63846558b65bc07965553fb9e3f97" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::calculate_checksum</definition>
+        <argsstring>(const uint8_t *data, size_t len) noexcept</argsstring>
+        <name>calculate_checksum</name>
+        <qualifiedname>umidi::protocol::calculate_checksum</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <briefdescription>
+<para>Calculate XOR checksum over data. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/encoding.hh" line="73" column="26" bodyfile="include/umidi/protocol/encoding.hh" bodystart="73" bodyend="80"/>
+      </memberdef>
+      <memberdef kind="function" id="message_8hh_1a13b701f8f864eca37de0ed4cf2836e42" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="structumidi_1_1protocol_1_1_parsed_message" kindref="compound">ParsedMessage</ref></type>
+        <definition>ParsedMessage umidi::protocol::parse_message</definition>
+        <argsstring>(const uint8_t *data, size_t len) noexcept</argsstring>
+        <name>parse_message</name>
+        <qualifiedname>umidi::protocol::parse_message</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <briefdescription>
+<para>Parse a UMI SysEx message. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>data</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>SysEx data (including F0 and F7) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>len</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data length </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>Parsed message </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/message.hh" line="119" column="32" bodyfile="include/umidi/protocol/message.hh" bodystart="119" bodyend="144"/>
+      </memberdef>
+      <memberdef kind="function" id="umi__auth_8hh_1ad830765ce05e3baadc204212e51a1e2c" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::secure_compare</definition>
+        <argsstring>(const uint8_t *a, const uint8_t *b, size_t len) noexcept</argsstring>
+        <name>secure_compare</name>
+        <qualifiedname>umidi::protocol::secure_compare</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <briefdescription>
+<para>Constant-time comparison to prevent timing attacks. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_auth.hh" line="72" column="23" bodyfile="include/umidi/protocol/umi_auth.hh" bodystart="72" bodyend="79"/>
+      </memberdef>
+      <memberdef kind="function" id="umi__firmware_8hh_1abdda29195e98a3537fbd6d7fb2d3fbab" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>VersionCompare</type>
+        <definition>VersionCompare umidi::protocol::compare_versions</definition>
+        <argsstring>(uint32_t major1, uint32_t minor1, uint32_t patch1, uint32_t major2, uint32_t minor2, uint32_t patch2) noexcept</argsstring>
+        <name>compare_versions</name>
+        <qualifiedname>umidi::protocol::compare_versions</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>major1</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>minor1</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>patch1</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>major2</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>minor2</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>patch2</declname>
+        </param>
+        <briefdescription>
+<para>Compare firmware versions. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="97" column="33" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="97" bodyend="111"/>
+      </memberdef>
+      <memberdef kind="function" id="umi__firmware_8hh_1a7adf8950505530cf334fc77572be6449" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>VersionCompare</type>
+        <definition>VersionCompare umidi::protocol::compare_versions</definition>
+        <argsstring>(const FirmwareHeader &amp;a, const FirmwareHeader &amp;b) noexcept</argsstring>
+        <name>compare_versions</name>
+        <qualifiedname>umidi::protocol::compare_versions</qualifiedname>
+        <param>
+          <type>const <ref refid="structumidi_1_1protocol_1_1_firmware_header" kindref="compound">FirmwareHeader</ref> &amp;</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>const <ref refid="structumidi_1_1protocol_1_1_firmware_header" kindref="compound">FirmwareHeader</ref> &amp;</type>
+          <declname>b</declname>
+        </param>
+        <briefdescription>
+<para>Compare firmware headers by version. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="114" column="33" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="114" bodyend="121"/>
+      </memberdef>
+      <memberdef kind="function" id="umi__firmware_8hh_1afd740345be45941399dae3ec5abe9e90" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::pack_version</definition>
+        <argsstring>(uint8_t major, uint8_t minor, uint8_t patch) noexcept</argsstring>
+        <name>pack_version</name>
+        <qualifiedname>umidi::protocol::pack_version</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>major</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>minor</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>patch</declname>
+        </param>
+        <briefdescription>
+<para>Format version as uint32_t (0xMMmmpp00) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="124" column="27" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="124" bodyend="126"/>
+      </memberdef>
+      <memberdef kind="function" id="umi__firmware_8hh_1ab68bc50fa0748d1ceca2293706423b23" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::version_major</definition>
+        <argsstring>(uint32_t packed) noexcept</argsstring>
+        <name>version_major</name>
+        <qualifiedname>umidi::protocol::version_major</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>packed</declname>
+        </param>
+        <briefdescription>
+<para>Extract major version. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="129" column="26" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="129" bodyend="131"/>
+      </memberdef>
+      <memberdef kind="function" id="umi__firmware_8hh_1a0a085b2f4326ecc2927b003aee585777" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::version_minor</definition>
+        <argsstring>(uint32_t packed) noexcept</argsstring>
+        <name>version_minor</name>
+        <qualifiedname>umidi::protocol::version_minor</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>packed</declname>
+        </param>
+        <briefdescription>
+<para>Extract minor version. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="134" column="26" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="134" bodyend="136"/>
+      </memberdef>
+      <memberdef kind="function" id="umi__firmware_8hh_1a804eaa50d18715232f5533b7754667ca" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::version_patch</definition>
+        <argsstring>(uint32_t packed) noexcept</argsstring>
+        <name>version_patch</name>
+        <qualifiedname>umidi::protocol::version_patch</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>packed</declname>
+        </param>
+        <briefdescription>
+<para>Extract patch version. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="139" column="26" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="139" bodyend="141"/>
+      </memberdef>
+      <memberdef kind="function" id="umi__firmware_8hh_1a6c603c4357786bfd3ab1c47aec997b1e" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::crc32</definition>
+        <argsstring>(const uint8_t *data, size_t len) noexcept</argsstring>
+        <name>crc32</name>
+        <qualifiedname>umidi::protocol::crc32</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <briefdescription>
+<para>Compute CRC-32 (IEEE 802.3) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="540" column="27" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="540" bodyend="546"/>
+      </memberdef>
+      <memberdef kind="function" id="umi__firmware_8hh_1a12289e1f344fa927f7656769ddd9e4b2" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::crc32_fn</definition>
+        <argsstring>(const uint8_t *data, size_t len) noexcept</argsstring>
+        <name>crc32_fn</name>
+        <qualifiedname>umidi::protocol::crc32_fn</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <briefdescription>
+<para>CRC-32 function for <ref refid="classumidi_1_1protocol_1_1_firmware_validator" kindref="compound">FirmwareValidator</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="549" column="17" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="549" bodyend="551"/>
+      </memberdef>
+      <memberdef kind="function" id="umi__object_8hh_1a2028273cba8a10957ffcb08628c84b01" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>ObjectFlags</type>
+        <definition>ObjectFlags umidi::protocol::operator|</definition>
+        <argsstring>(ObjectFlags a, ObjectFlags b)</argsstring>
+        <name>operator|</name>
+        <qualifiedname>umidi::protocol::operator|</qualifiedname>
+        <param>
+          <type>ObjectFlags</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>ObjectFlags</type>
+          <declname>b</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="46" column="30" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="46" bodyend="48"/>
+      </memberdef>
+      <memberdef kind="function" id="umi__object_8hh_1a334b29b916820832135e364dfb037385" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::operator&amp;</definition>
+        <argsstring>(ObjectFlags a, ObjectFlags b)</argsstring>
+        <name>operator&amp;</name>
+        <qualifiedname>umidi::protocol::operator&amp;</qualifiedname>
+        <param>
+          <type>ObjectFlags</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>ObjectFlags</type>
+          <declname>b</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="50" column="23" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="50" bodyend="52"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/commands.hh" line="8" column="1"/>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,161 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="commands_8hh" kind="file" language="C++">
+    <compoundname>commands.hh</compoundname>
+    <includes local="no">cstdint</includes>
+    <includedby refid="message_8hh" local="yes">include/umidi/protocol/message.hh</includedby>
+    <includedby refid="umi__sysex_8hh" local="yes">include/umidi/protocol/umi_sysex.hh</includedby>
+    <incdepgraph>
+      <node id="1">
+        <label>include/umidi/protocol/commands.hh</label>
+        <link refid="commands_8hh"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>cstdint</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="1">
+        <label>include/umidi/protocol/commands.hh</label>
+        <link refid="commands_8hh"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>include/umidi/protocol/message.hh</label>
+        <link refid="message_8hh"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>include/umidi/protocol/standard_io.hh</label>
+        <link refid="standard__io_8hh"/>
+        <childnode refid="4" relation="include">
+        </childnode>
+      </node>
+      <node id="5">
+        <label>include/umidi/protocol/umi_object.hh</label>
+        <link refid="umi__object_8hh_source"/>
+        <childnode refid="6" relation="include">
+        </childnode>
+      </node>
+      <node id="7">
+        <label>include/umidi/protocol/umi_state.hh</label>
+        <link refid="umi__state_8hh_source"/>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+      </node>
+      <node id="4">
+        <label>include/umidi/protocol/umi_sysex.hh</label>
+        <link refid="umi__sysex_8hh"/>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+      </node>
+      <node id="8">
+        <label>include/umidi/protocol/umi_transport.hh</label>
+        <link refid="umi__transport_8hh_source"/>
+        <childnode refid="6" relation="include">
+        </childnode>
+      </node>
+      <node id="6">
+        <label>include/umidi/umidi.hh</label>
+        <link refid="umidi_8hh_source"/>
+      </node>
+    </invincdepgraph>
+    <innernamespace refid="namespaceumidi">umidi</innernamespace>
+    <innernamespace refid="namespaceumidi_1_1protocol">umidi::protocol</innernamespace>
+    <briefdescription>
+<para>UMI protocol command and error definitions. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">//<sp/>SPDX-License-Identifier:<sp/>MIT</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="preprocessor">#pragma<sp/>once</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;cstdint&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">umidi::protocol<sp/>{</highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight></codeline>
+<codeline lineno="11" refid="commands_8hh_1ab42fc6e5b187aca1a8833d3c89db42df" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/>uint8_t<sp/><ref refid="commands_8hh_1ab42fc6e5b187aca1a8833d3c89db42df" kindref="member">UMI_SYSEX_ID</ref>[]<sp/>=<sp/>{0x7E,<sp/>0x7F,<sp/>0x00};</highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>UMI_SYSEX_ID_LEN<sp/>=<sp/>3;</highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight></codeline>
+<codeline lineno="15" refid="commands_8hh_1a91cd7fe572e2f5d961c33c7f3408555d" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/>uint8_t<sp/><ref refid="commands_8hh_1a91cd7fe572e2f5d961c33c7f3408555d" kindref="member">PROTOCOL_VERSION_MAJOR</ref><sp/>=<sp/>1;</highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/>uint8_t<sp/>PROTOCOL_VERSION_MINOR<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight></codeline>
+<codeline lineno="19" refid="commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">enum<sp/>class</highlight><highlight class="normal"><sp/><ref refid="commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8" kindref="member">Command</ref><sp/>:<sp/>uint8_t<sp/>{</highlight></codeline>
+<codeline lineno="20"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>Standard<sp/>IO<sp/>(0x01-0x0F)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"><sp/><sp/><sp/><sp/>STDOUT_DATA<sp/>=<sp/>0x01,</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"><sp/><sp/><sp/><sp/>STDERR_DATA<sp/>=<sp/>0x02,</highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/><sp/><sp/><sp/>STDIN_DATA<sp/><sp/>=<sp/>0x03,</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"><sp/><sp/><sp/><sp/>STDIN_EOF<sp/><sp/><sp/>=<sp/>0x04,</highlight></codeline>
+<codeline lineno="25"><highlight class="normal"><sp/><sp/><sp/><sp/>FLOW_CTRL<sp/><sp/><sp/>=<sp/>0x05,</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"></highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>Firmware<sp/>Update<sp/>(0x10-0x1F)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/><sp/><sp/>FW_QUERY<sp/><sp/><sp/><sp/>=<sp/>0x10,</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/><sp/><sp/>FW_INFO<sp/><sp/><sp/><sp/><sp/>=<sp/>0x11,</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"><sp/><sp/><sp/><sp/>FW_BEGIN<sp/><sp/><sp/><sp/>=<sp/>0x12,</highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/><sp/><sp/><sp/>FW_DATA<sp/><sp/><sp/><sp/><sp/>=<sp/>0x13,</highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/><sp/><sp/><sp/>FW_VERIFY<sp/><sp/><sp/>=<sp/>0x14,</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/><sp/><sp/>FW_COMMIT<sp/><sp/><sp/>=<sp/>0x15,</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/><sp/><sp/>FW_ROLLBACK<sp/>=<sp/>0x16,</highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/><sp/><sp/>FW_REBOOT<sp/><sp/><sp/>=<sp/>0x17,</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/><sp/><sp/><sp/>FW_ACK<sp/><sp/><sp/><sp/><sp/><sp/>=<sp/>0x18,</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/><sp/><sp/>FW_NACK<sp/><sp/><sp/><sp/><sp/>=<sp/>0x19,</highlight></codeline>
+<codeline lineno="38"><highlight class="normal"></highlight></codeline>
+<codeline lineno="39"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>System<sp/>(0x20-0x2F)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="40"><highlight class="normal"><sp/><sp/><sp/><sp/>PING<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>=<sp/>0x20,</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"><sp/><sp/><sp/><sp/>PONG<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>=<sp/>0x21,</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"><sp/><sp/><sp/><sp/>RESET<sp/><sp/><sp/><sp/><sp/><sp/><sp/>=<sp/>0x22,</highlight></codeline>
+<codeline lineno="43"><highlight class="normal"><sp/><sp/><sp/><sp/>VERSION<sp/><sp/><sp/><sp/><sp/>=<sp/>0x23,</highlight></codeline>
+<codeline lineno="44"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="45"><highlight class="normal"></highlight></codeline>
+<codeline lineno="47" refid="commands_8hh_1a535223bf911d0f4570ff0c7fb31530d9" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">enum<sp/>class</highlight><highlight class="normal"><sp/><ref refid="commands_8hh_1a535223bf911d0f4570ff0c7fb31530d9" kindref="member">ErrorCode</ref><sp/>:<sp/>uint8_t<sp/>{</highlight></codeline>
+<codeline lineno="48"><highlight class="normal"><sp/><sp/><sp/><sp/>OK<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>=<sp/>0x00,</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"><sp/><sp/><sp/><sp/>INVALID_COMMAND<sp/><sp/><sp/><sp/><sp/>=<sp/>0x01,</highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/><sp/><sp/>INVALID_SEQUENCE<sp/><sp/><sp/><sp/>=<sp/>0x02,</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"><sp/><sp/><sp/><sp/>INVALID_CHECKSUM<sp/><sp/><sp/><sp/>=<sp/>0x03,</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/>BUFFER_OVERFLOW<sp/><sp/><sp/><sp/><sp/>=<sp/>0x04,</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"><sp/><sp/><sp/><sp/>UPDATE_NOT_STARTED<sp/><sp/>=<sp/>0x05,</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/><sp/><sp/>UPDATE_IN_PROGRESS<sp/><sp/>=<sp/>0x06,</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/>VERIFY_FAILED<sp/><sp/><sp/><sp/><sp/><sp/><sp/>=<sp/>0x07,</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><sp/><sp/>SIGNATURE_INVALID<sp/><sp/><sp/>=<sp/>0x08,</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/><sp/><sp/>FLASH_ERROR<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>=<sp/>0x09,</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><sp/><sp/>ROLLBACK_UNAVAIL<sp/><sp/><sp/><sp/>=<sp/>0x0A,</highlight></codeline>
+<codeline lineno="59"><highlight class="normal"><sp/><sp/><sp/><sp/>TIMEOUT<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>=<sp/>0x0B,</highlight></codeline>
+<codeline lineno="60"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="61"><highlight class="normal"></highlight></codeline>
+<codeline lineno="63" refid="commands_8hh_1a4794e96786e74a58a550eecdc4b1cf50" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">enum<sp/>class</highlight><highlight class="normal"><sp/><ref refid="commands_8hh_1a4794e96786e74a58a550eecdc4b1cf50" kindref="member">FlowControl</ref><sp/>:<sp/>uint8_t<sp/>{</highlight></codeline>
+<codeline lineno="64" refid="commands_8hh_1a4794e96786e74a58a550eecdc4b1cf50abcc505cccb013305159c69ed61b992ca" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="commands_8hh_1a4794e96786e74a58a550eecdc4b1cf50abcc505cccb013305159c69ed61b992ca" kindref="member">XON</ref><sp/><sp/>=<sp/>0x11,<sp/><sp/></highlight></codeline>
+<codeline lineno="65" refid="commands_8hh_1a4794e96786e74a58a550eecdc4b1cf50ac3538f06c87eb5e9807cfb38b5925be4" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="commands_8hh_1a4794e96786e74a58a550eecdc4b1cf50ac3538f06c87eb5e9807cfb38b5925be4" kindref="member">XOFF</ref><sp/>=<sp/>0x13,<sp/><sp/></highlight></codeline>
+<codeline lineno="66"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="67"><highlight class="normal"></highlight></codeline>
+<codeline lineno="68"><highlight class="normal"></highlight><highlight class="comment">//<sp/>=============================================================================</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="69"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Callback<sp/>Types</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="70"><highlight class="normal"></highlight><highlight class="comment">//<sp/>=============================================================================</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="71"><highlight class="normal"></highlight></codeline>
+<codeline lineno="78" refid="commands_8hh_1a34aa5eb48e36170c9b03b409d6ef1c82" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal"><ref refid="commands_8hh_1a34aa5eb48e36170c9b03b409d6ef1c82" kindref="member">FlashWriteCallback</ref><sp/>=<sp/>bool<sp/>(*)(uint32_t<sp/>offset,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>uint8_t*<sp/>data,</highlight></codeline>
+<codeline lineno="79"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>len,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal">*<sp/>ctx);</highlight></codeline>
+<codeline lineno="80"><highlight class="normal"></highlight></codeline>
+<codeline lineno="87" refid="commands_8hh_1a9508a31062c338b8a385c4007dd13345" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal"><ref refid="commands_8hh_1a9508a31062c338b8a385c4007dd13345" kindref="member">SignatureVerifyCallback</ref><sp/>=<sp/>bool<sp/>(*)(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>uint8_t*<sp/>data,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>len,</highlight></codeline>
+<codeline lineno="88"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>uint8_t*<sp/>signature,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal">*<sp/>ctx);</highlight></codeline>
+<codeline lineno="89"><highlight class="normal"></highlight></codeline>
+<codeline lineno="90"><highlight class="normal">}<sp/></highlight><highlight class="comment">//<sp/>namespace<sp/>umidi::protocol</highlight><highlight class="normal"></highlight></codeline>
+    </programlisting>
+    <location file="include/umidi/protocol/commands.hh"/>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,14 @@
+.. _exhale_enum_result_8hh_1a57f163d9848ea33faf04a5386792bd83:
+
+Enum ErrorCode
+==============
+
+- Defined in :ref:`file_include_umidi_core_result.hh`
+
+
+Enum Documentation
+------------------
+
+
+.. doxygenenum:: umidi::ErrorCode
+   :project: umidi

@@ -1,0 +1,14 @@
+.. _exhale_typedef_commands_8hh_1a9508a31062c338b8a385c4007dd13345:
+
+Typedef umidi::protocol::SignatureVerifyCallback
+================================================
+
+- Defined in :ref:`file_include_umidi_protocol_commands.hh`
+
+
+Typedef Documentation
+---------------------
+
+
+.. doxygentypedef:: umidi::protocol::SignatureVerifyCallback
+   :project: umidi

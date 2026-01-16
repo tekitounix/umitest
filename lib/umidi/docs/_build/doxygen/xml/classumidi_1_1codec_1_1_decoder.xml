@@ -1,0 +1,373 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="classumidi_1_1codec_1_1_decoder" kind="class" language="C++" prot="public">
+    <compoundname>umidi::codec::Decoder</compoundname>
+    <templateparamlist>
+      <param>
+        <type>ChannelConfig</type>
+        <declname>Config</declname>
+        <defname>Config</defname>
+        <defval>default_config</defval>
+      </param>
+      <param>
+        <type>typename...</type>
+        <declname>MessageTypes</declname>
+        <defname>MessageTypes</defname>
+      </param>
+    </templateparamlist>
+    <sectiondef kind="private-type">
+      <memberdef kind="enum" id="classumidi_1_1codec_1_1_decoder_1a8005ebb41d3df78da1e2923c64c91f8e" prot="private" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>State</name>
+        <qualifiedname>umidi::codec::Decoder::State</qualifiedname>
+        <enumvalue id="classumidi_1_1codec_1_1_decoder_1a8005ebb41d3df78da1e2923c64c91f8eaa5daf7f2ebbba4975d61dab1c40188c7" prot="private">
+          <name>IDLE</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="classumidi_1_1codec_1_1_decoder_1a8005ebb41d3df78da1e2923c64c91f8eac53931f5d5ad73dc27513f1a979af259" prot="private">
+          <name>WAITING_DATA1</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="classumidi_1_1codec_1_1_decoder_1a8005ebb41d3df78da1e2923c64c91f8eacfe8b19e6b34cb561c18b410b0d8d664" prot="private">
+          <name>WAITING_DATA2</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="classumidi_1_1codec_1_1_decoder_1a8005ebb41d3df78da1e2923c64c91f8ea8ceaa46c365ea6c4d1a2e413d94d9d47" prot="private">
+          <name>SYSEX</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="172" column="5" bodyfile="include/umidi/codec/decoder.hh" bodystart="172" bodyend="172"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classumidi_1_1codec_1_1_decoder_1aad37266e44317120d918c736559ef9f2" prot="private" static="no" mutable="no">
+        <type>State</type>
+        <definition>State umidi::codec::Decoder&lt; Config, MessageTypes &gt;::state_</definition>
+        <argsstring></argsstring>
+        <name>state_</name>
+        <qualifiedname>umidi::codec::Decoder::state_</qualifiedname>
+        <initializer>= State::IDLE</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="174" column="11" bodyfile="include/umidi/codec/decoder.hh" bodystart="174" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1codec_1_1_decoder_1a9e240c21d00313fb22eeb7b97a81d23b" prot="private" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::codec::Decoder&lt; Config, MessageTypes &gt;::running_status_</definition>
+        <argsstring></argsstring>
+        <name>running_status_</name>
+        <qualifiedname>umidi::codec::Decoder::running_status_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="175" column="13" bodyfile="include/umidi/codec/decoder.hh" bodystart="175" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1codec_1_1_decoder_1a58b7fd166cea63a117d3b230f5b9adf2" prot="private" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::codec::Decoder&lt; Config, MessageTypes &gt;::data1_</definition>
+        <argsstring></argsstring>
+        <name>data1_</name>
+        <qualifiedname>umidi::codec::Decoder::data1_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="176" column="13" bodyfile="include/umidi/codec/decoder.hh" bodystart="176" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1codec_1_1_decoder_1aad8660f5eabb76f807fbaf24e737e31b" prot="private" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::codec::Decoder&lt; Config, MessageTypes &gt;::group_</definition>
+        <argsstring></argsstring>
+        <name>group_</name>
+        <qualifiedname>umidi::codec::Decoder::group_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="177" column="13" bodyfile="include/umidi/codec/decoder.hh" bodystart="177" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="classumidi_1_1codec_1_1_decoder_1a76e9798eba17531f9394cf7e0502a9bf" prot="public" static="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>static constexpr bool umidi::codec::Decoder&lt; Config, MessageTypes &gt;::is_supported</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>is_supported</name>
+        <qualifiedname>umidi::codec::Decoder::is_supported</qualifiedname>
+        <briefdescription>
+<para>Check at compile time if a message type is supported. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="135" column="27" bodyfile="include/umidi/codec/decoder.hh" bodystart="135" bodyend="137"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classumidi_1_1codec_1_1_decoder_1ae5d0aea2103436f54a5ef4a9ff5a46a8" prot="public" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Result&lt; bool &gt;</type>
+        <definition>Result&lt; bool &gt; umidi::codec::Decoder&lt; Config, MessageTypes &gt;::decode_byte</definition>
+        <argsstring>(uint8_t byte, UMP32 &amp;out) noexcept</argsstring>
+        <name>decode_byte</name>
+        <qualifiedname>umidi::codec::Decoder::decode_byte</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>byte</declname>
+        </param>
+        <param>
+          <type><ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref> &amp;</type>
+          <declname>out</declname>
+        </param>
+        <briefdescription>
+<para>Decode a single MIDI byte. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>byte</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input byte </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>out</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Output <ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref> (valid only if returns Ok) </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>Ok(true) if message complete, Ok(false) if waiting for more data, Err on error </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="143" column="23" bodyfile="include/umidi/codec/decoder.hh" bodystart="143" bodyend="156"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1codec_1_1_decoder_1aeecc49dd5fd5d10600eac6b30b607bab" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::codec::Decoder&lt; Config, MessageTypes &gt;::reset</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>reset</name>
+        <qualifiedname>umidi::codec::Decoder::reset</qualifiedname>
+        <briefdescription>
+<para>Reset decoder state. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="159" column="20" bodyfile="include/umidi/codec/decoder.hh" bodystart="159" bodyend="163"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1codec_1_1_decoder_1af4a647ec38f9daf05eab206015b056a1" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::codec::Decoder&lt; Config, MessageTypes &gt;::group</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>group</name>
+        <qualifiedname>umidi::codec::Decoder::group</qualifiedname>
+        <briefdescription>
+<para>Get current group. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="166" column="24" bodyfile="include/umidi/codec/decoder.hh" bodystart="166" bodyend="166"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1codec_1_1_decoder_1aa7f6f0a4a3943b1a8af6b659d2ff6a79" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::codec::Decoder&lt; Config, MessageTypes &gt;::set_group</definition>
+        <argsstring>(uint8_t g) noexcept</argsstring>
+        <name>set_group</name>
+        <qualifiedname>umidi::codec::Decoder::set_group</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>g</declname>
+        </param>
+        <briefdescription>
+<para>Set current group. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="169" column="20" bodyfile="include/umidi/codec/decoder.hh" bodystart="169" bodyend="169"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="private-func">
+      <memberdef kind="function" id="classumidi_1_1codec_1_1_decoder_1a8890d0f68b6c3b77c621b3dc9bb996e5" prot="private" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Result&lt; bool &gt;</type>
+        <definition>Result&lt; bool &gt; umidi::codec::Decoder&lt; Config, MessageTypes &gt;::decode_realtime</definition>
+        <argsstring>(uint8_t status, UMP32 &amp;out) noexcept</argsstring>
+        <name>decode_realtime</name>
+        <qualifiedname>umidi::codec::Decoder::decode_realtime</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>status</declname>
+        </param>
+        <param>
+          <type><ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref> &amp;</type>
+          <declname>out</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="180" column="23" bodyfile="include/umidi/codec/decoder.hh" bodystart="180" bodyend="210"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1codec_1_1_decoder_1a8e78113529d5b7937e59866ef2cabfbf" prot="private" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Result&lt; bool &gt;</type>
+        <definition>Result&lt; bool &gt; umidi::codec::Decoder&lt; Config, MessageTypes &gt;::handle_status</definition>
+        <argsstring>(uint8_t status, UMP32 &amp;out) noexcept</argsstring>
+        <name>handle_status</name>
+        <qualifiedname>umidi::codec::Decoder::handle_status</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>status</declname>
+        </param>
+        <param>
+          <type><ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref> &amp;</type>
+          <declname>out</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="213" column="23" bodyfile="include/umidi/codec/decoder.hh" bodystart="213" bodyend="264"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1codec_1_1_decoder_1a7c879cae2dcf668e0724183003c29d9e" prot="private" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Result&lt; bool &gt;</type>
+        <definition>Result&lt; bool &gt; umidi::codec::Decoder&lt; Config, MessageTypes &gt;::handle_system_common</definition>
+        <argsstring>(uint8_t status, UMP32 &amp;out) noexcept</argsstring>
+        <name>handle_system_common</name>
+        <qualifiedname>umidi::codec::Decoder::handle_system_common</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>status</declname>
+        </param>
+        <param>
+          <type><ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref> &amp;</type>
+          <declname>out</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="267" column="23" bodyfile="include/umidi/codec/decoder.hh" bodystart="267" bodyend="301"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1codec_1_1_decoder_1afad34906133fa9760079079b890b7df1" prot="private" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Result&lt; bool &gt;</type>
+        <definition>Result&lt; bool &gt; umidi::codec::Decoder&lt; Config, MessageTypes &gt;::handle_data</definition>
+        <argsstring>(uint8_t byte, UMP32 &amp;out) noexcept</argsstring>
+        <name>handle_data</name>
+        <qualifiedname>umidi::codec::Decoder::handle_data</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>byte</declname>
+        </param>
+        <param>
+          <type><ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref> &amp;</type>
+          <declname>out</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="304" column="23" bodyfile="include/umidi/codec/decoder.hh" bodystart="304" bodyend="327"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1codec_1_1_decoder_1ae65e2e01b3c5b241043d95ab2741300a" prot="private" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Result&lt; bool &gt;</type>
+        <definition>Result&lt; bool &gt; umidi::codec::Decoder&lt; Config, MessageTypes &gt;::complete_message</definition>
+        <argsstring>(uint8_t data2, UMP32 &amp;out) noexcept</argsstring>
+        <name>complete_message</name>
+        <qualifiedname>umidi::codec::Decoder::complete_message</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>data2</declname>
+        </param>
+        <param>
+          <type><ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref> &amp;</type>
+          <declname>out</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="330" column="23" bodyfile="include/umidi/codec/decoder.hh" bodystart="330" bodyend="346"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/codec/decoder.hh" line="131" column="1" bodyfile="include/umidi/codec/decoder.hh" bodystart="131" bodyend="347"/>
+    <listofallmembers>
+      <member refid="classumidi_1_1codec_1_1_decoder_1ae65e2e01b3c5b241043d95ab2741300a" prot="private" virt="non-virtual"><scope>umidi::codec::Decoder</scope><name>complete_message</name></member>
+      <member refid="classumidi_1_1codec_1_1_decoder_1a58b7fd166cea63a117d3b230f5b9adf2" prot="private" virt="non-virtual"><scope>umidi::codec::Decoder</scope><name>data1_</name></member>
+      <member refid="classumidi_1_1codec_1_1_decoder_1ae5d0aea2103436f54a5ef4a9ff5a46a8" prot="public" virt="non-virtual"><scope>umidi::codec::Decoder</scope><name>decode_byte</name></member>
+      <member refid="classumidi_1_1codec_1_1_decoder_1a8890d0f68b6c3b77c621b3dc9bb996e5" prot="private" virt="non-virtual"><scope>umidi::codec::Decoder</scope><name>decode_realtime</name></member>
+      <member refid="classumidi_1_1codec_1_1_decoder_1af4a647ec38f9daf05eab206015b056a1" prot="public" virt="non-virtual"><scope>umidi::codec::Decoder</scope><name>group</name></member>
+      <member refid="classumidi_1_1codec_1_1_decoder_1aad8660f5eabb76f807fbaf24e737e31b" prot="private" virt="non-virtual"><scope>umidi::codec::Decoder</scope><name>group_</name></member>
+      <member refid="classumidi_1_1codec_1_1_decoder_1afad34906133fa9760079079b890b7df1" prot="private" virt="non-virtual"><scope>umidi::codec::Decoder</scope><name>handle_data</name></member>
+      <member refid="classumidi_1_1codec_1_1_decoder_1a8e78113529d5b7937e59866ef2cabfbf" prot="private" virt="non-virtual"><scope>umidi::codec::Decoder</scope><name>handle_status</name></member>
+      <member refid="classumidi_1_1codec_1_1_decoder_1a7c879cae2dcf668e0724183003c29d9e" prot="private" virt="non-virtual"><scope>umidi::codec::Decoder</scope><name>handle_system_common</name></member>
+      <member refid="classumidi_1_1codec_1_1_decoder_1a76e9798eba17531f9394cf7e0502a9bf" prot="public" virt="non-virtual"><scope>umidi::codec::Decoder</scope><name>is_supported</name></member>
+      <member refid="classumidi_1_1codec_1_1_decoder_1aeecc49dd5fd5d10600eac6b30b607bab" prot="public" virt="non-virtual"><scope>umidi::codec::Decoder</scope><name>reset</name></member>
+      <member refid="classumidi_1_1codec_1_1_decoder_1a9e240c21d00313fb22eeb7b97a81d23b" prot="private" virt="non-virtual"><scope>umidi::codec::Decoder</scope><name>running_status_</name></member>
+      <member refid="classumidi_1_1codec_1_1_decoder_1aa7f6f0a4a3943b1a8af6b659d2ff6a79" prot="public" virt="non-virtual"><scope>umidi::codec::Decoder</scope><name>set_group</name></member>
+      <member refid="classumidi_1_1codec_1_1_decoder_1a8005ebb41d3df78da1e2923c64c91f8e" prot="private" virt="non-virtual"><scope>umidi::codec::Decoder</scope><name>State</name></member>
+      <member refid="classumidi_1_1codec_1_1_decoder_1aad37266e44317120d918c736559ef9f2" prot="private" virt="non-virtual"><scope>umidi::codec::Decoder</scope><name>state_</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

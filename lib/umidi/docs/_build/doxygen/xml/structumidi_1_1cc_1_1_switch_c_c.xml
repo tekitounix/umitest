@@ -1,0 +1,129 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1cc_1_1_switch_c_c" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::cc::SwitchCC</compoundname>
+    <innerclass refid="structumidi_1_1cc_1_1_switch_c_c_1_1_state" prot="public">umidi::cc::SwitchCC::State</innerclass>
+    <templateparamlist>
+      <param>
+        <type>uint8_t</type>
+        <declname>CC</declname>
+        <defname>CC</defname>
+      </param>
+      <param>
+        <type>StringLiteral</type>
+        <declname>Name</declname>
+        <defname>Name</defname>
+      </param>
+    </templateparamlist>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="structumidi_1_1cc_1_1_switch_c_c_1a3f69efb7ab77bfb5c6ad74cc19f90515" prot="public" static="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>static constexpr uint8_t umidi::cc::SwitchCC&lt; CC, Name &gt;::number</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>number</name>
+        <qualifiedname>umidi::cc::SwitchCC::number</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="63" column="30" bodyfile="include/umidi/cc/types.hh" bodystart="63" bodyend="63"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1cc_1_1_switch_c_c_1a70e40eb63c56ff0118ccdcb8b4d94709" prot="public" static="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>static constexpr uint8_t umidi::cc::SwitchCC&lt; CC, Name &gt;::number_msb</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>number_msb</name>
+        <qualifiedname>umidi::cc::SwitchCC::number_msb</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="64" column="30" bodyfile="include/umidi/cc/types.hh" bodystart="64" bodyend="64"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1cc_1_1_switch_c_c_1a51eb36018123f7530b87aa7adf934b3c" prot="public" static="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>static constexpr uint8_t umidi::cc::SwitchCC&lt; CC, Name &gt;::number_lsb</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>number_lsb</name>
+        <qualifiedname>umidi::cc::SwitchCC::number_lsb</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="65" column="30" bodyfile="include/umidi/cc/types.hh" bodystart="65" bodyend="65"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1cc_1_1_switch_c_c_1a7015df2ba1f6dd144e50beda8298f4ec" prot="public" static="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>const char *</type>
+        <definition>static constexpr const char * umidi::cc::SwitchCC&lt; CC, Name &gt;::name</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>name</name>
+        <qualifiedname>umidi::cc::SwitchCC::name</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="66" column="33" bodyfile="include/umidi/cc/types.hh" bodystart="66" bodyend="66"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1cc_1_1_switch_c_c_1a05351356153b79110b7ea2cd00fcb96d" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>static constexpr bool umidi::cc::SwitchCC&lt; CC, Name &gt;::parse</definition>
+        <argsstring>(State &amp;, uint8_t value) noexcept</argsstring>
+        <name>parse</name>
+        <qualifiedname>umidi::cc::SwitchCC::parse</qualifiedname>
+        <param>
+          <type>State &amp;</type>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>value</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="71" column="28" bodyfile="include/umidi/cc/types.hh" bodystart="71" bodyend="73"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1cc_1_1_switch_c_c_1a6f081ee73d03d3582f48d7dfccf7a4fb" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>static constexpr uint8_t umidi::cc::SwitchCC&lt; CC, Name &gt;::format</definition>
+        <argsstring>(bool on) noexcept</argsstring>
+        <name>format</name>
+        <qualifiedname>umidi::cc::SwitchCC::format</qualifiedname>
+        <param>
+          <type>bool</type>
+          <declname>on</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="75" column="31" bodyfile="include/umidi/cc/types.hh" bodystart="75" bodyend="77"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/cc/types.hh" line="60" column="1" bodyfile="include/umidi/cc/types.hh" bodystart="60" bodyend="78"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1cc_1_1_switch_c_c_1a6f081ee73d03d3582f48d7dfccf7a4fb" prot="public" virt="non-virtual"><scope>umidi::cc::SwitchCC</scope><name>format</name></member>
+      <member refid="structumidi_1_1cc_1_1_switch_c_c_1a7015df2ba1f6dd144e50beda8298f4ec" prot="public" virt="non-virtual"><scope>umidi::cc::SwitchCC</scope><name>name</name></member>
+      <member refid="structumidi_1_1cc_1_1_switch_c_c_1a3f69efb7ab77bfb5c6ad74cc19f90515" prot="public" virt="non-virtual"><scope>umidi::cc::SwitchCC</scope><name>number</name></member>
+      <member refid="structumidi_1_1cc_1_1_switch_c_c_1a51eb36018123f7530b87aa7adf934b3c" prot="public" virt="non-virtual"><scope>umidi::cc::SwitchCC</scope><name>number_lsb</name></member>
+      <member refid="structumidi_1_1cc_1_1_switch_c_c_1a70e40eb63c56ff0118ccdcb8b4d94709" prot="public" virt="non-virtual"><scope>umidi::cc::SwitchCC</scope><name>number_msb</name></member>
+      <member refid="structumidi_1_1cc_1_1_switch_c_c_1a05351356153b79110b7ea2cd00fcb96d" prot="public" virt="non-virtual"><scope>umidi::cc::SwitchCC</scope><name>parse</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

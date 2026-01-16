@@ -1,0 +1,591 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1_event" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::Event</compoundname>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structumidi_1_1_event_1aa0c83ed387cfb4d230234cf80c924e0f" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::Event::sample_pos</definition>
+        <argsstring></argsstring>
+        <name>sample_pos</name>
+        <qualifiedname>umidi::Event::sample_pos</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+<para>Sample position within buffer. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="20" column="14" bodyfile="include/umidi/event.hh" bodystart="20" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1_event_1ab91836db4d13c5ada2f105fae6bc82d4" prot="public" static="no" mutable="no">
+        <type><ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref></type>
+        <definition>UMP32 umidi::Event::ump</definition>
+        <argsstring></argsstring>
+        <name>ump</name>
+        <qualifiedname>umidi::Event::ump</qualifiedname>
+        <briefdescription>
+<para>MIDI message in UMP format. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="21" column="11" bodyfile="include/umidi/event.hh" bodystart="21" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="structumidi_1_1_event_1aa6318e0d3a6688c679c780339b8a369f" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>constexpr</type>
+        <definition>umidi::Event::Event</definition>
+        <argsstring>() noexcept=default</argsstring>
+        <name>Event</name>
+        <qualifiedname>umidi::Event::Event</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="23" column="15"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_event_1a7facace698a41f421de068c0081be55c" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>constexpr</type>
+        <definition>umidi::Event::Event</definition>
+        <argsstring>(uint32_t pos, UMP32 u) noexcept</argsstring>
+        <name>Event</name>
+        <qualifiedname>umidi::Event::Event</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>pos</declname>
+        </param>
+        <param>
+          <type><ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref></type>
+          <declname>u</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="24" column="15" bodyfile="include/umidi/event.hh" bodystart="24" bodyend="24"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_event_1a92e9e02cd57e14bfd29da4e6073946bb" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::Event::is_note_on</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>is_note_on</name>
+        <qualifiedname>umidi::Event::is_note_on</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="27" column="21" bodyfile="include/umidi/event.hh" bodystart="27" bodyend="27"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_event_1a2a280a65eded996177850116162338d7" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::Event::is_note_off</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>is_note_off</name>
+        <qualifiedname>umidi::Event::is_note_off</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="28" column="21" bodyfile="include/umidi/event.hh" bodystart="28" bodyend="28"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_event_1ae3aa4e29a13c536ac0a4859518ea767b" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::Event::is_cc</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>is_cc</name>
+        <qualifiedname>umidi::Event::is_cc</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="29" column="21" bodyfile="include/umidi/event.hh" bodystart="29" bodyend="29"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_event_1a03de0ccf34f95594d40b80f1b618dd57" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::Event::is_program_change</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>is_program_change</name>
+        <qualifiedname>umidi::Event::is_program_change</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="30" column="21" bodyfile="include/umidi/event.hh" bodystart="30" bodyend="30"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_event_1a0e63b0fbb977871336ff57e39cfbebea" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::Event::is_pitch_bend</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>is_pitch_bend</name>
+        <qualifiedname>umidi::Event::is_pitch_bend</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="31" column="21" bodyfile="include/umidi/event.hh" bodystart="31" bodyend="31"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_event_1a810a38edb815ec24efb43be89a2ccfbf" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::Event::is_channel_pressure</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>is_channel_pressure</name>
+        <qualifiedname>umidi::Event::is_channel_pressure</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="32" column="21" bodyfile="include/umidi/event.hh" bodystart="32" bodyend="32"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_event_1a93430c229f09fc201e6d823ff83664b0" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::Event::is_poly_pressure</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>is_poly_pressure</name>
+        <qualifiedname>umidi::Event::is_poly_pressure</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="33" column="21" bodyfile="include/umidi/event.hh" bodystart="33" bodyend="33"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_event_1a9ff14b94f0c64bce5144dc99c809b1b8" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::Event::is_realtime</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>is_realtime</name>
+        <qualifiedname>umidi::Event::is_realtime</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="34" column="21" bodyfile="include/umidi/event.hh" bodystart="34" bodyend="34"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_event_1a3f2456ff52b24a3121ac7ae526e150f5" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::Event::is_system</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>is_system</name>
+        <qualifiedname>umidi::Event::is_system</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="35" column="21" bodyfile="include/umidi/event.hh" bodystart="35" bodyend="35"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_event_1adc7e90bda156586eecec234f6b11dcee" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::Event::channel</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>channel</name>
+        <qualifiedname>umidi::Event::channel</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="37" column="24" bodyfile="include/umidi/event.hh" bodystart="37" bodyend="37"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_event_1ad0adf636e5ec839346b1c79d959654d5" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::Event::note</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>note</name>
+        <qualifiedname>umidi::Event::note</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="38" column="24" bodyfile="include/umidi/event.hh" bodystart="38" bodyend="38"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_event_1ac2184652200e01192e6ba6c840c65d9a" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::Event::velocity</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>velocity</name>
+        <qualifiedname>umidi::Event::velocity</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="39" column="24" bodyfile="include/umidi/event.hh" bodystart="39" bodyend="39"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_event_1a7b85becfdfb4bd482b219ce9d230170c" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::Event::cc_number</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>cc_number</name>
+        <qualifiedname>umidi::Event::cc_number</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="40" column="24" bodyfile="include/umidi/event.hh" bodystart="40" bodyend="40"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_event_1abbbb8e408675eafbaa8b2ecd4a4768c7" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::Event::cc_value</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>cc_value</name>
+        <qualifiedname>umidi::Event::cc_value</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="41" column="24" bodyfile="include/umidi/event.hh" bodystart="41" bodyend="41"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_event_1ac1b34a16d19714e25f1cb5a0932c3ab0" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::Event::group</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>group</name>
+        <qualifiedname>umidi::Event::group</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="42" column="24" bodyfile="include/umidi/event.hh" bodystart="42" bodyend="42"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_event_1ae8b3de6a4739e59a217e5fed273d63d8" prot="public" static="no" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::Event::operator&lt;</definition>
+        <argsstring>(const Event &amp;other) const noexcept</argsstring>
+        <name>operator&lt;</name>
+        <qualifiedname>umidi::Event::operator&lt;</qualifiedname>
+        <param>
+          <type>const Event &amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="86" column="15" bodyfile="include/umidi/event.hh" bodystart="86" bodyend="88"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="structumidi_1_1_event_1adeb2fc4eef9de4a7493e92c6abecbbb1" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Event</type>
+        <definition>static constexpr Event umidi::Event::note_on</definition>
+        <argsstring>(uint32_t pos, uint8_t channel, uint8_t note, uint8_t velocity, uint8_t group=0) noexcept</argsstring>
+        <name>note_on</name>
+        <qualifiedname>umidi::Event::note_on</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>pos</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>channel</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>note</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>velocity</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>group</declname>
+          <defval>0</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="46" column="5" bodyfile="include/umidi/event.hh" bodystart="46" bodyend="48"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_event_1ab8052c2c73ceb29523b40d5c32475275" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Event</type>
+        <definition>static constexpr Event umidi::Event::note_off</definition>
+        <argsstring>(uint32_t pos, uint8_t channel, uint8_t note, uint8_t velocity=0, uint8_t group=0) noexcept</argsstring>
+        <name>note_off</name>
+        <qualifiedname>umidi::Event::note_off</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>pos</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>channel</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>note</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>velocity</declname>
+          <defval>0</defval>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>group</declname>
+          <defval>0</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="51" column="5" bodyfile="include/umidi/event.hh" bodystart="51" bodyend="53"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_event_1ac5c90649faaefc18e633c10f40bf0055" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Event</type>
+        <definition>static constexpr Event umidi::Event::cc</definition>
+        <argsstring>(uint32_t pos, uint8_t channel, uint8_t cc_num, uint8_t value, uint8_t group=0) noexcept</argsstring>
+        <name>cc</name>
+        <qualifiedname>umidi::Event::cc</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>pos</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>channel</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>cc_num</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>value</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>group</declname>
+          <defval>0</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="56" column="5" bodyfile="include/umidi/event.hh" bodystart="56" bodyend="58"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_event_1a596585a19ffc94537ebd8330b8ac93e0" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Event</type>
+        <definition>static constexpr Event umidi::Event::program_change</definition>
+        <argsstring>(uint32_t pos, uint8_t channel, uint8_t program, uint8_t group=0) noexcept</argsstring>
+        <name>program_change</name>
+        <qualifiedname>umidi::Event::program_change</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>pos</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>channel</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>program</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>group</declname>
+          <defval>0</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="61" column="5" bodyfile="include/umidi/event.hh" bodystart="61" bodyend="63"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_event_1a0f7d77484b5b6060157fa67f770eff4a" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Event</type>
+        <definition>static constexpr Event umidi::Event::pitch_bend</definition>
+        <argsstring>(uint32_t pos, uint8_t channel, uint16_t value, uint8_t group=0) noexcept</argsstring>
+        <name>pitch_bend</name>
+        <qualifiedname>umidi::Event::pitch_bend</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>pos</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>channel</declname>
+        </param>
+        <param>
+          <type>uint16_t</type>
+          <declname>value</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>group</declname>
+          <defval>0</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="66" column="5" bodyfile="include/umidi/event.hh" bodystart="66" bodyend="68"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_event_1ab5f808d1be861b588e13872121a7b7e9" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Event</type>
+        <definition>static constexpr Event umidi::Event::timing_clock</definition>
+        <argsstring>(uint32_t pos, uint8_t group=0) noexcept</argsstring>
+        <name>timing_clock</name>
+        <qualifiedname>umidi::Event::timing_clock</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>pos</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>group</declname>
+          <defval>0</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="71" column="5" bodyfile="include/umidi/event.hh" bodystart="71" bodyend="73"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_event_1acfc3104efa42b1b21dc691c0b6d6138d" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Event</type>
+        <definition>static constexpr Event umidi::Event::start</definition>
+        <argsstring>(uint32_t pos, uint8_t group=0) noexcept</argsstring>
+        <name>start</name>
+        <qualifiedname>umidi::Event::start</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>pos</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>group</declname>
+          <defval>0</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="76" column="5" bodyfile="include/umidi/event.hh" bodystart="76" bodyend="78"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_event_1a000786ec95b4131da751e152b581a773" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Event</type>
+        <definition>static constexpr Event umidi::Event::stop</definition>
+        <argsstring>(uint32_t pos, uint8_t group=0) noexcept</argsstring>
+        <name>stop</name>
+        <qualifiedname>umidi::Event::stop</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>pos</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>group</declname>
+          <defval>0</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="81" column="5" bodyfile="include/umidi/event.hh" bodystart="81" bodyend="83"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="1">
+        <label>umidi::Event</label>
+        <childnode refid="2" relation="usage">
+          <edgelabel>ump</edgelabel>
+        </childnode>
+      </node>
+      <node id="2">
+        <label>umidi::UMP32</label>
+        <link refid="structumidi_1_1_u_m_p32"/>
+      </node>
+    </collaborationgraph>
+    <location file="include/umidi/event.hh" line="19" column="1" bodyfile="include/umidi/event.hh" bodystart="19" bodyend="89"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1_event_1ac5c90649faaefc18e633c10f40bf0055" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>cc</name></member>
+      <member refid="structumidi_1_1_event_1a7b85becfdfb4bd482b219ce9d230170c" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>cc_number</name></member>
+      <member refid="structumidi_1_1_event_1abbbb8e408675eafbaa8b2ecd4a4768c7" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>cc_value</name></member>
+      <member refid="structumidi_1_1_event_1adc7e90bda156586eecec234f6b11dcee" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>channel</name></member>
+      <member refid="structumidi_1_1_event_1aa6318e0d3a6688c679c780339b8a369f" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>Event</name></member>
+      <member refid="structumidi_1_1_event_1a7facace698a41f421de068c0081be55c" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>Event</name></member>
+      <member refid="structumidi_1_1_event_1ac1b34a16d19714e25f1cb5a0932c3ab0" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>group</name></member>
+      <member refid="structumidi_1_1_event_1ae3aa4e29a13c536ac0a4859518ea767b" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>is_cc</name></member>
+      <member refid="structumidi_1_1_event_1a810a38edb815ec24efb43be89a2ccfbf" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>is_channel_pressure</name></member>
+      <member refid="structumidi_1_1_event_1a2a280a65eded996177850116162338d7" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>is_note_off</name></member>
+      <member refid="structumidi_1_1_event_1a92e9e02cd57e14bfd29da4e6073946bb" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>is_note_on</name></member>
+      <member refid="structumidi_1_1_event_1a0e63b0fbb977871336ff57e39cfbebea" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>is_pitch_bend</name></member>
+      <member refid="structumidi_1_1_event_1a93430c229f09fc201e6d823ff83664b0" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>is_poly_pressure</name></member>
+      <member refid="structumidi_1_1_event_1a03de0ccf34f95594d40b80f1b618dd57" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>is_program_change</name></member>
+      <member refid="structumidi_1_1_event_1a9ff14b94f0c64bce5144dc99c809b1b8" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>is_realtime</name></member>
+      <member refid="structumidi_1_1_event_1a3f2456ff52b24a3121ac7ae526e150f5" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>is_system</name></member>
+      <member refid="structumidi_1_1_event_1ad0adf636e5ec839346b1c79d959654d5" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>note</name></member>
+      <member refid="structumidi_1_1_event_1ab8052c2c73ceb29523b40d5c32475275" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>note_off</name></member>
+      <member refid="structumidi_1_1_event_1adeb2fc4eef9de4a7493e92c6abecbbb1" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>note_on</name></member>
+      <member refid="structumidi_1_1_event_1ae8b3de6a4739e59a217e5fed273d63d8" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>operator&lt;</name></member>
+      <member refid="structumidi_1_1_event_1a0f7d77484b5b6060157fa67f770eff4a" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>pitch_bend</name></member>
+      <member refid="structumidi_1_1_event_1a596585a19ffc94537ebd8330b8ac93e0" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>program_change</name></member>
+      <member refid="structumidi_1_1_event_1aa0c83ed387cfb4d230234cf80c924e0f" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>sample_pos</name></member>
+      <member refid="structumidi_1_1_event_1acfc3104efa42b1b21dc691c0b6d6138d" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>start</name></member>
+      <member refid="structumidi_1_1_event_1a000786ec95b4131da751e152b581a773" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>stop</name></member>
+      <member refid="structumidi_1_1_event_1ab5f808d1be861b588e13872121a7b7e9" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>timing_clock</name></member>
+      <member refid="structumidi_1_1_event_1ab91836db4d13c5ada2f105fae6bc82d4" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>ump</name></member>
+      <member refid="structumidi_1_1_event_1ac2184652200e01192e6ba6c840c65d9a" prot="public" virt="non-virtual"><scope>umidi::Event</scope><name>velocity</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

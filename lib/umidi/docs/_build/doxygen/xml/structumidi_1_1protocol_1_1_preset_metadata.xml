@@ -1,0 +1,200 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1protocol_1_1_preset_metadata" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::protocol::PresetMetadata</compoundname>
+    <sectiondef kind="public-type">
+      <memberdef kind="enum" id="structumidi_1_1protocol_1_1_preset_metadata_1ae1cec42c3b271bc3319bd84324140cce" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>Category</name>
+        <qualifiedname>umidi::protocol::PresetMetadata::Category</qualifiedname>
+        <enumvalue id="structumidi_1_1protocol_1_1_preset_metadata_1ae1cec42c3b271bc3319bd84324140cceab50339a10e1de285ac99d4c3990b8693" prot="public">
+          <name>NONE</name>
+          <initializer>= 0</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="structumidi_1_1protocol_1_1_preset_metadata_1ae1cec42c3b271bc3319bd84324140cceadaa3b1e8f6a0603a00b4de70420b2844" prot="public">
+          <name>LEAD</name>
+          <initializer>= 1</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="structumidi_1_1protocol_1_1_preset_metadata_1ae1cec42c3b271bc3319bd84324140cceae1618eb6a84ac61faefe0a87d5649689" prot="public">
+          <name>BASS</name>
+          <initializer>= 2</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="structumidi_1_1protocol_1_1_preset_metadata_1ae1cec42c3b271bc3319bd84324140ccea9a91e423233cb015d469d42c56b20baa" prot="public">
+          <name>PAD</name>
+          <initializer>= 3</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="structumidi_1_1protocol_1_1_preset_metadata_1ae1cec42c3b271bc3319bd84324140ccea48fb38e1f876fa3dc9c8cd6cad73c243" prot="public">
+          <name>KEYS</name>
+          <initializer>= 4</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="structumidi_1_1protocol_1_1_preset_metadata_1ae1cec42c3b271bc3319bd84324140ccea71695754c5cb79fa230b437f37a8d4bc" prot="public">
+          <name>STRINGS</name>
+          <initializer>= 5</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="structumidi_1_1protocol_1_1_preset_metadata_1ae1cec42c3b271bc3319bd84324140cceaf8c23b538d2b40948387f9b4c4881586" prot="public">
+          <name>BRASS</name>
+          <initializer>= 6</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="structumidi_1_1protocol_1_1_preset_metadata_1ae1cec42c3b271bc3319bd84324140ccea84c5a609322b2338c9923de18d5f6685" prot="public">
+          <name>DRUMS</name>
+          <initializer>= 7</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="structumidi_1_1protocol_1_1_preset_metadata_1ae1cec42c3b271bc3319bd84324140cceab8b5089c70ae62534970e2d8aa67e96d" prot="public">
+          <name>FX</name>
+          <initializer>= 8</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="structumidi_1_1protocol_1_1_preset_metadata_1ae1cec42c3b271bc3319bd84324140ccea03570470bad94692ce93e32700d2e1cb" prot="public">
+          <name>OTHER</name>
+          <initializer>= 255</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="179" column="5" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="179" bodyend="190"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_preset_metadata_1a551c6b3f1a92e4a2da8f3d259a83e417" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::PresetMetadata::format_version</definition>
+        <argsstring></argsstring>
+        <name>format_version</name>
+        <qualifiedname>umidi::protocol::PresetMetadata::format_version</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="172" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="172" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_preset_metadata_1a44484ca916acfb3edda29ea4e4e09c26" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::PresetMetadata::category</definition>
+        <argsstring></argsstring>
+        <name>category</name>
+        <qualifiedname>umidi::protocol::PresetMetadata::category</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="173" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="173" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_preset_metadata_1a684150cbe0d442dabb83540f3aa9bb85" prot="public" static="no" mutable="no">
+        <type>uint16_t</type>
+        <definition>uint16_t umidi::protocol::PresetMetadata::bank</definition>
+        <argsstring></argsstring>
+        <name>bank</name>
+        <qualifiedname>umidi::protocol::PresetMetadata::bank</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="174" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="174" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_preset_metadata_1a06643c0358a9250611875fb7731cd59c" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::PresetMetadata::program</definition>
+        <argsstring></argsstring>
+        <name>program</name>
+        <qualifiedname>umidi::protocol::PresetMetadata::program</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="175" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="175" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_preset_metadata_1a25894ae0e1028f740a81f9f64b9c040d" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::PresetMetadata::flags</definition>
+        <argsstring></argsstring>
+        <name>flags</name>
+        <qualifiedname>umidi::protocol::PresetMetadata::flags</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="176" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="176" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_preset_metadata_1a21e9e64683fc758c1971c059f4b94d46" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::PresetMetadata::author[10]</definition>
+        <argsstring>[10]</argsstring>
+        <name>author</name>
+        <qualifiedname>umidi::protocol::PresetMetadata::author</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="177" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="177" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/umi_object.hh" line="171" column="1" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="171" bodyend="191"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1protocol_1_1_preset_metadata_1a21e9e64683fc758c1971c059f4b94d46" prot="public" virt="non-virtual"><scope>umidi::protocol::PresetMetadata</scope><name>author</name></member>
+      <member refid="structumidi_1_1protocol_1_1_preset_metadata_1a684150cbe0d442dabb83540f3aa9bb85" prot="public" virt="non-virtual"><scope>umidi::protocol::PresetMetadata</scope><name>bank</name></member>
+      <member refid="structumidi_1_1protocol_1_1_preset_metadata_1ae1cec42c3b271bc3319bd84324140cce" prot="public" virt="non-virtual"><scope>umidi::protocol::PresetMetadata</scope><name>Category</name></member>
+      <member refid="structumidi_1_1protocol_1_1_preset_metadata_1a44484ca916acfb3edda29ea4e4e09c26" prot="public" virt="non-virtual"><scope>umidi::protocol::PresetMetadata</scope><name>category</name></member>
+      <member refid="structumidi_1_1protocol_1_1_preset_metadata_1a25894ae0e1028f740a81f9f64b9c040d" prot="public" virt="non-virtual"><scope>umidi::protocol::PresetMetadata</scope><name>flags</name></member>
+      <member refid="structumidi_1_1protocol_1_1_preset_metadata_1a551c6b3f1a92e4a2da8f3d259a83e417" prot="public" virt="non-virtual"><scope>umidi::protocol::PresetMetadata</scope><name>format_version</name></member>
+      <member refid="structumidi_1_1protocol_1_1_preset_metadata_1a06643c0358a9250611875fb7731cd59c" prot="public" virt="non-virtual"><scope>umidi::protocol::PresetMetadata</scope><name>program</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

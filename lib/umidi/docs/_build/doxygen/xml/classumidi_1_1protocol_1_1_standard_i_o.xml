@@ -1,0 +1,350 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="classumidi_1_1protocol_1_1_standard_i_o" kind="class" language="C++" prot="public">
+    <compoundname>umidi::protocol::StandardIO</compoundname>
+    <includes refid="standard__io_8hh" local="no">standard_io.hh</includes>
+    <templateparamlist>
+      <param>
+        <type>size_t</type>
+        <declname>TxBufSize</declname>
+        <defname>TxBufSize</defname>
+        <defval>512</defval>
+      </param>
+      <param>
+        <type>size_t</type>
+        <declname>RxBufSize</declname>
+        <defname>RxBufSize</defname>
+        <defval>512</defval>
+      </param>
+    </templateparamlist>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_standard_i_o_1ae9747c7429a0e7a6918939e1e7e8d67b" prot="private" static="no" mutable="no">
+        <type><ref refid="standard__io_8hh_1a138ac55bc05c7aa193d345fe7609970c" kindref="member">StdinCallback</ref></type>
+        <definition>StdinCallback umidi::protocol::StandardIO&lt; TxBufSize, RxBufSize &gt;::stdin_cb_</definition>
+        <argsstring></argsstring>
+        <name>stdin_cb_</name>
+        <qualifiedname>umidi::protocol::StandardIO::stdin_cb_</qualifiedname>
+        <initializer>= nullptr</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/standard_io.hh" line="107" column="19" bodyfile="include/umidi/protocol/standard_io.hh" bodystart="107" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_standard_i_o_1a5a4df125e67737fdc021b4209e1d4c70" prot="private" static="no" mutable="no">
+        <type>void *</type>
+        <definition>void* umidi::protocol::StandardIO&lt; TxBufSize, RxBufSize &gt;::stdin_ctx_</definition>
+        <argsstring></argsstring>
+        <name>stdin_ctx_</name>
+        <qualifiedname>umidi::protocol::StandardIO::stdin_ctx_</qualifiedname>
+        <initializer>= nullptr</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/standard_io.hh" line="108" column="10" bodyfile="include/umidi/protocol/standard_io.hh" bodystart="108" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_standard_i_o_1aff3fa187eb6b722d89f43f8080b1664b" prot="private" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::StandardIO&lt; TxBufSize, RxBufSize &gt;::tx_seq_</definition>
+        <argsstring></argsstring>
+        <name>tx_seq_</name>
+        <qualifiedname>umidi::protocol::StandardIO::tx_seq_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/standard_io.hh" line="109" column="13" bodyfile="include/umidi/protocol/standard_io.hh" bodystart="109" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_standard_i_o_1ab5d9aa66a27497116d3b295155f3aba5" prot="private" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::StandardIO&lt; TxBufSize, RxBufSize &gt;::rx_seq_</definition>
+        <argsstring></argsstring>
+        <name>rx_seq_</name>
+        <qualifiedname>umidi::protocol::StandardIO::rx_seq_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/standard_io.hh" line="110" column="13" bodyfile="include/umidi/protocol/standard_io.hh" bodystart="110" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_standard_i_o_1a8f0b21c2b7fbf261b6e26abac9df1b8e" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool umidi::protocol::StandardIO&lt; TxBufSize, RxBufSize &gt;::tx_paused_</definition>
+        <argsstring></argsstring>
+        <name>tx_paused_</name>
+        <qualifiedname>umidi::protocol::StandardIO::tx_paused_</qualifiedname>
+        <initializer>= false</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/standard_io.hh" line="111" column="10" bodyfile="include/umidi/protocol/standard_io.hh" bodystart="111" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_standard_i_o_1a2e4f947ad42d1f193518510a0da5f628" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool umidi::protocol::StandardIO&lt; TxBufSize, RxBufSize &gt;::eof_received_</definition>
+        <argsstring></argsstring>
+        <name>eof_received_</name>
+        <qualifiedname>umidi::protocol::StandardIO::eof_received_</qualifiedname>
+        <initializer>= false</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/standard_io.hh" line="112" column="10" bodyfile="include/umidi/protocol/standard_io.hh" bodystart="112" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_standard_i_o_1a846ff3be5f4806fa9a54c1938c7dc3a2" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::StandardIO&lt; TxBufSize, RxBufSize &gt;::set_stdin_callback</definition>
+        <argsstring>(StdinCallback cb, void *ctx) noexcept</argsstring>
+        <name>set_stdin_callback</name>
+        <qualifiedname>umidi::protocol::StandardIO::set_stdin_callback</qualifiedname>
+        <param>
+          <type><ref refid="standard__io_8hh_1a138ac55bc05c7aa193d345fe7609970c" kindref="member">StdinCallback</ref></type>
+          <declname>cb</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>ctx</declname>
+        </param>
+        <briefdescription>
+<para>Set callback for incoming stdin data. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/standard_io.hh" line="22" column="10" bodyfile="include/umidi/protocol/standard_io.hh" bodystart="22" bodyend="25"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_standard_i_o_1a9322edeaa15c09adede8ff226d108d1f" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>size_t</type>
+        <definition>size_t umidi::protocol::StandardIO&lt; TxBufSize, RxBufSize &gt;::write_stdout</definition>
+        <argsstring>(const uint8_t *data, size_t len, SendFn send_fn)</argsstring>
+        <name>write_stdout</name>
+        <qualifiedname>umidi::protocol::StandardIO::write_stdout</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+<para>Write to stdout. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/standard_io.hh" line="29" column="12" bodyfile="include/umidi/protocol/standard_io.hh" bodystart="29" bodyend="31"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_standard_i_o_1a4faabac32982d3ec19e294a2d8f67fa2" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>size_t</type>
+        <definition>size_t umidi::protocol::StandardIO&lt; TxBufSize, RxBufSize &gt;::write_stderr</definition>
+        <argsstring>(const uint8_t *data, size_t len, SendFn send_fn)</argsstring>
+        <name>write_stderr</name>
+        <qualifiedname>umidi::protocol::StandardIO::write_stderr</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+<para>Write to stderr. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/standard_io.hh" line="35" column="12" bodyfile="include/umidi/protocol/standard_io.hh" bodystart="35" bodyend="37"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_standard_i_o_1acb5b1cce7ec041119461c22b12446a80" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::StandardIO&lt; TxBufSize, RxBufSize &gt;::process_message</definition>
+        <argsstring>(const uint8_t *data, size_t len)</argsstring>
+        <name>process_message</name>
+        <qualifiedname>umidi::protocol::StandardIO::process_message</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <briefdescription>
+<para>Process incoming SysEx message. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>true if message was handled </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/standard_io.hh" line="41" column="10" bodyfile="include/umidi/protocol/standard_io.hh" bodystart="41" bodyend="71"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_standard_i_o_1a0f13044ce8d77d460223fd607c9a13fb" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::StandardIO&lt; TxBufSize, RxBufSize &gt;::reset</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>reset</name>
+        <qualifiedname>umidi::protocol::StandardIO::reset</qualifiedname>
+        <briefdescription>
+<para>Reset IO state. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/standard_io.hh" line="74" column="10" bodyfile="include/umidi/protocol/standard_io.hh" bodystart="74" bodyend="79"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_standard_i_o_1a0745556c9907bbe9c34fd109a0e6a601" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::StandardIO&lt; TxBufSize, RxBufSize &gt;::is_paused</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>is_paused</name>
+        <qualifiedname>umidi::protocol::StandardIO::is_paused</qualifiedname>
+        <briefdescription>
+<para>Check if transmission is paused (flow control). </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/standard_io.hh" line="82" column="11" bodyfile="include/umidi/protocol/standard_io.hh" bodystart="82" bodyend="82"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_standard_i_o_1a981d9157cb421c94905c903afa8a13fb" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::StandardIO&lt; TxBufSize, RxBufSize &gt;::eof</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>eof</name>
+        <qualifiedname>umidi::protocol::StandardIO::eof</qualifiedname>
+        <briefdescription>
+<para>Check if EOF was received. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/standard_io.hh" line="85" column="11" bodyfile="include/umidi/protocol/standard_io.hh" bodystart="85" bodyend="85"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="private-func">
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_standard_i_o_1a032c85625266625f85738a7b8109dcba" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>size_t</type>
+        <definition>size_t umidi::protocol::StandardIO&lt; TxBufSize, RxBufSize &gt;::write_stream</definition>
+        <argsstring>(Command cmd, const uint8_t *data, size_t len, SendFn send_fn)</argsstring>
+        <name>write_stream</name>
+        <qualifiedname>umidi::protocol::StandardIO::write_stream</qualifiedname>
+        <param>
+          <type><ref refid="commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8" kindref="member">Command</ref></type>
+          <declname>cmd</declname>
+        </param>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/standard_io.hh" line="89" column="12" bodyfile="include/umidi/protocol/standard_io.hh" bodystart="89" bodyend="105"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Standard IO over SysEx. </para>
+    </briefdescription>
+    <detaileddescription>
+<para><parameterlist kind="templateparam"><parameteritem>
+<parameternamelist>
+<parametername>TxBufSize</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Transmit buffer size </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>RxBufSize</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Receive buffer size </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+    </detaileddescription>
+    <location file="include/umidi/protocol/standard_io.hh" line="19" column="1" bodyfile="include/umidi/protocol/standard_io.hh" bodystart="19" bodyend="113"/>
+    <listofallmembers>
+      <member refid="classumidi_1_1protocol_1_1_standard_i_o_1a981d9157cb421c94905c903afa8a13fb" prot="public" virt="non-virtual"><scope>umidi::protocol::StandardIO</scope><name>eof</name></member>
+      <member refid="classumidi_1_1protocol_1_1_standard_i_o_1a2e4f947ad42d1f193518510a0da5f628" prot="private" virt="non-virtual"><scope>umidi::protocol::StandardIO</scope><name>eof_received_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_standard_i_o_1a0745556c9907bbe9c34fd109a0e6a601" prot="public" virt="non-virtual"><scope>umidi::protocol::StandardIO</scope><name>is_paused</name></member>
+      <member refid="classumidi_1_1protocol_1_1_standard_i_o_1acb5b1cce7ec041119461c22b12446a80" prot="public" virt="non-virtual"><scope>umidi::protocol::StandardIO</scope><name>process_message</name></member>
+      <member refid="classumidi_1_1protocol_1_1_standard_i_o_1a0f13044ce8d77d460223fd607c9a13fb" prot="public" virt="non-virtual"><scope>umidi::protocol::StandardIO</scope><name>reset</name></member>
+      <member refid="classumidi_1_1protocol_1_1_standard_i_o_1ab5d9aa66a27497116d3b295155f3aba5" prot="private" virt="non-virtual"><scope>umidi::protocol::StandardIO</scope><name>rx_seq_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_standard_i_o_1a846ff3be5f4806fa9a54c1938c7dc3a2" prot="public" virt="non-virtual"><scope>umidi::protocol::StandardIO</scope><name>set_stdin_callback</name></member>
+      <member refid="classumidi_1_1protocol_1_1_standard_i_o_1ae9747c7429a0e7a6918939e1e7e8d67b" prot="private" virt="non-virtual"><scope>umidi::protocol::StandardIO</scope><name>stdin_cb_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_standard_i_o_1a5a4df125e67737fdc021b4209e1d4c70" prot="private" virt="non-virtual"><scope>umidi::protocol::StandardIO</scope><name>stdin_ctx_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_standard_i_o_1a8f0b21c2b7fbf261b6e26abac9df1b8e" prot="private" virt="non-virtual"><scope>umidi::protocol::StandardIO</scope><name>tx_paused_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_standard_i_o_1aff3fa187eb6b722d89f43f8080b1664b" prot="private" virt="non-virtual"><scope>umidi::protocol::StandardIO</scope><name>tx_seq_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_standard_i_o_1a4faabac32982d3ec19e294a2d8f67fa2" prot="public" virt="non-virtual"><scope>umidi::protocol::StandardIO</scope><name>write_stderr</name></member>
+      <member refid="classumidi_1_1protocol_1_1_standard_i_o_1a9322edeaa15c09adede8ff226d108d1f" prot="public" virt="non-virtual"><scope>umidi::protocol::StandardIO</scope><name>write_stdout</name></member>
+      <member refid="classumidi_1_1protocol_1_1_standard_i_o_1a032c85625266625f85738a7b8109dcba" prot="private" virt="non-virtual"><scope>umidi::protocol::StandardIO</scope><name>write_stream</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

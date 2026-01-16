@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1cc_1_1_parameter_number_1_1_value" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::cc::ParameterNumber::Value</compoundname>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structumidi_1_1cc_1_1_parameter_number_1_1_value_1a7d2519e4d66459024f493bc284bc27a7" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::cc::ParameterNumber&lt; Number, IsNRPN, Name &gt;::Value::msb</definition>
+        <argsstring></argsstring>
+        <name>msb</name>
+        <qualifiedname>umidi::cc::ParameterNumber::Value::msb</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="142" column="17" bodyfile="include/umidi/cc/types.hh" bodystart="142" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1cc_1_1_parameter_number_1_1_value_1a048140b46adf3e5beb2d87987246177d" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::cc::ParameterNumber&lt; Number, IsNRPN, Name &gt;::Value::lsb</definition>
+        <argsstring></argsstring>
+        <name>lsb</name>
+        <qualifiedname>umidi::cc::ParameterNumber::Value::lsb</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="143" column="17" bodyfile="include/umidi/cc/types.hh" bodystart="143" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/cc/types.hh" line="141" column="5" bodyfile="include/umidi/cc/types.hh" bodystart="141" bodyend="144"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1cc_1_1_parameter_number_1_1_value_1a048140b46adf3e5beb2d87987246177d" prot="public" virt="non-virtual"><scope>umidi::cc::ParameterNumber::Value</scope><name>lsb</name></member>
+      <member refid="structumidi_1_1cc_1_1_parameter_number_1_1_value_1a7d2519e4d66459024f493bc284bc27a7" prot="public" virt="non-virtual"><scope>umidi::cc::ParameterNumber::Value</scope><name>msb</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,210 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1message_1_1_note_on" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::message::NoteOn</compoundname>
+    <includes refid="channel__voice_8hh" local="no">channel_voice.hh</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structumidi_1_1message_1_1_note_on_1ae3fe64911158e8181267f11d8c8b60e7" prot="public" static="no" mutable="no">
+        <type><ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref></type>
+        <definition>UMP32 umidi::message::NoteOn::ump</definition>
+        <argsstring></argsstring>
+        <name>ump</name>
+        <qualifiedname>umidi::message::NoteOn::ump</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/channel_voice.hh" line="14" column="11" bodyfile="include/umidi/messages/channel_voice.hh" bodystart="14" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-attrib">
+      <memberdef kind="variable" id="structumidi_1_1message_1_1_note_on_1ab1059db5e49c7d57dbee5fead7135754" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::message::NoteOn::MT</definition>
+        <argsstring></argsstring>
+        <name>MT</name>
+        <qualifiedname>umidi::message::NoteOn::MT</qualifiedname>
+        <initializer>= 2</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/channel_voice.hh" line="16" column="30" bodyfile="include/umidi/messages/channel_voice.hh" bodystart="16" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1message_1_1_note_on_1a2860398e5dc40541820271a587221a0b" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::message::NoteOn::STATUS</definition>
+        <argsstring></argsstring>
+        <name>STATUS</name>
+        <qualifiedname>umidi::message::NoteOn::STATUS</qualifiedname>
+        <initializer>= 0x90</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/channel_voice.hh" line="17" column="30" bodyfile="include/umidi/messages/channel_voice.hh" bodystart="17" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="structumidi_1_1message_1_1_note_on_1aa528b572ced3368cc87db960f5845fc4" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::message::NoteOn::channel</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>channel</name>
+        <qualifiedname>umidi::message::NoteOn::channel</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/channel_voice.hh" line="20" column="24" bodyfile="include/umidi/messages/channel_voice.hh" bodystart="20" bodyend="20"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_note_on_1a8c61285d447a3cda63377d5fae99d124" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::message::NoteOn::note</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>note</name>
+        <qualifiedname>umidi::message::NoteOn::note</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/channel_voice.hh" line="21" column="24" bodyfile="include/umidi/messages/channel_voice.hh" bodystart="21" bodyend="21"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_note_on_1a1f39e59dd8e27da6bacebf5bfe9f664a" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::message::NoteOn::velocity</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>velocity</name>
+        <qualifiedname>umidi::message::NoteOn::velocity</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/channel_voice.hh" line="22" column="24" bodyfile="include/umidi/messages/channel_voice.hh" bodystart="22" bodyend="22"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_note_on_1aca6d03267a076386f9e7b230a14f40a0" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::message::NoteOn::group</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>group</name>
+        <qualifiedname>umidi::message::NoteOn::group</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/channel_voice.hh" line="23" column="24" bodyfile="include/umidi/messages/channel_voice.hh" bodystart="23" bodyend="23"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_note_on_1aa06b6dd8acf35439927a8f6aaeb74143" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::message::NoteOn::is_valid</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>is_valid</name>
+        <qualifiedname>umidi::message::NoteOn::is_valid</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/channel_voice.hh" line="26" column="21" bodyfile="include/umidi/messages/channel_voice.hh" bodystart="26" bodyend="26"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="structumidi_1_1message_1_1_note_on_1a1bdfc7798633702bef13c39578ca4d0d" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="structumidi_1_1message_1_1_note_on" kindref="compound">NoteOn</ref></type>
+        <definition>static constexpr NoteOn umidi::message::NoteOn::create</definition>
+        <argsstring>(uint8_t channel, uint8_t note, uint8_t velocity, uint8_t group=0) noexcept</argsstring>
+        <name>create</name>
+        <qualifiedname>umidi::message::NoteOn::create</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>channel</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>note</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>velocity</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>group</declname>
+          <defval>0</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/channel_voice.hh" line="30" column="5" bodyfile="include/umidi/messages/channel_voice.hh" bodystart="30" bodyend="32"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_note_on_1a27878e77febd292614c0ad936a853966" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="structumidi_1_1message_1_1_note_on" kindref="compound">NoteOn</ref></type>
+        <definition>static constexpr NoteOn umidi::message::NoteOn::from_ump</definition>
+        <argsstring>(UMP32 u) noexcept</argsstring>
+        <name>from_ump</name>
+        <qualifiedname>umidi::message::NoteOn::from_ump</qualifiedname>
+        <param>
+          <type><ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref></type>
+          <declname>u</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/channel_voice.hh" line="35" column="30" bodyfile="include/umidi/messages/channel_voice.hh" bodystart="35" bodyend="35"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Note On message wrapper. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Zero-overhead wrapper providing semantic API over <ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref>. </para>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="2">
+        <label>umidi::UMP32</label>
+        <link refid="structumidi_1_1_u_m_p32"/>
+      </node>
+      <node id="1">
+        <label>umidi::message::NoteOn</label>
+        <link refid="structumidi_1_1message_1_1_note_on"/>
+        <childnode refid="2" relation="usage">
+          <edgelabel>ump</edgelabel>
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="include/umidi/messages/channel_voice.hh" line="13" column="1" bodyfile="include/umidi/messages/channel_voice.hh" bodystart="13" bodyend="36"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1message_1_1_note_on_1aa528b572ced3368cc87db960f5845fc4" prot="public" virt="non-virtual"><scope>umidi::message::NoteOn</scope><name>channel</name></member>
+      <member refid="structumidi_1_1message_1_1_note_on_1a1bdfc7798633702bef13c39578ca4d0d" prot="public" virt="non-virtual"><scope>umidi::message::NoteOn</scope><name>create</name></member>
+      <member refid="structumidi_1_1message_1_1_note_on_1a27878e77febd292614c0ad936a853966" prot="public" virt="non-virtual"><scope>umidi::message::NoteOn</scope><name>from_ump</name></member>
+      <member refid="structumidi_1_1message_1_1_note_on_1aca6d03267a076386f9e7b230a14f40a0" prot="public" virt="non-virtual"><scope>umidi::message::NoteOn</scope><name>group</name></member>
+      <member refid="structumidi_1_1message_1_1_note_on_1aa06b6dd8acf35439927a8f6aaeb74143" prot="public" virt="non-virtual"><scope>umidi::message::NoteOn</scope><name>is_valid</name></member>
+      <member refid="structumidi_1_1message_1_1_note_on_1ab1059db5e49c7d57dbee5fead7135754" prot="public" virt="non-virtual"><scope>umidi::message::NoteOn</scope><name>MT</name></member>
+      <member refid="structumidi_1_1message_1_1_note_on_1a8c61285d447a3cda63377d5fae99d124" prot="public" virt="non-virtual"><scope>umidi::message::NoteOn</scope><name>note</name></member>
+      <member refid="structumidi_1_1message_1_1_note_on_1a2860398e5dc40541820271a587221a0b" prot="public" virt="non-virtual"><scope>umidi::message::NoteOn</scope><name>STATUS</name></member>
+      <member refid="structumidi_1_1message_1_1_note_on_1ae3fe64911158e8181267f11d8c8b60e7" prot="public" virt="non-virtual"><scope>umidi::message::NoteOn</scope><name>ump</name></member>
+      <member refid="structumidi_1_1message_1_1_note_on_1a1f39e59dd8e27da6bacebf5bfe9f664a" prot="public" virt="non-virtual"><scope>umidi::message::NoteOn</scope><name>velocity</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

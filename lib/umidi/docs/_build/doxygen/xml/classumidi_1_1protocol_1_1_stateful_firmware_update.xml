@@ -1,0 +1,339 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="classumidi_1_1protocol_1_1_stateful_firmware_update" kind="class" language="C++" prot="public">
+    <compoundname>umidi::protocol::StatefulFirmwareUpdate</compoundname>
+    <templateparamlist>
+      <param>
+        <type>const <ref refid="structumidi_1_1protocol_1_1_platform_config" kindref="compound">PlatformConfig</ref> *</type>
+        <declname>Config</declname>
+        <defname>Config</defname>
+      </param>
+      <param>
+        <type>size_t</type>
+        <declname>MaxChunkSize</declname>
+        <defname>MaxChunkSize</defname>
+        <defval>256</defval>
+      </param>
+    </templateparamlist>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_stateful_firmware_update_1a06b0af2c8e005b359b6aabdd7541fbae" prot="private" static="no" mutable="no">
+        <type><ref refid="classumidi_1_1protocol_1_1_secure_firmware_update" kindref="compound">SecureFirmwareUpdate</ref>&lt; Config, MaxChunkSize &gt;</type>
+        <definition>SecureFirmwareUpdate&lt;Config, MaxChunkSize&gt; umidi::protocol::StatefulFirmwareUpdate&lt; Config, MaxChunkSize &gt;::fw_update_</definition>
+        <argsstring></argsstring>
+        <name>fw_update_</name>
+        <qualifiedname>umidi::protocol::StatefulFirmwareUpdate::fw_update_</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="593" column="26" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="593" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_stateful_firmware_update_1a796ca488136d935164e74f1f4840bf0e" prot="private" static="no" mutable="no">
+        <type>StateManager</type>
+        <definition>StateManager umidi::protocol::StatefulFirmwareUpdate&lt; Config, MaxChunkSize &gt;::state_mgr_</definition>
+        <argsstring></argsstring>
+        <name>state_mgr_</name>
+        <qualifiedname>umidi::protocol::StatefulFirmwareUpdate::state_mgr_</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="594" column="18" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="594" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_stateful_firmware_update_1aa0893887a3d0e63733aed0820b9ccaae" prot="private" static="no" mutable="no">
+        <type>StateProtocolHandler</type>
+        <definition>StateProtocolHandler umidi::protocol::StatefulFirmwareUpdate&lt; Config, MaxChunkSize &gt;::state_handler_</definition>
+        <argsstring></argsstring>
+        <name>state_handler_</name>
+        <qualifiedname>umidi::protocol::StatefulFirmwareUpdate::state_handler_</qualifiedname>
+        <initializer>{state_mgr_}</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="595" column="26" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="595" bodyend="595"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_stateful_firmware_update_1a01fa2c60768d5f531c3c8d6ab2e4fbae" prot="private" static="no" mutable="no">
+        <type>BootVerification</type>
+        <definition>BootVerification umidi::protocol::StatefulFirmwareUpdate&lt; Config, MaxChunkSize &gt;::boot_verif_</definition>
+        <argsstring></argsstring>
+        <name>boot_verif_</name>
+        <qualifiedname>umidi::protocol::StatefulFirmwareUpdate::boot_verif_</qualifiedname>
+        <initializer>{}</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="596" column="22" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="596" bodyend="596"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_stateful_firmware_update_1a53a9251946519b65985dfc6aaa8fc6f5" prot="private" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::StatefulFirmwareUpdate&lt; Config, MaxChunkSize &gt;::resume_fw_hash_</definition>
+        <argsstring></argsstring>
+        <name>resume_fw_hash_</name>
+        <qualifiedname>umidi::protocol::StatefulFirmwareUpdate::resume_fw_hash_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="598" column="14" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="598" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_stateful_firmware_update_1a1178a036e6e125fb8750f244f1fa07f8" prot="private" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::StatefulFirmwareUpdate&lt; Config, MaxChunkSize &gt;::resume_chunk_size_</definition>
+        <argsstring></argsstring>
+        <name>resume_chunk_size_</name>
+        <qualifiedname>umidi::protocol::StatefulFirmwareUpdate::resume_chunk_size_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="599" column="13" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="599" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_stateful_firmware_update_1a712e1e98c765d8e9e02f1bb1754f98ad" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::StatefulFirmwareUpdate&lt; Config, MaxChunkSize &gt;::init</definition>
+        <argsstring>(const FlashInterface &amp;flash, const uint8_t *public_key=nullptr, const uint8_t *shared_secret=nullptr) noexcept</argsstring>
+        <name>init</name>
+        <qualifiedname>umidi::protocol::StatefulFirmwareUpdate::init</qualifiedname>
+        <param>
+          <type>const <ref refid="structumidi_1_1protocol_1_1_flash_interface" kindref="compound">FlashInterface</ref> &amp;</type>
+          <declname>flash</declname>
+        </param>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>public_key</declname>
+          <defval>nullptr</defval>
+        </param>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>shared_secret</declname>
+          <defval>nullptr</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="450" column="10" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="450" bodyend="457"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_stateful_firmware_update_1a05097225fa2e8f59e7c467daeab41eb0" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::StatefulFirmwareUpdate&lt; Config, MaxChunkSize &gt;::process</definition>
+        <argsstring>(const uint8_t *data, size_t len, uint32_t current_time, SendFn send_fn)</argsstring>
+        <name>process</name>
+        <qualifiedname>umidi::protocol::StatefulFirmwareUpdate::process</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>current_time</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+<para>Process incoming message (state + firmware commands) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="461" column="10" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="461" bodyend="490"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_stateful_firmware_update_1a9fb8bb0ba543bc0cb66e0b7272d3dc93" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::StatefulFirmwareUpdate&lt; Config, MaxChunkSize &gt;::mark_boot_success</definition>
+        <argsstring>(uint32_t timestamp=0) noexcept</argsstring>
+        <name>mark_boot_success</name>
+        <qualifiedname>umidi::protocol::StatefulFirmwareUpdate::mark_boot_success</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>timestamp</declname>
+          <defval>0</defval>
+        </param>
+        <briefdescription>
+<para>Mark current boot as successful (call from application after successful startup) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="493" column="10" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="493" bodyend="496"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_stateful_firmware_update_1ad19c2a7da0ec70aef0bcb109c987d2be" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::StatefulFirmwareUpdate&lt; Config, MaxChunkSize &gt;::should_rollback</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>should_rollback</name>
+        <qualifiedname>umidi::protocol::StatefulFirmwareUpdate::should_rollback</qualifiedname>
+        <briefdescription>
+<para>Check if rollback should be triggered (call early in boot) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="499" column="11" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="499" bodyend="501"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_stateful_firmware_update_1ac5253e14eb55a964e4eeb5aa63518e8b" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::StatefulFirmwareUpdate&lt; Config, MaxChunkSize &gt;::increment_boot_count</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>increment_boot_count</name>
+        <qualifiedname>umidi::protocol::StatefulFirmwareUpdate::increment_boot_count</qualifiedname>
+        <briefdescription>
+<para>Increment boot counter (call at boot start) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="504" column="10" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="504" bodyend="507"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_stateful_firmware_update_1ab2b746c821850da43bdc72c0a209c2f7" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>StateManager &amp;</type>
+        <definition>StateManager &amp; umidi::protocol::StatefulFirmwareUpdate&lt; Config, MaxChunkSize &gt;::state_manager</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>state_manager</name>
+        <qualifiedname>umidi::protocol::StatefulFirmwareUpdate::state_manager</qualifiedname>
+        <briefdescription>
+<para>Get state manager reference. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="510" column="18" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="510" bodyend="510"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_stateful_firmware_update_1afcc2f6e5efe4042b39c1f48c1b4cc849" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="classumidi_1_1protocol_1_1_secure_firmware_update" kindref="compound">SecureFirmwareUpdate</ref>&lt; Config, MaxChunkSize &gt; &amp;</type>
+        <definition>SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt; &amp; umidi::protocol::StatefulFirmwareUpdate&lt; Config, MaxChunkSize &gt;::firmware_update</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>firmware_update</name>
+        <qualifiedname>umidi::protocol::StatefulFirmwareUpdate::firmware_update</qualifiedname>
+        <briefdescription>
+<para>Get firmware update handler reference. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="513" column="26" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="513" bodyend="515"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_stateful_firmware_update_1a400b476b2abe87d06a85b09702afc7d3" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>BootVerification &amp;</type>
+        <definition>BootVerification &amp; umidi::protocol::StatefulFirmwareUpdate&lt; Config, MaxChunkSize &gt;::boot_verification</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>boot_verification</name>
+        <qualifiedname>umidi::protocol::StatefulFirmwareUpdate::boot_verification</qualifiedname>
+        <briefdescription>
+<para>Get boot verification reference. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="518" column="22" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="518" bodyend="518"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="private-func">
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_stateful_firmware_update_1a5077a6da8a5a2a79ae277a63f0ef234f" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::StatefulFirmwareUpdate&lt; Config, MaxChunkSize &gt;::handle_resume</definition>
+        <argsstring>(const ParsedMessage &amp;msg, uint32_t, SendFn send_fn)</argsstring>
+        <name>handle_resume</name>
+        <qualifiedname>umidi::protocol::StatefulFirmwareUpdate::handle_resume</qualifiedname>
+        <param>
+          <type>const <ref refid="structumidi_1_1protocol_1_1_parsed_message" kindref="compound">ParsedMessage</ref> &amp;</type>
+          <declname>msg</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="522" column="10" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="522" bodyend="562"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_stateful_firmware_update_1ad1274e3995b4650790df0f0b97041913" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::StatefulFirmwareUpdate&lt; Config, MaxChunkSize &gt;::sync_state</definition>
+        <argsstring>()</argsstring>
+        <name>sync_state</name>
+        <qualifiedname>umidi::protocol::StatefulFirmwareUpdate::sync_state</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_state.hh" line="564" column="10" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="564" bodyend="591"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/umi_state.hh" line="448" column="1" bodyfile="include/umidi/protocol/umi_state.hh" bodystart="448" bodyend="600"/>
+    <listofallmembers>
+      <member refid="classumidi_1_1protocol_1_1_stateful_firmware_update_1a01fa2c60768d5f531c3c8d6ab2e4fbae" prot="private" virt="non-virtual"><scope>umidi::protocol::StatefulFirmwareUpdate</scope><name>boot_verif_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_stateful_firmware_update_1a400b476b2abe87d06a85b09702afc7d3" prot="public" virt="non-virtual"><scope>umidi::protocol::StatefulFirmwareUpdate</scope><name>boot_verification</name></member>
+      <member refid="classumidi_1_1protocol_1_1_stateful_firmware_update_1afcc2f6e5efe4042b39c1f48c1b4cc849" prot="public" virt="non-virtual"><scope>umidi::protocol::StatefulFirmwareUpdate</scope><name>firmware_update</name></member>
+      <member refid="classumidi_1_1protocol_1_1_stateful_firmware_update_1a06b0af2c8e005b359b6aabdd7541fbae" prot="private" virt="non-virtual"><scope>umidi::protocol::StatefulFirmwareUpdate</scope><name>fw_update_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_stateful_firmware_update_1a5077a6da8a5a2a79ae277a63f0ef234f" prot="private" virt="non-virtual"><scope>umidi::protocol::StatefulFirmwareUpdate</scope><name>handle_resume</name></member>
+      <member refid="classumidi_1_1protocol_1_1_stateful_firmware_update_1ac5253e14eb55a964e4eeb5aa63518e8b" prot="public" virt="non-virtual"><scope>umidi::protocol::StatefulFirmwareUpdate</scope><name>increment_boot_count</name></member>
+      <member refid="classumidi_1_1protocol_1_1_stateful_firmware_update_1a712e1e98c765d8e9e02f1bb1754f98ad" prot="public" virt="non-virtual"><scope>umidi::protocol::StatefulFirmwareUpdate</scope><name>init</name></member>
+      <member refid="classumidi_1_1protocol_1_1_stateful_firmware_update_1a9fb8bb0ba543bc0cb66e0b7272d3dc93" prot="public" virt="non-virtual"><scope>umidi::protocol::StatefulFirmwareUpdate</scope><name>mark_boot_success</name></member>
+      <member refid="classumidi_1_1protocol_1_1_stateful_firmware_update_1a05097225fa2e8f59e7c467daeab41eb0" prot="public" virt="non-virtual"><scope>umidi::protocol::StatefulFirmwareUpdate</scope><name>process</name></member>
+      <member refid="classumidi_1_1protocol_1_1_stateful_firmware_update_1a1178a036e6e125fb8750f244f1fa07f8" prot="private" virt="non-virtual"><scope>umidi::protocol::StatefulFirmwareUpdate</scope><name>resume_chunk_size_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_stateful_firmware_update_1a53a9251946519b65985dfc6aaa8fc6f5" prot="private" virt="non-virtual"><scope>umidi::protocol::StatefulFirmwareUpdate</scope><name>resume_fw_hash_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_stateful_firmware_update_1ad19c2a7da0ec70aef0bcb109c987d2be" prot="public" virt="non-virtual"><scope>umidi::protocol::StatefulFirmwareUpdate</scope><name>should_rollback</name></member>
+      <member refid="classumidi_1_1protocol_1_1_stateful_firmware_update_1aa0893887a3d0e63733aed0820b9ccaae" prot="private" virt="non-virtual"><scope>umidi::protocol::StatefulFirmwareUpdate</scope><name>state_handler_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_stateful_firmware_update_1ab2b746c821850da43bdc72c0a209c2f7" prot="public" virt="non-virtual"><scope>umidi::protocol::StatefulFirmwareUpdate</scope><name>state_manager</name></member>
+      <member refid="classumidi_1_1protocol_1_1_stateful_firmware_update_1a796ca488136d935164e74f1f4840bf0e" prot="private" virt="non-virtual"><scope>umidi::protocol::StatefulFirmwareUpdate</scope><name>state_mgr_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_stateful_firmware_update_1ad1274e3995b4650790df0f0b97041913" prot="private" virt="non-virtual"><scope>umidi::protocol::StatefulFirmwareUpdate</scope><name>sync_state</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

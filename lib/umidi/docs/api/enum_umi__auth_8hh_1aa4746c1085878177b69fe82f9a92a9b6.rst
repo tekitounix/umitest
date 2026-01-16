@@ -1,0 +1,14 @@
+.. _exhale_enum_umi__auth_8hh_1aa4746c1085878177b69fe82f9a92a9b6:
+
+Enum AuthState
+==============
+
+- Defined in :ref:`file_include_umidi_protocol_umi_auth.hh`
+
+
+Enum Documentation
+------------------
+
+
+.. doxygenenum:: umidi::protocol::AuthState
+   :project: umidi

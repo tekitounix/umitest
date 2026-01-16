@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="dir_4fe82f8ccc97a71fa0933ad17bba611d" kind="dir">
+    <compoundname>include/umidi/core</compoundname>
+    <innerfile refid="parser_8hh">parser.hh</innerfile>
+    <innerfile refid="result_8hh">result.hh</innerfile>
+    <innerfile refid="sysex__buffer_8hh">sysex_buffer.hh</innerfile>
+    <innerfile refid="ump_8hh">ump.hh</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/core/"/>
+  </compounddef>
+</doxygen>

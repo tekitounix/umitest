@@ -1,0 +1,115 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="classumidi_1_1_serializer" kind="class" language="C++" prot="public">
+    <compoundname>umidi::Serializer</compoundname>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="classumidi_1_1_serializer_1a0eec05f98052c599a74ec360ce496d69" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>size_t</type>
+        <definition>static constexpr size_t umidi::Serializer::serialize</definition>
+        <argsstring>(const UMP32 &amp;ump, uint8_t *out) noexcept</argsstring>
+        <name>serialize</name>
+        <qualifiedname>umidi::Serializer::serialize</qualifiedname>
+        <param>
+          <type>const <ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref> &amp;</type>
+          <declname>ump</declname>
+        </param>
+        <param>
+          <type>uint8_t *</type>
+          <declname>out</declname>
+        </param>
+        <briefdescription>
+<para>Serialize <ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref> to MIDI 1.0 bytes. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>ump</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input UMP </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>out</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Output buffer (must be at least 3 bytes) </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>Number of bytes written (0, 1, 2, or 3) </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/parser.hh" line="197" column="30" bodyfile="include/umidi/core/parser.hh" bodystart="197" bodyend="232"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1_serializer_1a386dc3c7c511fdbd55ffa273abd5f88d" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>size_t</type>
+        <definition>static constexpr size_t umidi::Serializer::serialize_running</definition>
+        <argsstring>(const UMP32 &amp;ump, uint8_t *out, uint8_t &amp;running_status) noexcept</argsstring>
+        <name>serialize_running</name>
+        <qualifiedname>umidi::Serializer::serialize_running</qualifiedname>
+        <param>
+          <type>const <ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref> &amp;</type>
+          <declname>ump</declname>
+        </param>
+        <param>
+          <type>uint8_t *</type>
+          <declname>out</declname>
+        </param>
+        <param>
+          <type>uint8_t &amp;</type>
+          <declname>running_status</declname>
+        </param>
+        <briefdescription>
+<para>Serialize with running status optimization. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>ump</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input UMP </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>out</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Output buffer (must be at least 3 bytes) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>running_status</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Current running status (updated on output) </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>Number of bytes written </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/parser.hh" line="239" column="30" bodyfile="include/umidi/core/parser.hh" bodystart="239" bodyend="272"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/core/parser.hh" line="191" column="1" bodyfile="include/umidi/core/parser.hh" bodystart="191" bodyend="273"/>
+    <listofallmembers>
+      <member refid="classumidi_1_1_serializer_1a0eec05f98052c599a74ec360ce496d69" prot="public" virt="non-virtual"><scope>umidi::Serializer</scope><name>serialize</name></member>
+      <member refid="classumidi_1_1_serializer_1a386dc3c7c511fdbd55ffa273abd5f88d" prot="public" virt="non-virtual"><scope>umidi::Serializer</scope><name>serialize_running</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

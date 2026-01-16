@@ -1,0 +1,133 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1message_1_1_active_sensing" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::message::ActiveSensing</compoundname>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structumidi_1_1message_1_1_active_sensing_1a9dacca3dd9c5b85bfbbf1ee776be6671" prot="public" static="no" mutable="no">
+        <type><ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref></type>
+        <definition>UMP32 umidi::message::ActiveSensing::ump</definition>
+        <argsstring></argsstring>
+        <name>ump</name>
+        <qualifiedname>umidi::message::ActiveSensing::ump</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/system.hh" line="85" column="11" bodyfile="include/umidi/messages/system.hh" bodystart="85" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-attrib">
+      <memberdef kind="variable" id="structumidi_1_1message_1_1_active_sensing_1a5e1926712d8726c0834f35f2cbe4de79" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::message::ActiveSensing::STATUS</definition>
+        <argsstring></argsstring>
+        <name>STATUS</name>
+        <qualifiedname>umidi::message::ActiveSensing::STATUS</qualifiedname>
+        <initializer>= 0xFE</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/system.hh" line="87" column="30" bodyfile="include/umidi/messages/system.hh" bodystart="87" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="structumidi_1_1message_1_1_active_sensing_1a89cfe6a8549120a5668b8c19a4d8f62b" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::message::ActiveSensing::group</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>group</name>
+        <qualifiedname>umidi::message::ActiveSensing::group</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/system.hh" line="89" column="24" bodyfile="include/umidi/messages/system.hh" bodystart="89" bodyend="89"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_active_sensing_1a66cb245f8d91a79394c7823f9a77b85a" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::message::ActiveSensing::is_valid</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>is_valid</name>
+        <qualifiedname>umidi::message::ActiveSensing::is_valid</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/system.hh" line="90" column="21" bodyfile="include/umidi/messages/system.hh" bodystart="90" bodyend="92"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="structumidi_1_1message_1_1_active_sensing_1a98a15a93be28b25bb3906855c192f950" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>ActiveSensing</type>
+        <definition>static constexpr ActiveSensing umidi::message::ActiveSensing::create</definition>
+        <argsstring>(uint8_t group=0) noexcept</argsstring>
+        <name>create</name>
+        <qualifiedname>umidi::message::ActiveSensing::create</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>group</declname>
+          <defval>0</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/system.hh" line="94" column="37" bodyfile="include/umidi/messages/system.hh" bodystart="94" bodyend="96"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_active_sensing_1a4b86655fae20d50df8143fd794239f32" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>ActiveSensing</type>
+        <definition>static constexpr ActiveSensing umidi::message::ActiveSensing::from_ump</definition>
+        <argsstring>(UMP32 u) noexcept</argsstring>
+        <name>from_ump</name>
+        <qualifiedname>umidi::message::ActiveSensing::from_ump</qualifiedname>
+        <param>
+          <type><ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref></type>
+          <declname>u</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/system.hh" line="98" column="37" bodyfile="include/umidi/messages/system.hh" bodystart="98" bodyend="98"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="2">
+        <label>umidi::UMP32</label>
+        <link refid="structumidi_1_1_u_m_p32"/>
+      </node>
+      <node id="1">
+        <label>umidi::message::ActiveSensing</label>
+        <childnode refid="2" relation="usage">
+          <edgelabel>ump</edgelabel>
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="include/umidi/messages/system.hh" line="84" column="1" bodyfile="include/umidi/messages/system.hh" bodystart="84" bodyend="99"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1message_1_1_active_sensing_1a98a15a93be28b25bb3906855c192f950" prot="public" virt="non-virtual"><scope>umidi::message::ActiveSensing</scope><name>create</name></member>
+      <member refid="structumidi_1_1message_1_1_active_sensing_1a4b86655fae20d50df8143fd794239f32" prot="public" virt="non-virtual"><scope>umidi::message::ActiveSensing</scope><name>from_ump</name></member>
+      <member refid="structumidi_1_1message_1_1_active_sensing_1a89cfe6a8549120a5668b8c19a4d8f62b" prot="public" virt="non-virtual"><scope>umidi::message::ActiveSensing</scope><name>group</name></member>
+      <member refid="structumidi_1_1message_1_1_active_sensing_1a66cb245f8d91a79394c7823f9a77b85a" prot="public" virt="non-virtual"><scope>umidi::message::ActiveSensing</scope><name>is_valid</name></member>
+      <member refid="structumidi_1_1message_1_1_active_sensing_1a5e1926712d8726c0834f35f2cbe4de79" prot="public" virt="non-virtual"><scope>umidi::message::ActiveSensing</scope><name>STATUS</name></member>
+      <member refid="structumidi_1_1message_1_1_active_sensing_1a9dacca3dd9c5b85bfbbf1ee776be6671" prot="public" virt="non-virtual"><scope>umidi::message::ActiveSensing</scope><name>ump</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

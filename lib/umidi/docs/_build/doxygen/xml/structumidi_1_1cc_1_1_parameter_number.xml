@@ -1,0 +1,148 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1cc_1_1_parameter_number" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::cc::ParameterNumber</compoundname>
+    <innerclass refid="structumidi_1_1cc_1_1_parameter_number_1_1_value" prot="public">umidi::cc::ParameterNumber::Value</innerclass>
+    <templateparamlist>
+      <param>
+        <type>uint16_t</type>
+        <declname>Number</declname>
+        <defname>Number</defname>
+      </param>
+      <param>
+        <type>bool</type>
+        <declname>IsNRPN</declname>
+        <defname>IsNRPN</defname>
+        <defval>false</defval>
+      </param>
+      <param>
+        <type>StringLiteral</type>
+        <declname>Name</declname>
+        <defname>Name</defname>
+        <defval>&quot;&quot;</defval>
+      </param>
+    </templateparamlist>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="structumidi_1_1cc_1_1_parameter_number_1aa61681c078f326c221cac3e6322e11b7" prot="public" static="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint16_t</type>
+        <definition>static constexpr uint16_t umidi::cc::ParameterNumber&lt; Number, IsNRPN, Name &gt;::number</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>number</name>
+        <qualifiedname>umidi::cc::ParameterNumber::number</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="131" column="31" bodyfile="include/umidi/cc/types.hh" bodystart="131" bodyend="131"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1cc_1_1_parameter_number_1ae94b6379a799620321a6a400a7c8a63e" prot="public" static="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>static constexpr uint8_t umidi::cc::ParameterNumber&lt; Number, IsNRPN, Name &gt;::number_msb</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>number_msb</name>
+        <qualifiedname>umidi::cc::ParameterNumber::number_msb</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="132" column="30" bodyfile="include/umidi/cc/types.hh" bodystart="132" bodyend="132"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1cc_1_1_parameter_number_1ab2fc9e73d16f6e2ff206009dcfda5075" prot="public" static="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>static constexpr uint8_t umidi::cc::ParameterNumber&lt; Number, IsNRPN, Name &gt;::number_lsb</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>number_lsb</name>
+        <qualifiedname>umidi::cc::ParameterNumber::number_lsb</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="133" column="30" bodyfile="include/umidi/cc/types.hh" bodystart="133" bodyend="133"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1cc_1_1_parameter_number_1a7d62f507918f2e67a40388871e48170b" prot="public" static="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>static constexpr bool umidi::cc::ParameterNumber&lt; Number, IsNRPN, Name &gt;::is_nrpn</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>is_nrpn</name>
+        <qualifiedname>umidi::cc::ParameterNumber::is_nrpn</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="134" column="27" bodyfile="include/umidi/cc/types.hh" bodystart="134" bodyend="134"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1cc_1_1_parameter_number_1a83f452914bc8db09114de6269c7ad926" prot="public" static="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>const char *</type>
+        <definition>static constexpr const char * umidi::cc::ParameterNumber&lt; Number, IsNRPN, Name &gt;::name</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>name</name>
+        <qualifiedname>umidi::cc::ParameterNumber::name</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="135" column="33" bodyfile="include/umidi/cc/types.hh" bodystart="135" bodyend="135"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1cc_1_1_parameter_number_1a7eeb34148000eef5e1f0e33e4350acb6" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint16_t</type>
+        <definition>static constexpr uint16_t umidi::cc::ParameterNumber&lt; Number, IsNRPN, Name &gt;::parse</definition>
+        <argsstring>(uint16_t raw_value) noexcept</argsstring>
+        <name>parse</name>
+        <qualifiedname>umidi::cc::ParameterNumber::parse</qualifiedname>
+        <param>
+          <type>uint16_t</type>
+          <declname>raw_value</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="137" column="32" bodyfile="include/umidi/cc/types.hh" bodystart="137" bodyend="139"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1cc_1_1_parameter_number_1a2a6e6491f56c9bfe1484fac2f779fa0e" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Value</type>
+        <definition>static constexpr Value umidi::cc::ParameterNumber&lt; Number, IsNRPN, Name &gt;::format</definition>
+        <argsstring>(uint16_t value) noexcept</argsstring>
+        <name>format</name>
+        <qualifiedname>umidi::cc::ParameterNumber::format</qualifiedname>
+        <param>
+          <type>uint16_t</type>
+          <declname>value</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="146" column="29" bodyfile="include/umidi/cc/types.hh" bodystart="146" bodyend="148"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/cc/types.hh" line="128" column="1" bodyfile="include/umidi/cc/types.hh" bodystart="128" bodyend="149"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1cc_1_1_parameter_number_1a2a6e6491f56c9bfe1484fac2f779fa0e" prot="public" virt="non-virtual"><scope>umidi::cc::ParameterNumber</scope><name>format</name></member>
+      <member refid="structumidi_1_1cc_1_1_parameter_number_1a7d62f507918f2e67a40388871e48170b" prot="public" virt="non-virtual"><scope>umidi::cc::ParameterNumber</scope><name>is_nrpn</name></member>
+      <member refid="structumidi_1_1cc_1_1_parameter_number_1a83f452914bc8db09114de6269c7ad926" prot="public" virt="non-virtual"><scope>umidi::cc::ParameterNumber</scope><name>name</name></member>
+      <member refid="structumidi_1_1cc_1_1_parameter_number_1aa61681c078f326c221cac3e6322e11b7" prot="public" virt="non-virtual"><scope>umidi::cc::ParameterNumber</scope><name>number</name></member>
+      <member refid="structumidi_1_1cc_1_1_parameter_number_1ab2fc9e73d16f6e2ff206009dcfda5075" prot="public" virt="non-virtual"><scope>umidi::cc::ParameterNumber</scope><name>number_lsb</name></member>
+      <member refid="structumidi_1_1cc_1_1_parameter_number_1ae94b6379a799620321a6a400a7c8a63e" prot="public" virt="non-virtual"><scope>umidi::cc::ParameterNumber</scope><name>number_msb</name></member>
+      <member refid="structumidi_1_1cc_1_1_parameter_number_1a7eeb34148000eef5e1f0e33e4350acb6" prot="public" virt="non-virtual"><scope>umidi::cc::ParameterNumber</scope><name>parse</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

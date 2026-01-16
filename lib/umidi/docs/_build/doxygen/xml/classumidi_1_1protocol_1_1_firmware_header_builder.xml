@@ -1,0 +1,315 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="classumidi_1_1protocol_1_1_firmware_header_builder" kind="class" language="C++" prot="public">
+    <compoundname>umidi::protocol::FirmwareHeaderBuilder</compoundname>
+    <includes refid="umi__firmware_8hh" local="no">umi_firmware.hh</includes>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_firmware_header_builder_1a2c2afb5d74b22ba33ca061db02dea3f6" prot="private" static="no" mutable="no">
+        <type><ref refid="structumidi_1_1protocol_1_1_firmware_header" kindref="compound">FirmwareHeader</ref></type>
+        <definition>FirmwareHeader umidi::protocol::FirmwareHeaderBuilder::header_</definition>
+        <argsstring></argsstring>
+        <name>header_</name>
+        <qualifiedname>umidi::protocol::FirmwareHeaderBuilder::header_</qualifiedname>
+        <initializer>{}</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="485" column="20" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="485" bodyend="485"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_firmware_header_builder_1ab4e2e2eee958a1fd03a356b36f03725c" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="classumidi_1_1protocol_1_1_firmware_header_builder" kindref="compound">FirmwareHeaderBuilder</ref> &amp;</type>
+        <definition>FirmwareHeaderBuilder &amp; umidi::protocol::FirmwareHeaderBuilder::version</definition>
+        <argsstring>(uint32_t major, uint32_t minor, uint32_t patch) noexcept</argsstring>
+        <name>version</name>
+        <qualifiedname>umidi::protocol::FirmwareHeaderBuilder::version</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>major</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>minor</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>patch</declname>
+        </param>
+        <briefdescription>
+<para>Initialize with basic info. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="397" column="27" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="397" bodyend="402"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_firmware_header_builder_1a3fe6d14bbb80ee94cfd903708707fb9f" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="classumidi_1_1protocol_1_1_firmware_header_builder" kindref="compound">FirmwareHeaderBuilder</ref> &amp;</type>
+        <definition>FirmwareHeaderBuilder &amp; umidi::protocol::FirmwareHeaderBuilder::build_number</definition>
+        <argsstring>(uint32_t build) noexcept</argsstring>
+        <name>build_number</name>
+        <qualifiedname>umidi::protocol::FirmwareHeaderBuilder::build_number</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>build</declname>
+        </param>
+        <briefdescription>
+<para>Set build number. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="405" column="27" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="405" bodyend="408"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_firmware_header_builder_1a5c7014a67ba69696ceb24c8b9d8a5c20" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="classumidi_1_1protocol_1_1_firmware_header_builder" kindref="compound">FirmwareHeaderBuilder</ref> &amp;</type>
+        <definition>FirmwareHeaderBuilder &amp; umidi::protocol::FirmwareHeaderBuilder::image_size</definition>
+        <argsstring>(uint32_t size) noexcept</argsstring>
+        <name>image_size</name>
+        <qualifiedname>umidi::protocol::FirmwareHeaderBuilder::image_size</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>size</declname>
+        </param>
+        <briefdescription>
+<para>Set firmware size. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="411" column="27" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="411" bodyend="414"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_firmware_header_builder_1af58d18f20d8519c4d2113dcc88140078" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="classumidi_1_1protocol_1_1_firmware_header_builder" kindref="compound">FirmwareHeaderBuilder</ref> &amp;</type>
+        <definition>FirmwareHeaderBuilder &amp; umidi::protocol::FirmwareHeaderBuilder::crc32</definition>
+        <argsstring>(uint32_t crc) noexcept</argsstring>
+        <name>crc32</name>
+        <qualifiedname>umidi::protocol::FirmwareHeaderBuilder::crc32</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>crc</declname>
+        </param>
+        <briefdescription>
+<para>Set CRC32. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="417" column="27" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="417" bodyend="420"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_firmware_header_builder_1aa612f1ee19f9e95fc2e415c55e6cda04" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="classumidi_1_1protocol_1_1_firmware_header_builder" kindref="compound">FirmwareHeaderBuilder</ref> &amp;</type>
+        <definition>FirmwareHeaderBuilder &amp; umidi::protocol::FirmwareHeaderBuilder::load_address</definition>
+        <argsstring>(uint32_t addr) noexcept</argsstring>
+        <name>load_address</name>
+        <qualifiedname>umidi::protocol::FirmwareHeaderBuilder::load_address</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>addr</declname>
+        </param>
+        <briefdescription>
+<para>Set load address. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="423" column="27" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="423" bodyend="426"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_firmware_header_builder_1a60bae4d77a8549dade9eb20820b47a71" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="classumidi_1_1protocol_1_1_firmware_header_builder" kindref="compound">FirmwareHeaderBuilder</ref> &amp;</type>
+        <definition>FirmwareHeaderBuilder &amp; umidi::protocol::FirmwareHeaderBuilder::entry_point</definition>
+        <argsstring>(uint32_t addr) noexcept</argsstring>
+        <name>entry_point</name>
+        <qualifiedname>umidi::protocol::FirmwareHeaderBuilder::entry_point</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>addr</declname>
+        </param>
+        <briefdescription>
+<para>Set entry point. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="429" column="27" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="429" bodyend="432"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_firmware_header_builder_1a710225ff9c3e90a1f6f86bc9c0569d41" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="classumidi_1_1protocol_1_1_firmware_header_builder" kindref="compound">FirmwareHeaderBuilder</ref> &amp;</type>
+        <definition>FirmwareHeaderBuilder &amp; umidi::protocol::FirmwareHeaderBuilder::board</definition>
+        <argsstring>(const char *board_id) noexcept</argsstring>
+        <name>board</name>
+        <qualifiedname>umidi::protocol::FirmwareHeaderBuilder::board</qualifiedname>
+        <param>
+          <type>const char *</type>
+          <declname>board_id</declname>
+        </param>
+        <briefdescription>
+<para>Set target board. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="435" column="27" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="435" bodyend="439"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_firmware_header_builder_1a29603b14cefc6eea9a6a79c96860fbe5" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="classumidi_1_1protocol_1_1_firmware_header_builder" kindref="compound">FirmwareHeaderBuilder</ref> &amp;</type>
+        <definition>FirmwareHeaderBuilder &amp; umidi::protocol::FirmwareHeaderBuilder::hash</definition>
+        <argsstring>(const uint8_t *hash) noexcept</argsstring>
+        <name>hash</name>
+        <qualifiedname>umidi::protocol::FirmwareHeaderBuilder::hash</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>hash</declname>
+        </param>
+        <briefdescription>
+<para>Set firmware hash. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="442" column="27" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="442" bodyend="445"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_firmware_header_builder_1abb0709b8bb59e0a226af39e6e9d201fe" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="classumidi_1_1protocol_1_1_firmware_header_builder" kindref="compound">FirmwareHeaderBuilder</ref> &amp;</type>
+        <definition>FirmwareHeaderBuilder &amp; umidi::protocol::FirmwareHeaderBuilder::min_bootloader</definition>
+        <argsstring>(uint32_t version) noexcept</argsstring>
+        <name>min_bootloader</name>
+        <qualifiedname>umidi::protocol::FirmwareHeaderBuilder::min_bootloader</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>version</declname>
+        </param>
+        <briefdescription>
+<para>Set minimum bootloader version. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="448" column="27" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="448" bodyend="451"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_firmware_header_builder_1a099627262fe3010c0e2efdad485ccd8b" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="classumidi_1_1protocol_1_1_firmware_header_builder" kindref="compound">FirmwareHeaderBuilder</ref> &amp;</type>
+        <definition>FirmwareHeaderBuilder &amp; umidi::protocol::FirmwareHeaderBuilder::rollback_version</definition>
+        <argsstring>(uint32_t version) noexcept</argsstring>
+        <name>rollback_version</name>
+        <qualifiedname>umidi::protocol::FirmwareHeaderBuilder::rollback_version</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>version</declname>
+        </param>
+        <briefdescription>
+<para>Set anti-rollback version. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="454" column="27" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="454" bodyend="457"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_firmware_header_builder_1ac1991a3c99924eba09655ce7082300d9" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="classumidi_1_1protocol_1_1_firmware_header_builder" kindref="compound">FirmwareHeaderBuilder</ref> &amp;</type>
+        <definition>FirmwareHeaderBuilder &amp; umidi::protocol::FirmwareHeaderBuilder::timestamp</definition>
+        <argsstring>(uint32_t ts) noexcept</argsstring>
+        <name>timestamp</name>
+        <qualifiedname>umidi::protocol::FirmwareHeaderBuilder::timestamp</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>ts</declname>
+        </param>
+        <briefdescription>
+<para>Set build timestamp. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="460" column="27" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="460" bodyend="463"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_firmware_header_builder_1a6dec0cc6a4a71b16a28d53786bb7e8f7" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="classumidi_1_1protocol_1_1_firmware_header_builder" kindref="compound">FirmwareHeaderBuilder</ref> &amp;</type>
+        <definition>FirmwareHeaderBuilder &amp; umidi::protocol::FirmwareHeaderBuilder::flags</definition>
+        <argsstring>(FirmwareFlags f) noexcept</argsstring>
+        <name>flags</name>
+        <qualifiedname>umidi::protocol::FirmwareHeaderBuilder::flags</qualifiedname>
+        <param>
+          <type>FirmwareFlags</type>
+          <declname>f</declname>
+        </param>
+        <briefdescription>
+<para>Set flags. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="466" column="27" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="466" bodyend="469"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_firmware_header_builder_1a8c0a8ec13256e1f55c894070f1720b24" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="classumidi_1_1protocol_1_1_firmware_header_builder" kindref="compound">FirmwareHeaderBuilder</ref> &amp;</type>
+        <definition>FirmwareHeaderBuilder &amp; umidi::protocol::FirmwareHeaderBuilder::signed_firmware</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>signed_firmware</name>
+        <qualifiedname>umidi::protocol::FirmwareHeaderBuilder::signed_firmware</qualifiedname>
+        <briefdescription>
+<para>Mark as signed. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="472" column="27" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="472" bodyend="475"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_firmware_header_builder_1a4d346967e86f76cf147836e5c6573379" prot="public" static="no" nodiscard="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="structumidi_1_1protocol_1_1_firmware_header" kindref="compound">FirmwareHeader</ref></type>
+        <definition>FirmwareHeader umidi::protocol::FirmwareHeaderBuilder::build</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>build</name>
+        <qualifiedname>umidi::protocol::FirmwareHeaderBuilder::build</qualifiedname>
+        <briefdescription>
+<para>Build the header. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_firmware.hh" line="478" column="21" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="478" bodyend="482"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Helper class to build firmware headers. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/umi_firmware.hh" line="394" column="1" bodyfile="include/umidi/protocol/umi_firmware.hh" bodystart="394" bodyend="486"/>
+    <listofallmembers>
+      <member refid="classumidi_1_1protocol_1_1_firmware_header_builder_1a710225ff9c3e90a1f6f86bc9c0569d41" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeaderBuilder</scope><name>board</name></member>
+      <member refid="classumidi_1_1protocol_1_1_firmware_header_builder_1a4d346967e86f76cf147836e5c6573379" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeaderBuilder</scope><name>build</name></member>
+      <member refid="classumidi_1_1protocol_1_1_firmware_header_builder_1a3fe6d14bbb80ee94cfd903708707fb9f" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeaderBuilder</scope><name>build_number</name></member>
+      <member refid="classumidi_1_1protocol_1_1_firmware_header_builder_1af58d18f20d8519c4d2113dcc88140078" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeaderBuilder</scope><name>crc32</name></member>
+      <member refid="classumidi_1_1protocol_1_1_firmware_header_builder_1a60bae4d77a8549dade9eb20820b47a71" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeaderBuilder</scope><name>entry_point</name></member>
+      <member refid="classumidi_1_1protocol_1_1_firmware_header_builder_1a6dec0cc6a4a71b16a28d53786bb7e8f7" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeaderBuilder</scope><name>flags</name></member>
+      <member refid="classumidi_1_1protocol_1_1_firmware_header_builder_1a29603b14cefc6eea9a6a79c96860fbe5" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeaderBuilder</scope><name>hash</name></member>
+      <member refid="classumidi_1_1protocol_1_1_firmware_header_builder_1a2c2afb5d74b22ba33ca061db02dea3f6" prot="private" virt="non-virtual"><scope>umidi::protocol::FirmwareHeaderBuilder</scope><name>header_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_firmware_header_builder_1a5c7014a67ba69696ceb24c8b9d8a5c20" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeaderBuilder</scope><name>image_size</name></member>
+      <member refid="classumidi_1_1protocol_1_1_firmware_header_builder_1aa612f1ee19f9e95fc2e415c55e6cda04" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeaderBuilder</scope><name>load_address</name></member>
+      <member refid="classumidi_1_1protocol_1_1_firmware_header_builder_1abb0709b8bb59e0a226af39e6e9d201fe" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeaderBuilder</scope><name>min_bootloader</name></member>
+      <member refid="classumidi_1_1protocol_1_1_firmware_header_builder_1a099627262fe3010c0e2efdad485ccd8b" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeaderBuilder</scope><name>rollback_version</name></member>
+      <member refid="classumidi_1_1protocol_1_1_firmware_header_builder_1a8c0a8ec13256e1f55c894070f1720b24" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeaderBuilder</scope><name>signed_firmware</name></member>
+      <member refid="classumidi_1_1protocol_1_1_firmware_header_builder_1ac1991a3c99924eba09655ce7082300d9" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeaderBuilder</scope><name>timestamp</name></member>
+      <member refid="classumidi_1_1protocol_1_1_firmware_header_builder_1ab4e2e2eee958a1fd03a356b36f03725c" prot="public" virt="non-virtual"><scope>umidi::protocol::FirmwareHeaderBuilder</scope><name>version</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

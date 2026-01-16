@@ -1,0 +1,94 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1codec_1_1message__traits_3_01message_1_1_timing_clock_01_4" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::codec::message_traits&lt; message::TimingClock &gt;</compoundname>
+    <templateparamlist>
+    </templateparamlist>
+    <sectiondef kind="public-static-attrib">
+      <memberdef kind="variable" id="structumidi_1_1codec_1_1message__traits_3_01message_1_1_timing_clock_01_4_1aa00431025814e86ee2877c80525e6ba5" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>bool</type>
+        <definition>bool umidi::codec::message_traits&lt; message::TimingClock &gt;::is_system</definition>
+        <argsstring></argsstring>
+        <name>is_system</name>
+        <qualifiedname>umidi::codec::message_traits&lt; message::TimingClock &gt;::is_system</qualifiedname>
+        <initializer>= true</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="61" column="27" bodyfile="include/umidi/codec/decoder.hh" bodystart="61" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1codec_1_1message__traits_3_01message_1_1_timing_clock_01_4_1a6e97c9e927482162d6867a572daac167" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::codec::message_traits&lt; message::TimingClock &gt;::status</definition>
+        <argsstring></argsstring>
+        <name>status</name>
+        <qualifiedname>umidi::codec::message_traits&lt; message::TimingClock &gt;::status</qualifiedname>
+        <initializer>= 0xF8</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="62" column="30" bodyfile="include/umidi/codec/decoder.hh" bodystart="62" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1codec_1_1message__traits_1abd2a82cf6f0fef5191e5e07744b2d996" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>bool</type>
+        <definition>bool umidi::codec::message_traits&lt; message::TimingClock &gt;::is_channel_voice</definition>
+        <argsstring></argsstring>
+        <name>is_channel_voice</name>
+        <qualifiedname>umidi::codec::message_traits&lt; message::TimingClock &gt;::is_channel_voice</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="23" column="27" bodyfile="include/umidi/codec/decoder.hh" bodystart="23" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1codec_1_1message__traits_1ad50096368cf9dc914a8281b64ae88047" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>bool</type>
+        <definition>bool umidi::codec::message_traits&lt; message::TimingClock &gt;::is_sysex</definition>
+        <argsstring></argsstring>
+        <name>is_sysex</name>
+        <qualifiedname>umidi::codec::message_traits&lt; message::TimingClock &gt;::is_sysex</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="25" column="27" bodyfile="include/umidi/codec/decoder.hh" bodystart="25" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1codec_1_1message__traits_1ab4f6749fc6143a6527edd8c68a9dc5ef" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>bool</type>
+        <definition>bool umidi::codec::message_traits&lt; message::TimingClock &gt;::is_utility</definition>
+        <argsstring></argsstring>
+        <name>is_utility</name>
+        <qualifiedname>umidi::codec::message_traits&lt; message::TimingClock &gt;::is_utility</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="26" column="27" bodyfile="include/umidi/codec/decoder.hh" bodystart="26" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/codec/decoder.hh" line="60" column="11" bodyfile="include/umidi/codec/decoder.hh" bodystart="60" bodyend="63"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1codec_1_1message__traits_1abd2a82cf6f0fef5191e5e07744b2d996" prot="public" virt="non-virtual"><scope>umidi::codec::message_traits&lt; message::TimingClock &gt;</scope><name>is_channel_voice</name></member>
+      <member refid="structumidi_1_1codec_1_1message__traits_1ad50096368cf9dc914a8281b64ae88047" prot="public" virt="non-virtual"><scope>umidi::codec::message_traits&lt; message::TimingClock &gt;</scope><name>is_sysex</name></member>
+      <member refid="structumidi_1_1codec_1_1message__traits_3_01message_1_1_timing_clock_01_4_1aa00431025814e86ee2877c80525e6ba5" prot="public" virt="non-virtual"><scope>umidi::codec::message_traits&lt; message::TimingClock &gt;</scope><name>is_system</name></member>
+      <member refid="structumidi_1_1codec_1_1message__traits_1ab4f6749fc6143a6527edd8c68a9dc5ef" prot="public" virt="non-virtual"><scope>umidi::codec::message_traits&lt; message::TimingClock &gt;</scope><name>is_utility</name></member>
+      <member refid="structumidi_1_1codec_1_1message__traits_3_01message_1_1_timing_clock_01_4_1a6e97c9e927482162d6867a572daac167" prot="public" virt="non-virtual"><scope>umidi::codec::message_traits&lt; message::TimingClock &gt;</scope><name>status</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

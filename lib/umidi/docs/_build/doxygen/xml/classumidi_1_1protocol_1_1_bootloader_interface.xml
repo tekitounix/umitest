@@ -1,0 +1,514 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="classumidi_1_1protocol_1_1_bootloader_interface" kind="class" language="C++" prot="public">
+    <compoundname>umidi::protocol::BootloaderInterface</compoundname>
+    <includes refid="umi__bootloader_8hh" local="no">umi_bootloader.hh</includes>
+    <templateparamlist>
+      <param>
+        <type>const <ref refid="structumidi_1_1protocol_1_1_platform_config" kindref="compound">PlatformConfig</ref> *</type>
+        <declname>Config</declname>
+        <defname>Config</defname>
+      </param>
+    </templateparamlist>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_bootloader_interface_1afdee25ffcfcb1e9edd3172add79d4085" prot="private" static="no" mutable="no">
+        <type>const <ref refid="structumidi_1_1protocol_1_1_flash_interface" kindref="compound">FlashInterface</ref> *</type>
+        <definition>const FlashInterface* umidi::protocol::BootloaderInterface&lt; Config &gt;::flash_</definition>
+        <argsstring></argsstring>
+        <name>flash_</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::flash_</qualifiedname>
+        <initializer>= nullptr</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="544" column="26" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="544" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_bootloader_interface_1a000c8dc904be48bba7c69209a2bbee77" prot="private" static="no" mutable="no">
+        <type><ref refid="structumidi_1_1protocol_1_1_boot_config" kindref="compound">BootConfig</ref></type>
+        <definition>BootConfig umidi::protocol::BootloaderInterface&lt; Config &gt;::config_</definition>
+        <argsstring></argsstring>
+        <name>config_</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::config_</qualifiedname>
+        <initializer>{}</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="545" column="16" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="545" bodyend="545"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1a409c2ad34d3620e7ddc59359a5745655" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::BootloaderInterface&lt; Config &gt;::init</definition>
+        <argsstring>(const FlashInterface &amp;flash) noexcept</argsstring>
+        <name>init</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::init</qualifiedname>
+        <param>
+          <type>const <ref refid="structumidi_1_1protocol_1_1_flash_interface" kindref="compound">FlashInterface</ref> &amp;</type>
+          <declname>flash</declname>
+        </param>
+        <briefdescription>
+<para>Initialize with flash interface. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="294" column="10" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="294" bodyend="297"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1a0331529d87ca341f152f9237a10097ec" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::BootloaderInterface&lt; Config &gt;::load_config</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>load_config</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::load_config</qualifiedname>
+        <briefdescription>
+<para>Load boot configuration from flash. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="300" column="10" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="300" bodyend="319"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1a68693ab218b5da17e8678738d269bc07" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::BootloaderInterface&lt; Config &gt;::save_config</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>save_config</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::save_config</qualifiedname>
+        <briefdescription>
+<para>Save boot configuration to flash. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="322" column="10" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="322" bodyend="343"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1a7c8f0969fdc61583be4c5f6f5800ca8b" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Slot</type>
+        <definition>Slot umidi::protocol::BootloaderInterface&lt; Config &gt;::active_slot</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>active_slot</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::active_slot</qualifiedname>
+        <briefdescription>
+<para>Get active slot. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="346" column="11" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="346" bodyend="348"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1aadd3d3b0d5e75366d398f1381ba2b7f1" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Slot</type>
+        <definition>Slot umidi::protocol::BootloaderInterface&lt; Config &gt;::inactive_slot</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>inactive_slot</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::inactive_slot</qualifiedname>
+        <briefdescription>
+<para>Get inactive slot. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="351" column="11" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="351" bodyend="353"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1ae3f759da852d437d8ef2528707931dbe" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>SlotState</type>
+        <definition>SlotState umidi::protocol::BootloaderInterface&lt; Config &gt;::slot_state</definition>
+        <argsstring>(Slot slot) const noexcept</argsstring>
+        <name>slot_state</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::slot_state</qualifiedname>
+        <param>
+          <type>Slot</type>
+          <declname>slot</declname>
+        </param>
+        <briefdescription>
+<para>Get slot state. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="356" column="16" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="356" bodyend="358"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1a24037f831726aeca4d173f7841afa810" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>const <ref refid="structumidi_1_1protocol_1_1_flash_region" kindref="compound">FlashRegion</ref> &amp;</type>
+        <definition>const FlashRegion &amp; umidi::protocol::BootloaderInterface&lt; Config &gt;::slot_region</definition>
+        <argsstring>(Slot slot) const noexcept</argsstring>
+        <name>slot_region</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::slot_region</qualifiedname>
+        <param>
+          <type>Slot</type>
+          <declname>slot</declname>
+        </param>
+        <briefdescription>
+<para>Get slot flash region. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="361" column="24" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="361" bodyend="363"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1ad9d72dbeb1b1b8283ff37b59cd98f7dd" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Slot</type>
+        <definition>Slot umidi::protocol::BootloaderInterface&lt; Config &gt;::update_target</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>update_target</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::update_target</qualifiedname>
+        <briefdescription>
+<para>Get update target slot (inactive slot) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="366" column="11" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="366" bodyend="368"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1aa5a75538c10bc002aecaadfc64dd6410" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::BootloaderInterface&lt; Config &gt;::update_target_address</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>update_target_address</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::update_target_address</qualifiedname>
+        <briefdescription>
+<para>Get update target address. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="371" column="15" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="371" bodyend="373"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1a250ad6c76b853dc1ba50ec9d3924ccdb" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::BootloaderInterface&lt; Config &gt;::max_firmware_size</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>max_firmware_size</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::max_firmware_size</qualifiedname>
+        <briefdescription>
+<para>Get maximum firmware size. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="376" column="15" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="376" bodyend="378"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1ab27e1ccb78fd116f6f7f19b61805023b" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>FlashResult</type>
+        <definition>FlashResult umidi::protocol::BootloaderInterface&lt; Config &gt;::prepare_slot</definition>
+        <argsstring>(Slot slot) noexcept</argsstring>
+        <name>prepare_slot</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::prepare_slot</qualifiedname>
+        <param>
+          <type>Slot</type>
+          <declname>slot</declname>
+        </param>
+        <briefdescription>
+<para>Prepare slot for writing (erase) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="381" column="17" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="381" bodyend="392"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1a8d796831fa202fec08e03d873f343f62" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>FlashResult</type>
+        <definition>FlashResult umidi::protocol::BootloaderInterface&lt; Config &gt;::write_firmware</definition>
+        <argsstring>(Slot slot, uint32_t offset, const uint8_t *data, size_t size) noexcept</argsstring>
+        <name>write_firmware</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::write_firmware</qualifiedname>
+        <param>
+          <type>Slot</type>
+          <declname>slot</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>offset</declname>
+        </param>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>size</declname>
+        </param>
+        <briefdescription>
+<para>Write firmware data to slot. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="395" column="17" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="395" bodyend="415"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1a0e31ee974a277be59e252b351d5d923d" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::BootloaderInterface&lt; Config &gt;::mark_slot_valid</definition>
+        <argsstring>(Slot slot, uint32_t version, uint32_t crc) noexcept</argsstring>
+        <name>mark_slot_valid</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::mark_slot_valid</qualifiedname>
+        <param>
+          <type>Slot</type>
+          <declname>slot</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>version</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>crc</declname>
+        </param>
+        <briefdescription>
+<para>Mark slot as valid after successful verification. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="418" column="10" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="418" bodyend="427"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1ae736a11b5e041799ecc5dcc094e48bc8" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::BootloaderInterface&lt; Config &gt;::mark_slot_pending</definition>
+        <argsstring>(Slot slot) noexcept</argsstring>
+        <name>mark_slot_pending</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::mark_slot_pending</qualifiedname>
+        <param>
+          <type>Slot</type>
+          <declname>slot</declname>
+        </param>
+        <briefdescription>
+<para>Set slot as pending (update received but not committed) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="430" column="10" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="430" bodyend="432"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1a40d89fbfd5198accb698c38eddaad288" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::BootloaderInterface&lt; Config &gt;::commit_update</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>commit_update</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::commit_update</qualifiedname>
+        <briefdescription>
+<para>Commit update (switch active slot) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="435" column="10" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="435" bodyend="450"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1adfcf2423226e88f881fe3c7b99610978" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::BootloaderInterface&lt; Config &gt;::mark_boot_successful</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>mark_boot_successful</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::mark_boot_successful</qualifiedname>
+        <briefdescription>
+<para>Mark current boot as successful Call this from application after successful startup. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="454" column="10" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="454" bodyend="462"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1a352c49a533c76ee64f20e92b2cfb01d9" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::BootloaderInterface&lt; Config &gt;::increment_boot_count</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>increment_boot_count</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::increment_boot_count</qualifiedname>
+        <briefdescription>
+<para>Increment boot count (called by bootloader on each boot) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="465" column="10" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="465" bodyend="480"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1aeda6fd97eec2f3cffb5c116c826e0d7c" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::BootloaderInterface&lt; Config &gt;::rollback</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>rollback</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::rollback</qualifiedname>
+        <briefdescription>
+<para>Manual rollback to previous slot. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="483" column="10" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="483" bodyend="492"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1a1db5f5a442f22c1cd7179f6359e0700b" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::BootloaderInterface&lt; Config &gt;::rollback_available</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>rollback_available</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::rollback_available</qualifiedname>
+        <briefdescription>
+<para>Check if rollback is available. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="495" column="11" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="495" bodyend="497"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1aff89c059dbe87ac29b09759e77474599" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>const <ref refid="structumidi_1_1protocol_1_1_boot_config" kindref="compound">BootConfig</ref> &amp;</type>
+        <definition>const BootConfig &amp; umidi::protocol::BootloaderInterface&lt; Config &gt;::config</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>config</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::config</qualifiedname>
+        <briefdescription>
+<para>Get boot configuration (read-only) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="500" column="23" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="500" bodyend="502"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1ae74a7667bfe7f284006acaf0a0f2d3d2" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>const <ref refid="structumidi_1_1protocol_1_1_platform_config" kindref="compound">PlatformConfig</ref> &amp;</type>
+        <definition>static constexpr const PlatformConfig &amp; umidi::protocol::BootloaderInterface&lt; Config &gt;::platform</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>platform</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::platform</qualifiedname>
+        <briefdescription>
+<para>Get platform configuration. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="505" column="44" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="505" bodyend="507"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="private-func">
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1a6c540118b6a0bd95eb04b72ff3275c25" prot="private" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::BootloaderInterface&lt; Config &gt;::init_default_config</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>init_default_config</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::init_default_config</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="510" column="10" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="510" bodyend="520"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1a174a7983d9d1f0349380deca5fd375d6" prot="private" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::BootloaderInterface&lt; Config &gt;::set_slot_state</definition>
+        <argsstring>(Slot slot, SlotState state) noexcept</argsstring>
+        <name>set_slot_state</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::set_slot_state</qualifiedname>
+        <param>
+          <type>Slot</type>
+          <declname>slot</declname>
+        </param>
+        <param>
+          <type>SlotState</type>
+          <declname>state</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="522" column="10" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="522" bodyend="528"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1a30c8ebe309fbaf09ee33314cbf087c85" prot="private" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::BootloaderInterface&lt; Config &gt;::calculate_config_checksum</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>calculate_config_checksum</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::calculate_config_checksum</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="530" column="15" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="530" bodyend="538"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_bootloader_interface_1ac3930a601c193da4957cb581bdc9b3b9" prot="private" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::BootloaderInterface&lt; Config &gt;::verify_config_checksum</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>verify_config_checksum</name>
+        <qualifiedname>umidi::protocol::BootloaderInterface::verify_config_checksum</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="540" column="11" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="540" bodyend="542"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Bootloader controller Manages A/B partition switching and boot configuration. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/umi_bootloader.hh" line="291" column="1" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="291" bodyend="546"/>
+    <listofallmembers>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1a7c8f0969fdc61583be4c5f6f5800ca8b" prot="public" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>active_slot</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1a30c8ebe309fbaf09ee33314cbf087c85" prot="private" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>calculate_config_checksum</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1a40d89fbfd5198accb698c38eddaad288" prot="public" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>commit_update</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1aff89c059dbe87ac29b09759e77474599" prot="public" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>config</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1a000c8dc904be48bba7c69209a2bbee77" prot="private" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>config_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1afdee25ffcfcb1e9edd3172add79d4085" prot="private" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>flash_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1aadd3d3b0d5e75366d398f1381ba2b7f1" prot="public" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>inactive_slot</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1a352c49a533c76ee64f20e92b2cfb01d9" prot="public" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>increment_boot_count</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1a409c2ad34d3620e7ddc59359a5745655" prot="public" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>init</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1a6c540118b6a0bd95eb04b72ff3275c25" prot="private" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>init_default_config</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1a0331529d87ca341f152f9237a10097ec" prot="public" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>load_config</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1adfcf2423226e88f881fe3c7b99610978" prot="public" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>mark_boot_successful</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1ae736a11b5e041799ecc5dcc094e48bc8" prot="public" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>mark_slot_pending</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1a0e31ee974a277be59e252b351d5d923d" prot="public" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>mark_slot_valid</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1a250ad6c76b853dc1ba50ec9d3924ccdb" prot="public" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>max_firmware_size</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1ae74a7667bfe7f284006acaf0a0f2d3d2" prot="public" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>platform</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1ab27e1ccb78fd116f6f7f19b61805023b" prot="public" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>prepare_slot</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1aeda6fd97eec2f3cffb5c116c826e0d7c" prot="public" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>rollback</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1a1db5f5a442f22c1cd7179f6359e0700b" prot="public" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>rollback_available</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1a68693ab218b5da17e8678738d269bc07" prot="public" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>save_config</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1a174a7983d9d1f0349380deca5fd375d6" prot="private" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>set_slot_state</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1a24037f831726aeca4d173f7841afa810" prot="public" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>slot_region</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1ae3f759da852d437d8ef2528707931dbe" prot="public" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>slot_state</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1ad9d72dbeb1b1b8283ff37b59cd98f7dd" prot="public" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>update_target</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1aa5a75538c10bc002aecaadfc64dd6410" prot="public" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>update_target_address</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1ac3930a601c193da4957cb581bdc9b3b9" prot="private" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>verify_config_checksum</name></member>
+      <member refid="classumidi_1_1protocol_1_1_bootloader_interface_1a8d796831fa202fec08e03d873f343f62" prot="public" virt="non-virtual"><scope>umidi::protocol::BootloaderInterface</scope><name>write_firmware</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

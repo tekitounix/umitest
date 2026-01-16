@@ -1,0 +1,906 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="classumidi_1_1protocol_1_1_secure_firmware_update" kind="class" language="C++" prot="public">
+    <compoundname>umidi::protocol::SecureFirmwareUpdate</compoundname>
+    <includes refid="umi__sysex_8hh" local="no">umi_sysex.hh</includes>
+    <templateparamlist>
+      <param>
+        <type>const <ref refid="structumidi_1_1protocol_1_1_platform_config" kindref="compound">PlatformConfig</ref> *</type>
+        <declname>Config</declname>
+        <defname>Config</defname>
+      </param>
+      <param>
+        <type>size_t</type>
+        <declname>MaxChunkSize</declname>
+        <defname>MaxChunkSize</defname>
+        <defval>256</defval>
+      </param>
+    </templateparamlist>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a7e9b54e994f9492b2b69cbec9c91d0b1" prot="private" static="no" mutable="no">
+        <type><ref refid="classumidi_1_1protocol_1_1_bootloader_interface" kindref="compound">BootloaderInterface</ref>&lt; Config &gt;</type>
+        <definition>BootloaderInterface&lt;Config&gt; umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::bootloader_</definition>
+        <argsstring></argsstring>
+        <name>bootloader_</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::bootloader_</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="633" column="25" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="633" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a11ec4e2bcfb2ad544de08489c215b031" prot="private" static="no" mutable="no">
+        <type><ref refid="classumidi_1_1protocol_1_1_firmware_validator" kindref="compound">FirmwareValidator</ref>&lt; 16 &gt;</type>
+        <definition>FirmwareValidator&lt;16&gt; umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::validator_</definition>
+        <argsstring></argsstring>
+        <name>validator_</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::validator_</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="634" column="23" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="634" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_secure_firmware_update_1ada16af23a63fab9973ff758e4858346d" prot="private" static="no" mutable="no">
+        <type><ref refid="classumidi_1_1protocol_1_1_authenticator" kindref="compound">Authenticator</ref>&lt; 32, 300000 &gt;</type>
+        <definition>Authenticator&lt;32, 300000&gt; umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::auth_</definition>
+        <argsstring></argsstring>
+        <name>auth_</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::auth_</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="635" column="19" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="635" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_secure_firmware_update_1ae17dfb8d5cfb109546b77d4ab8f5bbfb" prot="private" static="no" mutable="no">
+        <type><ref refid="classumidi_1_1protocol_1_1_firmware_update_session_with_progress" kindref="compound">FirmwareUpdateSessionWithProgress</ref>&lt; 4 &gt;</type>
+        <definition>FirmwareUpdateSessionWithProgress&lt;4&gt; umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::session_</definition>
+        <argsstring></argsstring>
+        <name>session_</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::session_</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="636" column="39" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="636" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a056bae91ac0c6bb0c879d2fc22e3ae33" prot="private" static="no" mutable="no">
+        <type>const <ref refid="structumidi_1_1protocol_1_1_flash_interface" kindref="compound">FlashInterface</ref> *</type>
+        <definition>const FlashInterface* umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::flash_</definition>
+        <argsstring></argsstring>
+        <name>flash_</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::flash_</qualifiedname>
+        <initializer>= nullptr</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="637" column="26" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="637" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a5cdd720d53163e62127ccccf628a063a" prot="private" static="no" mutable="no">
+        <type>HmacSha256Fn</type>
+        <definition>HmacSha256Fn umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::hmac_fn_</definition>
+        <argsstring></argsstring>
+        <name>hmac_fn_</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::hmac_fn_</qualifiedname>
+        <initializer>= nullptr</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="638" column="18" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="638" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a0b3e516aa98763cd91913d03dd7646f1" prot="private" static="no" mutable="no">
+        <type>RandomFn</type>
+        <definition>RandomFn umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::rng_fn_</definition>
+        <argsstring></argsstring>
+        <name>rng_fn_</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::rng_fn_</qualifiedname>
+        <initializer>= nullptr</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="639" column="14" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="639" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a13a05f23411c6bd3f278c93c8fb0083c" prot="private" static="no" mutable="no">
+        <type><ref refid="umi__sysex_8hh_1a39d24180dcd046c170749a2d896a4324" kindref="member">UpdateState</ref></type>
+        <definition>UpdateState umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::state_</definition>
+        <argsstring></argsstring>
+        <name>state_</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::state_</qualifiedname>
+        <initializer>= <ref refid="umi__sysex_8hh_1a39d24180dcd046c170749a2d896a4324aa5daf7f2ebbba4975d61dab1c40188c7" kindref="member">UpdateState::IDLE</ref></initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="640" column="17" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="640" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a7f027d5aa6eaf8af3cabb23657437c19" prot="private" static="no" mutable="no">
+        <type>Slot</type>
+        <definition>Slot umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::target_slot_</definition>
+        <argsstring></argsstring>
+        <name>target_slot_</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::target_slot_</qualifiedname>
+        <initializer>= Slot::SLOT_A</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="641" column="10" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="641" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a150c7eece8831fdfc60d4dfb963768f5" prot="private" static="no" mutable="no">
+        <type><ref refid="structumidi_1_1protocol_1_1_firmware_header" kindref="compound">FirmwareHeader</ref></type>
+        <definition>FirmwareHeader umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::pending_header_</definition>
+        <argsstring></argsstring>
+        <name>pending_header_</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::pending_header_</qualifiedname>
+        <initializer>{}</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="642" column="20" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="642" bodyend="642"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a0d75cb0d965786e40448779ace36fc3b" prot="private" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::write_offset_</definition>
+        <argsstring></argsstring>
+        <name>write_offset_</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::write_offset_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="643" column="14" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="643" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a79fd1f4bf5bbc011dfcf5e2468e45012" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::require_auth_</definition>
+        <argsstring></argsstring>
+        <name>require_auth_</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::require_auth_</qualifiedname>
+        <initializer>= false</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="644" column="10" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="644" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a3092707a2ed7d93083d586d397e12472" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::reboot_requested_</definition>
+        <argsstring></argsstring>
+        <name>reboot_requested_</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::reboot_requested_</qualifiedname>
+        <initializer>= false</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="645" column="10" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="645" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a1abcec6dc8b1d15b21a1f81b368cec2e" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::init</definition>
+        <argsstring>(const FlashInterface &amp;flash, const uint8_t *public_key=nullptr, const uint8_t *shared_secret=nullptr) noexcept</argsstring>
+        <name>init</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::init</qualifiedname>
+        <param>
+          <type>const <ref refid="structumidi_1_1protocol_1_1_flash_interface" kindref="compound">FlashInterface</ref> &amp;</type>
+          <declname>flash</declname>
+        </param>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>public_key</declname>
+          <defval>nullptr</defval>
+        </param>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>shared_secret</declname>
+          <defval>nullptr</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="281" column="10" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="281" bodyend="297"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a3ac6bbc5317ff887ffdd416564114afe" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::set_crypto</definition>
+        <argsstring>(HmacSha256Fn hmac, RandomFn rng, Ed25519VerifyFn ed25519_verify, Sha256Fn sha256) noexcept</argsstring>
+        <name>set_crypto</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::set_crypto</qualifiedname>
+        <param>
+          <type>HmacSha256Fn</type>
+          <declname>hmac</declname>
+        </param>
+        <param>
+          <type>RandomFn</type>
+          <declname>rng</declname>
+        </param>
+        <param>
+          <type>Ed25519VerifyFn</type>
+          <declname>ed25519_verify</declname>
+        </param>
+        <param>
+          <type>Sha256Fn</type>
+          <declname>sha256</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="299" column="10" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="299" bodyend="304"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a95b0ef97cfd52327a407b0dece79af72" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::process</definition>
+        <argsstring>(const uint8_t *data, size_t len, uint32_t current_time, SendFn send_fn)</argsstring>
+        <name>process</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::process</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>current_time</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="307" column="10" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="307" bodyend="330"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a5821cfc19fbf88453ea44eb125b308ac" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="umi__sysex_8hh_1a39d24180dcd046c170749a2d896a4324" kindref="member">UpdateState</ref></type>
+        <definition>UpdateState umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::state</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>state</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::state</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="332" column="18" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="332" bodyend="332"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a70bd5c95b7a3c3b1875d87051b6d9c60" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>float</type>
+        <definition>float umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::progress</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>progress</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::progress</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="333" column="12" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="333" bodyend="333"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a05d917311455e510573b43cd9fb7fe9c" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::rollback_available</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>rollback_available</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::rollback_available</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="334" column="11" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="334" bodyend="336"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a39eac2d5653a4b4e91796413fd4f68d5" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::reboot_requested</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>reboot_requested</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::reboot_requested</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="337" column="11" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="337" bodyend="337"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a80b4f49503ac4ff7ea7dfaf276aaa8ad" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::clear_reboot_request</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>clear_reboot_request</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::clear_reboot_request</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="338" column="10" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="338" bodyend="338"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1ad8ea958bcce0848658e05dd08a32a8a4" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="classumidi_1_1protocol_1_1_bootloader_interface" kindref="compound">BootloaderInterface</ref>&lt; Config &gt; &amp;</type>
+        <definition>BootloaderInterface&lt; Config &gt; &amp; umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::bootloader</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>bootloader</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::bootloader</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="340" column="25" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="340" bodyend="340"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1ad1b99699a8859a77e122341dfbf2b30c" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="classumidi_1_1protocol_1_1_firmware_validator" kindref="compound">FirmwareValidator</ref>&lt; 16 &gt; &amp;</type>
+        <definition>FirmwareValidator&lt; 16 &gt; &amp; umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::validator</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>validator</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::validator</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="341" column="23" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="341" bodyend="341"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a1ab4073df6edffac6e0be726919b34f0" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="classumidi_1_1protocol_1_1_authenticator" kindref="compound">Authenticator</ref>&lt; 32, 300000 &gt; &amp;</type>
+        <definition>Authenticator&lt; 32, 300000 &gt; &amp; umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::authenticator</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>authenticator</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::authenticator</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="342" column="19" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="342" bodyend="342"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="private-func">
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a0607e360afbe88cafedf0f0f06a9c592" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::handle_auth_command</definition>
+        <argsstring>(const ParsedMessage &amp;msg, uint32_t current_time, SendFn send_fn)</argsstring>
+        <name>handle_auth_command</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::handle_auth_command</qualifiedname>
+        <param>
+          <type>const <ref refid="structumidi_1_1protocol_1_1_parsed_message" kindref="compound">ParsedMessage</ref> &amp;</type>
+          <declname>msg</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>current_time</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="346" column="10" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="346" bodyend="386"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1afcba8780b3b365622674c167960399c0" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::handle_firmware_command</definition>
+        <argsstring>(const ParsedMessage &amp;msg, uint32_t current_time, SendFn send_fn)</argsstring>
+        <name>handle_firmware_command</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::handle_firmware_command</qualifiedname>
+        <param>
+          <type>const <ref refid="structumidi_1_1protocol_1_1_parsed_message" kindref="compound">ParsedMessage</ref> &amp;</type>
+          <declname>msg</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>current_time</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="389" column="10" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="389" bodyend="400"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a94ed5259a67dc18a13a2e943d8172ba7" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::handle_fw_query</definition>
+        <argsstring>(const ParsedMessage &amp;msg, SendFn send_fn)</argsstring>
+        <name>handle_fw_query</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::handle_fw_query</qualifiedname>
+        <param>
+          <type>const <ref refid="structumidi_1_1protocol_1_1_parsed_message" kindref="compound">ParsedMessage</ref> &amp;</type>
+          <declname>msg</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="403" column="10" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="403" bodyend="415"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a2323bb5e42aff7eb9ea890009cf82f00" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::handle_fw_begin</definition>
+        <argsstring>(const ParsedMessage &amp;msg, uint32_t current_time, SendFn send_fn)</argsstring>
+        <name>handle_fw_begin</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::handle_fw_begin</qualifiedname>
+        <param>
+          <type>const <ref refid="structumidi_1_1protocol_1_1_parsed_message" kindref="compound">ParsedMessage</ref> &amp;</type>
+          <declname>msg</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>current_time</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="418" column="10" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="418" bodyend="460"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1af18d6afa606be79ed54ab57ccd910bcc" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::handle_fw_data</definition>
+        <argsstring>(const ParsedMessage &amp;msg, uint32_t current_time, SendFn send_fn)</argsstring>
+        <name>handle_fw_data</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::handle_fw_data</qualifiedname>
+        <param>
+          <type>const <ref refid="structumidi_1_1protocol_1_1_parsed_message" kindref="compound">ParsedMessage</ref> &amp;</type>
+          <declname>msg</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>current_time</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="463" column="10" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="463" bodyend="496"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a234712645b541254ef771b217f4d12b4" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::handle_fw_verify</definition>
+        <argsstring>(const ParsedMessage &amp;msg, SendFn send_fn)</argsstring>
+        <name>handle_fw_verify</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::handle_fw_verify</qualifiedname>
+        <param>
+          <type>const <ref refid="structumidi_1_1protocol_1_1_parsed_message" kindref="compound">ParsedMessage</ref> &amp;</type>
+          <declname>msg</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="499" column="10" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="499" bodyend="530"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a0841208b2a7707442c68cb91caa27ab5" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::handle_fw_commit</definition>
+        <argsstring>(const ParsedMessage &amp;msg, SendFn send_fn)</argsstring>
+        <name>handle_fw_commit</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::handle_fw_commit</qualifiedname>
+        <param>
+          <type>const <ref refid="structumidi_1_1protocol_1_1_parsed_message" kindref="compound">ParsedMessage</ref> &amp;</type>
+          <declname>msg</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="533" column="10" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="533" bodyend="553"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1ac9b5d1fffb685f055fb8a53f6dc56091" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::handle_fw_rollback</definition>
+        <argsstring>(const ParsedMessage &amp;msg, SendFn send_fn)</argsstring>
+        <name>handle_fw_rollback</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::handle_fw_rollback</qualifiedname>
+        <param>
+          <type>const <ref refid="structumidi_1_1protocol_1_1_parsed_message" kindref="compound">ParsedMessage</ref> &amp;</type>
+          <declname>msg</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="556" column="10" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="556" bodyend="567"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1aa3f6526d50cd67a9dfa09f76d823e022" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::handle_fw_reboot</definition>
+        <argsstring>(const ParsedMessage &amp;msg, SendFn send_fn)</argsstring>
+        <name>handle_fw_reboot</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::handle_fw_reboot</qualifiedname>
+        <param>
+          <type>const <ref refid="structumidi_1_1protocol_1_1_parsed_message" kindref="compound">ParsedMessage</ref> &amp;</type>
+          <declname>msg</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="570" column="10" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="570" bodyend="574"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a168309d0fedabda99996968dee307475" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::abort_update</definition>
+        <argsstring>(SendFn send_fn)</argsstring>
+        <name>abort_update</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::abort_update</qualifiedname>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="577" column="10" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="577" bodyend="584"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a4ead8a29d97b844ee346b1a0a582b81b" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::send_ack</definition>
+        <argsstring>(uint8_t seq, SendFn send_fn)</argsstring>
+        <name>send_ack</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::send_ack</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>seq</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="587" column="10" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="587" bodyend="591"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a07ed593cfd921c02e4e5673192a20864" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::send_nack</definition>
+        <argsstring>(uint8_t seq, ErrorCode err, SendFn send_fn)</argsstring>
+        <name>send_nack</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::send_nack</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>seq</declname>
+        </param>
+        <param>
+          <type><ref refid="commands_8hh_1a535223bf911d0f4570ff0c7fb31530d9" kindref="member">ErrorCode</ref></type>
+          <declname>err</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="594" column="10" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="594" bodyend="599"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a036a1d52002b37ce4c7332c410e55444" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::send_auth_ok</definition>
+        <argsstring>(uint8_t seq, SendFn send_fn)</argsstring>
+        <name>send_auth_ok</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::send_auth_ok</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>seq</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="602" column="10" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="602" bodyend="606"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1ab554af8b7d396809b1559cd8eb462175" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::send_auth_fail</definition>
+        <argsstring>(uint8_t seq, AuthError err, SendFn send_fn)</argsstring>
+        <name>send_auth_fail</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::send_auth_fail</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>seq</declname>
+        </param>
+        <param>
+          <type>AuthError</type>
+          <declname>err</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="609" column="10" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="609" bodyend="614"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="private-static-func">
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1a5445a263a659723d528546c2af66ce1d" prot="private" static="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>static bool umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::is_firmware_command</definition>
+        <argsstring>(Command cmd) noexcept</argsstring>
+        <name>is_firmware_command</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::is_firmware_command</qualifiedname>
+        <param>
+          <type><ref refid="commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8" kindref="member">Command</ref></type>
+          <declname>cmd</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="616" column="17" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="616" bodyend="619"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_secure_firmware_update_1adf890080c9152bc1cbf75d68ea1f31db" prot="private" static="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="commands_8hh_1a535223bf911d0f4570ff0c7fb31530d9" kindref="member">ErrorCode</ref></type>
+        <definition>static ErrorCode umidi::protocol::SecureFirmwareUpdate&lt; Config, MaxChunkSize &gt;::validation_to_error</definition>
+        <argsstring>(ValidationResult result) noexcept</argsstring>
+        <name>validation_to_error</name>
+        <qualifiedname>umidi::protocol::SecureFirmwareUpdate::validation_to_error</qualifiedname>
+        <param>
+          <type>ValidationResult</type>
+          <declname>result</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="621" column="22" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="621" bodyend="631"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Secure firmware update with authentication and A/B partitioning. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/umi_sysex.hh" line="279" column="1" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="279" bodyend="646"/>
+    <listofallmembers>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a168309d0fedabda99996968dee307475" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>abort_update</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1ada16af23a63fab9973ff758e4858346d" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>auth_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a1ab4073df6edffac6e0be726919b34f0" prot="public" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>authenticator</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1ad8ea958bcce0848658e05dd08a32a8a4" prot="public" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>bootloader</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a7e9b54e994f9492b2b69cbec9c91d0b1" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>bootloader_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a80b4f49503ac4ff7ea7dfaf276aaa8ad" prot="public" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>clear_reboot_request</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a056bae91ac0c6bb0c879d2fc22e3ae33" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>flash_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a0607e360afbe88cafedf0f0f06a9c592" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>handle_auth_command</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1afcba8780b3b365622674c167960399c0" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>handle_firmware_command</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a2323bb5e42aff7eb9ea890009cf82f00" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>handle_fw_begin</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a0841208b2a7707442c68cb91caa27ab5" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>handle_fw_commit</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1af18d6afa606be79ed54ab57ccd910bcc" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>handle_fw_data</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a94ed5259a67dc18a13a2e943d8172ba7" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>handle_fw_query</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1aa3f6526d50cd67a9dfa09f76d823e022" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>handle_fw_reboot</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1ac9b5d1fffb685f055fb8a53f6dc56091" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>handle_fw_rollback</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a234712645b541254ef771b217f4d12b4" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>handle_fw_verify</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a5cdd720d53163e62127ccccf628a063a" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>hmac_fn_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a1abcec6dc8b1d15b21a1f81b368cec2e" prot="public" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>init</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a5445a263a659723d528546c2af66ce1d" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>is_firmware_command</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a150c7eece8831fdfc60d4dfb963768f5" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>pending_header_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a95b0ef97cfd52327a407b0dece79af72" prot="public" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>process</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a70bd5c95b7a3c3b1875d87051b6d9c60" prot="public" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>progress</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a39eac2d5653a4b4e91796413fd4f68d5" prot="public" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>reboot_requested</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a3092707a2ed7d93083d586d397e12472" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>reboot_requested_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a79fd1f4bf5bbc011dfcf5e2468e45012" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>require_auth_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a0b3e516aa98763cd91913d03dd7646f1" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>rng_fn_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a05d917311455e510573b43cd9fb7fe9c" prot="public" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>rollback_available</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a4ead8a29d97b844ee346b1a0a582b81b" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>send_ack</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1ab554af8b7d396809b1559cd8eb462175" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>send_auth_fail</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a036a1d52002b37ce4c7332c410e55444" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>send_auth_ok</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a07ed593cfd921c02e4e5673192a20864" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>send_nack</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1ae17dfb8d5cfb109546b77d4ab8f5bbfb" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>session_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a3ac6bbc5317ff887ffdd416564114afe" prot="public" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>set_crypto</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a5821cfc19fbf88453ea44eb125b308ac" prot="public" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>state</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a13a05f23411c6bd3f278c93c8fb0083c" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>state_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a7f027d5aa6eaf8af3cabb23657437c19" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>target_slot_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1adf890080c9152bc1cbf75d68ea1f31db" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>validation_to_error</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1ad1b99699a8859a77e122341dfbf2b30c" prot="public" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>validator</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a11ec4e2bcfb2ad544de08489c215b031" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>validator_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_secure_firmware_update_1a0d75cb0d965786e40448779ace36fc3b" prot="private" virt="non-virtual"><scope>umidi::protocol::SecureFirmwareUpdate</scope><name>write_offset_</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

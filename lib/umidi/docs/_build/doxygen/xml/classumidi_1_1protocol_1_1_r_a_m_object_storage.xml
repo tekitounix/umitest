@@ -1,0 +1,321 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="classumidi_1_1protocol_1_1_r_a_m_object_storage" kind="class" language="C++" prot="public">
+    <compoundname>umidi::protocol::RAMObjectStorage</compoundname>
+    <basecompoundref prot="public" virt="non-virtual">umidi::protocol::ObjectStorage</basecompoundref>
+    <innerclass refid="structumidi_1_1protocol_1_1_r_a_m_object_storage_1_1_slot" prot="private">umidi::protocol::RAMObjectStorage::Slot</innerclass>
+    <templateparamlist>
+      <param>
+        <type>size_t</type>
+        <declname>MaxObjects</declname>
+        <defname>MaxObjects</defname>
+        <defval>16</defval>
+      </param>
+      <param>
+        <type>size_t</type>
+        <declname>MaxDataSize</declname>
+        <defname>MaxDataSize</defname>
+        <defval>65536</defval>
+      </param>
+    </templateparamlist>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_r_a_m_object_storage_1a2ae0580fb77241a3bc686263b66b7ba8" prot="private" static="no" mutable="no">
+        <type>Slot</type>
+        <definition>Slot umidi::protocol::RAMObjectStorage&lt; MaxObjects, MaxDataSize &gt;::slots_[MaxObjects]</definition>
+        <argsstring>[MaxObjects]</argsstring>
+        <name>slots_</name>
+        <qualifiedname>umidi::protocol::RAMObjectStorage::slots_</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="466" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="466" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_r_a_m_object_storage_1a805b1f752b849953c933e4b5f7e86077" prot="private" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::RAMObjectStorage&lt; MaxObjects, MaxDataSize &gt;::next_id_</definition>
+        <argsstring></argsstring>
+        <name>next_id_</name>
+        <qualifiedname>umidi::protocol::RAMObjectStorage::next_id_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="467" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="467" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_r_a_m_object_storage_1a328e5ecf087424d89f9206677a420865" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>umidi::protocol::RAMObjectStorage&lt; MaxObjects, MaxDataSize &gt;::RAMObjectStorage</definition>
+        <argsstring>()</argsstring>
+        <name>RAMObjectStorage</name>
+        <qualifiedname>umidi::protocol::RAMObjectStorage::RAMObjectStorage</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="327" column="5" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="327" bodyend="331"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_r_a_m_object_storage_1a41a244791e35a0e38d4e39c99e4deb02" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t umidi::protocol::RAMObjectStorage&lt; MaxObjects, MaxDataSize &gt;::list</definition>
+        <argsstring>(ObjectType type, ObjectHeader *out, size_t max_count) override</argsstring>
+        <name>list</name>
+        <qualifiedname>umidi::protocol::RAMObjectStorage::list</qualifiedname>
+        <param>
+          <type>ObjectType</type>
+          <declname>type</declname>
+        </param>
+        <param>
+          <type>ObjectHeader *</type>
+          <declname>out</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>max_count</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="333" column="12" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="333" bodyend="344"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_r_a_m_object_storage_1abe2231b631fb0851359ff8e4e31106b0" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::RAMObjectStorage&lt; MaxObjects, MaxDataSize &gt;::get_header</definition>
+        <argsstring>(uint32_t id, ObjectHeader &amp;out) override</argsstring>
+        <name>get_header</name>
+        <qualifiedname>umidi::protocol::RAMObjectStorage::get_header</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>id</declname>
+        </param>
+        <param>
+          <type>ObjectHeader &amp;</type>
+          <declname>out</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="346" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="346" bodyend="354"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_r_a_m_object_storage_1a5cf2061fae0a18447e7ffbf1184e7d80" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t umidi::protocol::RAMObjectStorage&lt; MaxObjects, MaxDataSize &gt;::read_data</definition>
+        <argsstring>(uint32_t id, uint32_t offset, uint8_t *out, size_t len) override</argsstring>
+        <name>read_data</name>
+        <qualifiedname>umidi::protocol::RAMObjectStorage::read_data</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>id</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>offset</declname>
+        </param>
+        <param>
+          <type>uint8_t *</type>
+          <declname>out</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="356" column="12" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="356" bodyend="367"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_r_a_m_object_storage_1aebc4da2bf03b975b47aaa756f25e6ae0" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::RAMObjectStorage&lt; MaxObjects, MaxDataSize &gt;::write_begin</definition>
+        <argsstring>(const ObjectHeader &amp;header) override</argsstring>
+        <name>write_begin</name>
+        <qualifiedname>umidi::protocol::RAMObjectStorage::write_begin</qualifiedname>
+        <param>
+          <type>const ObjectHeader &amp;</type>
+          <declname>header</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="369" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="369" bodyend="380"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_r_a_m_object_storage_1a5a17f79fe25c39743fe4b8e1ea9c5765" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::RAMObjectStorage&lt; MaxObjects, MaxDataSize &gt;::write_data</definition>
+        <argsstring>(uint32_t id, uint32_t offset, const uint8_t *data, size_t len) override</argsstring>
+        <name>write_data</name>
+        <qualifiedname>umidi::protocol::RAMObjectStorage::write_data</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>id</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>offset</declname>
+        </param>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="382" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="382" bodyend="394"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_r_a_m_object_storage_1ac6c6a70c41d64f88c9be4fa6349d0011" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::RAMObjectStorage&lt; MaxObjects, MaxDataSize &gt;::write_commit</definition>
+        <argsstring>(uint32_t id) override</argsstring>
+        <name>write_commit</name>
+        <qualifiedname>umidi::protocol::RAMObjectStorage::write_commit</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>id</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="396" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="396" bodyend="405"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_r_a_m_object_storage_1a8a3e46335b5840c3d3228779da7e1a9c" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::RAMObjectStorage&lt; MaxObjects, MaxDataSize &gt;::write_abort</definition>
+        <argsstring>(uint32_t id) override</argsstring>
+        <name>write_abort</name>
+        <qualifiedname>umidi::protocol::RAMObjectStorage::write_abort</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>id</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="407" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="407" bodyend="414"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_r_a_m_object_storage_1ab98b5eef01d65bf0fef59cfeed1a69d1" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::RAMObjectStorage&lt; MaxObjects, MaxDataSize &gt;::remove</definition>
+        <argsstring>(uint32_t id) override</argsstring>
+        <name>remove</name>
+        <qualifiedname>umidi::protocol::RAMObjectStorage::remove</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>id</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="416" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="416" bodyend="424"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_r_a_m_object_storage_1a8b52d45e0df76d3104ed10e5f0f24b66" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::RAMObjectStorage&lt; MaxObjects, MaxDataSize &gt;::rename</definition>
+        <argsstring>(uint32_t id, const char *new_name) override</argsstring>
+        <name>rename</name>
+        <qualifiedname>umidi::protocol::RAMObjectStorage::rename</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>id</declname>
+        </param>
+        <param>
+          <type>const char *</type>
+          <declname>new_name</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="426" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="426" bodyend="434"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_r_a_m_object_storage_1afb0379317e6ff4cd3bf0d11afb22fc06" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>StorageInfo</type>
+        <definition>StorageInfo umidi::protocol::RAMObjectStorage&lt; MaxObjects, MaxDataSize &gt;::get_storage_info</definition>
+        <argsstring>() override</argsstring>
+        <name>get_storage_info</name>
+        <qualifiedname>umidi::protocol::RAMObjectStorage::get_storage_info</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="436" column="17" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="436" bodyend="451"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_r_a_m_object_storage_1a5327316c29a32961995fb5fe4b7aad97" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::RAMObjectStorage&lt; MaxObjects, MaxDataSize &gt;::generate_id</definition>
+        <argsstring>() override</argsstring>
+        <name>generate_id</name>
+        <qualifiedname>umidi::protocol::RAMObjectStorage::generate_id</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="453" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="453" bodyend="455"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/umi_object.hh" line="325" column="1" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="325" bodyend="468"/>
+    <listofallmembers>
+      <member refid="classumidi_1_1protocol_1_1_r_a_m_object_storage_1a5327316c29a32961995fb5fe4b7aad97" prot="public" virt="non-virtual"><scope>umidi::protocol::RAMObjectStorage</scope><name>generate_id</name></member>
+      <member refid="classumidi_1_1protocol_1_1_r_a_m_object_storage_1abe2231b631fb0851359ff8e4e31106b0" prot="public" virt="non-virtual"><scope>umidi::protocol::RAMObjectStorage</scope><name>get_header</name></member>
+      <member refid="classumidi_1_1protocol_1_1_r_a_m_object_storage_1afb0379317e6ff4cd3bf0d11afb22fc06" prot="public" virt="non-virtual"><scope>umidi::protocol::RAMObjectStorage</scope><name>get_storage_info</name></member>
+      <member refid="classumidi_1_1protocol_1_1_r_a_m_object_storage_1a41a244791e35a0e38d4e39c99e4deb02" prot="public" virt="non-virtual"><scope>umidi::protocol::RAMObjectStorage</scope><name>list</name></member>
+      <member refid="classumidi_1_1protocol_1_1_r_a_m_object_storage_1a805b1f752b849953c933e4b5f7e86077" prot="private" virt="non-virtual"><scope>umidi::protocol::RAMObjectStorage</scope><name>next_id_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_r_a_m_object_storage_1a328e5ecf087424d89f9206677a420865" prot="public" virt="non-virtual"><scope>umidi::protocol::RAMObjectStorage</scope><name>RAMObjectStorage</name></member>
+      <member refid="classumidi_1_1protocol_1_1_r_a_m_object_storage_1a5cf2061fae0a18447e7ffbf1184e7d80" prot="public" virt="non-virtual"><scope>umidi::protocol::RAMObjectStorage</scope><name>read_data</name></member>
+      <member refid="classumidi_1_1protocol_1_1_r_a_m_object_storage_1ab98b5eef01d65bf0fef59cfeed1a69d1" prot="public" virt="non-virtual"><scope>umidi::protocol::RAMObjectStorage</scope><name>remove</name></member>
+      <member refid="classumidi_1_1protocol_1_1_r_a_m_object_storage_1a8b52d45e0df76d3104ed10e5f0f24b66" prot="public" virt="non-virtual"><scope>umidi::protocol::RAMObjectStorage</scope><name>rename</name></member>
+      <member refid="classumidi_1_1protocol_1_1_r_a_m_object_storage_1a2ae0580fb77241a3bc686263b66b7ba8" prot="private" virt="non-virtual"><scope>umidi::protocol::RAMObjectStorage</scope><name>slots_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_r_a_m_object_storage_1a8a3e46335b5840c3d3228779da7e1a9c" prot="public" virt="non-virtual"><scope>umidi::protocol::RAMObjectStorage</scope><name>write_abort</name></member>
+      <member refid="classumidi_1_1protocol_1_1_r_a_m_object_storage_1aebc4da2bf03b975b47aaa756f25e6ae0" prot="public" virt="non-virtual"><scope>umidi::protocol::RAMObjectStorage</scope><name>write_begin</name></member>
+      <member refid="classumidi_1_1protocol_1_1_r_a_m_object_storage_1ac6c6a70c41d64f88c9be4fa6349d0011" prot="public" virt="non-virtual"><scope>umidi::protocol::RAMObjectStorage</scope><name>write_commit</name></member>
+      <member refid="classumidi_1_1protocol_1_1_r_a_m_object_storage_1a5a17f79fe25c39743fe4b8e1ea9c5765" prot="public" virt="non-virtual"><scope>umidi::protocol::RAMObjectStorage</scope><name>write_data</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_storage_1a8b749bf8ed516a038e9ce93f7a15305a" prot="public" virt="virtual"><scope>umidi::protocol::RAMObjectStorage</scope><name>~ObjectStorage</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

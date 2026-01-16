@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1cc_1_1is__rpn__type" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::cc::is_rpn_type</compoundname>
+    <basecompoundref prot="public" virt="non-virtual">std::false_type</basecompoundref>
+    <templateparamlist>
+      <param>
+        <type>typename T</type>
+      </param>
+    </templateparamlist>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/cc/types.hh" line="163" column="1" bodyfile="include/umidi/cc/types.hh" bodystart="163" bodyend="163"/>
+    <listofallmembers>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

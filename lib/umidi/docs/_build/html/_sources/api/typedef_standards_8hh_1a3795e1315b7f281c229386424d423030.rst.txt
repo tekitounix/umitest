@@ -1,0 +1,14 @@
+.. _exhale_typedef_standards_8hh_1a3795e1315b7f281c229386424d423030:
+
+Typedef umidi::cc::SoundController5
+===================================
+
+- Defined in :ref:`file_include_umidi_cc_standards.hh`
+
+
+Typedef Documentation
+---------------------
+
+
+.. doxygentypedef:: umidi::cc::SoundController5
+   :project: umidi

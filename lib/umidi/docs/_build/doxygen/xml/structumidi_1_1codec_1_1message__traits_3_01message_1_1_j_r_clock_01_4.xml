@@ -1,0 +1,78 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1codec_1_1message__traits_3_01message_1_1_j_r_clock_01_4" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::codec::message_traits&lt; message::JRClock &gt;</compoundname>
+    <templateparamlist>
+    </templateparamlist>
+    <sectiondef kind="public-static-attrib">
+      <memberdef kind="variable" id="structumidi_1_1codec_1_1message__traits_3_01message_1_1_j_r_clock_01_4_1a403d7b5091601ac75f2c6f71da68fa8b" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>bool</type>
+        <definition>bool umidi::codec::message_traits&lt; message::JRClock &gt;::is_utility</definition>
+        <argsstring></argsstring>
+        <name>is_utility</name>
+        <qualifiedname>umidi::codec::message_traits&lt; message::JRClock &gt;::is_utility</qualifiedname>
+        <initializer>= true</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="82" column="27" bodyfile="include/umidi/codec/decoder.hh" bodystart="82" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1codec_1_1message__traits_1abd2a82cf6f0fef5191e5e07744b2d996" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>bool</type>
+        <definition>bool umidi::codec::message_traits&lt; message::JRClock &gt;::is_channel_voice</definition>
+        <argsstring></argsstring>
+        <name>is_channel_voice</name>
+        <qualifiedname>umidi::codec::message_traits&lt; message::JRClock &gt;::is_channel_voice</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="23" column="27" bodyfile="include/umidi/codec/decoder.hh" bodystart="23" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1codec_1_1message__traits_1ab7df1f5fce4fa2d2b079928ad956bd3b" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>bool</type>
+        <definition>bool umidi::codec::message_traits&lt; message::JRClock &gt;::is_system</definition>
+        <argsstring></argsstring>
+        <name>is_system</name>
+        <qualifiedname>umidi::codec::message_traits&lt; message::JRClock &gt;::is_system</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="24" column="27" bodyfile="include/umidi/codec/decoder.hh" bodystart="24" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1codec_1_1message__traits_1ad50096368cf9dc914a8281b64ae88047" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>bool</type>
+        <definition>bool umidi::codec::message_traits&lt; message::JRClock &gt;::is_sysex</definition>
+        <argsstring></argsstring>
+        <name>is_sysex</name>
+        <qualifiedname>umidi::codec::message_traits&lt; message::JRClock &gt;::is_sysex</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="25" column="27" bodyfile="include/umidi/codec/decoder.hh" bodystart="25" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/codec/decoder.hh" line="81" column="11" bodyfile="include/umidi/codec/decoder.hh" bodystart="81" bodyend="83"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1codec_1_1message__traits_1abd2a82cf6f0fef5191e5e07744b2d996" prot="public" virt="non-virtual"><scope>umidi::codec::message_traits&lt; message::JRClock &gt;</scope><name>is_channel_voice</name></member>
+      <member refid="structumidi_1_1codec_1_1message__traits_1ad50096368cf9dc914a8281b64ae88047" prot="public" virt="non-virtual"><scope>umidi::codec::message_traits&lt; message::JRClock &gt;</scope><name>is_sysex</name></member>
+      <member refid="structumidi_1_1codec_1_1message__traits_1ab7df1f5fce4fa2d2b079928ad956bd3b" prot="public" virt="non-virtual"><scope>umidi::codec::message_traits&lt; message::JRClock &gt;</scope><name>is_system</name></member>
+      <member refid="structumidi_1_1codec_1_1message__traits_3_01message_1_1_j_r_clock_01_4_1a403d7b5091601ac75f2c6f71da68fa8b" prot="public" virt="non-virtual"><scope>umidi::codec::message_traits&lt; message::JRClock &gt;</scope><name>is_utility</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

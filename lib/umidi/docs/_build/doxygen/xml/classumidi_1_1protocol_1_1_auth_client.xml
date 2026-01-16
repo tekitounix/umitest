@@ -1,0 +1,161 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="classumidi_1_1protocol_1_1_auth_client" kind="class" language="C++" prot="public">
+    <compoundname>umidi::protocol::AuthClient</compoundname>
+    <includes refid="umi__auth_8hh" local="no">umi_auth.hh</includes>
+    <templateparamlist>
+      <param>
+        <type>size_t</type>
+        <declname>KeySize</declname>
+        <defname>KeySize</defname>
+        <defval>32</defval>
+      </param>
+    </templateparamlist>
+    <sectiondef kind="public-static-attrib">
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_auth_client_1ad395e5b5122f7f886f08a2882596f589" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>size_t</type>
+        <definition>size_t umidi::protocol::AuthClient&lt; KeySize &gt;::CHALLENGE_SIZE</definition>
+        <argsstring></argsstring>
+        <name>CHALLENGE_SIZE</name>
+        <qualifiedname>umidi::protocol::AuthClient::CHALLENGE_SIZE</qualifiedname>
+        <initializer>= 32</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_auth.hh" line="227" column="29" bodyfile="include/umidi/protocol/umi_auth.hh" bodystart="227" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_auth_client_1a7c733a26c25339034e59056892d5db15" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>size_t</type>
+        <definition>size_t umidi::protocol::AuthClient&lt; KeySize &gt;::RESPONSE_SIZE</definition>
+        <argsstring></argsstring>
+        <name>RESPONSE_SIZE</name>
+        <qualifiedname>umidi::protocol::AuthClient::RESPONSE_SIZE</qualifiedname>
+        <initializer>= 32</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_auth.hh" line="228" column="29" bodyfile="include/umidi/protocol/umi_auth.hh" bodystart="228" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_auth_client_1a68ff687538e91a9fde590add8347c5c8" prot="private" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::AuthClient&lt; KeySize &gt;::key_[KeySize]</definition>
+        <argsstring>[KeySize]</argsstring>
+        <name>key_</name>
+        <qualifiedname>umidi::protocol::AuthClient::key_</qualifiedname>
+        <initializer>{}</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_auth.hh" line="247" column="13" bodyfile="include/umidi/protocol/umi_auth.hh" bodystart="247" bodyend="247"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_auth_client_1a3a396b8a8f8ffb6ab77d7af7c3ba768f" prot="private" static="no" mutable="no">
+        <type>HmacSha256Fn</type>
+        <definition>HmacSha256Fn umidi::protocol::AuthClient&lt; KeySize &gt;::hmac_fn_</definition>
+        <argsstring></argsstring>
+        <name>hmac_fn_</name>
+        <qualifiedname>umidi::protocol::AuthClient::hmac_fn_</qualifiedname>
+        <initializer>= nullptr</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_auth.hh" line="248" column="18" bodyfile="include/umidi/protocol/umi_auth.hh" bodystart="248" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_auth_client_1a721ea2fe28c93306b1c103d2fc4513c2" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::AuthClient&lt; KeySize &gt;::init</definition>
+        <argsstring>(const uint8_t *key, HmacSha256Fn hmac) noexcept</argsstring>
+        <name>init</name>
+        <qualifiedname>umidi::protocol::AuthClient::init</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>key</declname>
+        </param>
+        <param>
+          <type>HmacSha256Fn</type>
+          <declname>hmac</declname>
+        </param>
+        <briefdescription>
+<para>Initialize with shared secret and HMAC function. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_auth.hh" line="231" column="10" bodyfile="include/umidi/protocol/umi_auth.hh" bodystart="231" bodyend="234"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_auth_client_1ab22abc8795ca884457dcd80fe0525dc6" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::AuthClient&lt; KeySize &gt;::compute_response</definition>
+        <argsstring>(const uint8_t *challenge, uint8_t *response) noexcept</argsstring>
+        <name>compute_response</name>
+        <qualifiedname>umidi::protocol::AuthClient::compute_response</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>challenge</declname>
+        </param>
+        <param>
+          <type>uint8_t *</type>
+          <declname>response</declname>
+        </param>
+        <briefdescription>
+<para>Compute response to challenge. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>challenge</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Challenge from device (CHALLENGE_SIZE bytes) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>response</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Output response buffer (RESPONSE_SIZE bytes) </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>true if response computed successfully </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_auth.hh" line="240" column="10" bodyfile="include/umidi/protocol/umi_auth.hh" bodystart="240" bodyend="244"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Authentication client helper for host side. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/umi_auth.hh" line="225" column="1" bodyfile="include/umidi/protocol/umi_auth.hh" bodystart="225" bodyend="249"/>
+    <listofallmembers>
+      <member refid="classumidi_1_1protocol_1_1_auth_client_1ad395e5b5122f7f886f08a2882596f589" prot="public" virt="non-virtual"><scope>umidi::protocol::AuthClient</scope><name>CHALLENGE_SIZE</name></member>
+      <member refid="classumidi_1_1protocol_1_1_auth_client_1ab22abc8795ca884457dcd80fe0525dc6" prot="public" virt="non-virtual"><scope>umidi::protocol::AuthClient</scope><name>compute_response</name></member>
+      <member refid="classumidi_1_1protocol_1_1_auth_client_1a3a396b8a8f8ffb6ab77d7af7c3ba768f" prot="private" virt="non-virtual"><scope>umidi::protocol::AuthClient</scope><name>hmac_fn_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_auth_client_1a721ea2fe28c93306b1c103d2fc4513c2" prot="public" virt="non-virtual"><scope>umidi::protocol::AuthClient</scope><name>init</name></member>
+      <member refid="classumidi_1_1protocol_1_1_auth_client_1a68ff687538e91a9fde590add8347c5c8" prot="private" virt="non-virtual"><scope>umidi::protocol::AuthClient</scope><name>key_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_auth_client_1a7c733a26c25339034e59056892d5db15" prot="public" virt="non-virtual"><scope>umidi::protocol::AuthClient</scope><name>RESPONSE_SIZE</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

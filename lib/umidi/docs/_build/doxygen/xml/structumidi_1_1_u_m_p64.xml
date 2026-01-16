@@ -1,0 +1,308 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1_u_m_p64" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::UMP64</compoundname>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structumidi_1_1_u_m_p64_1a5d991f9f98ac436ce794dbea040111eb" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::UMP64::word0</definition>
+        <argsstring></argsstring>
+        <name>word0</name>
+        <qualifiedname>umidi::UMP64::word0</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/ump.hh" line="275" column="14" bodyfile="include/umidi/core/ump.hh" bodystart="275" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1_u_m_p64_1a22a158fe2110377ce9fd6775ab728afe" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::UMP64::word1</definition>
+        <argsstring></argsstring>
+        <name>word1</name>
+        <qualifiedname>umidi::UMP64::word1</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/ump.hh" line="276" column="14" bodyfile="include/umidi/core/ump.hh" bodystart="276" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="structumidi_1_1_u_m_p64_1a3663f2cff1b8f69637d6e9a03d60fcb7" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>constexpr</type>
+        <definition>umidi::UMP64::UMP64</definition>
+        <argsstring>() noexcept=default</argsstring>
+        <name>UMP64</name>
+        <qualifiedname>umidi::UMP64::UMP64</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/ump.hh" line="278" column="15"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_u_m_p64_1aa42db44573b928d73609d470ebac114a" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>constexpr</type>
+        <definition>umidi::UMP64::UMP64</definition>
+        <argsstring>(uint32_t w0, uint32_t w1) noexcept</argsstring>
+        <name>UMP64</name>
+        <qualifiedname>umidi::UMP64::UMP64</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>w0</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>w1</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/ump.hh" line="279" column="15" bodyfile="include/umidi/core/ump.hh" bodystart="279" bodyend="279"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_u_m_p64_1a3f80976991f2f1bd49abaa45b84c0c37" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::UMP64::mt</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>mt</name>
+        <qualifiedname>umidi::UMP64::mt</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/ump.hh" line="282" column="24" bodyfile="include/umidi/core/ump.hh" bodystart="282" bodyend="282"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_u_m_p64_1a274137f84a6066bae613e074cf95a5d4" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::UMP64::group</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>group</name>
+        <qualifiedname>umidi::UMP64::group</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/ump.hh" line="283" column="24" bodyfile="include/umidi/core/ump.hh" bodystart="283" bodyend="283"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_u_m_p64_1a38653846131cb9fc35979219510f3b05" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::UMP64::status</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>status</name>
+        <qualifiedname>umidi::UMP64::status</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/ump.hh" line="284" column="24" bodyfile="include/umidi/core/ump.hh" bodystart="284" bodyend="284"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_u_m_p64_1a5e12f8b3b00d5f2401081fad42b8db94" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::UMP64::data1</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>data1</name>
+        <qualifiedname>umidi::UMP64::data1</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/ump.hh" line="285" column="24" bodyfile="include/umidi/core/ump.hh" bodystart="285" bodyend="285"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_u_m_p64_1ab268c98383db90465df67afe4e6caefd" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::UMP64::data2</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>data2</name>
+        <qualifiedname>umidi::UMP64::data2</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/ump.hh" line="286" column="24" bodyfile="include/umidi/core/ump.hh" bodystart="286" bodyend="286"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_u_m_p64_1a1a33f5773f78e64da6f3b1a3b1ec4f82" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::UMP64::sysex_status</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>sysex_status</name>
+        <qualifiedname>umidi::UMP64::sysex_status</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/ump.hh" line="289" column="24" bodyfile="include/umidi/core/ump.hh" bodystart="289" bodyend="289"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_u_m_p64_1af47e5682f74dd0ebe87780fee0c0d56d" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::UMP64::sysex_num_bytes</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>sysex_num_bytes</name>
+        <qualifiedname>umidi::UMP64::sysex_num_bytes</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/ump.hh" line="290" column="24" bodyfile="include/umidi/core/ump.hh" bodystart="290" bodyend="290"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_u_m_p64_1a2f07840e3f01dca511147527717b3e1d" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint16_t</type>
+        <definition>uint16_t umidi::UMP64::data_16_hi</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>data_16_hi</name>
+        <qualifiedname>umidi::UMP64::data_16_hi</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/ump.hh" line="293" column="25" bodyfile="include/umidi/core/ump.hh" bodystart="293" bodyend="293"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_u_m_p64_1a11cd48ec8dd6d33cb1e66f849a6921ec" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint16_t</type>
+        <definition>uint16_t umidi::UMP64::data_16_lo</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>data_16_lo</name>
+        <qualifiedname>umidi::UMP64::data_16_lo</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/ump.hh" line="294" column="25" bodyfile="include/umidi/core/ump.hh" bodystart="294" bodyend="294"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_u_m_p64_1af421aaf1588c2691cbd29ffd042aa0a7" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::UMP64::data_32</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>data_32</name>
+        <qualifiedname>umidi::UMP64::data_32</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/ump.hh" line="297" column="25" bodyfile="include/umidi/core/ump.hh" bodystart="297" bodyend="297"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_u_m_p64_1af8b37f02bc77c9a65183b5a383c0dbfe" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::UMP64::set_mt_group</definition>
+        <argsstring>(uint8_t mt, uint8_t g) noexcept</argsstring>
+        <name>set_mt_group</name>
+        <qualifiedname>umidi::UMP64::set_mt_group</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>mt</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>g</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/ump.hh" line="300" column="20" bodyfile="include/umidi/core/ump.hh" bodystart="300" bodyend="302"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_u_m_p64_1a0d2bc3124f7c66431b6243c594daa994" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::UMP64::set_data_32</definition>
+        <argsstring>(uint32_t d) noexcept</argsstring>
+        <name>set_data_32</name>
+        <qualifiedname>umidi::UMP64::set_data_32</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>d</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/ump.hh" line="304" column="20" bodyfile="include/umidi/core/ump.hh" bodystart="304" bodyend="304"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="structumidi_1_1_u_m_p64_1ae08062335dfb9f20c3a98435d4c8e7ab" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>UMP64</type>
+        <definition>static constexpr UMP64 umidi::UMP64::sysex7_complete</definition>
+        <argsstring>(uint8_t group, const uint8_t *data, uint8_t len) noexcept</argsstring>
+        <name>sysex7_complete</name>
+        <qualifiedname>umidi::UMP64::sysex7_complete</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>group</declname>
+        </param>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>len</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/ump.hh" line="308" column="5" bodyfile="include/umidi/core/ump.hh" bodystart="308" bodyend="322"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/core/ump.hh" line="274" column="1" bodyfile="include/umidi/core/ump.hh" bodystart="274" bodyend="323"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1_u_m_p64_1a5e12f8b3b00d5f2401081fad42b8db94" prot="public" virt="non-virtual"><scope>umidi::UMP64</scope><name>data1</name></member>
+      <member refid="structumidi_1_1_u_m_p64_1ab268c98383db90465df67afe4e6caefd" prot="public" virt="non-virtual"><scope>umidi::UMP64</scope><name>data2</name></member>
+      <member refid="structumidi_1_1_u_m_p64_1a2f07840e3f01dca511147527717b3e1d" prot="public" virt="non-virtual"><scope>umidi::UMP64</scope><name>data_16_hi</name></member>
+      <member refid="structumidi_1_1_u_m_p64_1a11cd48ec8dd6d33cb1e66f849a6921ec" prot="public" virt="non-virtual"><scope>umidi::UMP64</scope><name>data_16_lo</name></member>
+      <member refid="structumidi_1_1_u_m_p64_1af421aaf1588c2691cbd29ffd042aa0a7" prot="public" virt="non-virtual"><scope>umidi::UMP64</scope><name>data_32</name></member>
+      <member refid="structumidi_1_1_u_m_p64_1a274137f84a6066bae613e074cf95a5d4" prot="public" virt="non-virtual"><scope>umidi::UMP64</scope><name>group</name></member>
+      <member refid="structumidi_1_1_u_m_p64_1a3f80976991f2f1bd49abaa45b84c0c37" prot="public" virt="non-virtual"><scope>umidi::UMP64</scope><name>mt</name></member>
+      <member refid="structumidi_1_1_u_m_p64_1a0d2bc3124f7c66431b6243c594daa994" prot="public" virt="non-virtual"><scope>umidi::UMP64</scope><name>set_data_32</name></member>
+      <member refid="structumidi_1_1_u_m_p64_1af8b37f02bc77c9a65183b5a383c0dbfe" prot="public" virt="non-virtual"><scope>umidi::UMP64</scope><name>set_mt_group</name></member>
+      <member refid="structumidi_1_1_u_m_p64_1a38653846131cb9fc35979219510f3b05" prot="public" virt="non-virtual"><scope>umidi::UMP64</scope><name>status</name></member>
+      <member refid="structumidi_1_1_u_m_p64_1ae08062335dfb9f20c3a98435d4c8e7ab" prot="public" virt="non-virtual"><scope>umidi::UMP64</scope><name>sysex7_complete</name></member>
+      <member refid="structumidi_1_1_u_m_p64_1af47e5682f74dd0ebe87780fee0c0d56d" prot="public" virt="non-virtual"><scope>umidi::UMP64</scope><name>sysex_num_bytes</name></member>
+      <member refid="structumidi_1_1_u_m_p64_1a1a33f5773f78e64da6f3b1a3b1ec4f82" prot="public" virt="non-virtual"><scope>umidi::UMP64</scope><name>sysex_status</name></member>
+      <member refid="structumidi_1_1_u_m_p64_1a3663f2cff1b8f69637d6e9a03d60fcb7" prot="public" virt="non-virtual"><scope>umidi::UMP64</scope><name>UMP64</name></member>
+      <member refid="structumidi_1_1_u_m_p64_1aa42db44573b928d73609d470ebac114a" prot="public" virt="non-virtual"><scope>umidi::UMP64</scope><name>UMP64</name></member>
+      <member refid="structumidi_1_1_u_m_p64_1a5d991f9f98ac436ce794dbea040111eb" prot="public" virt="non-virtual"><scope>umidi::UMP64</scope><name>word0</name></member>
+      <member refid="structumidi_1_1_u_m_p64_1a22a158fe2110377ce9fd6775ab728afe" prot="public" virt="non-virtual"><scope>umidi::UMP64</scope><name>word1</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

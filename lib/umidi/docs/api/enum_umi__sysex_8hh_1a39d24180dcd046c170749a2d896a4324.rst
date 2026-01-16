@@ -1,0 +1,14 @@
+.. _exhale_enum_umi__sysex_8hh_1a39d24180dcd046c170749a2d896a4324:
+
+Enum UpdateState
+================
+
+- Defined in :ref:`file_include_umidi_protocol_umi_sysex.hh`
+
+
+Enum Documentation
+------------------
+
+
+.. doxygenenum:: umidi::protocol::UpdateState
+   :project: umidi

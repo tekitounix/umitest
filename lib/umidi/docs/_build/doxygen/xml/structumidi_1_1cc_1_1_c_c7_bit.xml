@@ -1,0 +1,129 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1cc_1_1_c_c7_bit" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::cc::CC7Bit</compoundname>
+    <innerclass refid="structumidi_1_1cc_1_1_c_c7_bit_1_1_state" prot="public">umidi::cc::CC7Bit::State</innerclass>
+    <templateparamlist>
+      <param>
+        <type>uint8_t</type>
+        <declname>CC</declname>
+        <defname>CC</defname>
+      </param>
+      <param>
+        <type>StringLiteral</type>
+        <declname>Name</declname>
+        <defname>Name</defname>
+      </param>
+    </templateparamlist>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="structumidi_1_1cc_1_1_c_c7_bit_1aa31d837940c5b3995676839e65c0fc46" prot="public" static="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>static constexpr uint8_t umidi::cc::CC7Bit&lt; CC, Name &gt;::number</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>number</name>
+        <qualifiedname>umidi::cc::CC7Bit::number</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="38" column="30" bodyfile="include/umidi/cc/types.hh" bodystart="38" bodyend="38"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1cc_1_1_c_c7_bit_1ac1a0dc216903afe5877b15492d516233" prot="public" static="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>static constexpr uint8_t umidi::cc::CC7Bit&lt; CC, Name &gt;::number_msb</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>number_msb</name>
+        <qualifiedname>umidi::cc::CC7Bit::number_msb</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="39" column="30" bodyfile="include/umidi/cc/types.hh" bodystart="39" bodyend="39"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1cc_1_1_c_c7_bit_1a5c69736cdaec1b90a488335551f87e3d" prot="public" static="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>static constexpr uint8_t umidi::cc::CC7Bit&lt; CC, Name &gt;::number_lsb</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>number_lsb</name>
+        <qualifiedname>umidi::cc::CC7Bit::number_lsb</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="40" column="30" bodyfile="include/umidi/cc/types.hh" bodystart="40" bodyend="40"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1cc_1_1_c_c7_bit_1a152de96474cbee2ad2b461785124acc5" prot="public" static="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>const char *</type>
+        <definition>static constexpr const char * umidi::cc::CC7Bit&lt; CC, Name &gt;::name</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>name</name>
+        <qualifiedname>umidi::cc::CC7Bit::name</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="41" column="33" bodyfile="include/umidi/cc/types.hh" bodystart="41" bodyend="41"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1cc_1_1_c_c7_bit_1a54e58ecd923d502bf1337f44a6f6cf7d" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>static constexpr uint8_t umidi::cc::CC7Bit&lt; CC, Name &gt;::parse</definition>
+        <argsstring>(State &amp;, uint8_t value) noexcept</argsstring>
+        <name>parse</name>
+        <qualifiedname>umidi::cc::CC7Bit::parse</qualifiedname>
+        <param>
+          <type>State &amp;</type>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>value</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="46" column="31" bodyfile="include/umidi/cc/types.hh" bodystart="46" bodyend="48"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1cc_1_1_c_c7_bit_1aaeb97c697694daeb88ab557da50d2137" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>static constexpr uint8_t umidi::cc::CC7Bit&lt; CC, Name &gt;::format</definition>
+        <argsstring>(uint8_t value) noexcept</argsstring>
+        <name>format</name>
+        <qualifiedname>umidi::cc::CC7Bit::format</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>value</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="50" column="31" bodyfile="include/umidi/cc/types.hh" bodystart="50" bodyend="52"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/cc/types.hh" line="35" column="1" bodyfile="include/umidi/cc/types.hh" bodystart="35" bodyend="53"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1cc_1_1_c_c7_bit_1aaeb97c697694daeb88ab557da50d2137" prot="public" virt="non-virtual"><scope>umidi::cc::CC7Bit</scope><name>format</name></member>
+      <member refid="structumidi_1_1cc_1_1_c_c7_bit_1a152de96474cbee2ad2b461785124acc5" prot="public" virt="non-virtual"><scope>umidi::cc::CC7Bit</scope><name>name</name></member>
+      <member refid="structumidi_1_1cc_1_1_c_c7_bit_1aa31d837940c5b3995676839e65c0fc46" prot="public" virt="non-virtual"><scope>umidi::cc::CC7Bit</scope><name>number</name></member>
+      <member refid="structumidi_1_1cc_1_1_c_c7_bit_1a5c69736cdaec1b90a488335551f87e3d" prot="public" virt="non-virtual"><scope>umidi::cc::CC7Bit</scope><name>number_lsb</name></member>
+      <member refid="structumidi_1_1cc_1_1_c_c7_bit_1ac1a0dc216903afe5877b15492d516233" prot="public" virt="non-virtual"><scope>umidi::cc::CC7Bit</scope><name>number_msb</name></member>
+      <member refid="structumidi_1_1cc_1_1_c_c7_bit_1a54e58ecd923d502bf1337f44a6f6cf7d" prot="public" virt="non-virtual"><scope>umidi::cc::CC7Bit</scope><name>parse</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

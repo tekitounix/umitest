@@ -1,0 +1,187 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1message_1_1_program_change" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::message::ProgramChange</compoundname>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structumidi_1_1message_1_1_program_change_1ab21b06b70560ddc70997abc5cd60b6f9" prot="public" static="no" mutable="no">
+        <type><ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref></type>
+        <definition>UMP32 umidi::message::ProgramChange::ump</definition>
+        <argsstring></argsstring>
+        <name>ump</name>
+        <qualifiedname>umidi::message::ProgramChange::ump</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/channel_voice.hh" line="84" column="11" bodyfile="include/umidi/messages/channel_voice.hh" bodystart="84" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-attrib">
+      <memberdef kind="variable" id="structumidi_1_1message_1_1_program_change_1ad7d87575cce8c28d4fb37db23ae9c2fa" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::message::ProgramChange::MT</definition>
+        <argsstring></argsstring>
+        <name>MT</name>
+        <qualifiedname>umidi::message::ProgramChange::MT</qualifiedname>
+        <initializer>= 2</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/channel_voice.hh" line="86" column="30" bodyfile="include/umidi/messages/channel_voice.hh" bodystart="86" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1message_1_1_program_change_1a81ecdd4db94607919db6b46d659a096d" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::message::ProgramChange::STATUS</definition>
+        <argsstring></argsstring>
+        <name>STATUS</name>
+        <qualifiedname>umidi::message::ProgramChange::STATUS</qualifiedname>
+        <initializer>= 0xC0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/channel_voice.hh" line="87" column="30" bodyfile="include/umidi/messages/channel_voice.hh" bodystart="87" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="structumidi_1_1message_1_1_program_change_1aa98537f555f996357069c56d4f4f59ae" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::message::ProgramChange::channel</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>channel</name>
+        <qualifiedname>umidi::message::ProgramChange::channel</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/channel_voice.hh" line="89" column="24" bodyfile="include/umidi/messages/channel_voice.hh" bodystart="89" bodyend="89"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_program_change_1ac376cd0ddcf15bbb29c813d5074299f5" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::message::ProgramChange::program</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>program</name>
+        <qualifiedname>umidi::message::ProgramChange::program</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/channel_voice.hh" line="90" column="24" bodyfile="include/umidi/messages/channel_voice.hh" bodystart="90" bodyend="90"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_program_change_1a16dd6d96b4e48dcde47604767a7b7926" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::message::ProgramChange::group</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>group</name>
+        <qualifiedname>umidi::message::ProgramChange::group</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/channel_voice.hh" line="91" column="24" bodyfile="include/umidi/messages/channel_voice.hh" bodystart="91" bodyend="91"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_program_change_1a5697fb7cc34438f7dc869604f9dbb2e9" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::message::ProgramChange::is_valid</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>is_valid</name>
+        <qualifiedname>umidi::message::ProgramChange::is_valid</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/channel_voice.hh" line="93" column="21" bodyfile="include/umidi/messages/channel_voice.hh" bodystart="93" bodyend="93"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="structumidi_1_1message_1_1_program_change_1aea2265f5a5889488b130627bc58807c0" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>ProgramChange</type>
+        <definition>static constexpr ProgramChange umidi::message::ProgramChange::create</definition>
+        <argsstring>(uint8_t channel, uint8_t program, uint8_t group=0) noexcept</argsstring>
+        <name>create</name>
+        <qualifiedname>umidi::message::ProgramChange::create</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>channel</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>program</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>group</declname>
+          <defval>0</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/channel_voice.hh" line="96" column="5" bodyfile="include/umidi/messages/channel_voice.hh" bodystart="96" bodyend="98"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_program_change_1ac4abc707d3615f3d38b5af6758c353d2" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>ProgramChange</type>
+        <definition>static constexpr ProgramChange umidi::message::ProgramChange::from_ump</definition>
+        <argsstring>(UMP32 u) noexcept</argsstring>
+        <name>from_ump</name>
+        <qualifiedname>umidi::message::ProgramChange::from_ump</qualifiedname>
+        <param>
+          <type><ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref></type>
+          <declname>u</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/channel_voice.hh" line="100" column="37" bodyfile="include/umidi/messages/channel_voice.hh" bodystart="100" bodyend="100"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="2">
+        <label>umidi::UMP32</label>
+        <link refid="structumidi_1_1_u_m_p32"/>
+      </node>
+      <node id="1">
+        <label>umidi::message::ProgramChange</label>
+        <childnode refid="2" relation="usage">
+          <edgelabel>ump</edgelabel>
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="include/umidi/messages/channel_voice.hh" line="83" column="1" bodyfile="include/umidi/messages/channel_voice.hh" bodystart="83" bodyend="101"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1message_1_1_program_change_1aa98537f555f996357069c56d4f4f59ae" prot="public" virt="non-virtual"><scope>umidi::message::ProgramChange</scope><name>channel</name></member>
+      <member refid="structumidi_1_1message_1_1_program_change_1aea2265f5a5889488b130627bc58807c0" prot="public" virt="non-virtual"><scope>umidi::message::ProgramChange</scope><name>create</name></member>
+      <member refid="structumidi_1_1message_1_1_program_change_1ac4abc707d3615f3d38b5af6758c353d2" prot="public" virt="non-virtual"><scope>umidi::message::ProgramChange</scope><name>from_ump</name></member>
+      <member refid="structumidi_1_1message_1_1_program_change_1a16dd6d96b4e48dcde47604767a7b7926" prot="public" virt="non-virtual"><scope>umidi::message::ProgramChange</scope><name>group</name></member>
+      <member refid="structumidi_1_1message_1_1_program_change_1a5697fb7cc34438f7dc869604f9dbb2e9" prot="public" virt="non-virtual"><scope>umidi::message::ProgramChange</scope><name>is_valid</name></member>
+      <member refid="structumidi_1_1message_1_1_program_change_1ad7d87575cce8c28d4fb37db23ae9c2fa" prot="public" virt="non-virtual"><scope>umidi::message::ProgramChange</scope><name>MT</name></member>
+      <member refid="structumidi_1_1message_1_1_program_change_1ac376cd0ddcf15bbb29c813d5074299f5" prot="public" virt="non-virtual"><scope>umidi::message::ProgramChange</scope><name>program</name></member>
+      <member refid="structumidi_1_1message_1_1_program_change_1a81ecdd4db94607919db6b46d659a096d" prot="public" virt="non-virtual"><scope>umidi::message::ProgramChange</scope><name>STATUS</name></member>
+      <member refid="structumidi_1_1message_1_1_program_change_1ab21b06b70560ddc70997abc5cd60b6f9" prot="public" virt="non-virtual"><scope>umidi::message::ProgramChange</scope><name>ump</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

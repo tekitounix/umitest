@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1protocol_1_1_flow_config" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::protocol::FlowConfig</compoundname>
+    <includes refid="umi__session_8hh" local="no">umi_session.hh</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_flow_config_1ad2462bf4a083bae3ab52b99ac6d7be2d" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::FlowConfig::window_size</definition>
+        <argsstring></argsstring>
+        <name>window_size</name>
+        <qualifiedname>umidi::protocol::FlowConfig::window_size</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="201" column="13" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="201" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_flow_config_1a2a9d18fef5e1d93024c12fa7203a1f0d" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::FlowConfig::max_payload_size</definition>
+        <argsstring></argsstring>
+        <name>max_payload_size</name>
+        <qualifiedname>umidi::protocol::FlowConfig::max_payload_size</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="202" column="13" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="202" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Flow control configuration. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/umi_session.hh" line="200" column="1" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="200" bodyend="203"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1protocol_1_1_flow_config_1a2a9d18fef5e1d93024c12fa7203a1f0d" prot="public" virt="non-virtual"><scope>umidi::protocol::FlowConfig</scope><name>max_payload_size</name></member>
+      <member refid="structumidi_1_1protocol_1_1_flow_config_1ad2462bf4a083bae3ab52b99ac6d7be2d" prot="public" virt="non-virtual"><scope>umidi::protocol::FlowConfig</scope><name>window_size</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

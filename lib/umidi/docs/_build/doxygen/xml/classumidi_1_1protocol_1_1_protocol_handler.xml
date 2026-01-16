@@ -1,0 +1,115 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="classumidi_1_1protocol_1_1_protocol_handler" kind="class" language="C++" prot="public">
+    <compoundname>umidi::protocol::ProtocolHandler</compoundname>
+    <includes refid="umi__sysex_8hh" local="no">umi_sysex.hh</includes>
+    <templateparamlist>
+      <param>
+        <type>size_t</type>
+        <declname>TxBufSize</declname>
+        <defname>TxBufSize</defname>
+        <defval>512</defval>
+      </param>
+      <param>
+        <type>size_t</type>
+        <declname>RxBufSize</declname>
+        <defname>RxBufSize</defname>
+        <defval>512</defval>
+      </param>
+    </templateparamlist>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_protocol_handler_1a0b5766481ee5f4b6e44fcf8cd35067ef" prot="public" static="no" mutable="no">
+        <type><ref refid="classumidi_1_1protocol_1_1_standard_i_o" kindref="compound">StandardIO</ref>&lt; TxBufSize, RxBufSize &gt;</type>
+        <definition>StandardIO&lt;TxBufSize, RxBufSize&gt; umidi::protocol::ProtocolHandler&lt; TxBufSize, RxBufSize &gt;::io</definition>
+        <argsstring></argsstring>
+        <name>io</name>
+        <qualifiedname>umidi::protocol::ProtocolHandler::io</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="262" column="16" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="262" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_protocol_handler_1a83cac756af23c2959214d2a524fc143a" prot="public" static="no" mutable="no">
+        <type><ref refid="classumidi_1_1protocol_1_1_firmware_update" kindref="compound">FirmwareUpdate</ref>&lt; 256 &gt;</type>
+        <definition>FirmwareUpdate&lt;256&gt; umidi::protocol::ProtocolHandler&lt; TxBufSize, RxBufSize &gt;::fw_update</definition>
+        <argsstring></argsstring>
+        <name>fw_update</name>
+        <qualifiedname>umidi::protocol::ProtocolHandler::fw_update</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="263" column="20" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="263" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_protocol_handler_1a73f417a4308340c81a3d717f31a59007" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::ProtocolHandler&lt; TxBufSize, RxBufSize &gt;::process</definition>
+        <argsstring>(const uint8_t *data, size_t len, SendFn send_fn)</argsstring>
+        <name>process</name>
+        <qualifiedname>umidi::protocol::ProtocolHandler::process</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_sysex.hh" line="266" column="10" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="266" bodyend="270"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Combined handler for all UMI SysEx protocols. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="3">
+        <label>umidi::protocol::FirmwareUpdate&lt; 256 &gt;</label>
+        <link refid="classumidi_1_1protocol_1_1_firmware_update"/>
+      </node>
+      <node id="1">
+        <label>umidi::protocol::ProtocolHandler&lt; TxBufSize, RxBufSize &gt;</label>
+        <link refid="classumidi_1_1protocol_1_1_protocol_handler"/>
+        <childnode refid="2" relation="usage">
+          <edgelabel>io</edgelabel>
+        </childnode>
+        <childnode refid="3" relation="usage">
+          <edgelabel>fw_update</edgelabel>
+        </childnode>
+      </node>
+      <node id="2">
+        <label>umidi::protocol::StandardIO&lt; 512, 512 &gt;</label>
+        <link refid="classumidi_1_1protocol_1_1_standard_i_o"/>
+      </node>
+    </collaborationgraph>
+    <location file="include/umidi/protocol/umi_sysex.hh" line="260" column="1" bodyfile="include/umidi/protocol/umi_sysex.hh" bodystart="260" bodyend="271"/>
+    <listofallmembers>
+      <member refid="classumidi_1_1protocol_1_1_protocol_handler_1a83cac756af23c2959214d2a524fc143a" prot="public" virt="non-virtual"><scope>umidi::protocol::ProtocolHandler</scope><name>fw_update</name></member>
+      <member refid="classumidi_1_1protocol_1_1_protocol_handler_1a0b5766481ee5f4b6e44fcf8cd35067ef" prot="public" virt="non-virtual"><scope>umidi::protocol::ProtocolHandler</scope><name>io</name></member>
+      <member refid="classumidi_1_1protocol_1_1_protocol_handler_1a73f417a4308340c81a3d717f31a59007" prot="public" virt="non-virtual"><scope>umidi::protocol::ProtocolHandler</scope><name>process</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

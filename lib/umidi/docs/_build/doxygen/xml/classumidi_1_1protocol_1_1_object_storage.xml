@@ -1,0 +1,311 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="classumidi_1_1protocol_1_1_object_storage" kind="class" language="C++" prot="public" abstract="yes">
+    <compoundname>umidi::protocol::ObjectStorage</compoundname>
+    <derivedcompoundref refid="classumidi_1_1protocol_1_1_r_a_m_object_storage" prot="public" virt="non-virtual">umidi::protocol::RAMObjectStorage&lt; MaxObjects, MaxDataSize &gt;</derivedcompoundref>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_storage_1a8b749bf8ed516a038e9ce93f7a15305a" prot="public" static="no" const="no" explicit="no" inline="no" virt="virtual">
+        <type></type>
+        <definition>virtual umidi::protocol::ObjectStorage::~ObjectStorage</definition>
+        <argsstring>()=default</argsstring>
+        <name>~ObjectStorage</name>
+        <qualifiedname>umidi::protocol::ObjectStorage::~ObjectStorage</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="280" column="13"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_storage_1ab43480517ae330f39cf934b4d4908782" prot="public" static="no" const="no" explicit="no" inline="no" virt="pure-virtual">
+        <type>size_t</type>
+        <definition>virtual size_t umidi::protocol::ObjectStorage::list</definition>
+        <argsstring>(ObjectType type, ObjectHeader *out, size_t max_count)=0</argsstring>
+        <name>list</name>
+        <qualifiedname>umidi::protocol::ObjectStorage::list</qualifiedname>
+        <param>
+          <type>ObjectType</type>
+          <declname>type</declname>
+        </param>
+        <param>
+          <type>ObjectHeader *</type>
+          <declname>out</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>max_count</declname>
+        </param>
+        <briefdescription>
+<para>List objects of a specific type. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>type</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Object type to list (0xFF for all) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>out</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Array to store headers </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>max_count</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Maximum number of headers to return </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>Number of objects found </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="287" column="20"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_storage_1ad7c78eef7b218865452ad5f8e4e3ecfa" prot="public" static="no" const="no" explicit="no" inline="no" virt="pure-virtual">
+        <type>bool</type>
+        <definition>virtual bool umidi::protocol::ObjectStorage::get_header</definition>
+        <argsstring>(uint32_t id, ObjectHeader &amp;out)=0</argsstring>
+        <name>get_header</name>
+        <qualifiedname>umidi::protocol::ObjectStorage::get_header</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>id</declname>
+        </param>
+        <param>
+          <type>ObjectHeader &amp;</type>
+          <declname>out</declname>
+        </param>
+        <briefdescription>
+<para>Get object header by ID. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="290" column="18"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_storage_1adc10f3d622b058e5f8e3cdf2a7a4f865" prot="public" static="no" const="no" explicit="no" inline="no" virt="pure-virtual">
+        <type>size_t</type>
+        <definition>virtual size_t umidi::protocol::ObjectStorage::read_data</definition>
+        <argsstring>(uint32_t id, uint32_t offset, uint8_t *out, size_t len)=0</argsstring>
+        <name>read_data</name>
+        <qualifiedname>umidi::protocol::ObjectStorage::read_data</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>id</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>offset</declname>
+        </param>
+        <param>
+          <type>uint8_t *</type>
+          <declname>out</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <briefdescription>
+<para>Read object data. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="293" column="20"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_storage_1a2cb81842077aab1931158052ecb9c862" prot="public" static="no" const="no" explicit="no" inline="no" virt="pure-virtual">
+        <type>bool</type>
+        <definition>virtual bool umidi::protocol::ObjectStorage::write_begin</definition>
+        <argsstring>(const ObjectHeader &amp;header)=0</argsstring>
+        <name>write_begin</name>
+        <qualifiedname>umidi::protocol::ObjectStorage::write_begin</qualifiedname>
+        <param>
+          <type>const ObjectHeader &amp;</type>
+          <declname>header</declname>
+        </param>
+        <briefdescription>
+<para>Begin writing new object. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="296" column="18"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_storage_1a227363f33cdbed7597363851cbeeb56c" prot="public" static="no" const="no" explicit="no" inline="no" virt="pure-virtual">
+        <type>bool</type>
+        <definition>virtual bool umidi::protocol::ObjectStorage::write_data</definition>
+        <argsstring>(uint32_t id, uint32_t offset, const uint8_t *data, size_t len)=0</argsstring>
+        <name>write_data</name>
+        <qualifiedname>umidi::protocol::ObjectStorage::write_data</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>id</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>offset</declname>
+        </param>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <briefdescription>
+<para>Write object data chunk. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="299" column="18"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_storage_1a65023710a962df0ae8c5a3b94220b36f" prot="public" static="no" const="no" explicit="no" inline="no" virt="pure-virtual">
+        <type>bool</type>
+        <definition>virtual bool umidi::protocol::ObjectStorage::write_commit</definition>
+        <argsstring>(uint32_t id)=0</argsstring>
+        <name>write_commit</name>
+        <qualifiedname>umidi::protocol::ObjectStorage::write_commit</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>id</declname>
+        </param>
+        <briefdescription>
+<para>Commit written object. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="302" column="18"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_storage_1ac4a40a9303276d6076dccbaf20ac4a5e" prot="public" static="no" const="no" explicit="no" inline="no" virt="pure-virtual">
+        <type>void</type>
+        <definition>virtual void umidi::protocol::ObjectStorage::write_abort</definition>
+        <argsstring>(uint32_t id)=0</argsstring>
+        <name>write_abort</name>
+        <qualifiedname>umidi::protocol::ObjectStorage::write_abort</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>id</declname>
+        </param>
+        <briefdescription>
+<para>Abort write operation. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="305" column="18"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_storage_1a047019c993525740640d0302d909a7f8" prot="public" static="no" const="no" explicit="no" inline="no" virt="pure-virtual">
+        <type>bool</type>
+        <definition>virtual bool umidi::protocol::ObjectStorage::remove</definition>
+        <argsstring>(uint32_t id)=0</argsstring>
+        <name>remove</name>
+        <qualifiedname>umidi::protocol::ObjectStorage::remove</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>id</declname>
+        </param>
+        <briefdescription>
+<para>Delete object. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="308" column="18"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_storage_1a8c88af224456cd527103241f1ab7161e" prot="public" static="no" const="no" explicit="no" inline="no" virt="pure-virtual">
+        <type>bool</type>
+        <definition>virtual bool umidi::protocol::ObjectStorage::rename</definition>
+        <argsstring>(uint32_t id, const char *new_name)=0</argsstring>
+        <name>rename</name>
+        <qualifiedname>umidi::protocol::ObjectStorage::rename</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>id</declname>
+        </param>
+        <param>
+          <type>const char *</type>
+          <declname>new_name</declname>
+        </param>
+        <briefdescription>
+<para>Rename object. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="311" column="18"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_storage_1a217ef68fc062a2e00264dc11e2440700" prot="public" static="no" const="no" explicit="no" inline="no" virt="pure-virtual">
+        <type>StorageInfo</type>
+        <definition>virtual StorageInfo umidi::protocol::ObjectStorage::get_storage_info</definition>
+        <argsstring>()=0</argsstring>
+        <name>get_storage_info</name>
+        <qualifiedname>umidi::protocol::ObjectStorage::get_storage_info</qualifiedname>
+        <briefdescription>
+<para>Get storage info. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="314" column="25"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_storage_1a0a525ed10a90527cacc6dc69a34f8540" prot="public" static="no" const="no" explicit="no" inline="no" virt="pure-virtual">
+        <type>uint32_t</type>
+        <definition>virtual uint32_t umidi::protocol::ObjectStorage::generate_id</definition>
+        <argsstring>()=0</argsstring>
+        <name>generate_id</name>
+        <qualifiedname>umidi::protocol::ObjectStorage::generate_id</qualifiedname>
+        <briefdescription>
+<para>Generate new unique ID. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="317" column="22"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/umi_object.hh" line="278" column="1" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="278" bodyend="318"/>
+    <listofallmembers>
+      <member refid="classumidi_1_1protocol_1_1_object_storage_1a0a525ed10a90527cacc6dc69a34f8540" prot="public" virt="pure-virtual"><scope>umidi::protocol::ObjectStorage</scope><name>generate_id</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_storage_1ad7c78eef7b218865452ad5f8e4e3ecfa" prot="public" virt="pure-virtual"><scope>umidi::protocol::ObjectStorage</scope><name>get_header</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_storage_1a217ef68fc062a2e00264dc11e2440700" prot="public" virt="pure-virtual"><scope>umidi::protocol::ObjectStorage</scope><name>get_storage_info</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_storage_1ab43480517ae330f39cf934b4d4908782" prot="public" virt="pure-virtual"><scope>umidi::protocol::ObjectStorage</scope><name>list</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_storage_1adc10f3d622b058e5f8e3cdf2a7a4f865" prot="public" virt="pure-virtual"><scope>umidi::protocol::ObjectStorage</scope><name>read_data</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_storage_1a047019c993525740640d0302d909a7f8" prot="public" virt="pure-virtual"><scope>umidi::protocol::ObjectStorage</scope><name>remove</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_storage_1a8c88af224456cd527103241f1ab7161e" prot="public" virt="pure-virtual"><scope>umidi::protocol::ObjectStorage</scope><name>rename</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_storage_1ac4a40a9303276d6076dccbaf20ac4a5e" prot="public" virt="pure-virtual"><scope>umidi::protocol::ObjectStorage</scope><name>write_abort</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_storage_1a2cb81842077aab1931158052ecb9c862" prot="public" virt="pure-virtual"><scope>umidi::protocol::ObjectStorage</scope><name>write_begin</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_storage_1a65023710a962df0ae8c5a3b94220b36f" prot="public" virt="pure-virtual"><scope>umidi::protocol::ObjectStorage</scope><name>write_commit</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_storage_1a227363f33cdbed7597363851cbeeb56c" prot="public" virt="pure-virtual"><scope>umidi::protocol::ObjectStorage</scope><name>write_data</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_storage_1a8b749bf8ed516a038e9ce93f7a15305a" prot="public" virt="virtual"><scope>umidi::protocol::ObjectStorage</scope><name>~ObjectStorage</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

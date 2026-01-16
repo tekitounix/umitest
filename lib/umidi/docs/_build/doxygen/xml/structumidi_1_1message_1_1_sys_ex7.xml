@@ -1,0 +1,347 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1message_1_1_sys_ex7" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::message::SysEx7</compoundname>
+    <sectiondef kind="public-type">
+      <memberdef kind="enum" id="structumidi_1_1message_1_1_sys_ex7_1a5657efb8d2a6c70f507b415b2b2baaab" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>Status</name>
+        <qualifiedname>umidi::message::SysEx7::Status</qualifiedname>
+        <enumvalue id="structumidi_1_1message_1_1_sys_ex7_1a5657efb8d2a6c70f507b415b2b2baaaba3de44296982e58199afc513a715b12ba" prot="public">
+          <name>COMPLETE</name>
+          <initializer>= 0x00</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="structumidi_1_1message_1_1_sys_ex7_1a5657efb8d2a6c70f507b415b2b2baaabab078ffd28db767c502ac367053f6e0ac" prot="public">
+          <name>START</name>
+          <initializer>= 0x10</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="structumidi_1_1message_1_1_sys_ex7_1a5657efb8d2a6c70f507b415b2b2baaaba2f453cfe638e57e27bb0c9512436111e" prot="public">
+          <name>CONTINUE</name>
+          <initializer>= 0x20</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="structumidi_1_1message_1_1_sys_ex7_1a5657efb8d2a6c70f507b415b2b2baaabab1a326c06d88bf042f73d70f50197905" prot="public">
+          <name>END</name>
+          <initializer>= 0x30</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>SysEx packet status. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/sysex.hh" line="20" column="5" bodyfile="include/umidi/messages/sysex.hh" bodystart="20" bodyend="25"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structumidi_1_1message_1_1_sys_ex7_1ab2037f7106cf1e977a424ba6cbd8862c" prot="public" static="no" mutable="no">
+        <type>UMP64</type>
+        <definition>UMP64 umidi::message::SysEx7::ump</definition>
+        <argsstring></argsstring>
+        <name>ump</name>
+        <qualifiedname>umidi::message::SysEx7::ump</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/sysex.hh" line="17" column="11" bodyfile="include/umidi/messages/sysex.hh" bodystart="17" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="structumidi_1_1message_1_1_sys_ex7_1afd401c97b5ee785300aa1846054bd897" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::message::SysEx7::group</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>group</name>
+        <qualifiedname>umidi::message::SysEx7::group</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/sysex.hh" line="28" column="24" bodyfile="include/umidi/messages/sysex.hh" bodystart="28" bodyend="28"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_sys_ex7_1a2caaa9be0cce353ddbcbdecdbcbc5009" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Status</type>
+        <definition>Status umidi::message::SysEx7::sysex_status</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>sysex_status</name>
+        <qualifiedname>umidi::message::SysEx7::sysex_status</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/sysex.hh" line="30" column="23" bodyfile="include/umidi/messages/sysex.hh" bodystart="30" bodyend="32"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_sys_ex7_1a7a1be1673880607257f43f23ad10ae8d" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::message::SysEx7::num_bytes</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>num_bytes</name>
+        <qualifiedname>umidi::message::SysEx7::num_bytes</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/sysex.hh" line="34" column="24" bodyfile="include/umidi/messages/sysex.hh" bodystart="34" bodyend="36"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_sys_ex7_1a503501107555294a12e65446356b4152" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::message::SysEx7::is_valid</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>is_valid</name>
+        <qualifiedname>umidi::message::SysEx7::is_valid</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/sysex.hh" line="38" column="21" bodyfile="include/umidi/messages/sysex.hh" bodystart="38" bodyend="40"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_sys_ex7_1a0daa183b7e1aed43939aa53ec5c1bba1" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::message::SysEx7::data_at</definition>
+        <argsstring>(size_t idx) const noexcept</argsstring>
+        <name>data_at</name>
+        <qualifiedname>umidi::message::SysEx7::data_at</qualifiedname>
+        <param>
+          <type>size_t</type>
+          <declname>idx</declname>
+        </param>
+        <briefdescription>
+<para>Get data byte at index (0-5) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/sysex.hh" line="43" column="24" bodyfile="include/umidi/messages/sysex.hh" bodystart="43" bodyend="53"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_sys_ex7_1a5daad48a2a13bba74f54605cc30502e8" prot="public" static="no" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t umidi::message::SysEx7::copy_data</definition>
+        <argsstring>(uint8_t *out, size_t max_len) const noexcept</argsstring>
+        <name>copy_data</name>
+        <qualifiedname>umidi::message::SysEx7::copy_data</qualifiedname>
+        <param>
+          <type>uint8_t *</type>
+          <declname>out</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>max_len</declname>
+        </param>
+        <briefdescription>
+<para>Copy data bytes to output buffer. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>Number of bytes copied </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/sysex.hh" line="57" column="22" bodyfile="include/umidi/messages/sysex.hh" bodystart="57" bodyend="66"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="structumidi_1_1message_1_1_sys_ex7_1a507eaa055d76ceffd282e1ef0d8af3c8" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>SysEx7</type>
+        <definition>static constexpr SysEx7 umidi::message::SysEx7::create</definition>
+        <argsstring>(Status status, uint8_t group, const uint8_t *data, size_t len) noexcept</argsstring>
+        <name>create</name>
+        <qualifiedname>umidi::message::SysEx7::create</qualifiedname>
+        <param>
+          <type>Status</type>
+          <declname>status</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>group</declname>
+        </param>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/sysex.hh" line="70" column="5" bodyfile="include/umidi/messages/sysex.hh" bodystart="70" bodyend="87"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_sys_ex7_1aaba988fb9caaea873318cb8bd430fc00" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>SysEx7</type>
+        <definition>static constexpr SysEx7 umidi::message::SysEx7::create_complete</definition>
+        <argsstring>(uint8_t group, const uint8_t *data, size_t len) noexcept</argsstring>
+        <name>create_complete</name>
+        <qualifiedname>umidi::message::SysEx7::create_complete</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>group</declname>
+        </param>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/sysex.hh" line="90" column="5" bodyfile="include/umidi/messages/sysex.hh" bodystart="90" bodyend="92"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_sys_ex7_1a1681ce60fca5cac779d84ddf37249741" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>SysEx7</type>
+        <definition>static constexpr SysEx7 umidi::message::SysEx7::create_start</definition>
+        <argsstring>(uint8_t group, const uint8_t *data, size_t len) noexcept</argsstring>
+        <name>create_start</name>
+        <qualifiedname>umidi::message::SysEx7::create_start</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>group</declname>
+        </param>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/sysex.hh" line="95" column="5" bodyfile="include/umidi/messages/sysex.hh" bodystart="95" bodyend="97"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_sys_ex7_1a791144491cee48f18750da8945dea35e" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>SysEx7</type>
+        <definition>static constexpr SysEx7 umidi::message::SysEx7::create_continue</definition>
+        <argsstring>(uint8_t group, const uint8_t *data, size_t len) noexcept</argsstring>
+        <name>create_continue</name>
+        <qualifiedname>umidi::message::SysEx7::create_continue</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>group</declname>
+        </param>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/sysex.hh" line="100" column="5" bodyfile="include/umidi/messages/sysex.hh" bodystart="100" bodyend="102"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_sys_ex7_1a2c2a300895d321887de868ae7fd8fdfc" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>SysEx7</type>
+        <definition>static constexpr SysEx7 umidi::message::SysEx7::create_end</definition>
+        <argsstring>(uint8_t group, const uint8_t *data, size_t len) noexcept</argsstring>
+        <name>create_end</name>
+        <qualifiedname>umidi::message::SysEx7::create_end</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>group</declname>
+        </param>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/sysex.hh" line="105" column="5" bodyfile="include/umidi/messages/sysex.hh" bodystart="105" bodyend="107"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_sys_ex7_1a7c0d905e0b969d4d0b214414034b274e" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>SysEx7</type>
+        <definition>static constexpr SysEx7 umidi::message::SysEx7::from_ump</definition>
+        <argsstring>(UMP64 u) noexcept</argsstring>
+        <name>from_ump</name>
+        <qualifiedname>umidi::message::SysEx7::from_ump</qualifiedname>
+        <param>
+          <type>UMP64</type>
+          <declname>u</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/sysex.hh" line="109" column="30" bodyfile="include/umidi/messages/sysex.hh" bodystart="109" bodyend="109"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/messages/sysex.hh" line="16" column="1" bodyfile="include/umidi/messages/sysex.hh" bodystart="16" bodyend="110"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1message_1_1_sys_ex7_1a5daad48a2a13bba74f54605cc30502e8" prot="public" virt="non-virtual"><scope>umidi::message::SysEx7</scope><name>copy_data</name></member>
+      <member refid="structumidi_1_1message_1_1_sys_ex7_1a507eaa055d76ceffd282e1ef0d8af3c8" prot="public" virt="non-virtual"><scope>umidi::message::SysEx7</scope><name>create</name></member>
+      <member refid="structumidi_1_1message_1_1_sys_ex7_1aaba988fb9caaea873318cb8bd430fc00" prot="public" virt="non-virtual"><scope>umidi::message::SysEx7</scope><name>create_complete</name></member>
+      <member refid="structumidi_1_1message_1_1_sys_ex7_1a791144491cee48f18750da8945dea35e" prot="public" virt="non-virtual"><scope>umidi::message::SysEx7</scope><name>create_continue</name></member>
+      <member refid="structumidi_1_1message_1_1_sys_ex7_1a2c2a300895d321887de868ae7fd8fdfc" prot="public" virt="non-virtual"><scope>umidi::message::SysEx7</scope><name>create_end</name></member>
+      <member refid="structumidi_1_1message_1_1_sys_ex7_1a1681ce60fca5cac779d84ddf37249741" prot="public" virt="non-virtual"><scope>umidi::message::SysEx7</scope><name>create_start</name></member>
+      <member refid="structumidi_1_1message_1_1_sys_ex7_1a0daa183b7e1aed43939aa53ec5c1bba1" prot="public" virt="non-virtual"><scope>umidi::message::SysEx7</scope><name>data_at</name></member>
+      <member refid="structumidi_1_1message_1_1_sys_ex7_1a7c0d905e0b969d4d0b214414034b274e" prot="public" virt="non-virtual"><scope>umidi::message::SysEx7</scope><name>from_ump</name></member>
+      <member refid="structumidi_1_1message_1_1_sys_ex7_1afd401c97b5ee785300aa1846054bd897" prot="public" virt="non-virtual"><scope>umidi::message::SysEx7</scope><name>group</name></member>
+      <member refid="structumidi_1_1message_1_1_sys_ex7_1a503501107555294a12e65446356b4152" prot="public" virt="non-virtual"><scope>umidi::message::SysEx7</scope><name>is_valid</name></member>
+      <member refid="structumidi_1_1message_1_1_sys_ex7_1a7a1be1673880607257f43f23ad10ae8d" prot="public" virt="non-virtual"><scope>umidi::message::SysEx7</scope><name>num_bytes</name></member>
+      <member refid="structumidi_1_1message_1_1_sys_ex7_1a5657efb8d2a6c70f507b415b2b2baaab" prot="public" virt="non-virtual"><scope>umidi::message::SysEx7</scope><name>Status</name></member>
+      <member refid="structumidi_1_1message_1_1_sys_ex7_1a2caaa9be0cce353ddbcbdecdbcbc5009" prot="public" virt="non-virtual"><scope>umidi::message::SysEx7</scope><name>sysex_status</name></member>
+      <member refid="structumidi_1_1message_1_1_sys_ex7_1ab2037f7106cf1e977a424ba6cbd8862c" prot="public" virt="non-virtual"><scope>umidi::message::SysEx7</scope><name>ump</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

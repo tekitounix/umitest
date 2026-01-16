@@ -1,0 +1,200 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="classumidi_1_1protocol_1_1_transport" kind="class" language="C++" prot="public" abstract="yes">
+    <compoundname>umidi::protocol::Transport</compoundname>
+    <derivedcompoundref refid="classumidi_1_1protocol_1_1_bulk_transport" prot="public" virt="non-virtual">umidi::protocol::BulkTransport&lt; TxBufSize, RxBufSize &gt;</derivedcompoundref>
+    <derivedcompoundref refid="classumidi_1_1protocol_1_1_sys_ex_transport" prot="public" virt="non-virtual">umidi::protocol::SysExTransport&lt; TxBufSize, RxBufSize &gt;</derivedcompoundref>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_transport_1ac02c2b1e143a43ee9be4cc4d8a60f2e5" prot="public" static="no" const="no" explicit="no" inline="no" virt="virtual">
+        <type></type>
+        <definition>virtual umidi::protocol::Transport::~Transport</definition>
+        <argsstring>()=default</argsstring>
+        <name>~Transport</name>
+        <qualifiedname>umidi::protocol::Transport::~Transport</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="60" column="13"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_transport_1a79eb41db7bd5ae60a8dc698545ad8893" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="no" noexcept="yes" virt="pure-virtual">
+        <type>TransportType</type>
+        <definition>virtual TransportType umidi::protocol::Transport::type</definition>
+        <argsstring>() const noexcept=0</argsstring>
+        <name>type</name>
+        <qualifiedname>umidi::protocol::Transport::type</qualifiedname>
+        <briefdescription>
+<para>Get transport type. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="63" column="28"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_transport_1a768cdd8cebe4f04c07fa921847179c61" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="no" noexcept="yes" virt="pure-virtual">
+        <type>const TransportCapabilities &amp;</type>
+        <definition>virtual const TransportCapabilities &amp; umidi::protocol::Transport::capabilities</definition>
+        <argsstring>() const noexcept=0</argsstring>
+        <name>capabilities</name>
+        <qualifiedname>umidi::protocol::Transport::capabilities</qualifiedname>
+        <briefdescription>
+<para>Get transport capabilities. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="66" column="42"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_transport_1aeaad0913da4c2b20b12dc3dc488df0b5" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="no" noexcept="yes" virt="pure-virtual">
+        <type>bool</type>
+        <definition>virtual bool umidi::protocol::Transport::is_connected</definition>
+        <argsstring>() const noexcept=0</argsstring>
+        <name>is_connected</name>
+        <qualifiedname>umidi::protocol::Transport::is_connected</qualifiedname>
+        <briefdescription>
+<para>Check if connected. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="69" column="19"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_transport_1aba141869ea77dacf1fb1e79bd12c5660" prot="public" static="no" const="no" explicit="no" inline="no" virt="pure-virtual">
+        <type>size_t</type>
+        <definition>virtual size_t umidi::protocol::Transport::send</definition>
+        <argsstring>(const uint8_t *data, size_t len)=0</argsstring>
+        <name>send</name>
+        <qualifiedname>umidi::protocol::Transport::send</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <briefdescription>
+<para>Send raw data (transport handles framing/encoding) </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>data</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Raw 8-bit data to send </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>len</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data length </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>Bytes sent, or 0 on error </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="75" column="20"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_transport_1a7a6bfe41cfe06ef609a2e62dac0dd420" prot="public" static="no" const="no" explicit="no" inline="no" virt="pure-virtual">
+        <type>size_t</type>
+        <definition>virtual size_t umidi::protocol::Transport::receive</definition>
+        <argsstring>(uint8_t *out, size_t max_len)=0</argsstring>
+        <name>receive</name>
+        <qualifiedname>umidi::protocol::Transport::receive</qualifiedname>
+        <param>
+          <type>uint8_t *</type>
+          <declname>out</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>max_len</declname>
+        </param>
+        <briefdescription>
+<para>Receive data (transport handles deframing/decoding) </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>out</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Output buffer </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>max_len</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Maximum bytes to receive </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>Bytes received, or 0 if no data </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="81" column="20"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_transport_1a5451d1bf6ae3bae417db5ae48310ee07" prot="public" static="no" const="no" explicit="no" inline="no" virt="pure-virtual">
+        <type>void</type>
+        <definition>virtual void umidi::protocol::Transport::flush</definition>
+        <argsstring>()=0</argsstring>
+        <name>flush</name>
+        <qualifiedname>umidi::protocol::Transport::flush</qualifiedname>
+        <briefdescription>
+<para>Flush pending data. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="84" column="18"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_transport_1a339aa831088a7007621726d1a95aac53" prot="public" static="no" const="no" explicit="no" inline="no" virt="pure-virtual">
+        <type>void</type>
+        <definition>virtual void umidi::protocol::Transport::reset</definition>
+        <argsstring>()=0</argsstring>
+        <name>reset</name>
+        <qualifiedname>umidi::protocol::Transport::reset</qualifiedname>
+        <briefdescription>
+<para>Reset transport state. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="87" column="18"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/umi_transport.hh" line="58" column="1" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="58" bodyend="88"/>
+    <listofallmembers>
+      <member refid="classumidi_1_1protocol_1_1_transport_1a768cdd8cebe4f04c07fa921847179c61" prot="public" virt="pure-virtual"><scope>umidi::protocol::Transport</scope><name>capabilities</name></member>
+      <member refid="classumidi_1_1protocol_1_1_transport_1a5451d1bf6ae3bae417db5ae48310ee07" prot="public" virt="pure-virtual"><scope>umidi::protocol::Transport</scope><name>flush</name></member>
+      <member refid="classumidi_1_1protocol_1_1_transport_1aeaad0913da4c2b20b12dc3dc488df0b5" prot="public" virt="pure-virtual"><scope>umidi::protocol::Transport</scope><name>is_connected</name></member>
+      <member refid="classumidi_1_1protocol_1_1_transport_1a7a6bfe41cfe06ef609a2e62dac0dd420" prot="public" virt="pure-virtual"><scope>umidi::protocol::Transport</scope><name>receive</name></member>
+      <member refid="classumidi_1_1protocol_1_1_transport_1a339aa831088a7007621726d1a95aac53" prot="public" virt="pure-virtual"><scope>umidi::protocol::Transport</scope><name>reset</name></member>
+      <member refid="classumidi_1_1protocol_1_1_transport_1aba141869ea77dacf1fb1e79bd12c5660" prot="public" virt="pure-virtual"><scope>umidi::protocol::Transport</scope><name>send</name></member>
+      <member refid="classumidi_1_1protocol_1_1_transport_1a79eb41db7bd5ae60a8dc698545ad8893" prot="public" virt="pure-virtual"><scope>umidi::protocol::Transport</scope><name>type</name></member>
+      <member refid="classumidi_1_1protocol_1_1_transport_1ac02c2b1e143a43ee9be4cc4d8a60f2e5" prot="public" virt="virtual"><scope>umidi::protocol::Transport</scope><name>~Transport</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

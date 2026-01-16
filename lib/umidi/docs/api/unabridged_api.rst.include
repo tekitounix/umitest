@@ -1,0 +1,1692 @@
+
+Full API
+--------
+
+Namespaces
+**********
+
+
+.. toctree::
+   :maxdepth: 5
+
+   namespace_std.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   namespace_umidi.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   namespace_umidi__cc.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   namespace_umidi__cc__pitch_bend_sensitivity.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   namespace_umidi__codec.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   namespace_umidi__compat.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   namespace_umidi__convert.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   namespace_umidi__message.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   namespace_umidi__protocol.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   namespace_umidi__protocol__bulk.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   namespace_umidi__protocol__platforms.rst
+
+Classes and Structs
+*******************
+
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1cc_1_1_c_c14_bit.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1cc_1_1_c_c14_bit_1_1_state.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1cc_1_1_c_c14_bit_1_1_value.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1cc_1_1_c_c14_bit_state.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1cc_1_1_c_c7_bit.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1cc_1_1_c_c7_bit_1_1_state.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1cc_1_1is__rpn__type.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1cc_1_1is__rpn__type_3_01_parameter_number_3_01_n_00_01_is_n_r_p_n_00_01_name_01_4_01_4.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1cc_1_1_parameter_number.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1cc_1_1_parameter_number_1_1_value.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1cc_1_1_parameter_number_decoder_1_1_result.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1cc_1_1pitch__bend__sensitivity_1_1_value.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1cc_1_1_string_literal.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1cc_1_1_switch_c_c.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1cc_1_1_switch_c_c_1_1_state.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1codec_1_1_channel_config.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1codec_1_1message__traits.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1codec_1_1message__traits_3_01message_1_1_channel_pressure_01_4.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1codec_1_1message__traits_3_01message_1_1_continue_01_4.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1codec_1_1message__traits_3_01message_1_1_control_change_01_4.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1codec_1_1message__traits_3_01message_1_1_j_r_clock_01_4.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1codec_1_1message__traits_3_01message_1_1_j_r_timestamp_01_4.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1codec_1_1message__traits_3_01message_1_1_note_off_01_4.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1codec_1_1message__traits_3_01message_1_1_note_on_01_4.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1codec_1_1message__traits_3_01message_1_1_pitch_bend_01_4.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1codec_1_1message__traits_3_01message_1_1_poly_pressure_01_4.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1codec_1_1message__traits_3_01message_1_1_program_change_01_4.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1codec_1_1message__traits_3_01message_1_1_start_01_4.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1codec_1_1message__traits_3_01message_1_1_stop_01_4.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1codec_1_1message__traits_3_01message_1_1_sys_ex7_01_4.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1codec_1_1message__traits_3_01message_1_1_timing_clock_01_4.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1_error.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1_event.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1message_1_1_active_sensing.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1message_1_1_channel_pressure.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1message_1_1_continue.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1message_1_1_control_change.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1message_1_1_j_r_clock.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1message_1_1_j_r_timestamp.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1message_1_1_midi_time_code.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1message_1_1_n_o_o_p.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1message_1_1_note_off.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1message_1_1_note_on.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1message_1_1_pitch_bend.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1message_1_1_poly_pressure.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1message_1_1_program_change.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1message_1_1_song_position.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1message_1_1_song_select.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1message_1_1_start.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1message_1_1_stop.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1message_1_1_sys_ex7.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1message_1_1_sys_ex_parser_1_1_result.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1message_1_1_system_reset.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1message_1_1_timing_clock.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1message_1_1_tune_request.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1protocol_1_1_boot_config.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1protocol_1_1_boot_verification.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1protocol_1_1_config_metadata.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1protocol_1_1_firmware_header.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1protocol_1_1_flash_interface.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1protocol_1_1_flash_region.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1protocol_1_1_flow_config.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1protocol_1_1_object_header.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1protocol_1_1_packet_state.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1protocol_1_1_parsed_message.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1protocol_1_1_platform_config.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1protocol_1_1_preset_metadata.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1protocol_1_1_r_a_m_object_storage_1_1_slot.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1protocol_1_1_resume_info.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1protocol_1_1_sample_metadata.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1protocol_1_1_sequence_metadata.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1protocol_1_1_state_report.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1protocol_1_1_storage_info.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1protocol_1_1_timeout_config.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1protocol_1_1_transport_capabilities.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1_u_m_p32.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   structumidi_1_1_u_m_p64.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1cc_1_1_parameter_number_decoder.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1cc_1_1_parameter_number_state.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1codec_1_1_decoder.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1_event_queue.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1message_1_1_j_r_timestamp_tracker.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1message_1_1_sys_ex_parser.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1message_1_1_sys_ex_serializer.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1_parser.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_auth_client.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_authenticator.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_bootloader_interface.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_bulk_transport.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_firmware_header_builder.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_firmware_update.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_firmware_update_session.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_firmware_update_session_with_progress.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_firmware_validator.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_flow_control_receiver.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_flow_control_sender.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_message_builder.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_object_storage.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_object_transfer_handler.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_protocol_handler.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_r_a_m_object_storage.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_secure_firmware_update.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_session_timer.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_standard_i_o.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_stateful_firmware_update.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_state_manager.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_state_protocol_handler.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_sys_ex_transport.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_transport.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_transport_handler.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1protocol_1_1_transport_manager.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1_serializer.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   classumidi_1_1_sys_ex_buffer.rst
+
+Enums
+*****
+
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_codec_2decoder_8hh_1a9d9833f9a1360722a03a2396289ecd20.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_result_8hh_1a57f163d9848ea33faf04a5386792bd83.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_umi__auth_8hh_1a523f8b9a6f3a922b86acc73bd19dae64.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_umi__auth_8hh_1a8b930266096efb5c16d2caf68608dfd7.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_umi__auth_8hh_1aa4746c1085878177b69fe82f9a92a9b6.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_commands_8hh_1ae3b0b69dafba46c303a669e02ec86ea8.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_umi__state_8hh_1aee0028e072f0a21e9917da27dd8fe02b.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_commands_8hh_1a535223bf911d0f4570ff0c7fb31530d9.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_umi__firmware_8hh_1a37a516c867046d80a424e8a967e63844.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_umi__bootloader_8hh_1aea8b72ea1718571a03fbceb51748bb73.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_commands_8hh_1a4794e96786e74a58a550eecdc4b1cf50.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_umi__object_8hh_1a1b8d8df97a692537cd2d27db83d69636.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_umi__object_8hh_1a720ae451081b2e8a1c681c930e6ab687.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_umi__object_8hh_1a6c8b5c0d4aba897a4de96d94f8f29546.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_umi__object_8hh_1aad09cb329fca2316052a60710cd475a1.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_umi__session_8hh_1a54f145a9eaae94c9a42b4caf193425a6.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_umi__session_8hh_1ad962baeb0d66bb3ec3db37b7ae8f5c8f.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_umi__bootloader_8hh_1a3703f324f9ced505b0f3e6e9696c71b9.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_umi__bootloader_8hh_1a84280f916f93c102252489f8f7c58ab1.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_umi__state_8hh_1a213f7b02992b11917efe1111b9692dd2.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_umi__session_8hh_1a8a8c7670daa82497cfc4048609a2816b.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_umi__transport_8hh_1aa6e93bf4dec760535df66babbf660767.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_umi__sysex_8hh_1a39d24180dcd046c170749a2d896a4324.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_umi__firmware_8hh_1ae7f47641999c91f695260019f8148afe.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   enum_umi__firmware_8hh_1adcbc061a897cbf4e790db14f6f7dae2f.rst
+
+Functions
+*********
+
+
+.. toctree::
+   :maxdepth: 5
+
+   function_types_8hh_1ac1f632ef5a322fcb5430172668ce6fde.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_types_8hh_1ada00fc39f1e7b59ba0a13688e48c2897.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_cc_2decoder_8hh_1a201a74e81d461c3fc575583c25852a26.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_types_8hh_1a9e36cdf15ef7bbcdacaec22ad2ec0684.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_cc_2decoder_8hh_1af007764e38df1f6cb7aa176dbd64c217.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_types_8hh_1ab9de8ba7142f98ce296e7db8b3b44633.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_codec_2decoder_8hh_1a3bdc252f6e9050d8d80602a434947eef.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_event_8hh_1ad2ed57ce3555c629e2769f5623fe334e.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_event_8hh_1aaae27f5218bdcb1a58ac2baf026f6b92.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_convert_8hh_1aa385c12bcebd0a35ebfa731af3e524db.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_convert_8hh_1a1b797ff2956f6175009213ef0a511dc9.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_convert_8hh_1a6062689175be156efc076054015611ca.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_convert_8hh_1aec19553f2af998b837f8684de21ecb1f.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_convert_8hh_1af8841f530bf07ff1b3a0b2b8b5ae1379.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_convert_8hh_1a7a1fee2943051c2c80182358bd000f72.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_convert_8hh_1aac6186be8996fc3c76ae0f99216fd017.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_convert_8hh_1a044fa119cc9f3bef2f5250d4c09b1507.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_convert_8hh_1aaa9c9327932a8f84234e0d6d88806bc6.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_convert_8hh_1ad459c95138ad6fcd7c8f9b8e7c8b9bfc.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_convert_8hh_1ac74327372d927547c9b13a0c9566e6ec.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_convert_8hh_1ab0b901c2cf8695f243e5097ebfd9db16.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_convert_8hh_1a5f04aff800408c18768957782bdeee51.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_convert_8hh_1a8435924dff5a54366f13bcd8d86ab39a.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_convert_8hh_1a0e821771e1eb5e32ba6ebeccab6603e0.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_convert_8hh_1aba210f5855a245169acf27a022d307cf.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_convert_8hh_1a7c095ca85ed9210c879f3d171906dfc3.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_convert_8hh_1af5224bd9bad0987c24d02b6c1546ace7.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_result_8hh_1a7e081d009145b141ee778d6b75e582ef.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_result_8hh_1aced40ad251969e418530cfb697e1ce10.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_ump_8hh_1afd96ffdd5aa4e6b72a2bee3d8e2385f5.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_channel__voice_8hh_1a357918c175003a54032caf866e58effa.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_system_8hh_1aa44d5a00124d4b8443c16e833f0647e0.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_system_8hh_1ad1a357ef0ef7da0bfefb0798508cac3e.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_result_8hh_1a4b548463cc0738bc12c41142bc7cdac2.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_umi__transport_8hh_1afab50833e645177ade3eb935f26d50e2.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_umi__transport_8hh_1a4306a24dee85876d7489674c6778faaa.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_umi__transport_8hh_1a525af1df4378ec651978a714f56ece4e.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_encoding_8hh_1a97f63846558b65bc07965553fb9e3f97.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_umi__firmware_8hh_1abdda29195e98a3537fbd6d7fb2d3fbab.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_umi__firmware_8hh_1a7adf8950505530cf334fc77572be6449.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_umi__firmware_8hh_1a6c603c4357786bfd3ab1c47aec997b1e.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_umi__firmware_8hh_1a12289e1f344fa927f7656769ddd9e4b2.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_encoding_8hh_1a34c6393de3128f41f63b8c4a1a44d65f.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_encoding_8hh_1ad1f5b97644b5dac264448e26e61f1970.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_encoding_8hh_1a244c5b03a406fb569d28c7027677091b.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_encoding_8hh_1a623081b57e3d5db97ecff0bc23b1bc98.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_umi__object_8hh_1a334b29b916820832135e364dfb037385.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_umi__object_8hh_1a2028273cba8a10957ffcb08628c84b01.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_umi__firmware_8hh_1afd740345be45941399dae3ec5abe9e90.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_message_8hh_1a13b701f8f864eca37de0ed4cf2836e42.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_umi__auth_8hh_1ad830765ce05e3baadc204212e51a1e2c.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_umi__firmware_8hh_1ab68bc50fa0748d1ceca2293706423b23.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_umi__firmware_8hh_1a0a085b2f4326ecc2927b003aee585777.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   function_umi__firmware_8hh_1a804eaa50d18715232f5533b7754667ca.rst
+
+Variables
+*********
+
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_types_8hh_1ab51163845c701a0e0bf7331a71609453.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_cc_2decoder_8hh_1a7aa12153ec6f71bf0468f2655b8c6efd.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_codec_2decoder_8hh_1a6f3d0db1bbb50aa1a081bd18f64af00b.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umidi_8hh_1a2c6f5b0141351119f5ef06d9f422be2a.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umi__bootloader_8hh_1a549ed7fff74f1776214ab1f0b2a5fd3f.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umi__transport_8hh_1a2ca3dce6d9aabe41b85dd51f56050615.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umi__transport_8hh_1a9c68b74cb42381c16f9549b5930b00dc.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umi__transport_8hh_1a7c2ec2b84e4b7047d539e816bd848bba.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umi__transport_8hh_1a710d1a848a97ff569a4273b081f8dd25.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umi__transport_8hh_1a8602c447823acaa61341a06ac0608274.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umi__firmware_8hh_1ad051a35076f1926275a87dfcffbc23f0.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umi__session_8hh_1a6925c70fe7e3b606b2bbcdf41c90a5bf.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umi__bootloader_8hh_1a5b0382f3196918caa052911db633a6d7.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umi__session_8hh_1a2f29ba9d71c05bedae8c3d85e7a1604e.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umi__firmware_8hh_1a74c176d53636615dbc0d09b66729c568.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umi__firmware_8hh_1a05a1e64a215d1e75da098f061991b17e.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umi__firmware_8hh_1a5bd8ec516a4cb306854712739dfa0554.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umi__firmware_8hh_1a1d31346004e36cf8b08cef3ec0c95169.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umi__session_8hh_1a388e39c026d1264085390710e9ef668f.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umi__object_8hh_1ad525da25b077614a7977549dcf7ff2a9.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umi__bootloader_8hh_1ab108f633d0edbb0530b640032e637091.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umi__bootloader_8hh_1a57b625834a4b05819e1908076e67697e.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umi__bootloader_8hh_1a126a750a29815810a163229e21b8d412.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umi__bootloader_8hh_1acdb2adff3ab7d7ba250024cf9903d0fc.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_commands_8hh_1a91cd7fe572e2f5d961c33c7f3408555d.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_commands_8hh_1a9233d78e2a26d89e218513950f47c990.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umi__firmware_8hh_1acf20ee75ebe8a1ab50d6afa497c2c949.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umi__session_8hh_1aac64472ccaf26edf408192644422e081.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umi__transport_8hh_1a1f3390036f67708b99b82abfe8dbde53.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_commands_8hh_1ab42fc6e5b187aca1a8833d3c89db42df.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_commands_8hh_1a1c23706f29a6f9377031f21c3cdf450d.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   variable_umidi_8hh_1a87977b8ac3bab3edbabd4d169cada59a.rst
+
+Typedefs
+********
+
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1aa53d0b7a55f3d77d77a3f1c93d58165d.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1adb7b984186f60c3323e1474f7f412f3c.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1ae20b84eaca86d05535a9e74da752a96c.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a0260c8e3b588f261e7c9ec2955a21e34.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a9520854873992b0956f74ee8aa0ddf87.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a0318b4a9c988d548faf09c02116a5822.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a9fa8597655533ea8ac5713eeaf240079.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a21e9ff72e3cef6040ce5bc68593e0308.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1afda156e399daddde122e949435cf256c.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1af55c9fb58526847d247e7acffe0daf35.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a802013dec9bc8a504c11aa0c00f40461.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a837b1467c8d7e744461463e4d9ad2f6f.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1ae32d6dab04e70bd6ba5fe1a05c32161e.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a1d87a3d8e8153315b6a8114fd01ee0e5.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1ae173494e5567f0d4a17254bda0935e85.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1acfcd1299014b379e30588e482b16923e.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a84f9ca829db69eaad0c1444150d92a1d.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a8c191e97ab340bea23c1447e9a4d0aba.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1ab0f44e3352261b335d74b8c3af7c6104.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a933c919afe52279de60e83665ce01360.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a19f4793d3ca86c3976bf2d8acdecdbba.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a3e91ad945bccfe9c6d2d4007380e6f93.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a59c875290ca15b323c1fe4707f584c97.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a9bead7e8d54c8f3575b47f2b6af7b5dd.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a312c35a2d5f5e38e6ed4e20c86bff2f5.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a916ce58b7ec735d2aa4b62ee7a54719b.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a5daf50adf085aeeebdcad3c6314d34c7.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a6e1443a85487a2a0b2464987a2d243b9.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1ae4c0586fae7079639c63946d876c74da.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1afbf9c057d4ddee1fc883e58469cf3894.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1ac6eee3137585648ce85661578229dc93.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a06618725e0591e9e5beab3e3fcccd9fb.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_types_8hh_1a28bac6c28bb143800fc17280481a06f5.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a5c1fe2004ffd3f1468f4a926f6970776.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a0e96162827e466646cf78ae4a47961d8.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1aea95afe788e3bc3ec4ee3cbd048c162c.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a3fbd759209d2e8c213615667b8f22f94.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1ac84adfdb321fff61883a9de4a8550e27.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1ab87a12a7250c38ca42a21e8a57b72127.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1ab62c93a5ede826feeb12ac951815148f.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1aa11b20d838ec6b8eb8bb6751af67078b.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a81239645ea540d1a4b87a065d7f6da39.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a93604d15fc280c7a919e9d0dd25c30a3.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_types_8hh_1ac3e82edd9079162ed5d4ee81a490c548.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1aeb5ec69afaf0a412ec1db64558ebd0d8.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a5c3e6a28cbe3570ca4c0b5d460bc5754.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a7f0d07a0e64157cb9f2ab878ad4f0cae.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1aa60bf88eeb0988401eaa424aa6acc285.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1ae439a9f4d94a99af96fb42829e0146c4.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1aa8ca301e69569e25fcd32b36e5b00583.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a1d826e52e65877c1bc3d0687976656ce.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1af2e659109880e9d208b48b19f93ff559.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1ab88c8b7654fb93397960671ce2963123.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a0a72d9be2359afedae1244323c8a999a.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a6a2d373c31108e034a2a77e91ca54b97.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1ac774e74b88993fe55066544ea897736c.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a2458a14459872c0364808f3af2f35de0.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a79c005e709db9f6c75bc9994107dc1e4.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a2f1b2b97298cf065a787ffc1f22b23fc.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1aa7271cdd3b295df2c2baa4cd7f756356.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a167e3d5b8a627fed88b186820569e1af.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a3795e1315b7f281c229386424d423030.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a1db06a50043e7a44215a57d052b27a86.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a6efa4f4cf76035edd4981ec98ea9bba5.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a45317f44c7eda02379812e440be344fa.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1afd31126fe331f7f12604629cc91cbcfa.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standards_8hh_1a431d6355a338536498e5ddaafd0ab32e.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_codec_2decoder_8hh_1a57e5e5c2ee6b58f85817147e27051e1f.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_codec_2decoder_8hh_1a2d852bf412b29ee0a3d80b59586e45f0.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_codec_2decoder_8hh_1a421726ad44a5f9e392cb8b9b01d21280.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_codec_2decoder_8hh_1a7cd48266989582e2ded31a45bc878dd4.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_umidi_8hh_1abe6be093f9b172775dbe2c59ab667ea4.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_umidi_8hh_1a3397219c35efde97caf350577c47aba1.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_umi__bootloader_8hh_1a9910ebdbb18d58c50fd911f671374394.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_umi__bootloader_8hh_1aba3c692f6a69564dbc50909024f51605.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_umi__bootloader_8hh_1a5ea260dd736f734ff804c7a3fd865533.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_umi__bootloader_8hh_1ae8a5c897615bdf00bbcedc8a70ba1864.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_umi__firmware_8hh_1a68cbbd7ce4c6cffc066a58332045bc91.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_umi__firmware_8hh_1a4acd0a9cd880eb8d763409b33e55b502.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_commands_8hh_1a34aa5eb48e36170c9b03b409d6ef1c82.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_umi__auth_8hh_1aeb656e26ba9c5b746eced0a193c5a797.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_umi__session_8hh_1af4db94efb89fa9b33c4f247fae895ff6.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_umi__auth_8hh_1abcd7dfaf3b8aeb0ce01a2134d40c5130.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_umi__sysex_8hh_1ac163194dfdd0f68ebb9fef161f48ac5f.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_umi__sysex_8hh_1af67ef9abb1a5a146896605d5dc156ffc.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_umi__sysex_8hh_1a44256fe1d846754a0fda827842542944.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_umi__sysex_8hh_1a3ecd2310e3841c30c22746f07a67ad9f.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_umi__firmware_8hh_1aad094a9d5b972511b435aca8d9c66df9.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_commands_8hh_1a9508a31062c338b8a385c4007dd13345.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_umi__state_8hh_1a2e77ac48efbb7ba7e35dbb90f608479b.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_umi__state_8hh_1acdd540c7ab7324a1bfe33d35cf16ac82.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_umi__state_8hh_1a500414826c7479bae7acdcee635ba0cd.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_umi__state_8hh_1ae8cc0aaccc3784cada064c99ec4b8b89.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_standard__io_8hh_1a138ac55bc05c7aa193d345fe7609970c.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_result_8hh_1a85d468c82c33965c1fc13ccaadb1df66.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_sysex__buffer_8hh_1af2e5f2987c48011f8884eb4c218da4d0.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_sysex__buffer_8hh_1ab6a004b2d381427ce391632270db56aa.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   typedef_sysex__buffer_8hh_1a83f609cc17eda802886e1877e7e8621e.rst

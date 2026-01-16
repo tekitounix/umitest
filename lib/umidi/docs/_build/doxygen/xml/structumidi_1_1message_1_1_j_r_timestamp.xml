@@ -1,0 +1,239 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1message_1_1_j_r_timestamp" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::message::JRTimestamp</compoundname>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structumidi_1_1message_1_1_j_r_timestamp_1a725efea725a0db65d71ddaefaf43f72d" prot="public" static="no" mutable="no">
+        <type><ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref></type>
+        <definition>UMP32 umidi::message::JRTimestamp::ump</definition>
+        <argsstring></argsstring>
+        <name>ump</name>
+        <qualifiedname>umidi::message::JRTimestamp::ump</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/utility.hh" line="18" column="11" bodyfile="include/umidi/messages/utility.hh" bodystart="18" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-attrib">
+      <memberdef kind="variable" id="structumidi_1_1message_1_1_j_r_timestamp_1a8e88f30f060b60745b29d54d4bd4d26c" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::message::JRTimestamp::MT</definition>
+        <argsstring></argsstring>
+        <name>MT</name>
+        <qualifiedname>umidi::message::JRTimestamp::MT</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/utility.hh" line="20" column="30" bodyfile="include/umidi/messages/utility.hh" bodystart="20" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1message_1_1_j_r_timestamp_1ab0e07789eaf3d692a3dfa503795df373" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::message::JRTimestamp::STATUS</definition>
+        <argsstring></argsstring>
+        <name>STATUS</name>
+        <qualifiedname>umidi::message::JRTimestamp::STATUS</qualifiedname>
+        <initializer>= 0x20</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/utility.hh" line="21" column="30" bodyfile="include/umidi/messages/utility.hh" bodystart="21" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="structumidi_1_1message_1_1_j_r_timestamp_1a8ba2a141525423c095ddd8a87b3ed82f" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::message::JRTimestamp::group</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>group</name>
+        <qualifiedname>umidi::message::JRTimestamp::group</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/utility.hh" line="23" column="24" bodyfile="include/umidi/messages/utility.hh" bodystart="23" bodyend="23"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_j_r_timestamp_1a681c23f78c8a1777905898cf11f205a8" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint16_t</type>
+        <definition>uint16_t umidi::message::JRTimestamp::timestamp</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>timestamp</name>
+        <qualifiedname>umidi::message::JRTimestamp::timestamp</qualifiedname>
+        <briefdescription>
+<para>Get timestamp value (0-16383, 14-bit) Unit: 1/31250 second = 32 microseconds. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/utility.hh" line="27" column="25" bodyfile="include/umidi/messages/utility.hh" bodystart="27" bodyend="29"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_j_r_timestamp_1a78ebfe6ea62774c2ec54b8c769b11f4f" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::message::JRTimestamp::to_microseconds</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>to_microseconds</name>
+        <qualifiedname>umidi::message::JRTimestamp::to_microseconds</qualifiedname>
+        <briefdescription>
+<para>Convert timestamp to microseconds. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/utility.hh" line="32" column="25" bodyfile="include/umidi/messages/utility.hh" bodystart="32" bodyend="34"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_j_r_timestamp_1ae2b4fb5e467725ddf12c001e0986d238" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::message::JRTimestamp::is_valid</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>is_valid</name>
+        <qualifiedname>umidi::message::JRTimestamp::is_valid</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/utility.hh" line="36" column="21" bodyfile="include/umidi/messages/utility.hh" bodystart="36" bodyend="38"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="structumidi_1_1message_1_1_j_r_timestamp_1a4452827c2b6f1c6ac3cf4c41e9665b8a" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>JRTimestamp</type>
+        <definition>static constexpr JRTimestamp umidi::message::JRTimestamp::create</definition>
+        <argsstring>(uint16_t ts, uint8_t group=0) noexcept</argsstring>
+        <name>create</name>
+        <qualifiedname>umidi::message::JRTimestamp::create</qualifiedname>
+        <param>
+          <type>uint16_t</type>
+          <declname>ts</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>group</declname>
+          <defval>0</defval>
+        </param>
+        <briefdescription>
+<para>Create JR Timestamp. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>ts</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Timestamp value (0-16383) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>group</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>UMP group (0-15) </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/utility.hh" line="43" column="35" bodyfile="include/umidi/messages/utility.hh" bodystart="43" bodyend="45"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_j_r_timestamp_1aed1dcc2b30044f9831beae0076319c56" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>JRTimestamp</type>
+        <definition>static constexpr JRTimestamp umidi::message::JRTimestamp::from_microseconds</definition>
+        <argsstring>(uint32_t us, uint8_t group=0) noexcept</argsstring>
+        <name>from_microseconds</name>
+        <qualifiedname>umidi::message::JRTimestamp::from_microseconds</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>us</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>group</declname>
+          <defval>0</defval>
+        </param>
+        <briefdescription>
+<para>Create from microseconds (truncates to fit 14-bit range) </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>us</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Microseconds (0-524287 maps to 0-16383) </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/utility.hh" line="49" column="35" bodyfile="include/umidi/messages/utility.hh" bodystart="49" bodyend="52"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_j_r_timestamp_1aea9bbea367b3df0abdf13a2a24e8cd5f" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>JRTimestamp</type>
+        <definition>static constexpr JRTimestamp umidi::message::JRTimestamp::from_ump</definition>
+        <argsstring>(UMP32 u) noexcept</argsstring>
+        <name>from_ump</name>
+        <qualifiedname>umidi::message::JRTimestamp::from_ump</qualifiedname>
+        <param>
+          <type><ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref></type>
+          <declname>u</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/utility.hh" line="54" column="35" bodyfile="include/umidi/messages/utility.hh" bodystart="54" bodyend="54"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="2">
+        <label>umidi::UMP32</label>
+        <link refid="structumidi_1_1_u_m_p32"/>
+      </node>
+      <node id="1">
+        <label>umidi::message::JRTimestamp</label>
+        <childnode refid="2" relation="usage">
+          <edgelabel>ump</edgelabel>
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="include/umidi/messages/utility.hh" line="17" column="1" bodyfile="include/umidi/messages/utility.hh" bodystart="17" bodyend="55"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1message_1_1_j_r_timestamp_1a4452827c2b6f1c6ac3cf4c41e9665b8a" prot="public" virt="non-virtual"><scope>umidi::message::JRTimestamp</scope><name>create</name></member>
+      <member refid="structumidi_1_1message_1_1_j_r_timestamp_1aed1dcc2b30044f9831beae0076319c56" prot="public" virt="non-virtual"><scope>umidi::message::JRTimestamp</scope><name>from_microseconds</name></member>
+      <member refid="structumidi_1_1message_1_1_j_r_timestamp_1aea9bbea367b3df0abdf13a2a24e8cd5f" prot="public" virt="non-virtual"><scope>umidi::message::JRTimestamp</scope><name>from_ump</name></member>
+      <member refid="structumidi_1_1message_1_1_j_r_timestamp_1a8ba2a141525423c095ddd8a87b3ed82f" prot="public" virt="non-virtual"><scope>umidi::message::JRTimestamp</scope><name>group</name></member>
+      <member refid="structumidi_1_1message_1_1_j_r_timestamp_1ae2b4fb5e467725ddf12c001e0986d238" prot="public" virt="non-virtual"><scope>umidi::message::JRTimestamp</scope><name>is_valid</name></member>
+      <member refid="structumidi_1_1message_1_1_j_r_timestamp_1a8e88f30f060b60745b29d54d4bd4d26c" prot="public" virt="non-virtual"><scope>umidi::message::JRTimestamp</scope><name>MT</name></member>
+      <member refid="structumidi_1_1message_1_1_j_r_timestamp_1ab0e07789eaf3d692a3dfa503795df373" prot="public" virt="non-virtual"><scope>umidi::message::JRTimestamp</scope><name>STATUS</name></member>
+      <member refid="structumidi_1_1message_1_1_j_r_timestamp_1a681c23f78c8a1777905898cf11f205a8" prot="public" virt="non-virtual"><scope>umidi::message::JRTimestamp</scope><name>timestamp</name></member>
+      <member refid="structumidi_1_1message_1_1_j_r_timestamp_1a78ebfe6ea62774c2ec54b8c769b11f4f" prot="public" virt="non-virtual"><scope>umidi::message::JRTimestamp</scope><name>to_microseconds</name></member>
+      <member refid="structumidi_1_1message_1_1_j_r_timestamp_1a725efea725a0db65d71ddaefaf43f72d" prot="public" virt="non-virtual"><scope>umidi::message::JRTimestamp</scope><name>ump</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

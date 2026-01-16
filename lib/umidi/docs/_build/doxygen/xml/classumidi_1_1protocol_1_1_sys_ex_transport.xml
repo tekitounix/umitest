@@ -1,0 +1,343 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="classumidi_1_1protocol_1_1_sys_ex_transport" kind="class" language="C++" prot="public">
+    <compoundname>umidi::protocol::SysExTransport</compoundname>
+    <basecompoundref prot="public" virt="non-virtual">umidi::protocol::Transport</basecompoundref>
+    <templateparamlist>
+      <param>
+        <type>size_t</type>
+        <declname>TxBufSize</declname>
+        <defname>TxBufSize</defname>
+        <defval>512</defval>
+      </param>
+      <param>
+        <type>size_t</type>
+        <declname>RxBufSize</declname>
+        <defname>RxBufSize</defname>
+        <defval>512</defval>
+      </param>
+    </templateparamlist>
+    <sectiondef kind="public-type">
+      <memberdef kind="typedef" id="classumidi_1_1protocol_1_1_sys_ex_transport_1afff14a0421c293af28f520f4d410e1a0" prot="public" static="no">
+        <type>void(*)(const uint8_t *data, size_t len, void *ctx)</type>
+        <definition>using umidi::protocol::SysExTransport&lt; TxBufSize, RxBufSize &gt;::SendFn =  void (*)(const uint8_t* data, size_t len, void* ctx)</definition>
+        <argsstring></argsstring>
+        <name>SendFn</name>
+        <qualifiedname>umidi::protocol::SysExTransport::SendFn</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="189" column="5" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="189" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="classumidi_1_1protocol_1_1_sys_ex_transport_1a6199c5f1f11e57fbd0afaa6e92bbc9b9" prot="public" static="no">
+        <type>size_t(*)(uint8_t *out, size_t max_len, void *ctx)</type>
+        <definition>using umidi::protocol::SysExTransport&lt; TxBufSize, RxBufSize &gt;::ReceiveFn =  size_t (*)(uint8_t* out, size_t max_len, void* ctx)</definition>
+        <argsstring></argsstring>
+        <name>ReceiveFn</name>
+        <qualifiedname>umidi::protocol::SysExTransport::ReceiveFn</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="190" column="5" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="190" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_sys_ex_transport_1aaadf931d6d89d05dd530cd1167fd26a1" prot="private" static="no" mutable="no">
+        <type>SendFn</type>
+        <definition>SendFn umidi::protocol::SysExTransport&lt; TxBufSize, RxBufSize &gt;::send_fn_</definition>
+        <argsstring></argsstring>
+        <name>send_fn_</name>
+        <qualifiedname>umidi::protocol::SysExTransport::send_fn_</qualifiedname>
+        <initializer>= nullptr</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="260" column="12" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="260" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_sys_ex_transport_1a1e78ad79a73c7baf77aa8e92e4719209" prot="private" static="no" mutable="no">
+        <type>ReceiveFn</type>
+        <definition>ReceiveFn umidi::protocol::SysExTransport&lt; TxBufSize, RxBufSize &gt;::recv_fn_</definition>
+        <argsstring></argsstring>
+        <name>recv_fn_</name>
+        <qualifiedname>umidi::protocol::SysExTransport::recv_fn_</qualifiedname>
+        <initializer>= nullptr</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="261" column="15" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="261" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_sys_ex_transport_1a10bafd88a63902981ee5cc6a71594bc9" prot="private" static="no" mutable="no">
+        <type>void *</type>
+        <definition>void* umidi::protocol::SysExTransport&lt; TxBufSize, RxBufSize &gt;::ctx_</definition>
+        <argsstring></argsstring>
+        <name>ctx_</name>
+        <qualifiedname>umidi::protocol::SysExTransport::ctx_</qualifiedname>
+        <initializer>= nullptr</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="262" column="10" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="262" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_sys_ex_transport_1a0781dc1afd44d6f63e6c5dd4d3881a60" prot="private" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::SysExTransport&lt; TxBufSize, RxBufSize &gt;::tx_seq_</definition>
+        <argsstring></argsstring>
+        <name>tx_seq_</name>
+        <qualifiedname>umidi::protocol::SysExTransport::tx_seq_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="263" column="13" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="263" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_sys_ex_transport_1ac459ab1fa8671fa17cbd9f6f067857b5" prot="private" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::SysExTransport&lt; TxBufSize, RxBufSize &gt;::rx_seq_</definition>
+        <argsstring></argsstring>
+        <name>rx_seq_</name>
+        <qualifiedname>umidi::protocol::SysExTransport::rx_seq_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="264" column="13" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="264" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_sys_ex_transport_1a482ce7de1b830814e1e36aae10d85157" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool umidi::protocol::SysExTransport&lt; TxBufSize, RxBufSize &gt;::connected_</definition>
+        <argsstring></argsstring>
+        <name>connected_</name>
+        <qualifiedname>umidi::protocol::SysExTransport::connected_</qualifiedname>
+        <initializer>= false</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="265" column="10" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="265" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_sys_ex_transport_1a1959362123167e1826598f03cd280c4e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>umidi::protocol::SysExTransport&lt; TxBufSize, RxBufSize &gt;::SysExTransport</definition>
+        <argsstring>()=default</argsstring>
+        <name>SysExTransport</name>
+        <qualifiedname>umidi::protocol::SysExTransport::SysExTransport</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="192" column="5"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_sys_ex_transport_1a2ed5824db0f3154cd83c0067dc54ec5b" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::SysExTransport&lt; TxBufSize, RxBufSize &gt;::init</definition>
+        <argsstring>(SendFn send_fn, ReceiveFn recv_fn, void *ctx) noexcept</argsstring>
+        <name>init</name>
+        <qualifiedname>umidi::protocol::SysExTransport::init</qualifiedname>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <param>
+          <type>ReceiveFn</type>
+          <declname>recv_fn</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>ctx</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="194" column="10" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="194" bodyend="199"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_sys_ex_transport_1a359dbd9619449981ef421d2a70f9c572" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>TransportType</type>
+        <definition>TransportType umidi::protocol::SysExTransport&lt; TxBufSize, RxBufSize &gt;::type</definition>
+        <argsstring>() const noexcept override</argsstring>
+        <name>type</name>
+        <qualifiedname>umidi::protocol::SysExTransport::type</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="201" column="20" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="201" bodyend="203"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_sys_ex_transport_1a984fa66306eca392653961b356b8313a" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>const TransportCapabilities &amp;</type>
+        <definition>const TransportCapabilities &amp; umidi::protocol::SysExTransport&lt; TxBufSize, RxBufSize &gt;::capabilities</definition>
+        <argsstring>() const noexcept override</argsstring>
+        <name>capabilities</name>
+        <qualifiedname>umidi::protocol::SysExTransport::capabilities</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="205" column="34" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="205" bodyend="207"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_sys_ex_transport_1a7070697a3b63d7d100a3dfff5d4ea7ec" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::SysExTransport&lt; TxBufSize, RxBufSize &gt;::is_connected</definition>
+        <argsstring>() const noexcept override</argsstring>
+        <name>is_connected</name>
+        <qualifiedname>umidi::protocol::SysExTransport::is_connected</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="209" column="11" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="209" bodyend="211"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_sys_ex_transport_1a5028900a86fab53457446f992c7c8866" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t umidi::protocol::SysExTransport&lt; TxBufSize, RxBufSize &gt;::send</definition>
+        <argsstring>(const uint8_t *data, size_t len) override</argsstring>
+        <name>send</name>
+        <qualifiedname>umidi::protocol::SysExTransport::send</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="213" column="12" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="213" bodyend="228"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_sys_ex_transport_1a4f75322d107b7d69b68500942339a2cb" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t umidi::protocol::SysExTransport&lt; TxBufSize, RxBufSize &gt;::receive</definition>
+        <argsstring>(uint8_t *out, size_t max_len) override</argsstring>
+        <name>receive</name>
+        <qualifiedname>umidi::protocol::SysExTransport::receive</qualifiedname>
+        <param>
+          <type>uint8_t *</type>
+          <declname>out</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>max_len</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="230" column="12" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="230" bodyend="244"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_sys_ex_transport_1adfad4338eb04244713bc8e35b014dfda" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::SysExTransport&lt; TxBufSize, RxBufSize &gt;::flush</definition>
+        <argsstring>() override</argsstring>
+        <name>flush</name>
+        <qualifiedname>umidi::protocol::SysExTransport::flush</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="246" column="10" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="246" bodyend="248"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_sys_ex_transport_1a4d571b5785469d449dc1d42b10494a56" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::SysExTransport&lt; TxBufSize, RxBufSize &gt;::reset</definition>
+        <argsstring>() override</argsstring>
+        <name>reset</name>
+        <qualifiedname>umidi::protocol::SysExTransport::reset</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="250" column="10" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="250" bodyend="253"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_sys_ex_transport_1ac0153781464be9b77777717c3b7eda6f" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::SysExTransport&lt; TxBufSize, RxBufSize &gt;::set_connected</definition>
+        <argsstring>(bool connected) noexcept</argsstring>
+        <name>set_connected</name>
+        <qualifiedname>umidi::protocol::SysExTransport::set_connected</qualifiedname>
+        <param>
+          <type>bool</type>
+          <declname>connected</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="255" column="10" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="255" bodyend="257"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/umi_transport.hh" line="187" column="1" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="187" bodyend="266"/>
+    <listofallmembers>
+      <member refid="classumidi_1_1protocol_1_1_sys_ex_transport_1a984fa66306eca392653961b356b8313a" prot="public" virt="non-virtual"><scope>umidi::protocol::SysExTransport</scope><name>capabilities</name></member>
+      <member refid="classumidi_1_1protocol_1_1_sys_ex_transport_1a482ce7de1b830814e1e36aae10d85157" prot="private" virt="non-virtual"><scope>umidi::protocol::SysExTransport</scope><name>connected_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_sys_ex_transport_1a10bafd88a63902981ee5cc6a71594bc9" prot="private" virt="non-virtual"><scope>umidi::protocol::SysExTransport</scope><name>ctx_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_sys_ex_transport_1adfad4338eb04244713bc8e35b014dfda" prot="public" virt="non-virtual"><scope>umidi::protocol::SysExTransport</scope><name>flush</name></member>
+      <member refid="classumidi_1_1protocol_1_1_sys_ex_transport_1a2ed5824db0f3154cd83c0067dc54ec5b" prot="public" virt="non-virtual"><scope>umidi::protocol::SysExTransport</scope><name>init</name></member>
+      <member refid="classumidi_1_1protocol_1_1_sys_ex_transport_1a7070697a3b63d7d100a3dfff5d4ea7ec" prot="public" virt="non-virtual"><scope>umidi::protocol::SysExTransport</scope><name>is_connected</name></member>
+      <member refid="classumidi_1_1protocol_1_1_sys_ex_transport_1a4f75322d107b7d69b68500942339a2cb" prot="public" virt="non-virtual"><scope>umidi::protocol::SysExTransport</scope><name>receive</name></member>
+      <member refid="classumidi_1_1protocol_1_1_sys_ex_transport_1a6199c5f1f11e57fbd0afaa6e92bbc9b9" prot="public" virt="non-virtual"><scope>umidi::protocol::SysExTransport</scope><name>ReceiveFn</name></member>
+      <member refid="classumidi_1_1protocol_1_1_sys_ex_transport_1a1e78ad79a73c7baf77aa8e92e4719209" prot="private" virt="non-virtual"><scope>umidi::protocol::SysExTransport</scope><name>recv_fn_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_sys_ex_transport_1a4d571b5785469d449dc1d42b10494a56" prot="public" virt="non-virtual"><scope>umidi::protocol::SysExTransport</scope><name>reset</name></member>
+      <member refid="classumidi_1_1protocol_1_1_sys_ex_transport_1ac459ab1fa8671fa17cbd9f6f067857b5" prot="private" virt="non-virtual"><scope>umidi::protocol::SysExTransport</scope><name>rx_seq_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_sys_ex_transport_1a5028900a86fab53457446f992c7c8866" prot="public" virt="non-virtual"><scope>umidi::protocol::SysExTransport</scope><name>send</name></member>
+      <member refid="classumidi_1_1protocol_1_1_sys_ex_transport_1aaadf931d6d89d05dd530cd1167fd26a1" prot="private" virt="non-virtual"><scope>umidi::protocol::SysExTransport</scope><name>send_fn_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_sys_ex_transport_1afff14a0421c293af28f520f4d410e1a0" prot="public" virt="non-virtual"><scope>umidi::protocol::SysExTransport</scope><name>SendFn</name></member>
+      <member refid="classumidi_1_1protocol_1_1_sys_ex_transport_1ac0153781464be9b77777717c3b7eda6f" prot="public" virt="non-virtual"><scope>umidi::protocol::SysExTransport</scope><name>set_connected</name></member>
+      <member refid="classumidi_1_1protocol_1_1_sys_ex_transport_1a1959362123167e1826598f03cd280c4e" prot="public" virt="non-virtual"><scope>umidi::protocol::SysExTransport</scope><name>SysExTransport</name></member>
+      <member refid="classumidi_1_1protocol_1_1_sys_ex_transport_1a0781dc1afd44d6f63e6c5dd4d3881a60" prot="private" virt="non-virtual"><scope>umidi::protocol::SysExTransport</scope><name>tx_seq_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_sys_ex_transport_1a359dbd9619449981ef421d2a70f9c572" prot="public" virt="non-virtual"><scope>umidi::protocol::SysExTransport</scope><name>type</name></member>
+      <member refid="classumidi_1_1protocol_1_1_transport_1ac02c2b1e143a43ee9be4cc4d8a60f2e5" prot="public" virt="virtual"><scope>umidi::protocol::SysExTransport</scope><name>~Transport</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

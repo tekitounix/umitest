@@ -1,0 +1,596 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="classumidi_1_1protocol_1_1_object_transfer_handler" kind="class" language="C++" prot="public">
+    <compoundname>umidi::protocol::ObjectTransferHandler</compoundname>
+    <templateparamlist>
+      <param>
+        <type>size_t</type>
+        <declname>MaxChunkSize</declname>
+        <defname>MaxChunkSize</defname>
+        <defval>256</defval>
+      </param>
+    </templateparamlist>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_object_transfer_handler_1ad6a50467f0fbf993c7fb2ceb169028b8" prot="private" static="no" mutable="no">
+        <type>ObjectStorage &amp;</type>
+        <definition>ObjectStorage&amp; umidi::protocol::ObjectTransferHandler&lt; MaxChunkSize &gt;::storage_</definition>
+        <argsstring></argsstring>
+        <name>storage_</name>
+        <qualifiedname>umidi::protocol::ObjectTransferHandler::storage_</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="770" column="19" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="770" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_object_transfer_handler_1a5009e06f296362319355c6049a0e4d48" prot="private" static="no" mutable="no">
+        <type>StateManager &amp;</type>
+        <definition>StateManager&amp; umidi::protocol::ObjectTransferHandler&lt; MaxChunkSize &gt;::state_</definition>
+        <argsstring></argsstring>
+        <name>state_</name>
+        <qualifiedname>umidi::protocol::ObjectTransferHandler::state_</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="771" column="18" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="771" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_object_transfer_handler_1a1cafab5fb711edf403aa29d1d2bfac02" prot="private" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::ObjectTransferHandler&lt; MaxChunkSize &gt;::read_id_</definition>
+        <argsstring></argsstring>
+        <name>read_id_</name>
+        <qualifiedname>umidi::protocol::ObjectTransferHandler::read_id_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="774" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="774" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_object_transfer_handler_1a9e88555b4ce496fd93ab73d4367beffd" prot="private" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::ObjectTransferHandler&lt; MaxChunkSize &gt;::read_offset_</definition>
+        <argsstring></argsstring>
+        <name>read_offset_</name>
+        <qualifiedname>umidi::protocol::ObjectTransferHandler::read_offset_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="775" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="775" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_object_transfer_handler_1a02ca8411290129b7a0e3af514ff1efa8" prot="private" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::ObjectTransferHandler&lt; MaxChunkSize &gt;::read_total_</definition>
+        <argsstring></argsstring>
+        <name>read_total_</name>
+        <qualifiedname>umidi::protocol::ObjectTransferHandler::read_total_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="776" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="776" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_object_transfer_handler_1a38bc46ebb6fbf01477c40329ca36b25f" prot="private" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::ObjectTransferHandler&lt; MaxChunkSize &gt;::read_seq_</definition>
+        <argsstring></argsstring>
+        <name>read_seq_</name>
+        <qualifiedname>umidi::protocol::ObjectTransferHandler::read_seq_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="777" column="13" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="777" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_object_transfer_handler_1a87ffc6438eb7fbc2d49aab7e847ece44" prot="private" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::ObjectTransferHandler&lt; MaxChunkSize &gt;::write_id_</definition>
+        <argsstring></argsstring>
+        <name>write_id_</name>
+        <qualifiedname>umidi::protocol::ObjectTransferHandler::write_id_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="780" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="780" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_object_transfer_handler_1a5b53865d2f1237514fc1ac0257b741e7" prot="private" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::ObjectTransferHandler&lt; MaxChunkSize &gt;::write_offset_</definition>
+        <argsstring></argsstring>
+        <name>write_offset_</name>
+        <qualifiedname>umidi::protocol::ObjectTransferHandler::write_offset_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="781" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="781" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_object_transfer_handler_1a35006739a7e00ec29c47f2027f4f7cce" prot="private" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::ObjectTransferHandler&lt; MaxChunkSize &gt;::write_total_</definition>
+        <argsstring></argsstring>
+        <name>write_total_</name>
+        <qualifiedname>umidi::protocol::ObjectTransferHandler::write_total_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="782" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="782" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_object_transfer_handler_1a0d2328be567321df6409bf0e2da4c012" prot="private" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::ObjectTransferHandler&lt; MaxChunkSize &gt;::write_crc_</definition>
+        <argsstring></argsstring>
+        <name>write_crc_</name>
+        <qualifiedname>umidi::protocol::ObjectTransferHandler::write_crc_</qualifiedname>
+        <initializer>= 0xFFFFFFFF</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="783" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="783" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_transfer_handler_1a17082f120db71737696c6daef8960630" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>umidi::protocol::ObjectTransferHandler&lt; MaxChunkSize &gt;::ObjectTransferHandler</definition>
+        <argsstring>(ObjectStorage &amp;storage, StateManager &amp;state)</argsstring>
+        <name>ObjectTransferHandler</name>
+        <qualifiedname>umidi::protocol::ObjectTransferHandler::ObjectTransferHandler</qualifiedname>
+        <param>
+          <type>ObjectStorage &amp;</type>
+          <declname>storage</declname>
+        </param>
+        <param>
+          <type>StateManager &amp;</type>
+          <declname>state</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="477" column="5" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="477" bodyend="478"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_transfer_handler_1ac1bb9c56a48b46464f5ba88b0c4b35ee" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::ObjectTransferHandler&lt; MaxChunkSize &gt;::process</definition>
+        <argsstring>(const uint8_t *data, size_t len, SendFn send_fn)</argsstring>
+        <name>process</name>
+        <qualifiedname>umidi::protocol::ObjectTransferHandler::process</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+<para>Process object command. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="482" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="482" bodyend="518"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="private-func">
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_transfer_handler_1a549dba41da61169ec3a2e6f29c9b3542" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::ObjectTransferHandler&lt; MaxChunkSize &gt;::handle_list</definition>
+        <argsstring>(const uint8_t *data, size_t len, SendFn send_fn)</argsstring>
+        <name>handle_list</name>
+        <qualifiedname>umidi::protocol::ObjectTransferHandler::handle_list</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="522" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="522" bodyend="541"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_transfer_handler_1af52555c5ef2af20a9df053bf43b382cb" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::ObjectTransferHandler&lt; MaxChunkSize &gt;::handle_info</definition>
+        <argsstring>(const uint8_t *data, size_t len, SendFn send_fn)</argsstring>
+        <name>handle_info</name>
+        <qualifiedname>umidi::protocol::ObjectTransferHandler::handle_info</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="544" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="544" bodyend="564"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_transfer_handler_1a2561eee8d4ff1d0b140b6f4f62b1d838" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::ObjectTransferHandler&lt; MaxChunkSize &gt;::handle_read_begin</definition>
+        <argsstring>(const uint8_t *data, size_t len, SendFn send_fn)</argsstring>
+        <name>handle_read_begin</name>
+        <qualifiedname>umidi::protocol::ObjectTransferHandler::handle_read_begin</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="567" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="567" bodyend="584"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_transfer_handler_1aa491f77551e9d262463400a50bda046b" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::ObjectTransferHandler&lt; MaxChunkSize &gt;::handle_read_data</definition>
+        <argsstring>(const uint8_t *data, size_t len, SendFn send_fn)</argsstring>
+        <name>handle_read_data</name>
+        <qualifiedname>umidi::protocol::ObjectTransferHandler::handle_read_data</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="587" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="587" bodyend="618"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_transfer_handler_1a92f1714a695a254b0cd32703f0e12e58" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::ObjectTransferHandler&lt; MaxChunkSize &gt;::handle_write_begin</definition>
+        <argsstring>(const uint8_t *data, size_t len, SendFn send_fn)</argsstring>
+        <name>handle_write_begin</name>
+        <qualifiedname>umidi::protocol::ObjectTransferHandler::handle_write_begin</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="621" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="621" bodyend="644"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_transfer_handler_1a8c409845a58d6ce67abeb917a158bf69" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::ObjectTransferHandler&lt; MaxChunkSize &gt;::handle_write_data</definition>
+        <argsstring>(const uint8_t *data, size_t len, SendFn send_fn)</argsstring>
+        <name>handle_write_data</name>
+        <qualifiedname>umidi::protocol::ObjectTransferHandler::handle_write_data</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="647" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="647" bodyend="674"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_transfer_handler_1a8432bf240dfc34beadff35d4f14cdea3" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::ObjectTransferHandler&lt; MaxChunkSize &gt;::handle_verify</definition>
+        <argsstring>(const uint8_t *data, size_t len, SendFn send_fn)</argsstring>
+        <name>handle_verify</name>
+        <qualifiedname>umidi::protocol::ObjectTransferHandler::handle_verify</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="677" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="677" bodyend="708"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_transfer_handler_1a70c85b7fbd26ff1285de308e3736862a" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::ObjectTransferHandler&lt; MaxChunkSize &gt;::handle_delete</definition>
+        <argsstring>(const uint8_t *data, size_t len, SendFn send_fn)</argsstring>
+        <name>handle_delete</name>
+        <qualifiedname>umidi::protocol::ObjectTransferHandler::handle_delete</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="711" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="711" bodyend="722"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_transfer_handler_1a21395ad5f6714f5f03d0ae6839bc2c76" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::ObjectTransferHandler&lt; MaxChunkSize &gt;::handle_storage_info</definition>
+        <argsstring>(SendFn send_fn)</argsstring>
+        <name>handle_storage_info</name>
+        <qualifiedname>umidi::protocol::ObjectTransferHandler::handle_storage_info</qualifiedname>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="725" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="725" bodyend="737"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_transfer_handler_1a2f9a90291d96c311d9f569c5d84bcc92" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::ObjectTransferHandler&lt; MaxChunkSize &gt;::send_ack</definition>
+        <argsstring>(SendFn send_fn)</argsstring>
+        <name>send_ack</name>
+        <qualifiedname>umidi::protocol::ObjectTransferHandler::send_ack</qualifiedname>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="740" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="740" bodyend="745"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_transfer_handler_1ae44484dfc04111afdf763cb26a42e607" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename SendFn</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::protocol::ObjectTransferHandler&lt; MaxChunkSize &gt;::send_nack</definition>
+        <argsstring>(ObjectError err, SendFn send_fn)</argsstring>
+        <name>send_nack</name>
+        <qualifiedname>umidi::protocol::ObjectTransferHandler::send_nack</qualifiedname>
+        <param>
+          <type>ObjectError</type>
+          <declname>err</declname>
+        </param>
+        <param>
+          <type>SendFn</type>
+          <declname>send_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="748" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="748" bodyend="754"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_object_transfer_handler_1af1621dc276b8687a4ace93b08e8e7620" prot="private" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::ObjectTransferHandler&lt; MaxChunkSize &gt;::update_crc</definition>
+        <argsstring>(const uint8_t *data, size_t len) noexcept</argsstring>
+        <name>update_crc</name>
+        <qualifiedname>umidi::protocol::ObjectTransferHandler::update_crc</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>len</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="756" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="756" bodyend="768"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/umi_object.hh" line="475" column="1" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="475" bodyend="784"/>
+    <listofallmembers>
+      <member refid="classumidi_1_1protocol_1_1_object_transfer_handler_1a70c85b7fbd26ff1285de308e3736862a" prot="private" virt="non-virtual"><scope>umidi::protocol::ObjectTransferHandler</scope><name>handle_delete</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_transfer_handler_1af52555c5ef2af20a9df053bf43b382cb" prot="private" virt="non-virtual"><scope>umidi::protocol::ObjectTransferHandler</scope><name>handle_info</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_transfer_handler_1a549dba41da61169ec3a2e6f29c9b3542" prot="private" virt="non-virtual"><scope>umidi::protocol::ObjectTransferHandler</scope><name>handle_list</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_transfer_handler_1a2561eee8d4ff1d0b140b6f4f62b1d838" prot="private" virt="non-virtual"><scope>umidi::protocol::ObjectTransferHandler</scope><name>handle_read_begin</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_transfer_handler_1aa491f77551e9d262463400a50bda046b" prot="private" virt="non-virtual"><scope>umidi::protocol::ObjectTransferHandler</scope><name>handle_read_data</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_transfer_handler_1a21395ad5f6714f5f03d0ae6839bc2c76" prot="private" virt="non-virtual"><scope>umidi::protocol::ObjectTransferHandler</scope><name>handle_storage_info</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_transfer_handler_1a8432bf240dfc34beadff35d4f14cdea3" prot="private" virt="non-virtual"><scope>umidi::protocol::ObjectTransferHandler</scope><name>handle_verify</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_transfer_handler_1a92f1714a695a254b0cd32703f0e12e58" prot="private" virt="non-virtual"><scope>umidi::protocol::ObjectTransferHandler</scope><name>handle_write_begin</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_transfer_handler_1a8c409845a58d6ce67abeb917a158bf69" prot="private" virt="non-virtual"><scope>umidi::protocol::ObjectTransferHandler</scope><name>handle_write_data</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_transfer_handler_1a17082f120db71737696c6daef8960630" prot="public" virt="non-virtual"><scope>umidi::protocol::ObjectTransferHandler</scope><name>ObjectTransferHandler</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_transfer_handler_1ac1bb9c56a48b46464f5ba88b0c4b35ee" prot="public" virt="non-virtual"><scope>umidi::protocol::ObjectTransferHandler</scope><name>process</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_transfer_handler_1a1cafab5fb711edf403aa29d1d2bfac02" prot="private" virt="non-virtual"><scope>umidi::protocol::ObjectTransferHandler</scope><name>read_id_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_transfer_handler_1a9e88555b4ce496fd93ab73d4367beffd" prot="private" virt="non-virtual"><scope>umidi::protocol::ObjectTransferHandler</scope><name>read_offset_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_transfer_handler_1a38bc46ebb6fbf01477c40329ca36b25f" prot="private" virt="non-virtual"><scope>umidi::protocol::ObjectTransferHandler</scope><name>read_seq_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_transfer_handler_1a02ca8411290129b7a0e3af514ff1efa8" prot="private" virt="non-virtual"><scope>umidi::protocol::ObjectTransferHandler</scope><name>read_total_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_transfer_handler_1a2f9a90291d96c311d9f569c5d84bcc92" prot="private" virt="non-virtual"><scope>umidi::protocol::ObjectTransferHandler</scope><name>send_ack</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_transfer_handler_1ae44484dfc04111afdf763cb26a42e607" prot="private" virt="non-virtual"><scope>umidi::protocol::ObjectTransferHandler</scope><name>send_nack</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_transfer_handler_1a5009e06f296362319355c6049a0e4d48" prot="private" virt="non-virtual"><scope>umidi::protocol::ObjectTransferHandler</scope><name>state_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_transfer_handler_1ad6a50467f0fbf993c7fb2ceb169028b8" prot="private" virt="non-virtual"><scope>umidi::protocol::ObjectTransferHandler</scope><name>storage_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_transfer_handler_1af1621dc276b8687a4ace93b08e8e7620" prot="private" virt="non-virtual"><scope>umidi::protocol::ObjectTransferHandler</scope><name>update_crc</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_transfer_handler_1a0d2328be567321df6409bf0e2da4c012" prot="private" virt="non-virtual"><scope>umidi::protocol::ObjectTransferHandler</scope><name>write_crc_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_transfer_handler_1a87ffc6438eb7fbc2d49aab7e847ece44" prot="private" virt="non-virtual"><scope>umidi::protocol::ObjectTransferHandler</scope><name>write_id_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_transfer_handler_1a5b53865d2f1237514fc1ac0257b741e7" prot="private" virt="non-virtual"><scope>umidi::protocol::ObjectTransferHandler</scope><name>write_offset_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_object_transfer_handler_1a35006739a7e00ec29c47f2027f4f7cce" prot="private" virt="non-virtual"><scope>umidi::protocol::ObjectTransferHandler</scope><name>write_total_</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

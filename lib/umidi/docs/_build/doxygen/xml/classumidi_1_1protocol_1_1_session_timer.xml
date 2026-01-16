@@ -1,0 +1,382 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="classumidi_1_1protocol_1_1_session_timer" kind="class" language="C++" prot="public">
+    <compoundname>umidi::protocol::SessionTimer</compoundname>
+    <includes refid="umi__session_8hh" local="no">umi_session.hh</includes>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_session_timer_1ab8435429eb4e46b87e1c28983c11623f" prot="private" static="no" mutable="no">
+        <type><ref refid="structumidi_1_1protocol_1_1_timeout_config" kindref="compound">TimeoutConfig</ref></type>
+        <definition>TimeoutConfig umidi::protocol::SessionTimer::config_</definition>
+        <argsstring></argsstring>
+        <name>config_</name>
+        <qualifiedname>umidi::protocol::SessionTimer::config_</qualifiedname>
+        <initializer>{}</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="174" column="19" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="174" bodyend="174"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_session_timer_1a2c087a10523547f470099cc5916c898b" prot="private" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::SessionTimer::session_start_</definition>
+        <argsstring></argsstring>
+        <name>session_start_</name>
+        <qualifiedname>umidi::protocol::SessionTimer::session_start_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="175" column="14" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="175" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_session_timer_1a2a7bcaeb176f9cbde092fdee6ebc7178" prot="private" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::SessionTimer::last_activity_</definition>
+        <argsstring></argsstring>
+        <name>last_activity_</name>
+        <qualifiedname>umidi::protocol::SessionTimer::last_activity_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="176" column="14" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="176" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_session_timer_1acf91591f0e2a7e9cb2e3d2476edde759" prot="private" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::SessionTimer::last_chunk_</definition>
+        <argsstring></argsstring>
+        <name>last_chunk_</name>
+        <qualifiedname>umidi::protocol::SessionTimer::last_chunk_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="177" column="14" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="177" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_session_timer_1a23e9e6f73db128dc2b1cd2ba289a02fa" prot="private" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::SessionTimer::ack_sent_</definition>
+        <argsstring></argsstring>
+        <name>ack_sent_</name>
+        <qualifiedname>umidi::protocol::SessionTimer::ack_sent_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="178" column="14" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="178" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_session_timer_1a2eba86c4f8e471a562ddf2b4de1728fa" prot="private" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::SessionTimer::retry_count_</definition>
+        <argsstring></argsstring>
+        <name>retry_count_</name>
+        <qualifiedname>umidi::protocol::SessionTimer::retry_count_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="179" column="13" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="179" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_session_timer_1ab586cd2b4db6a362a4602a3a991a9ce6" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool umidi::protocol::SessionTimer::session_active_</definition>
+        <argsstring></argsstring>
+        <name>session_active_</name>
+        <qualifiedname>umidi::protocol::SessionTimer::session_active_</qualifiedname>
+        <initializer>= false</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="180" column="10" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="180" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_session_timer_1a477d1f85bb559a19a650a422430141d2" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::SessionTimer::init</definition>
+        <argsstring>(const TimeoutConfig &amp;config) noexcept</argsstring>
+        <name>init</name>
+        <qualifiedname>umidi::protocol::SessionTimer::init</qualifiedname>
+        <param>
+          <type>const <ref refid="structumidi_1_1protocol_1_1_timeout_config" kindref="compound">TimeoutConfig</ref> &amp;</type>
+          <declname>config</declname>
+        </param>
+        <briefdescription>
+<para>Initialize with timeout configuration. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="64" column="10" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="64" bodyend="67"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_session_timer_1a6ef9c7dfd1cab5d3f6ad4d5a23afe118" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::SessionTimer::reset</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>reset</name>
+        <qualifiedname>umidi::protocol::SessionTimer::reset</qualifiedname>
+        <briefdescription>
+<para>Reset all timers (start new session) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="70" column="10" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="70" bodyend="77"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_session_timer_1a08af8ddcf67beecdc2e36faa1515b404" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::SessionTimer::start_session</definition>
+        <argsstring>(uint32_t current_time_ms) noexcept</argsstring>
+        <name>start_session</name>
+        <qualifiedname>umidi::protocol::SessionTimer::start_session</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>current_time_ms</declname>
+        </param>
+        <briefdescription>
+<para>Start session. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="80" column="10" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="80" bodyend="87"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_session_timer_1a73820c67c2a3abb526cee2e15e152a6c" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::SessionTimer::end_session</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>end_session</name>
+        <qualifiedname>umidi::protocol::SessionTimer::end_session</qualifiedname>
+        <briefdescription>
+<para>End session. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="90" column="10" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="90" bodyend="92"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_session_timer_1aeeead99cf6421db305d4ffb6da2da469" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::SessionTimer::record_activity</definition>
+        <argsstring>(uint32_t current_time_ms) noexcept</argsstring>
+        <name>record_activity</name>
+        <qualifiedname>umidi::protocol::SessionTimer::record_activity</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>current_time_ms</declname>
+        </param>
+        <briefdescription>
+<para>Record activity (any message received/sent) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="95" column="10" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="95" bodyend="97"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_session_timer_1a5f8a5ba86c5a901a492af3de35114081" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::SessionTimer::record_chunk</definition>
+        <argsstring>(uint32_t current_time_ms) noexcept</argsstring>
+        <name>record_chunk</name>
+        <qualifiedname>umidi::protocol::SessionTimer::record_chunk</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>current_time_ms</declname>
+        </param>
+        <briefdescription>
+<para>Record chunk received. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="100" column="10" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="100" bodyend="103"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_session_timer_1a0f61a0b94ee591569e872439464abaee" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::SessionTimer::record_ack_sent</definition>
+        <argsstring>(uint32_t current_time_ms) noexcept</argsstring>
+        <name>record_ack_sent</name>
+        <qualifiedname>umidi::protocol::SessionTimer::record_ack_sent</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>current_time_ms</declname>
+        </param>
+        <briefdescription>
+<para>Record ACK sent (start waiting for response) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="106" column="10" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="106" bodyend="108"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_session_timer_1a128cd4930795294d2f35e8d7e88f4d2d" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::SessionTimer::record_ack_received</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>record_ack_received</name>
+        <qualifiedname>umidi::protocol::SessionTimer::record_ack_received</qualifiedname>
+        <briefdescription>
+<para>Record ACK received (clear ACK timer) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="111" column="10" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="111" bodyend="114"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_session_timer_1a95deabc9ee8c69739bbe7f95a972c802" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::SessionTimer::increment_retry</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>increment_retry</name>
+        <qualifiedname>umidi::protocol::SessionTimer::increment_retry</qualifiedname>
+        <briefdescription>
+<para>Increment retry count. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>true if retries remaining </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="118" column="10" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="118" bodyend="121"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_session_timer_1a0ce6f2e93c890003d30ce57186d30eea" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>TimeoutEvent</type>
+        <definition>TimeoutEvent umidi::protocol::SessionTimer::check</definition>
+        <argsstring>(uint32_t current_time_ms) const noexcept</argsstring>
+        <name>check</name>
+        <qualifiedname>umidi::protocol::SessionTimer::check</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>current_time_ms</declname>
+        </param>
+        <briefdescription>
+<para>Check for timeout conditions. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>current_time_ms</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Current timestamp </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>Timeout event if any occurred </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="126" column="19" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="126" bodyend="154"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_session_timer_1a1e48f45681f7caea0d28edf85aa87679" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::SessionTimer::is_active</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>is_active</name>
+        <qualifiedname>umidi::protocol::SessionTimer::is_active</qualifiedname>
+        <briefdescription>
+<para>Check if session is active. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="157" column="11" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="157" bodyend="157"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_session_timer_1a85bc6e5b6d0d9befc53cd2d187f0b18a" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::SessionTimer::remaining_session_time</definition>
+        <argsstring>(uint32_t current_time_ms) const noexcept</argsstring>
+        <name>remaining_session_time</name>
+        <qualifiedname>umidi::protocol::SessionTimer::remaining_session_time</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>current_time_ms</declname>
+        </param>
+        <briefdescription>
+<para>Get remaining session time (ms) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="160" column="15" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="160" bodyend="168"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_session_timer_1aee731970613546f39e49847e752d4748" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::SessionTimer::retry_count</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>retry_count</name>
+        <qualifiedname>umidi::protocol::SessionTimer::retry_count</qualifiedname>
+        <briefdescription>
+<para>Get retry count. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="171" column="14" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="171" bodyend="171"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Session timer Tracks multiple timeout conditions. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/umi_session.hh" line="61" column="1" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="61" bodyend="181"/>
+    <listofallmembers>
+      <member refid="classumidi_1_1protocol_1_1_session_timer_1a23e9e6f73db128dc2b1cd2ba289a02fa" prot="private" virt="non-virtual"><scope>umidi::protocol::SessionTimer</scope><name>ack_sent_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_session_timer_1a0ce6f2e93c890003d30ce57186d30eea" prot="public" virt="non-virtual"><scope>umidi::protocol::SessionTimer</scope><name>check</name></member>
+      <member refid="classumidi_1_1protocol_1_1_session_timer_1ab8435429eb4e46b87e1c28983c11623f" prot="private" virt="non-virtual"><scope>umidi::protocol::SessionTimer</scope><name>config_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_session_timer_1a73820c67c2a3abb526cee2e15e152a6c" prot="public" virt="non-virtual"><scope>umidi::protocol::SessionTimer</scope><name>end_session</name></member>
+      <member refid="classumidi_1_1protocol_1_1_session_timer_1a95deabc9ee8c69739bbe7f95a972c802" prot="public" virt="non-virtual"><scope>umidi::protocol::SessionTimer</scope><name>increment_retry</name></member>
+      <member refid="classumidi_1_1protocol_1_1_session_timer_1a477d1f85bb559a19a650a422430141d2" prot="public" virt="non-virtual"><scope>umidi::protocol::SessionTimer</scope><name>init</name></member>
+      <member refid="classumidi_1_1protocol_1_1_session_timer_1a1e48f45681f7caea0d28edf85aa87679" prot="public" virt="non-virtual"><scope>umidi::protocol::SessionTimer</scope><name>is_active</name></member>
+      <member refid="classumidi_1_1protocol_1_1_session_timer_1a2a7bcaeb176f9cbde092fdee6ebc7178" prot="private" virt="non-virtual"><scope>umidi::protocol::SessionTimer</scope><name>last_activity_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_session_timer_1acf91591f0e2a7e9cb2e3d2476edde759" prot="private" virt="non-virtual"><scope>umidi::protocol::SessionTimer</scope><name>last_chunk_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_session_timer_1a128cd4930795294d2f35e8d7e88f4d2d" prot="public" virt="non-virtual"><scope>umidi::protocol::SessionTimer</scope><name>record_ack_received</name></member>
+      <member refid="classumidi_1_1protocol_1_1_session_timer_1a0f61a0b94ee591569e872439464abaee" prot="public" virt="non-virtual"><scope>umidi::protocol::SessionTimer</scope><name>record_ack_sent</name></member>
+      <member refid="classumidi_1_1protocol_1_1_session_timer_1aeeead99cf6421db305d4ffb6da2da469" prot="public" virt="non-virtual"><scope>umidi::protocol::SessionTimer</scope><name>record_activity</name></member>
+      <member refid="classumidi_1_1protocol_1_1_session_timer_1a5f8a5ba86c5a901a492af3de35114081" prot="public" virt="non-virtual"><scope>umidi::protocol::SessionTimer</scope><name>record_chunk</name></member>
+      <member refid="classumidi_1_1protocol_1_1_session_timer_1a85bc6e5b6d0d9befc53cd2d187f0b18a" prot="public" virt="non-virtual"><scope>umidi::protocol::SessionTimer</scope><name>remaining_session_time</name></member>
+      <member refid="classumidi_1_1protocol_1_1_session_timer_1a6ef9c7dfd1cab5d3f6ad4d5a23afe118" prot="public" virt="non-virtual"><scope>umidi::protocol::SessionTimer</scope><name>reset</name></member>
+      <member refid="classumidi_1_1protocol_1_1_session_timer_1aee731970613546f39e49847e752d4748" prot="public" virt="non-virtual"><scope>umidi::protocol::SessionTimer</scope><name>retry_count</name></member>
+      <member refid="classumidi_1_1protocol_1_1_session_timer_1a2eba86c4f8e471a562ddf2b4de1728fa" prot="private" virt="non-virtual"><scope>umidi::protocol::SessionTimer</scope><name>retry_count_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_session_timer_1ab586cd2b4db6a362a4602a3a991a9ce6" prot="private" virt="non-virtual"><scope>umidi::protocol::SessionTimer</scope><name>session_active_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_session_timer_1a2c087a10523547f470099cc5916c898b" prot="private" virt="non-virtual"><scope>umidi::protocol::SessionTimer</scope><name>session_start_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_session_timer_1a08af8ddcf67beecdc2e36faa1515b404" prot="public" virt="non-virtual"><scope>umidi::protocol::SessionTimer</scope><name>start_session</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

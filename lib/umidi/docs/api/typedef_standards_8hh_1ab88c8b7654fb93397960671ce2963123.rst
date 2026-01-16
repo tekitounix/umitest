@@ -1,0 +1,14 @@
+.. _exhale_typedef_standards_8hh_1ab88c8b7654fb93397960671ce2963123:
+
+Typedef umidi::cc::RpnTuningBankSelect
+======================================
+
+- Defined in :ref:`file_include_umidi_cc_standards.hh`
+
+
+Typedef Documentation
+---------------------
+
+
+.. doxygentypedef:: umidi::cc::RpnTuningBankSelect
+   :project: umidi

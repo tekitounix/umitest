@@ -1,0 +1,131 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="classumidi_1_1protocol_1_1_flow_control_receiver" kind="class" language="C++" prot="public">
+    <compoundname>umidi::protocol::FlowControlReceiver</compoundname>
+    <includes refid="umi__session_8hh" local="no">umi_session.hh</includes>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_flow_control_receiver_1a289a6d940acbb14e8e15db76fb100b44" prot="private" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::FlowControlReceiver::expected_seq_</definition>
+        <argsstring></argsstring>
+        <name>expected_seq_</name>
+        <qualifiedname>umidi::protocol::FlowControlReceiver::expected_seq_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="389" column="13" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="389" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_flow_control_receiver_1a4904046c642baf4dd31dd98fc3695f84" prot="private" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::FlowControlReceiver::received_mask_</definition>
+        <argsstring></argsstring>
+        <name>received_mask_</name>
+        <qualifiedname>umidi::protocol::FlowControlReceiver::received_mask_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="390" column="14" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="390" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_flow_control_receiver_1aecc708f0a20f7b9fc8b18702bdb90af8" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::FlowControlReceiver::reset</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>reset</name>
+        <qualifiedname>umidi::protocol::FlowControlReceiver::reset</qualifiedname>
+        <briefdescription>
+<para>Reset state. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="344" column="10" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="344" bodyend="347"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_flow_control_receiver_1add9fb8fb0dc64b2a73391c3f7be356ea" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::FlowControlReceiver::process_packet</definition>
+        <argsstring>(uint8_t seq) noexcept</argsstring>
+        <name>process_packet</name>
+        <qualifiedname>umidi::protocol::FlowControlReceiver::process_packet</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>seq</declname>
+        </param>
+        <briefdescription>
+<para>Process received packet. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>seq</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Sequence number </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>true if packet is new and in order </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="352" column="10" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="352" bodyend="375"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_flow_control_receiver_1ab634ebdd209adf117c3c48403cdcd6c1" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::FlowControlReceiver::ack_sequence</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>ack_sequence</name>
+        <qualifiedname>umidi::protocol::FlowControlReceiver::ack_sequence</qualifiedname>
+        <briefdescription>
+<para>Get ACK sequence (highest consecutive received) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="378" column="14" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="378" bodyend="381"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_flow_control_receiver_1abd3d99680626c49d7c4b2986d096ca4c" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::FlowControlReceiver::expected_sequence</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>expected_sequence</name>
+        <qualifiedname>umidi::protocol::FlowControlReceiver::expected_sequence</qualifiedname>
+        <briefdescription>
+<para>Get expected sequence. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="384" column="14" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="384" bodyend="386"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Receiver-side flow controller. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/umi_session.hh" line="341" column="1" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="341" bodyend="391"/>
+    <listofallmembers>
+      <member refid="classumidi_1_1protocol_1_1_flow_control_receiver_1ab634ebdd209adf117c3c48403cdcd6c1" prot="public" virt="non-virtual"><scope>umidi::protocol::FlowControlReceiver</scope><name>ack_sequence</name></member>
+      <member refid="classumidi_1_1protocol_1_1_flow_control_receiver_1a289a6d940acbb14e8e15db76fb100b44" prot="private" virt="non-virtual"><scope>umidi::protocol::FlowControlReceiver</scope><name>expected_seq_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_flow_control_receiver_1abd3d99680626c49d7c4b2986d096ca4c" prot="public" virt="non-virtual"><scope>umidi::protocol::FlowControlReceiver</scope><name>expected_sequence</name></member>
+      <member refid="classumidi_1_1protocol_1_1_flow_control_receiver_1add9fb8fb0dc64b2a73391c3f7be356ea" prot="public" virt="non-virtual"><scope>umidi::protocol::FlowControlReceiver</scope><name>process_packet</name></member>
+      <member refid="classumidi_1_1protocol_1_1_flow_control_receiver_1a4904046c642baf4dd31dd98fc3695f84" prot="private" virt="non-virtual"><scope>umidi::protocol::FlowControlReceiver</scope><name>received_mask_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_flow_control_receiver_1aecc708f0a20f7b9fc8b18702bdb90af8" prot="public" virt="non-virtual"><scope>umidi::protocol::FlowControlReceiver</scope><name>reset</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

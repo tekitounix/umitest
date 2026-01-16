@@ -1,0 +1,1038 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="namespaceumidi_1_1cc" kind="namespace" language="C++">
+    <compoundname>umidi::cc</compoundname>
+    <innerclass refid="structumidi_1_1cc_1_1_c_c14_bit" prot="public">umidi::cc::CC14Bit</innerclass>
+    <innerclass refid="structumidi_1_1cc_1_1_c_c14_bit_state" prot="public">umidi::cc::CC14BitState</innerclass>
+    <innerclass refid="structumidi_1_1cc_1_1_c_c7_bit" prot="public">umidi::cc::CC7Bit</innerclass>
+    <innerclass refid="structumidi_1_1cc_1_1is__rpn__type" prot="public">umidi::cc::is_rpn_type</innerclass>
+    <innerclass refid="structumidi_1_1cc_1_1is__rpn__type_3_01_parameter_number_3_01_n_00_01_is_n_r_p_n_00_01_name_01_4_01_4" prot="public">umidi::cc::is_rpn_type&lt; ParameterNumber&lt; N, IsNRPN, Name &gt; &gt;</innerclass>
+    <innerclass refid="structumidi_1_1cc_1_1_parameter_number" prot="public">umidi::cc::ParameterNumber</innerclass>
+    <innerclass refid="classumidi_1_1cc_1_1_parameter_number_decoder" prot="public">umidi::cc::ParameterNumberDecoder</innerclass>
+    <innerclass refid="classumidi_1_1cc_1_1_parameter_number_state" prot="public">umidi::cc::ParameterNumberState</innerclass>
+    <innerclass refid="structumidi_1_1cc_1_1_string_literal" prot="public">umidi::cc::StringLiteral</innerclass>
+    <innerclass refid="structumidi_1_1cc_1_1_switch_c_c" prot="public">umidi::cc::SwitchCC</innerclass>
+    <innernamespace refid="namespaceumidi_1_1cc_1_1pitch__bend__sensitivity">umidi::cc::pitch_bend_sensitivity</innernamespace>
+    <sectiondef kind="typedef">
+      <memberdef kind="typedef" id="standards_8hh_1a0260c8e3b588f261e7c9ec2955a21e34" prot="public" static="no">
+        <type>CC14Bit&lt; 0, &quot;Bank Select&quot;&gt;</type>
+        <definition>using umidi::cc::BankSelect =  CC14Bit&lt;0, &quot;Bank Select&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>BankSelect</name>
+        <qualifiedname>umidi::cc::BankSelect</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="14" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="14" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1ac6eee3137585648ce85661578229dc93" prot="public" static="no">
+        <type>CC14Bit&lt; 1, &quot;Modulation Wheel&quot;&gt;</type>
+        <definition>using umidi::cc::ModulationWheel =  CC14Bit&lt;1, &quot;Modulation Wheel&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>ModulationWheel</name>
+        <qualifiedname>umidi::cc::ModulationWheel</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="15" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="15" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a9520854873992b0956f74ee8aa0ddf87" prot="public" static="no">
+        <type>CC14Bit&lt; 2, &quot;Breath Controller&quot;&gt;</type>
+        <definition>using umidi::cc::BreathController =  CC14Bit&lt;2, &quot;Breath Controller&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>BreathController</name>
+        <qualifiedname>umidi::cc::BreathController</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="16" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="16" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a8c191e97ab340bea23c1447e9a4d0aba" prot="public" static="no">
+        <type>CC14Bit&lt; 4, &quot;Foot Controller&quot;&gt;</type>
+        <definition>using umidi::cc::FootController =  CC14Bit&lt;4, &quot;Foot Controller&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>FootController</name>
+        <qualifiedname>umidi::cc::FootController</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="17" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="17" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a81239645ea540d1a4b87a065d7f6da39" prot="public" static="no">
+        <type>CC14Bit&lt; 5, &quot;Portamento Time&quot;&gt;</type>
+        <definition>using umidi::cc::PortamentoTime =  CC14Bit&lt;5, &quot;Portamento Time&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>PortamentoTime</name>
+        <qualifiedname>umidi::cc::PortamentoTime</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="18" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="18" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a21e9ff72e3cef6040ce5bc68593e0308" prot="public" static="no">
+        <type>CC14Bit&lt; 6, &quot;Data Entry&quot;&gt;</type>
+        <definition>using umidi::cc::DataEntry =  CC14Bit&lt;6, &quot;Data Entry&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>DataEntry</name>
+        <qualifiedname>umidi::cc::DataEntry</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="19" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="19" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a0318b4a9c988d548faf09c02116a5822" prot="public" static="no">
+        <type>CC14Bit&lt; 7, &quot;Channel Volume&quot;&gt;</type>
+        <definition>using umidi::cc::ChannelVolume =  CC14Bit&lt;7, &quot;Channel Volume&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>ChannelVolume</name>
+        <qualifiedname>umidi::cc::ChannelVolume</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="20" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="20" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1ae20b84eaca86d05535a9e74da752a96c" prot="public" static="no">
+        <type>CC14Bit&lt; 8, &quot;Balance&quot;&gt;</type>
+        <definition>using umidi::cc::Balance =  CC14Bit&lt;8, &quot;Balance&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>Balance</name>
+        <qualifiedname>umidi::cc::Balance</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="21" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="21" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1ac84adfdb321fff61883a9de4a8550e27" prot="public" static="no">
+        <type>CC14Bit&lt; 10, &quot;Pan&quot;&gt;</type>
+        <definition>using umidi::cc::Pan =  CC14Bit&lt;10, &quot;Pan&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>Pan</name>
+        <qualifiedname>umidi::cc::Pan</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="22" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="22" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a84f9ca829db69eaad0c1444150d92a1d" prot="public" static="no">
+        <type>CC14Bit&lt; 11, &quot;Expression&quot;&gt;</type>
+        <definition>using umidi::cc::Expression =  CC14Bit&lt;11, &quot;Expression&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>Expression</name>
+        <qualifiedname>umidi::cc::Expression</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="23" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="23" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1af55c9fb58526847d247e7acffe0daf35" prot="public" static="no">
+        <type>CC14Bit&lt; 12, &quot;Effect Control 1&quot;&gt;</type>
+        <definition>using umidi::cc::EffectControl1 =  CC14Bit&lt;12, &quot;Effect Control 1&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>EffectControl1</name>
+        <qualifiedname>umidi::cc::EffectControl1</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="24" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="24" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a802013dec9bc8a504c11aa0c00f40461" prot="public" static="no">
+        <type>CC14Bit&lt; 13, &quot;Effect Control 2&quot;&gt;</type>
+        <definition>using umidi::cc::EffectControl2 =  CC14Bit&lt;13, &quot;Effect Control 2&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>EffectControl2</name>
+        <qualifiedname>umidi::cc::EffectControl2</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="25" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="25" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1ab0f44e3352261b335d74b8c3af7c6104" prot="public" static="no">
+        <type>CC14Bit&lt; 16, &quot;General Purpose 1&quot;&gt;</type>
+        <definition>using umidi::cc::GeneralPurpose1 =  CC14Bit&lt;16, &quot;General Purpose 1&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>GeneralPurpose1</name>
+        <qualifiedname>umidi::cc::GeneralPurpose1</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="26" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="26" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a933c919afe52279de60e83665ce01360" prot="public" static="no">
+        <type>CC14Bit&lt; 17, &quot;General Purpose 2&quot;&gt;</type>
+        <definition>using umidi::cc::GeneralPurpose2 =  CC14Bit&lt;17, &quot;General Purpose 2&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>GeneralPurpose2</name>
+        <qualifiedname>umidi::cc::GeneralPurpose2</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="27" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="27" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a19f4793d3ca86c3976bf2d8acdecdbba" prot="public" static="no">
+        <type>CC14Bit&lt; 18, &quot;General Purpose 3&quot;&gt;</type>
+        <definition>using umidi::cc::GeneralPurpose3 =  CC14Bit&lt;18, &quot;General Purpose 3&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>GeneralPurpose3</name>
+        <qualifiedname>umidi::cc::GeneralPurpose3</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="28" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="28" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a3e91ad945bccfe9c6d2d4007380e6f93" prot="public" static="no">
+        <type>CC14Bit&lt; 19, &quot;General Purpose 4&quot;&gt;</type>
+        <definition>using umidi::cc::GeneralPurpose4 =  CC14Bit&lt;19, &quot;General Purpose 4&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>GeneralPurpose4</name>
+        <qualifiedname>umidi::cc::GeneralPurpose4</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="29" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="29" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a431d6355a338536498e5ddaafd0ab32e" prot="public" static="no">
+        <type>SwitchCC&lt; 64, &quot;Sustain Pedal&quot;&gt;</type>
+        <definition>using umidi::cc::SustainPedal =  SwitchCC&lt;64, &quot;Sustain Pedal&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>SustainPedal</name>
+        <qualifiedname>umidi::cc::SustainPedal</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="35" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="35" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1aa11b20d838ec6b8eb8bb6751af67078b" prot="public" static="no">
+        <type>SwitchCC&lt; 65, &quot;Portamento&quot;&gt;</type>
+        <definition>using umidi::cc::PortamentoSwitch =  SwitchCC&lt;65, &quot;Portamento&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>PortamentoSwitch</name>
+        <qualifiedname>umidi::cc::PortamentoSwitch</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="36" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="36" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1ac774e74b88993fe55066544ea897736c" prot="public" static="no">
+        <type>SwitchCC&lt; 66, &quot;Sostenuto&quot;&gt;</type>
+        <definition>using umidi::cc::Sostenuto =  SwitchCC&lt;66, &quot;Sostenuto&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>Sostenuto</name>
+        <qualifiedname>umidi::cc::Sostenuto</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="37" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="37" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a6a2d373c31108e034a2a77e91ca54b97" prot="public" static="no">
+        <type>SwitchCC&lt; 67, &quot;Soft Pedal&quot;&gt;</type>
+        <definition>using umidi::cc::SoftPedal =  SwitchCC&lt;67, &quot;Soft Pedal&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>SoftPedal</name>
+        <qualifiedname>umidi::cc::SoftPedal</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="38" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="38" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1ae4c0586fae7079639c63946d876c74da" prot="public" static="no">
+        <type>SwitchCC&lt; 68, &quot;Legato Footswitch&quot;&gt;</type>
+        <definition>using umidi::cc::LegatoFootswitch =  SwitchCC&lt;68, &quot;Legato Footswitch&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>LegatoFootswitch</name>
+        <qualifiedname>umidi::cc::LegatoFootswitch</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="39" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="39" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a6e1443a85487a2a0b2464987a2d243b9" prot="public" static="no">
+        <type>SwitchCC&lt; 69, &quot;Hold 2&quot;&gt;</type>
+        <definition>using umidi::cc::Hold2 =  SwitchCC&lt;69, &quot;Hold 2&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>Hold2</name>
+        <qualifiedname>umidi::cc::Hold2</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="40" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="40" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a2458a14459872c0364808f3af2f35de0" prot="public" static="no">
+        <type>CC7Bit&lt; 70, &quot;Sound Variation&quot;&gt;</type>
+        <definition>using umidi::cc::SoundController1 =  CC7Bit&lt;70, &quot;Sound Variation&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>SoundController1</name>
+        <qualifiedname>umidi::cc::SoundController1</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="46" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="46" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a2f1b2b97298cf065a787ffc1f22b23fc" prot="public" static="no">
+        <type>CC7Bit&lt; 71, &quot;Timbre/Harmonic Content&quot;&gt;</type>
+        <definition>using umidi::cc::SoundController2 =  CC7Bit&lt;71, &quot;Timbre/Harmonic Content&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>SoundController2</name>
+        <qualifiedname>umidi::cc::SoundController2</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="47" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="47" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1aa7271cdd3b295df2c2baa4cd7f756356" prot="public" static="no">
+        <type>CC7Bit&lt; 72, &quot;Release Time&quot;&gt;</type>
+        <definition>using umidi::cc::SoundController3 =  CC7Bit&lt;72, &quot;Release Time&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>SoundController3</name>
+        <qualifiedname>umidi::cc::SoundController3</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="48" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="48" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a167e3d5b8a627fed88b186820569e1af" prot="public" static="no">
+        <type>CC7Bit&lt; 73, &quot;Attack Time&quot;&gt;</type>
+        <definition>using umidi::cc::SoundController4 =  CC7Bit&lt;73, &quot;Attack Time&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>SoundController4</name>
+        <qualifiedname>umidi::cc::SoundController4</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="49" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="49" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a3795e1315b7f281c229386424d423030" prot="public" static="no">
+        <type>CC7Bit&lt; 74, &quot;Brightness&quot;&gt;</type>
+        <definition>using umidi::cc::SoundController5 =  CC7Bit&lt;74, &quot;Brightness&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>SoundController5</name>
+        <qualifiedname>umidi::cc::SoundController5</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="50" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="50" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a1db06a50043e7a44215a57d052b27a86" prot="public" static="no">
+        <type>CC7Bit&lt; 75, &quot;Decay Time&quot;&gt;</type>
+        <definition>using umidi::cc::SoundController6 =  CC7Bit&lt;75, &quot;Decay Time&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>SoundController6</name>
+        <qualifiedname>umidi::cc::SoundController6</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="51" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="51" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a6efa4f4cf76035edd4981ec98ea9bba5" prot="public" static="no">
+        <type>CC7Bit&lt; 76, &quot;Vibrato Rate&quot;&gt;</type>
+        <definition>using umidi::cc::SoundController7 =  CC7Bit&lt;76, &quot;Vibrato Rate&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>SoundController7</name>
+        <qualifiedname>umidi::cc::SoundController7</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="52" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="52" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a45317f44c7eda02379812e440be344fa" prot="public" static="no">
+        <type>CC7Bit&lt; 77, &quot;Vibrato Depth&quot;&gt;</type>
+        <definition>using umidi::cc::SoundController8 =  CC7Bit&lt;77, &quot;Vibrato Depth&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>SoundController8</name>
+        <qualifiedname>umidi::cc::SoundController8</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="53" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="53" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1afd31126fe331f7f12604629cc91cbcfa" prot="public" static="no">
+        <type>CC7Bit&lt; 78, &quot;Vibrato Delay&quot;&gt;</type>
+        <definition>using umidi::cc::SoundController9 =  CC7Bit&lt;78, &quot;Vibrato Delay&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>SoundController9</name>
+        <qualifiedname>umidi::cc::SoundController9</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="54" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="54" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a79c005e709db9f6c75bc9994107dc1e4" prot="public" static="no">
+        <type>CC7Bit&lt; 79, &quot;Sound Controller 10&quot;&gt;</type>
+        <definition>using umidi::cc::SoundController10 =  CC7Bit&lt;79, &quot;Sound Controller 10&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>SoundController10</name>
+        <qualifiedname>umidi::cc::SoundController10</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="55" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="55" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a59c875290ca15b323c1fe4707f584c97" prot="public" static="no">
+        <type>CC7Bit&lt; 80, &quot;General Purpose 5&quot;&gt;</type>
+        <definition>using umidi::cc::GeneralPurpose5 =  CC7Bit&lt;80, &quot;General Purpose 5&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>GeneralPurpose5</name>
+        <qualifiedname>umidi::cc::GeneralPurpose5</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="61" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="61" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a9bead7e8d54c8f3575b47f2b6af7b5dd" prot="public" static="no">
+        <type>CC7Bit&lt; 81, &quot;General Purpose 6&quot;&gt;</type>
+        <definition>using umidi::cc::GeneralPurpose6 =  CC7Bit&lt;81, &quot;General Purpose 6&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>GeneralPurpose6</name>
+        <qualifiedname>umidi::cc::GeneralPurpose6</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="62" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="62" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a312c35a2d5f5e38e6ed4e20c86bff2f5" prot="public" static="no">
+        <type>CC7Bit&lt; 82, &quot;General Purpose 7&quot;&gt;</type>
+        <definition>using umidi::cc::GeneralPurpose7 =  CC7Bit&lt;82, &quot;General Purpose 7&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>GeneralPurpose7</name>
+        <qualifiedname>umidi::cc::GeneralPurpose7</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="63" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="63" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a916ce58b7ec735d2aa4b62ee7a54719b" prot="public" static="no">
+        <type>CC7Bit&lt; 83, &quot;General Purpose 8&quot;&gt;</type>
+        <definition>using umidi::cc::GeneralPurpose8 =  CC7Bit&lt;83, &quot;General Purpose 8&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>GeneralPurpose8</name>
+        <qualifiedname>umidi::cc::GeneralPurpose8</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="64" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="64" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1ab62c93a5ede826feeb12ac951815148f" prot="public" static="no">
+        <type>CC7Bit&lt; 84, &quot;Portamento Control&quot;&gt;</type>
+        <definition>using umidi::cc::PortamentoControl =  CC7Bit&lt;84, &quot;Portamento Control&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>PortamentoControl</name>
+        <qualifiedname>umidi::cc::PortamentoControl</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="70" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="70" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a5daf50adf085aeeebdcad3c6314d34c7" prot="public" static="no">
+        <type>CC7Bit&lt; 88, &quot;High Resolution Velocity Prefix&quot;&gt;</type>
+        <definition>using umidi::cc::HighResVelocityPrefix =  CC7Bit&lt;88, &quot;High Resolution Velocity Prefix&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>HighResVelocityPrefix</name>
+        <qualifiedname>umidi::cc::HighResVelocityPrefix</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="71" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="71" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a837b1467c8d7e744461463e4d9ad2f6f" prot="public" static="no">
+        <type>CC7Bit&lt; 91, &quot;Reverb Send Level&quot;&gt;</type>
+        <definition>using umidi::cc::Effects1Depth =  CC7Bit&lt;91, &quot;Reverb Send Level&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>Effects1Depth</name>
+        <qualifiedname>umidi::cc::Effects1Depth</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="77" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="77" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1ae32d6dab04e70bd6ba5fe1a05c32161e" prot="public" static="no">
+        <type>CC7Bit&lt; 92, &quot;Tremolo Depth&quot;&gt;</type>
+        <definition>using umidi::cc::Effects2Depth =  CC7Bit&lt;92, &quot;Tremolo Depth&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>Effects2Depth</name>
+        <qualifiedname>umidi::cc::Effects2Depth</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="78" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="78" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a1d87a3d8e8153315b6a8114fd01ee0e5" prot="public" static="no">
+        <type>CC7Bit&lt; 93, &quot;Chorus Send Level&quot;&gt;</type>
+        <definition>using umidi::cc::Effects3Depth =  CC7Bit&lt;93, &quot;Chorus Send Level&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>Effects3Depth</name>
+        <qualifiedname>umidi::cc::Effects3Depth</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="79" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="79" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1ae173494e5567f0d4a17254bda0935e85" prot="public" static="no">
+        <type>CC7Bit&lt; 94, &quot;Celeste Depth&quot;&gt;</type>
+        <definition>using umidi::cc::Effects4Depth =  CC7Bit&lt;94, &quot;Celeste Depth&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>Effects4Depth</name>
+        <qualifiedname>umidi::cc::Effects4Depth</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="80" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="80" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1acfcd1299014b379e30588e482b16923e" prot="public" static="no">
+        <type>CC7Bit&lt; 95, &quot;Phaser Depth&quot;&gt;</type>
+        <definition>using umidi::cc::Effects5Depth =  CC7Bit&lt;95, &quot;Phaser Depth&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>Effects5Depth</name>
+        <qualifiedname>umidi::cc::Effects5Depth</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="81" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="81" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1afda156e399daddde122e949435cf256c" prot="public" static="no">
+        <type>CC7Bit&lt; 96, &quot;Data Increment&quot;&gt;</type>
+        <definition>using umidi::cc::DataIncrement =  CC7Bit&lt;96, &quot;Data Increment&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>DataIncrement</name>
+        <qualifiedname>umidi::cc::DataIncrement</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="87" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="87" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a9fa8597655533ea8ac5713eeaf240079" prot="public" static="no">
+        <type>CC7Bit&lt; 97, &quot;Data Decrement&quot;&gt;</type>
+        <definition>using umidi::cc::DataDecrement =  CC7Bit&lt;97, &quot;Data Decrement&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>DataDecrement</name>
+        <qualifiedname>umidi::cc::DataDecrement</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="88" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="88" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a5c1fe2004ffd3f1468f4a926f6970776" prot="public" static="no">
+        <type>CC7Bit&lt; 98, &quot;NRPN LSB&quot;&gt;</type>
+        <definition>using umidi::cc::NrpnLsb =  CC7Bit&lt;98, &quot;NRPN LSB&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>NrpnLsb</name>
+        <qualifiedname>umidi::cc::NrpnLsb</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="89" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="89" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a0e96162827e466646cf78ae4a47961d8" prot="public" static="no">
+        <type>CC7Bit&lt; 99, &quot;NRPN MSB&quot;&gt;</type>
+        <definition>using umidi::cc::NrpnMsb =  CC7Bit&lt;99, &quot;NRPN MSB&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>NrpnMsb</name>
+        <qualifiedname>umidi::cc::NrpnMsb</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="90" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="90" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a7f0d07a0e64157cb9f2ab878ad4f0cae" prot="public" static="no">
+        <type>CC7Bit&lt; 100, &quot;RPN LSB&quot;&gt;</type>
+        <definition>using umidi::cc::RpnLsb =  CC7Bit&lt;100, &quot;RPN LSB&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>RpnLsb</name>
+        <qualifiedname>umidi::cc::RpnLsb</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="91" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="91" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1aa8ca301e69569e25fcd32b36e5b00583" prot="public" static="no">
+        <type>CC7Bit&lt; 101, &quot;RPN MSB&quot;&gt;</type>
+        <definition>using umidi::cc::RpnMsb =  CC7Bit&lt;101, &quot;RPN MSB&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>RpnMsb</name>
+        <qualifiedname>umidi::cc::RpnMsb</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="92" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="92" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1adb7b984186f60c3323e1474f7f412f3c" prot="public" static="no">
+        <type>CC7Bit&lt; 120, &quot;All Sound Off&quot;&gt;</type>
+        <definition>using umidi::cc::AllSoundOff =  CC7Bit&lt;120, &quot;All Sound Off&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>AllSoundOff</name>
+        <qualifiedname>umidi::cc::AllSoundOff</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="98" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="98" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a93604d15fc280c7a919e9d0dd25c30a3" prot="public" static="no">
+        <type>CC7Bit&lt; 121, &quot;Reset All Controllers&quot;&gt;</type>
+        <definition>using umidi::cc::ResetAllControllers =  CC7Bit&lt;121, &quot;Reset All Controllers&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>ResetAllControllers</name>
+        <qualifiedname>umidi::cc::ResetAllControllers</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="99" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="99" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1afbf9c057d4ddee1fc883e58469cf3894" prot="public" static="no">
+        <type>SwitchCC&lt; 122, &quot;Local Control&quot;&gt;</type>
+        <definition>using umidi::cc::LocalControl =  SwitchCC&lt;122, &quot;Local Control&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>LocalControl</name>
+        <qualifiedname>umidi::cc::LocalControl</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="100" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="100" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1aa53d0b7a55f3d77d77a3f1c93d58165d" prot="public" static="no">
+        <type>CC7Bit&lt; 123, &quot;All Notes Off&quot;&gt;</type>
+        <definition>using umidi::cc::AllNotesOff =  CC7Bit&lt;123, &quot;All Notes Off&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>AllNotesOff</name>
+        <qualifiedname>umidi::cc::AllNotesOff</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="101" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="101" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1aea95afe788e3bc3ec4ee3cbd048c162c" prot="public" static="no">
+        <type>CC7Bit&lt; 124, &quot;Omni Mode Off&quot;&gt;</type>
+        <definition>using umidi::cc::OmniModeOff =  CC7Bit&lt;124, &quot;Omni Mode Off&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>OmniModeOff</name>
+        <qualifiedname>umidi::cc::OmniModeOff</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="102" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="102" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a3fbd759209d2e8c213615667b8f22f94" prot="public" static="no">
+        <type>CC7Bit&lt; 125, &quot;Omni Mode On&quot;&gt;</type>
+        <definition>using umidi::cc::OmniModeOn =  CC7Bit&lt;125, &quot;Omni Mode On&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>OmniModeOn</name>
+        <qualifiedname>umidi::cc::OmniModeOn</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="103" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="103" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a06618725e0591e9e5beab3e3fcccd9fb" prot="public" static="no">
+        <type>CC7Bit&lt; 126, &quot;Mono Mode On&quot;&gt;</type>
+        <definition>using umidi::cc::MonoModeOn =  CC7Bit&lt;126, &quot;Mono Mode On&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>MonoModeOn</name>
+        <qualifiedname>umidi::cc::MonoModeOn</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="104" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="104" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1ab87a12a7250c38ca42a21e8a57b72127" prot="public" static="no">
+        <type>CC7Bit&lt; 127, &quot;Poly Mode On&quot;&gt;</type>
+        <definition>using umidi::cc::PolyModeOn =  CC7Bit&lt;127, &quot;Poly Mode On&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>PolyModeOn</name>
+        <qualifiedname>umidi::cc::PolyModeOn</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="105" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="105" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1af2e659109880e9d208b48b19f93ff559" prot="public" static="no">
+        <type>RPN&lt; 0x0000, &quot;Pitch Bend Sensitivity&quot;&gt;</type>
+        <definition>using umidi::cc::RpnPitchBendSensitivity =  RPN&lt;0x0000, &quot;Pitch Bend Sensitivity&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>RpnPitchBendSensitivity</name>
+        <qualifiedname>umidi::cc::RpnPitchBendSensitivity</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="111" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="111" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a5c3e6a28cbe3570ca4c0b5d460bc5754" prot="public" static="no">
+        <type>RPN&lt; 0x0001, &quot;Fine Tuning&quot;&gt;</type>
+        <definition>using umidi::cc::RpnFineTuning =  RPN&lt;0x0001, &quot;Fine Tuning&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>RpnFineTuning</name>
+        <qualifiedname>umidi::cc::RpnFineTuning</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="112" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="112" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1aeb5ec69afaf0a412ec1db64558ebd0d8" prot="public" static="no">
+        <type>RPN&lt; 0x0002, &quot;Coarse Tuning&quot;&gt;</type>
+        <definition>using umidi::cc::RpnCoarseTuning =  RPN&lt;0x0002, &quot;Coarse Tuning&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>RpnCoarseTuning</name>
+        <qualifiedname>umidi::cc::RpnCoarseTuning</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="113" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="113" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a0a72d9be2359afedae1244323c8a999a" prot="public" static="no">
+        <type>RPN&lt; 0x0003, &quot;Tuning Program Select&quot;&gt;</type>
+        <definition>using umidi::cc::RpnTuningProgramSelect =  RPN&lt;0x0003, &quot;Tuning Program Select&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>RpnTuningProgramSelect</name>
+        <qualifiedname>umidi::cc::RpnTuningProgramSelect</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="114" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="114" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1ab88c8b7654fb93397960671ce2963123" prot="public" static="no">
+        <type>RPN&lt; 0x0004, &quot;Tuning Bank Select&quot;&gt;</type>
+        <definition>using umidi::cc::RpnTuningBankSelect =  RPN&lt;0x0004, &quot;Tuning Bank Select&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>RpnTuningBankSelect</name>
+        <qualifiedname>umidi::cc::RpnTuningBankSelect</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="115" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="115" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1aa60bf88eeb0988401eaa424aa6acc285" prot="public" static="no">
+        <type>RPN&lt; 0x0005, &quot;Modulation Depth Range&quot;&gt;</type>
+        <definition>using umidi::cc::RpnModulationDepthRange =  RPN&lt;0x0005, &quot;Modulation Depth Range&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>RpnModulationDepthRange</name>
+        <qualifiedname>umidi::cc::RpnModulationDepthRange</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="116" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="116" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1ae439a9f4d94a99af96fb42829e0146c4" prot="public" static="no">
+        <type>RPN&lt; 0x0006, &quot;MPE Configuration&quot;&gt;</type>
+        <definition>using umidi::cc::RpnMPEConfiguration =  RPN&lt;0x0006, &quot;MPE Configuration&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>RpnMPEConfiguration</name>
+        <qualifiedname>umidi::cc::RpnMPEConfiguration</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="117" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="117" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="standards_8hh_1a1d826e52e65877c1bc3d0687976656ce" prot="public" static="no">
+        <type>RPN&lt; 0x3FFF, &quot;Null (Reset)&quot;&gt;</type>
+        <definition>using umidi::cc::RpnNull =  RPN&lt;0x3FFF, &quot;Null (Reset)&quot;&gt;</definition>
+        <argsstring></argsstring>
+        <name>RpnNull</name>
+        <qualifiedname>umidi::cc::RpnNull</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/standards.hh" line="118" column="1" bodyfile="include/umidi/cc/standards.hh" bodystart="118" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="types_8hh_1ac3e82edd9079162ed5d4ee81a490c548" prot="public" static="no">
+        <templateparamlist>
+          <param>
+            <type>uint16_t</type>
+            <declname>Number</declname>
+            <defname>Number</defname>
+          </param>
+          <param>
+            <type>StringLiteral</type>
+            <declname>Name</declname>
+            <defname>Name</defname>
+            <defval>&quot;&quot;</defval>
+          </param>
+        </templateparamlist>
+        <type>ParameterNumber&lt; Number, false, Name &gt;</type>
+        <definition>using umidi::cc::RPN =  ParameterNumber&lt;Number, false, Name&gt;</definition>
+        <argsstring></argsstring>
+        <name>RPN</name>
+        <qualifiedname>umidi::cc::RPN</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="153" column="1" bodyfile="include/umidi/cc/types.hh" bodystart="153" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="types_8hh_1a28bac6c28bb143800fc17280481a06f5" prot="public" static="no">
+        <templateparamlist>
+          <param>
+            <type>uint16_t</type>
+            <declname>Number</declname>
+            <defname>Number</defname>
+          </param>
+          <param>
+            <type>StringLiteral</type>
+            <declname>Name</declname>
+            <defname>Name</defname>
+            <defval>&quot;&quot;</defval>
+          </param>
+        </templateparamlist>
+        <type>ParameterNumber&lt; Number, true, Name &gt;</type>
+        <definition>using umidi::cc::NRPN =  ParameterNumber&lt;Number, true, Name&gt;</definition>
+        <argsstring></argsstring>
+        <name>NRPN</name>
+        <qualifiedname>umidi::cc::NRPN</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="156" column="1" bodyfile="include/umidi/cc/types.hh" bodystart="156" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="var">
+      <memberdef kind="variable" id="types_8hh_1ab51163845c701a0e0bf7331a71609453" prot="public" static="no" constexpr="yes" mutable="no">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool umidi::cc::is_rpn_type_v</definition>
+        <argsstring></argsstring>
+        <name>is_rpn_type_v</name>
+        <qualifiedname>umidi::cc::is_rpn_type_v</qualifiedname>
+        <initializer>= is_rpn_type&lt;T&gt;::value</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="169" column="23" bodyfile="include/umidi/cc/types.hh" bodystart="169" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="types_8hh_1ab9de8ba7142f98ce296e7db8b3b44633" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>std::size_t</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+        </templateparamlist>
+        <type></type>
+        <definition>umidi::cc::StringLiteral</definition>
+        <argsstring>(const char(&amp;)[N]) -&gt; StringLiteral&lt; N &gt;</argsstring>
+        <name>StringLiteral</name>
+        <qualifiedname>umidi::cc::StringLiteral</qualifiedname>
+        <param>
+          <type>const </type>
+          <declname>char</declname>
+          <array>(&amp;)[N]</array>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="28" column="1" declfile="include/umidi/cc/types.hh" declline="28" declcolumn="1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/cc/decoder.hh" line="11" column="1"/>
+  </compounddef>
+</doxygen>

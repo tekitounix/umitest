@@ -1,0 +1,185 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="standards_8hh" kind="file" language="C++">
+    <compoundname>standards.hh</compoundname>
+    <includes refid="types_8hh" local="yes">types.hh</includes>
+    <includedby refid="cc_2decoder_8hh" local="yes">include/umidi/cc/decoder.hh</includedby>
+    <includedby refid="umidi_8hh" local="yes">include/umidi/umidi.hh</includedby>
+    <incdepgraph>
+      <node id="1">
+        <label>include/umidi/cc/standards.hh</label>
+        <link refid="standards_8hh"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>types.hh</label>
+        <link refid="types_8hh_source"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+      </node>
+      <node id="5">
+        <label>algorithm</label>
+      </node>
+      <node id="4">
+        <label>cstddef</label>
+      </node>
+      <node id="3">
+        <label>cstdint</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="2">
+        <label>include/umidi/cc/decoder.hh</label>
+        <link refid="cc_2decoder_8hh_source"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>include/umidi/cc/standards.hh</label>
+        <link refid="standards_8hh"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>include/umidi/umidi.hh</label>
+        <link refid="umidi_8hh_source"/>
+      </node>
+    </invincdepgraph>
+    <innernamespace refid="namespaceumidi">umidi</innernamespace>
+    <innernamespace refid="namespaceumidi_1_1cc">umidi::cc</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">//<sp/>SPDX-License-Identifier:<sp/>MIT</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="comment">//<sp/>UMI-OS<sp/>MIDI<sp/>Library<sp/>-<sp/>Standard<sp/>CC<sp/>Definitions</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="comment">//<sp/>MIDI<sp/>1.0<sp/>specification<sp/>compliant<sp/>CC<sp/>types</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="preprocessor">#pragma<sp/>once</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;types.hh&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">umidi::cc<sp/>{</highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="comment">//<sp/>=============================================================================</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight><highlight class="comment">//<sp/>14-bit<sp/>Control<sp/>Changes<sp/>(0-31<sp/>MSB,<sp/>32-63<sp/>LSB)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="comment">//<sp/>=============================================================================</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">BankSelect<sp/>=<sp/>CC14Bit&lt;0,<sp/></highlight><highlight class="stringliteral">&quot;Bank<sp/>Select&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">ModulationWheel<sp/>=<sp/>CC14Bit&lt;1,<sp/></highlight><highlight class="stringliteral">&quot;Modulation<sp/>Wheel&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">BreathController<sp/>=<sp/>CC14Bit&lt;2,<sp/></highlight><highlight class="stringliteral">&quot;Breath<sp/>Controller&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">FootController<sp/>=<sp/>CC14Bit&lt;4,<sp/></highlight><highlight class="stringliteral">&quot;Foot<sp/>Controller&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">PortamentoTime<sp/>=<sp/>CC14Bit&lt;5,<sp/></highlight><highlight class="stringliteral">&quot;Portamento<sp/>Time&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">DataEntry<sp/>=<sp/>CC14Bit&lt;6,<sp/></highlight><highlight class="stringliteral">&quot;Data<sp/>Entry&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">ChannelVolume<sp/>=<sp/>CC14Bit&lt;7,<sp/></highlight><highlight class="stringliteral">&quot;Channel<sp/>Volume&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">Balance<sp/>=<sp/>CC14Bit&lt;8,<sp/></highlight><highlight class="stringliteral">&quot;Balance&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">Pan<sp/>=<sp/>CC14Bit&lt;10,<sp/></highlight><highlight class="stringliteral">&quot;Pan&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">Expression<sp/>=<sp/>CC14Bit&lt;11,<sp/></highlight><highlight class="stringliteral">&quot;Expression&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">EffectControl1<sp/>=<sp/>CC14Bit&lt;12,<sp/></highlight><highlight class="stringliteral">&quot;Effect<sp/>Control<sp/>1&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="25"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">EffectControl2<sp/>=<sp/>CC14Bit&lt;13,<sp/></highlight><highlight class="stringliteral">&quot;Effect<sp/>Control<sp/>2&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">GeneralPurpose1<sp/>=<sp/>CC14Bit&lt;16,<sp/></highlight><highlight class="stringliteral">&quot;General<sp/>Purpose<sp/>1&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">GeneralPurpose2<sp/>=<sp/>CC14Bit&lt;17,<sp/></highlight><highlight class="stringliteral">&quot;General<sp/>Purpose<sp/>2&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="28"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">GeneralPurpose3<sp/>=<sp/>CC14Bit&lt;18,<sp/></highlight><highlight class="stringliteral">&quot;General<sp/>Purpose<sp/>3&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">GeneralPurpose4<sp/>=<sp/>CC14Bit&lt;19,<sp/></highlight><highlight class="stringliteral">&quot;General<sp/>Purpose<sp/>4&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight></codeline>
+<codeline lineno="31"><highlight class="normal"></highlight><highlight class="comment">//<sp/>=============================================================================</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Switch<sp/>Controllers<sp/>(64-69)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight><highlight class="comment">//<sp/>=============================================================================</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight></codeline>
+<codeline lineno="35"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">SustainPedal<sp/>=<sp/>SwitchCC&lt;64,<sp/></highlight><highlight class="stringliteral">&quot;Sustain<sp/>Pedal&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">PortamentoSwitch<sp/>=<sp/>SwitchCC&lt;65,<sp/></highlight><highlight class="stringliteral">&quot;Portamento&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">Sostenuto<sp/>=<sp/>SwitchCC&lt;66,<sp/></highlight><highlight class="stringliteral">&quot;Sostenuto&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="38"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">SoftPedal<sp/>=<sp/>SwitchCC&lt;67,<sp/></highlight><highlight class="stringliteral">&quot;Soft<sp/>Pedal&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="39"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">LegatoFootswitch<sp/>=<sp/>SwitchCC&lt;68,<sp/></highlight><highlight class="stringliteral">&quot;Legato<sp/>Footswitch&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="40"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">Hold2<sp/>=<sp/>SwitchCC&lt;69,<sp/></highlight><highlight class="stringliteral">&quot;Hold<sp/>2&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"></highlight></codeline>
+<codeline lineno="42"><highlight class="normal"></highlight><highlight class="comment">//<sp/>=============================================================================</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="43"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Sound<sp/>Controllers<sp/>(70-79)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="44"><highlight class="normal"></highlight><highlight class="comment">//<sp/>=============================================================================</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="45"><highlight class="normal"></highlight></codeline>
+<codeline lineno="46"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">SoundController1<sp/>=<sp/>CC7Bit&lt;70,<sp/></highlight><highlight class="stringliteral">&quot;Sound<sp/>Variation&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="47"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">SoundController2<sp/>=<sp/>CC7Bit&lt;71,<sp/></highlight><highlight class="stringliteral">&quot;Timbre/Harmonic<sp/>Content&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="48"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">SoundController3<sp/>=<sp/>CC7Bit&lt;72,<sp/></highlight><highlight class="stringliteral">&quot;Release<sp/>Time&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">SoundController4<sp/>=<sp/>CC7Bit&lt;73,<sp/></highlight><highlight class="stringliteral">&quot;Attack<sp/>Time&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="50"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">SoundController5<sp/>=<sp/>CC7Bit&lt;74,<sp/></highlight><highlight class="stringliteral">&quot;Brightness&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">SoundController6<sp/>=<sp/>CC7Bit&lt;75,<sp/></highlight><highlight class="stringliteral">&quot;Decay<sp/>Time&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">SoundController7<sp/>=<sp/>CC7Bit&lt;76,<sp/></highlight><highlight class="stringliteral">&quot;Vibrato<sp/>Rate&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">SoundController8<sp/>=<sp/>CC7Bit&lt;77,<sp/></highlight><highlight class="stringliteral">&quot;Vibrato<sp/>Depth&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">SoundController9<sp/>=<sp/>CC7Bit&lt;78,<sp/></highlight><highlight class="stringliteral">&quot;Vibrato<sp/>Delay&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">SoundController10<sp/>=<sp/>CC7Bit&lt;79,<sp/></highlight><highlight class="stringliteral">&quot;Sound<sp/>Controller<sp/>10&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"></highlight></codeline>
+<codeline lineno="57"><highlight class="normal"></highlight><highlight class="comment">//<sp/>=============================================================================</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="58"><highlight class="normal"></highlight><highlight class="comment">//<sp/>General<sp/>Purpose<sp/>Controllers<sp/>(7-bit)<sp/>(80-83)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="59"><highlight class="normal"></highlight><highlight class="comment">//<sp/>=============================================================================</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="60"><highlight class="normal"></highlight></codeline>
+<codeline lineno="61"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">GeneralPurpose5<sp/>=<sp/>CC7Bit&lt;80,<sp/></highlight><highlight class="stringliteral">&quot;General<sp/>Purpose<sp/>5&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">GeneralPurpose6<sp/>=<sp/>CC7Bit&lt;81,<sp/></highlight><highlight class="stringliteral">&quot;General<sp/>Purpose<sp/>6&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="63"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">GeneralPurpose7<sp/>=<sp/>CC7Bit&lt;82,<sp/></highlight><highlight class="stringliteral">&quot;General<sp/>Purpose<sp/>7&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">GeneralPurpose8<sp/>=<sp/>CC7Bit&lt;83,<sp/></highlight><highlight class="stringliteral">&quot;General<sp/>Purpose<sp/>8&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="65"><highlight class="normal"></highlight></codeline>
+<codeline lineno="66"><highlight class="normal"></highlight><highlight class="comment">//<sp/>=============================================================================</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="67"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Other<sp/>Controllers</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="68"><highlight class="normal"></highlight><highlight class="comment">//<sp/>=============================================================================</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="69"><highlight class="normal"></highlight></codeline>
+<codeline lineno="70"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">PortamentoControl<sp/>=<sp/>CC7Bit&lt;84,<sp/></highlight><highlight class="stringliteral">&quot;Portamento<sp/>Control&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="71"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">HighResVelocityPrefix<sp/>=<sp/>CC7Bit&lt;88,<sp/></highlight><highlight class="stringliteral">&quot;High<sp/>Resolution<sp/>Velocity<sp/>Prefix&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"></highlight></codeline>
+<codeline lineno="73"><highlight class="normal"></highlight><highlight class="comment">//<sp/>=============================================================================</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="74"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Effects<sp/>Depth<sp/>(91-95)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="75"><highlight class="normal"></highlight><highlight class="comment">//<sp/>=============================================================================</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="76"><highlight class="normal"></highlight></codeline>
+<codeline lineno="77"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">Effects1Depth<sp/>=<sp/>CC7Bit&lt;91,<sp/></highlight><highlight class="stringliteral">&quot;Reverb<sp/>Send<sp/>Level&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="78"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">Effects2Depth<sp/>=<sp/>CC7Bit&lt;92,<sp/></highlight><highlight class="stringliteral">&quot;Tremolo<sp/>Depth&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="79"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">Effects3Depth<sp/>=<sp/>CC7Bit&lt;93,<sp/></highlight><highlight class="stringliteral">&quot;Chorus<sp/>Send<sp/>Level&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="80"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">Effects4Depth<sp/>=<sp/>CC7Bit&lt;94,<sp/></highlight><highlight class="stringliteral">&quot;Celeste<sp/>Depth&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="81"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">Effects5Depth<sp/>=<sp/>CC7Bit&lt;95,<sp/></highlight><highlight class="stringliteral">&quot;Phaser<sp/>Depth&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="82"><highlight class="normal"></highlight></codeline>
+<codeline lineno="83"><highlight class="normal"></highlight><highlight class="comment">//<sp/>=============================================================================</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="84"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Data<sp/>Entry<sp/>and<sp/>Parameter<sp/>Selection<sp/>(96-101)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="85"><highlight class="normal"></highlight><highlight class="comment">//<sp/>=============================================================================</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="86"><highlight class="normal"></highlight></codeline>
+<codeline lineno="87"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">DataIncrement<sp/>=<sp/>CC7Bit&lt;96,<sp/></highlight><highlight class="stringliteral">&quot;Data<sp/>Increment&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="88"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">DataDecrement<sp/>=<sp/>CC7Bit&lt;97,<sp/></highlight><highlight class="stringliteral">&quot;Data<sp/>Decrement&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="89"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">NrpnLsb<sp/>=<sp/>CC7Bit&lt;98,<sp/></highlight><highlight class="stringliteral">&quot;NRPN<sp/>LSB&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="90"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">NrpnMsb<sp/>=<sp/>CC7Bit&lt;99,<sp/></highlight><highlight class="stringliteral">&quot;NRPN<sp/>MSB&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="91"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">RpnLsb<sp/>=<sp/>CC7Bit&lt;100,<sp/></highlight><highlight class="stringliteral">&quot;RPN<sp/>LSB&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="92"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">RpnMsb<sp/>=<sp/>CC7Bit&lt;101,<sp/></highlight><highlight class="stringliteral">&quot;RPN<sp/>MSB&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="93"><highlight class="normal"></highlight></codeline>
+<codeline lineno="94"><highlight class="normal"></highlight><highlight class="comment">//<sp/>=============================================================================</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="95"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Channel<sp/>Mode<sp/>Messages<sp/>(120-127)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="96"><highlight class="normal"></highlight><highlight class="comment">//<sp/>=============================================================================</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="97"><highlight class="normal"></highlight></codeline>
+<codeline lineno="98"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">AllSoundOff<sp/>=<sp/>CC7Bit&lt;120,<sp/></highlight><highlight class="stringliteral">&quot;All<sp/>Sound<sp/>Off&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="99"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">ResetAllControllers<sp/>=<sp/>CC7Bit&lt;121,<sp/></highlight><highlight class="stringliteral">&quot;Reset<sp/>All<sp/>Controllers&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="100"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">LocalControl<sp/>=<sp/>SwitchCC&lt;122,<sp/></highlight><highlight class="stringliteral">&quot;Local<sp/>Control&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="101"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">AllNotesOff<sp/>=<sp/>CC7Bit&lt;123,<sp/></highlight><highlight class="stringliteral">&quot;All<sp/>Notes<sp/>Off&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="102"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">OmniModeOff<sp/>=<sp/>CC7Bit&lt;124,<sp/></highlight><highlight class="stringliteral">&quot;Omni<sp/>Mode<sp/>Off&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="103"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">OmniModeOn<sp/>=<sp/>CC7Bit&lt;125,<sp/></highlight><highlight class="stringliteral">&quot;Omni<sp/>Mode<sp/>On&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="104"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">MonoModeOn<sp/>=<sp/>CC7Bit&lt;126,<sp/></highlight><highlight class="stringliteral">&quot;Mono<sp/>Mode<sp/>On&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="105"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">PolyModeOn<sp/>=<sp/>CC7Bit&lt;127,<sp/></highlight><highlight class="stringliteral">&quot;Poly<sp/>Mode<sp/>On&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="106"><highlight class="normal"></highlight></codeline>
+<codeline lineno="107"><highlight class="normal"></highlight><highlight class="comment">//<sp/>=============================================================================</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="108"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Standard<sp/>RPN<sp/>Definitions</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="109"><highlight class="normal"></highlight><highlight class="comment">//<sp/>=============================================================================</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="110"><highlight class="normal"></highlight></codeline>
+<codeline lineno="111"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">RpnPitchBendSensitivity<sp/>=<sp/>RPN&lt;0x0000,<sp/></highlight><highlight class="stringliteral">&quot;Pitch<sp/>Bend<sp/>Sensitivity&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="112"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">RpnFineTuning<sp/>=<sp/>RPN&lt;0x0001,<sp/></highlight><highlight class="stringliteral">&quot;Fine<sp/>Tuning&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="113"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">RpnCoarseTuning<sp/>=<sp/>RPN&lt;0x0002,<sp/></highlight><highlight class="stringliteral">&quot;Coarse<sp/>Tuning&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="114"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">RpnTuningProgramSelect<sp/>=<sp/>RPN&lt;0x0003,<sp/></highlight><highlight class="stringliteral">&quot;Tuning<sp/>Program<sp/>Select&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="115"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">RpnTuningBankSelect<sp/>=<sp/>RPN&lt;0x0004,<sp/></highlight><highlight class="stringliteral">&quot;Tuning<sp/>Bank<sp/>Select&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="116"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">RpnModulationDepthRange<sp/>=<sp/>RPN&lt;0x0005,<sp/></highlight><highlight class="stringliteral">&quot;Modulation<sp/>Depth<sp/>Range&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="117"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">RpnMPEConfiguration<sp/>=<sp/>RPN&lt;0x0006,<sp/></highlight><highlight class="stringliteral">&quot;MPE<sp/>Configuration&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="118"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">RpnNull<sp/>=<sp/>RPN&lt;0x3FFF,<sp/></highlight><highlight class="stringliteral">&quot;Null<sp/>(Reset)&quot;</highlight><highlight class="normal">&gt;;</highlight></codeline>
+<codeline lineno="119"><highlight class="normal"></highlight></codeline>
+<codeline lineno="120"><highlight class="normal">}<sp/></highlight><highlight class="comment">//<sp/>namespace<sp/>umidi::cc</highlight><highlight class="normal"></highlight></codeline>
+    </programlisting>
+    <location file="include/umidi/cc/standards.hh"/>
+  </compounddef>
+</doxygen>

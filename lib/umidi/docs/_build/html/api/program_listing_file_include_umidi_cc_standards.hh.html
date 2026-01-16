@@ -1,0 +1,516 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Program Listing for File standards.hh &mdash; umidi Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/collapsible-lists/css/tree_view.css?v=a885cde7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js?v=73120307"></script>
+      <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js?v=660e4f45"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            umidi
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+<div class="language-switcher" style="margin-top: 10px; padding: 8px; background: #f0f0f0; border-radius: 4px;">
+  <span style="font-size: 0.85em; color: #333;">Language:</span>
+  
+    <strong style="color: #2980b9;">EN</strong> |
+    <a href="ja/index.html" style="color: #2980b9; text-decoration: underline;">JA</a>
+  
+</div>
+
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../README.html">umidi - UMI-OS MIDI Library</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../README.html#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../README.html#quick-start">Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../README.html#documentation">Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../README.html#directory-structure">Directory Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../README.html#independence">Independence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../README.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../README.html#license">License</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../design.html">umidi Design Document</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../design.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../design.html#architecture">Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#layer-structure">Layer Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#core-design-ump-opt-format">Core Design: UMP-Opt Format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#type-checking-optimization">Type Checking Optimization</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../design.html#module-reference">Module Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#core">core/</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#messages">messages/</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#protocol">protocol/</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../design.html#usage-patterns">Usage Patterns</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#basic-parsing">Basic Parsing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#type-safe-dispatch">Type-Safe Dispatch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#factory-methods">Factory Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../design.html#performance-considerations">Performance Considerations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#memory">Memory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#timing">Timing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../design.html#thread-safety">Thread Safety</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../design.html#error-handling">Error Handling</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#basic-midi-parsing">Basic MIDI Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#running-status-support">Running Status Support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#type-safe-message-wrappers">Type-Safe Message Wrappers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#message-dispatch">Message Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#midi-output">MIDI Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#sysex-communication">SysEx Communication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#pitch-bend-handling">Pitch Bend Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#building-umi-protocol-messages">Building UMI Protocol Messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#interrupt-safe-usage">Interrupt-Safe Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../CORE.html">Core Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../CORE.html#ump32-core-ump-hh">UMP32 (core/ump.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../CORE.html#memory-layout">Memory Layout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CORE.html#type-checking">Type Checking</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CORE.html#api">API</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../CORE.html#ump64-core-ump-hh">UMP64 (core/ump.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../CORE.html#parser-core-parser-hh">Parser (core/parser.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../CORE.html#usage-example">Usage Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../CORE.html#serializer-core-parser-hh">Serializer (core/parser.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../CORE.html#result-core-result-hh">Result (core/result.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../CORE.html#sysexbuffer-core-sysex-buffer-hh">SysExBuffer (core/sysex_buffer.hh)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../MESSAGES.html">Message Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../MESSAGES.html#channel-voice-messages-messages-channel-voice-hh">Channel Voice Messages (messages/channel_voice.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#noteon">NoteOn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#noteoff">NoteOff</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#controlchange">ControlChange</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#programchange">ProgramChange</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#pitchbend">PitchBend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#channelpressure">ChannelPressure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#polypressure">PolyPressure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#message-dispatch">Message Dispatch</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../MESSAGES.html#system-messages-messages-system-hh">System Messages (messages/system.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#real-time-messages">Real-time Messages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#system-common-messages">System Common Messages</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../MESSAGES.html#sysex-messages-messages-sysex-hh">SysEx Messages (messages/sysex.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#sysex7">SysEx7</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#sysexparser">SysExParser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#sysexserializer">SysExSerializer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../MESSAGES.html#utility-messages-messages-utility-hh">Utility Messages (messages/utility.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#jr-timestamp-jitter-reduction">JR Timestamp (Jitter Reduction)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#jr-timestamp-tracker">JR Timestamp Tracker</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#jr-clock">JR Clock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../MESSAGES.html#noop">NOOP</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../CC.html">Control Change</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../CC.html#cc-types-cc-types-hh">CC Types (cc/types.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#bit-cc">7-bit CC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#bit-cc-msb-lsb-pair">14-bit CC (MSB/LSB pair)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#switch-cc">Switch CC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#rpn-nrpn">RPN/NRPN</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../CC.html#standard-cc-definitions-cc-standards-hh">Standard CC Definitions (cc/standards.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#bit-controllers">14-bit Controllers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#switch-controllers">Switch Controllers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#sound-controllers">Sound Controllers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#effect-depths">Effect Depths</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#channel-mode">Channel Mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#standard-rpns">Standard RPNs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#pitch-bend-sensitivity-helper">Pitch Bend Sensitivity Helper</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../CC.html#rpn-nrpn-decoder-cc-decoder-hh">RPN/NRPN Decoder (cc/decoder.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#usage-example">Usage Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../CC.html#template-static-decoder-codec-decoder-hh">Template Static Decoder (codec/decoder.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../CC.html#pre-configured-decoders">Pre-configured Decoders</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../PROTOCOL.html">UMI SysEx Protocol</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#protocol-overview">Protocol Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#bit-encoding-protocol-umi-sysex-hh">7-bit Encoding (protocol/umi_sysex.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#command-categories">Command Categories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#standard-io-protocol-umi-sysex-hh">Standard IO (protocol/umi_sysex.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#standardio-class">StandardIO Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#commands">Commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#message-builder">Message Builder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#message-parser">Message Parser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#firmware-update-protocol-umi-firmware-hh">Firmware Update (protocol/umi_firmware.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#firmwareheader">FirmwareHeader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#firmwareheaderbuilder">FirmwareHeaderBuilder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#firmwarevalidator">FirmwareValidator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#firmware-commands">Firmware Commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#a-b-partition-bootloader-protocol-umi-bootloader-hh">A/B Partition Bootloader (protocol/umi_bootloader.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#bootconfig">BootConfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#platform-configurations">Platform Configurations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#bootloaderinterface">BootloaderInterface</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#authentication-protocol-umi-auth-hh">Authentication (protocol/umi_auth.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#authenticator">Authenticator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#authclient">AuthClient</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#auth-commands">Auth Commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#session-management-protocol-umi-session-hh">Session Management (protocol/umi_session.hh)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#timeoutconfig">TimeoutConfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#sessiontimer">SessionTimer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#flowcontrolsender">FlowControlSender</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../PROTOCOL.html#flowcontrolreceiver">FlowControlReceiver</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../PROTOCOL.html#securefirmwareupdate-complete-handler">SecureFirmwareUpdate (Complete Handler)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../TRANSPORT.html">Transport Abstraction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#transport-types-protocol-umi-transport-hh">Transport Types (protocol/umi_transport.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#transport-capabilities">Transport Capabilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#transport-interface">Transport Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#bulk-framing">Bulk Framing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#sysex-transport">SysEx Transport</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#bulk-transport">Bulk Transport</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#transport-handler">Transport Handler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#transport-manager">Transport Manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#usage-example">Usage Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../TRANSPORT.html#web-client-fallback-strategy">Web Client Fallback Strategy</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../STATE.html">State Synchronization</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#device-states-protocol-umi-state-hh">Device States (protocol/umi_state.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#state-commands-0x28-0x2f">State Commands (0x28-0x2F)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#state-report">State Report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#resume-info">Resume Info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#boot-verification">Boot Verification</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../STATE.html#boot-flow">Boot Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#state-manager">State Manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#state-protocol-handler">State Protocol Handler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#stateful-firmware-update">Stateful Firmware Update</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STATE.html#usage-example">Usage Example</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../STATE.html#device-side-bootloader">Device-side (Bootloader)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../STATE.html#device-side-application">Device-side (Application)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../STATE.html#host-side-web-client">Host-side (Web Client)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../OBJECT.html">Object Transfer Protocol</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#object-types-protocol-umi-object-hh">Object Types (protocol/umi_object.hh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#object-flags">Object Flags</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#object-header-80-bytes">Object Header (80 bytes)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#type-specific-metadata">Type-Specific Metadata</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#sequence-metadata">Sequence Metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#sample-metadata">Sample Metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#preset-metadata">Preset Metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#config-metadata">Config Metadata</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#object-commands-0x40-0x5f">Object Commands (0x40-0x5F)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#management-commands-0x40-0x4f">Management Commands (0x40-0x4F)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#action-commands-0x50-0x5f">Action Commands (0x50-0x5F)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#object-error-codes">Object Error Codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#storage-info">Storage Info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#object-storage-interface">Object Storage Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#ram-object-storage">RAM Object Storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#object-transfer-handler">Object Transfer Handler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../OBJECT.html#usage-example">Usage Example</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#storing-a-sequence">Storing a Sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#reading-a-preset">Reading a Preset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../OBJECT.html#host-side-web-client">Host-side (Web Client)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../API.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../API.html#namespaces">Namespaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../API.html#core-types">Core Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#ump32">UMP32</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#ump64">UMP64</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#parser">Parser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#result">Result</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#event">Event</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../API.html#message-types">Message Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#channel-voice">Channel Voice</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#utility">Utility</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../API.html#control-change">Control Change</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#rpn-nrpn-decoder">RPN/NRPN Decoder</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../API.html#protocol">Protocol</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#sysex-encoding">SysEx Encoding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#message-builder-parser">Message Builder/Parser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#firmware-update">Firmware Update</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#transport">Transport</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#state-management">State Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../API.html#object-transfer">Object Transfer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../API.html#value-conversions">Value Conversions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../API.html#platform-aliases">Platform Aliases</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="library_root.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="library_root.html#file-hierarchy">File Hierarchy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="library_root.html#full-api">Full API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#namespaces">Namespaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#classes-and-structs">Classes and Structs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#enums">Enums</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#functions">Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#variables">Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">umidi</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Program Listing for File standards.hh</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/program_listing_file_include_umidi_cc_standards.hh.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="program-listing-for-file-standards-hh">
+<span id="program-listing-file-include-umidi-cc-standards-hh"></span><h1>Program Listing for File standards.hh<a class="headerlink" href="#program-listing-for-file-standards-hh" title="Link to this heading"></a></h1>
+<p>↰ <a class="reference internal" href="file_include_umidi_cc_standards.hh.html#file-include-umidi-cc-standards-hh"><span class="std std-ref">Return to documentation for file</span></a> (<code class="docutils literal notranslate"><span class="pre">include/umidi/cc/standards.hh</span></code>)</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// SPDX-License-Identifier: MIT</span>
+<span class="c1">// UMI-OS MIDI Library - Standard CC Definitions</span>
+<span class="c1">// MIDI 1.0 specification compliant CC types</span>
+<span class="cp">#pragma once</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;types.hh&quot;</span>
+
+<span class="k">namespace</span><span class="w"> </span><span class="nn">umidi</span><span class="o">::</span><span class="nn">cc</span><span class="w"> </span><span class="p">{</span>
+
+<span class="c1">// =============================================================================</span>
+<span class="c1">// 14-bit Control Changes (0-31 MSB, 32-63 LSB)</span>
+<span class="c1">// =============================================================================</span>
+
+<span class="k">using</span><span class="w"> </span><span class="n">BankSelect</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC14Bit</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Bank Select&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">ModulationWheel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC14Bit</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Modulation Wheel&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">BreathController</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC14Bit</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Breath Controller&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">FootController</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC14Bit</span><span class="o">&lt;</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Foot Controller&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">PortamentoTime</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC14Bit</span><span class="o">&lt;</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Portamento Time&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">DataEntry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC14Bit</span><span class="o">&lt;</span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Data Entry&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">ChannelVolume</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC14Bit</span><span class="o">&lt;</span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Channel Volume&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">Balance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC14Bit</span><span class="o">&lt;</span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Balance&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">Pan</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC14Bit</span><span class="o">&lt;</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Pan&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">Expression</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC14Bit</span><span class="o">&lt;</span><span class="mi">11</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Expression&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">EffectControl1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC14Bit</span><span class="o">&lt;</span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Effect Control 1&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">EffectControl2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC14Bit</span><span class="o">&lt;</span><span class="mi">13</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Effect Control 2&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">GeneralPurpose1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC14Bit</span><span class="o">&lt;</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;General Purpose 1&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">GeneralPurpose2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC14Bit</span><span class="o">&lt;</span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;General Purpose 2&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">GeneralPurpose3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC14Bit</span><span class="o">&lt;</span><span class="mi">18</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;General Purpose 3&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">GeneralPurpose4</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC14Bit</span><span class="o">&lt;</span><span class="mi">19</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;General Purpose 4&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="c1">// =============================================================================</span>
+<span class="c1">// Switch Controllers (64-69)</span>
+<span class="c1">// =============================================================================</span>
+
+<span class="k">using</span><span class="w"> </span><span class="n">SustainPedal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SwitchCC</span><span class="o">&lt;</span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Sustain Pedal&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">PortamentoSwitch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SwitchCC</span><span class="o">&lt;</span><span class="mi">65</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Portamento&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">Sostenuto</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SwitchCC</span><span class="o">&lt;</span><span class="mi">66</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Sostenuto&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">SoftPedal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SwitchCC</span><span class="o">&lt;</span><span class="mi">67</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Soft Pedal&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">LegatoFootswitch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SwitchCC</span><span class="o">&lt;</span><span class="mi">68</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Legato Footswitch&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">Hold2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SwitchCC</span><span class="o">&lt;</span><span class="mi">69</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Hold 2&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="c1">// =============================================================================</span>
+<span class="c1">// Sound Controllers (70-79)</span>
+<span class="c1">// =============================================================================</span>
+
+<span class="k">using</span><span class="w"> </span><span class="n">SoundController1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">70</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Sound Variation&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">SoundController2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">71</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Timbre/Harmonic Content&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">SoundController3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">72</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Release Time&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">SoundController4</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">73</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Attack Time&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">SoundController5</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">74</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Brightness&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">SoundController6</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">75</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Decay Time&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">SoundController7</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">76</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Vibrato Rate&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">SoundController8</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">77</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Vibrato Depth&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">SoundController9</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">78</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Vibrato Delay&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">SoundController10</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">79</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Sound Controller 10&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="c1">// =============================================================================</span>
+<span class="c1">// General Purpose Controllers (7-bit) (80-83)</span>
+<span class="c1">// =============================================================================</span>
+
+<span class="k">using</span><span class="w"> </span><span class="n">GeneralPurpose5</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">80</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;General Purpose 5&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">GeneralPurpose6</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">81</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;General Purpose 6&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">GeneralPurpose7</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">82</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;General Purpose 7&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">GeneralPurpose8</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">83</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;General Purpose 8&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="c1">// =============================================================================</span>
+<span class="c1">// Other Controllers</span>
+<span class="c1">// =============================================================================</span>
+
+<span class="k">using</span><span class="w"> </span><span class="n">PortamentoControl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">84</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Portamento Control&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">HighResVelocityPrefix</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">88</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;High Resolution Velocity Prefix&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="c1">// =============================================================================</span>
+<span class="c1">// Effects Depth (91-95)</span>
+<span class="c1">// =============================================================================</span>
+
+<span class="k">using</span><span class="w"> </span><span class="n">Effects1Depth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">91</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Reverb Send Level&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">Effects2Depth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">92</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Tremolo Depth&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">Effects3Depth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">93</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Chorus Send Level&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">Effects4Depth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">94</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Celeste Depth&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">Effects5Depth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">95</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Phaser Depth&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="c1">// =============================================================================</span>
+<span class="c1">// Data Entry and Parameter Selection (96-101)</span>
+<span class="c1">// =============================================================================</span>
+
+<span class="k">using</span><span class="w"> </span><span class="n">DataIncrement</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">96</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Data Increment&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">DataDecrement</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">97</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Data Decrement&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">NrpnLsb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">98</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;NRPN LSB&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">NrpnMsb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">99</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;NRPN MSB&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">RpnLsb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;RPN LSB&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">RpnMsb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">101</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;RPN MSB&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="c1">// =============================================================================</span>
+<span class="c1">// Channel Mode Messages (120-127)</span>
+<span class="c1">// =============================================================================</span>
+
+<span class="k">using</span><span class="w"> </span><span class="n">AllSoundOff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">120</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;All Sound Off&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">ResetAllControllers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">121</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Reset All Controllers&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">LocalControl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SwitchCC</span><span class="o">&lt;</span><span class="mi">122</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Local Control&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">AllNotesOff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">123</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;All Notes Off&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">OmniModeOff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">124</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Omni Mode Off&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">OmniModeOn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">125</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Omni Mode On&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">MonoModeOn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">126</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Mono Mode On&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">PolyModeOn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CC7Bit</span><span class="o">&lt;</span><span class="mi">127</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Poly Mode On&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="c1">// =============================================================================</span>
+<span class="c1">// Standard RPN Definitions</span>
+<span class="c1">// =============================================================================</span>
+
+<span class="k">using</span><span class="w"> </span><span class="n">RpnPitchBendSensitivity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RPN</span><span class="o">&lt;</span><span class="mh">0x0000</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Pitch Bend Sensitivity&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">RpnFineTuning</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RPN</span><span class="o">&lt;</span><span class="mh">0x0001</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Fine Tuning&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">RpnCoarseTuning</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RPN</span><span class="o">&lt;</span><span class="mh">0x0002</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Coarse Tuning&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">RpnTuningProgramSelect</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RPN</span><span class="o">&lt;</span><span class="mh">0x0003</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Tuning Program Select&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">RpnTuningBankSelect</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RPN</span><span class="o">&lt;</span><span class="mh">0x0004</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Tuning Bank Select&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">RpnModulationDepthRange</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RPN</span><span class="o">&lt;</span><span class="mh">0x0005</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Modulation Depth Range&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">RpnMPEConfiguration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RPN</span><span class="o">&lt;</span><span class="mh">0x0006</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;MPE Configuration&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">RpnNull</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RPN</span><span class="o">&lt;</span><span class="mh">0x3FFF</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Null (Reset)&quot;</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// namespace umidi::cc</span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, UMI-OS Project.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

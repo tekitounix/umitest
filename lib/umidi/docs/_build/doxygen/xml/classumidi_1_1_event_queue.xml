@@ -1,0 +1,371 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="classumidi_1_1_event_queue" kind="class" language="C++" prot="public">
+    <compoundname>umidi::EventQueue</compoundname>
+    <templateparamlist>
+      <param>
+        <type>size_t</type>
+        <declname>Capacity</declname>
+        <defname>Capacity</defname>
+        <defval>256</defval>
+      </param>
+    </templateparamlist>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classumidi_1_1_event_queue_1a03db575bbe2006ed4cfffa83b2102317" prot="private" static="no" mutable="no">
+        <type>Event</type>
+        <definition>Event umidi::EventQueue&lt; Capacity &gt;::events_[Capacity]</definition>
+        <argsstring>[Capacity]</argsstring>
+        <name>events_</name>
+        <qualifiedname>umidi::EventQueue::events_</qualifiedname>
+        <initializer>= {}</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="197" column="11" bodyfile="include/umidi/event.hh" bodystart="197" bodyend="197"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1_event_queue_1ae28babe3482769009eeaacd8e0d65000" prot="private" static="no" mutable="no">
+        <type>size_t</type>
+        <definition>size_t umidi::EventQueue&lt; Capacity &gt;::read_pos_</definition>
+        <argsstring></argsstring>
+        <name>read_pos_</name>
+        <qualifiedname>umidi::EventQueue::read_pos_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="198" column="12" bodyfile="include/umidi/event.hh" bodystart="198" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1_event_queue_1a32ac0b99cfedd561fa61d2f7d7c7ce94" prot="private" static="no" mutable="no">
+        <type>size_t</type>
+        <definition>size_t umidi::EventQueue&lt; Capacity &gt;::write_pos_</definition>
+        <argsstring></argsstring>
+        <name>write_pos_</name>
+        <qualifiedname>umidi::EventQueue::write_pos_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="199" column="12" bodyfile="include/umidi/event.hh" bodystart="199" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classumidi_1_1_event_queue_1a08b2eb4ab6948c022efb059a50bd66e2" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>constexpr</type>
+        <definition>umidi::EventQueue&lt; Capacity &gt;::EventQueue</definition>
+        <argsstring>() noexcept=default</argsstring>
+        <name>EventQueue</name>
+        <qualifiedname>umidi::EventQueue::EventQueue</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="100" column="15"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1_event_queue_1a6e1ad2a4b1350f0cd87bee2ee4fe9919" prot="public" static="no" nodiscard="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::EventQueue&lt; Capacity &gt;::push</definition>
+        <argsstring>(const Event &amp;e) noexcept</argsstring>
+        <name>push</name>
+        <qualifiedname>umidi::EventQueue::push</qualifiedname>
+        <param>
+          <type>const Event &amp;</type>
+          <declname>e</declname>
+        </param>
+        <briefdescription>
+<para>Push an event to the queue. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="103" column="11" bodyfile="include/umidi/event.hh" bodystart="103" bodyend="111"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1_event_queue_1a53fce9b705b03b7cc0063424cb456869" prot="public" static="no" nodiscard="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::EventQueue&lt; Capacity &gt;::push_note_on</definition>
+        <argsstring>(uint32_t pos, uint8_t ch, uint8_t note, uint8_t vel) noexcept</argsstring>
+        <name>push_note_on</name>
+        <qualifiedname>umidi::EventQueue::push_note_on</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>pos</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>ch</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>note</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>vel</declname>
+        </param>
+        <briefdescription>
+<para>Push Note On event. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="114" column="11" bodyfile="include/umidi/event.hh" bodystart="114" bodyend="116"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1_event_queue_1ae01312e17a0aabc8ac2c5896e3643c9f" prot="public" static="no" nodiscard="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::EventQueue&lt; Capacity &gt;::push_note_off</definition>
+        <argsstring>(uint32_t pos, uint8_t ch, uint8_t note, uint8_t vel=0) noexcept</argsstring>
+        <name>push_note_off</name>
+        <qualifiedname>umidi::EventQueue::push_note_off</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>pos</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>ch</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>note</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>vel</declname>
+          <defval>0</defval>
+        </param>
+        <briefdescription>
+<para>Push Note Off event. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="119" column="11" bodyfile="include/umidi/event.hh" bodystart="119" bodyend="121"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1_event_queue_1a9cd1155035ab01c388bc88438f6145ff" prot="public" static="no" nodiscard="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::EventQueue&lt; Capacity &gt;::push_cc</definition>
+        <argsstring>(uint32_t pos, uint8_t ch, uint8_t cc, uint8_t val) noexcept</argsstring>
+        <name>push_cc</name>
+        <qualifiedname>umidi::EventQueue::push_cc</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>pos</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>ch</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>cc</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>val</declname>
+        </param>
+        <briefdescription>
+<para>Push CC event. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="124" column="11" bodyfile="include/umidi/event.hh" bodystart="124" bodyend="126"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1_event_queue_1a2ad339c435ab24997cec75a18611f649" prot="public" static="no" nodiscard="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::EventQueue&lt; Capacity &gt;::pop</definition>
+        <argsstring>(Event &amp;out) noexcept</argsstring>
+        <name>pop</name>
+        <qualifiedname>umidi::EventQueue::pop</qualifiedname>
+        <param>
+          <type>Event &amp;</type>
+          <declname>out</declname>
+        </param>
+        <briefdescription>
+<para>Pop next event. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="129" column="11" bodyfile="include/umidi/event.hh" bodystart="129" bodyend="136"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1_event_queue_1ab83fde488a7b22e6753c48bfb2b8060f" prot="public" static="no" nodiscard="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::EventQueue&lt; Capacity &gt;::pop_until</definition>
+        <argsstring>(uint32_t sample_pos, Event &amp;out) noexcept</argsstring>
+        <name>pop_until</name>
+        <qualifiedname>umidi::EventQueue::pop_until</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>sample_pos</declname>
+        </param>
+        <param>
+          <type>Event &amp;</type>
+          <declname>out</declname>
+        </param>
+        <briefdescription>
+<para>Pop events up to and including sample_pos. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="139" column="11" bodyfile="include/umidi/event.hh" bodystart="139" bodyend="147"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1_event_queue_1ad7230e624b8ae5d62789112fa81cc7e8" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::EventQueue&lt; Capacity &gt;::peek</definition>
+        <argsstring>(Event &amp;out) const noexcept</argsstring>
+        <name>peek</name>
+        <qualifiedname>umidi::EventQueue::peek</qualifiedname>
+        <param>
+          <type>Event &amp;</type>
+          <declname>out</declname>
+        </param>
+        <briefdescription>
+<para>Peek at next event without removing. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="150" column="11" bodyfile="include/umidi/event.hh" bodystart="150" bodyend="156"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1_event_queue_1a7b0c3b7687019be8c0268c48af029c5e" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::EventQueue&lt; Capacity &gt;::peek_sample_pos</definition>
+        <argsstring>(uint32_t &amp;pos) const noexcept</argsstring>
+        <name>peek_sample_pos</name>
+        <qualifiedname>umidi::EventQueue::peek_sample_pos</qualifiedname>
+        <param>
+          <type>uint32_t &amp;</type>
+          <declname>pos</declname>
+        </param>
+        <briefdescription>
+<para>Peek at next event&apos;s sample position. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="159" column="11" bodyfile="include/umidi/event.hh" bodystart="159" bodyend="165"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1_event_queue_1a4877e0b88c5383af25db3db0267aaa33" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::EventQueue&lt; Capacity &gt;::empty</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>empty</name>
+        <qualifiedname>umidi::EventQueue::empty</qualifiedname>
+        <briefdescription>
+<para>Check if queue is empty. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="168" column="11" bodyfile="include/umidi/event.hh" bodystart="168" bodyend="170"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1_event_queue_1a9a6574788350542c082db94e2526a630" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t umidi::EventQueue&lt; Capacity &gt;::size</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>size</name>
+        <qualifiedname>umidi::EventQueue::size</qualifiedname>
+        <briefdescription>
+<para>Get number of events in queue. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="173" column="13" bodyfile="include/umidi/event.hh" bodystart="173" bodyend="178"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1_event_queue_1aa7c5f02c7b327fafd00893ad41c421b4" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t umidi::EventQueue&lt; Capacity &gt;::available</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>available</name>
+        <qualifiedname>umidi::EventQueue::available</qualifiedname>
+        <briefdescription>
+<para>Get available space. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="181" column="13" bodyfile="include/umidi/event.hh" bodystart="181" bodyend="183"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1_event_queue_1addab761ad97b430be19ee691e9391968" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::EventQueue&lt; Capacity &gt;::clear</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>clear</name>
+        <qualifiedname>umidi::EventQueue::clear</qualifiedname>
+        <briefdescription>
+<para>Clear all events. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="186" column="10" bodyfile="include/umidi/event.hh" bodystart="186" bodyend="189"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="classumidi_1_1_event_queue_1a1ce82cf01ebf21cf546f988d1f42f998" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>size_t</type>
+        <definition>static constexpr size_t umidi::EventQueue&lt; Capacity &gt;::capacity</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>capacity</name>
+        <qualifiedname>umidi::EventQueue::capacity</qualifiedname>
+        <briefdescription>
+<para>Capacity of the queue. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/event.hh" line="192" column="30" bodyfile="include/umidi/event.hh" bodystart="192" bodyend="194"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/event.hh" line="98" column="1" bodyfile="include/umidi/event.hh" bodystart="98" bodyend="200"/>
+    <listofallmembers>
+      <member refid="classumidi_1_1_event_queue_1aa7c5f02c7b327fafd00893ad41c421b4" prot="public" virt="non-virtual"><scope>umidi::EventQueue</scope><name>available</name></member>
+      <member refid="classumidi_1_1_event_queue_1a1ce82cf01ebf21cf546f988d1f42f998" prot="public" virt="non-virtual"><scope>umidi::EventQueue</scope><name>capacity</name></member>
+      <member refid="classumidi_1_1_event_queue_1addab761ad97b430be19ee691e9391968" prot="public" virt="non-virtual"><scope>umidi::EventQueue</scope><name>clear</name></member>
+      <member refid="classumidi_1_1_event_queue_1a4877e0b88c5383af25db3db0267aaa33" prot="public" virt="non-virtual"><scope>umidi::EventQueue</scope><name>empty</name></member>
+      <member refid="classumidi_1_1_event_queue_1a08b2eb4ab6948c022efb059a50bd66e2" prot="public" virt="non-virtual"><scope>umidi::EventQueue</scope><name>EventQueue</name></member>
+      <member refid="classumidi_1_1_event_queue_1a03db575bbe2006ed4cfffa83b2102317" prot="private" virt="non-virtual"><scope>umidi::EventQueue</scope><name>events_</name></member>
+      <member refid="classumidi_1_1_event_queue_1ad7230e624b8ae5d62789112fa81cc7e8" prot="public" virt="non-virtual"><scope>umidi::EventQueue</scope><name>peek</name></member>
+      <member refid="classumidi_1_1_event_queue_1a7b0c3b7687019be8c0268c48af029c5e" prot="public" virt="non-virtual"><scope>umidi::EventQueue</scope><name>peek_sample_pos</name></member>
+      <member refid="classumidi_1_1_event_queue_1a2ad339c435ab24997cec75a18611f649" prot="public" virt="non-virtual"><scope>umidi::EventQueue</scope><name>pop</name></member>
+      <member refid="classumidi_1_1_event_queue_1ab83fde488a7b22e6753c48bfb2b8060f" prot="public" virt="non-virtual"><scope>umidi::EventQueue</scope><name>pop_until</name></member>
+      <member refid="classumidi_1_1_event_queue_1a6e1ad2a4b1350f0cd87bee2ee4fe9919" prot="public" virt="non-virtual"><scope>umidi::EventQueue</scope><name>push</name></member>
+      <member refid="classumidi_1_1_event_queue_1a9cd1155035ab01c388bc88438f6145ff" prot="public" virt="non-virtual"><scope>umidi::EventQueue</scope><name>push_cc</name></member>
+      <member refid="classumidi_1_1_event_queue_1ae01312e17a0aabc8ac2c5896e3643c9f" prot="public" virt="non-virtual"><scope>umidi::EventQueue</scope><name>push_note_off</name></member>
+      <member refid="classumidi_1_1_event_queue_1a53fce9b705b03b7cc0063424cb456869" prot="public" virt="non-virtual"><scope>umidi::EventQueue</scope><name>push_note_on</name></member>
+      <member refid="classumidi_1_1_event_queue_1ae28babe3482769009eeaacd8e0d65000" prot="private" virt="non-virtual"><scope>umidi::EventQueue</scope><name>read_pos_</name></member>
+      <member refid="classumidi_1_1_event_queue_1a9a6574788350542c082db94e2526a630" prot="public" virt="non-virtual"><scope>umidi::EventQueue</scope><name>size</name></member>
+      <member refid="classumidi_1_1_event_queue_1a32ac0b99cfedd561fa61d2f7d7c7ce94" prot="private" virt="non-virtual"><scope>umidi::EventQueue</scope><name>write_pos_</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

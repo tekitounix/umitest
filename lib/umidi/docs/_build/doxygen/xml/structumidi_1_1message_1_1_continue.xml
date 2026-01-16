@@ -1,0 +1,133 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1message_1_1_continue" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::message::Continue</compoundname>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structumidi_1_1message_1_1_continue_1a8179bf9d970e9807bbb01b48ee1fddda" prot="public" static="no" mutable="no">
+        <type><ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref></type>
+        <definition>UMP32 umidi::message::Continue::ump</definition>
+        <argsstring></argsstring>
+        <name>ump</name>
+        <qualifiedname>umidi::message::Continue::ump</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/system.hh" line="51" column="11" bodyfile="include/umidi/messages/system.hh" bodystart="51" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-attrib">
+      <memberdef kind="variable" id="structumidi_1_1message_1_1_continue_1a4b7f4f7ba749c6c6f3780e266d4cfe58" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::message::Continue::STATUS</definition>
+        <argsstring></argsstring>
+        <name>STATUS</name>
+        <qualifiedname>umidi::message::Continue::STATUS</qualifiedname>
+        <initializer>= 0xFB</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/system.hh" line="53" column="30" bodyfile="include/umidi/messages/system.hh" bodystart="53" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="structumidi_1_1message_1_1_continue_1a756e11146f99864010658bfeace5d8ac" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::message::Continue::group</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>group</name>
+        <qualifiedname>umidi::message::Continue::group</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/system.hh" line="55" column="24" bodyfile="include/umidi/messages/system.hh" bodystart="55" bodyend="55"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_continue_1a24ece8eb9913ca8293551af48604d6d9" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::message::Continue::is_valid</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>is_valid</name>
+        <qualifiedname>umidi::message::Continue::is_valid</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/system.hh" line="56" column="21" bodyfile="include/umidi/messages/system.hh" bodystart="56" bodyend="58"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="structumidi_1_1message_1_1_continue_1a02c899becaa8ba6ec1669e18913c3405" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Continue</type>
+        <definition>static constexpr Continue umidi::message::Continue::create</definition>
+        <argsstring>(uint8_t group=0) noexcept</argsstring>
+        <name>create</name>
+        <qualifiedname>umidi::message::Continue::create</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>group</declname>
+          <defval>0</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/system.hh" line="60" column="32" bodyfile="include/umidi/messages/system.hh" bodystart="60" bodyend="62"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_continue_1ad378ba0e0ee08e988ab36da29193a267" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Continue</type>
+        <definition>static constexpr Continue umidi::message::Continue::from_ump</definition>
+        <argsstring>(UMP32 u) noexcept</argsstring>
+        <name>from_ump</name>
+        <qualifiedname>umidi::message::Continue::from_ump</qualifiedname>
+        <param>
+          <type><ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref></type>
+          <declname>u</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/system.hh" line="64" column="32" bodyfile="include/umidi/messages/system.hh" bodystart="64" bodyend="64"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="2">
+        <label>umidi::UMP32</label>
+        <link refid="structumidi_1_1_u_m_p32"/>
+      </node>
+      <node id="1">
+        <label>umidi::message::Continue</label>
+        <childnode refid="2" relation="usage">
+          <edgelabel>ump</edgelabel>
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="include/umidi/messages/system.hh" line="50" column="1" bodyfile="include/umidi/messages/system.hh" bodystart="50" bodyend="65"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1message_1_1_continue_1a02c899becaa8ba6ec1669e18913c3405" prot="public" virt="non-virtual"><scope>umidi::message::Continue</scope><name>create</name></member>
+      <member refid="structumidi_1_1message_1_1_continue_1ad378ba0e0ee08e988ab36da29193a267" prot="public" virt="non-virtual"><scope>umidi::message::Continue</scope><name>from_ump</name></member>
+      <member refid="structumidi_1_1message_1_1_continue_1a756e11146f99864010658bfeace5d8ac" prot="public" virt="non-virtual"><scope>umidi::message::Continue</scope><name>group</name></member>
+      <member refid="structumidi_1_1message_1_1_continue_1a24ece8eb9913ca8293551af48604d6d9" prot="public" virt="non-virtual"><scope>umidi::message::Continue</scope><name>is_valid</name></member>
+      <member refid="structumidi_1_1message_1_1_continue_1a4b7f4f7ba749c6c6f3780e266d4cfe58" prot="public" virt="non-virtual"><scope>umidi::message::Continue</scope><name>STATUS</name></member>
+      <member refid="structumidi_1_1message_1_1_continue_1a8179bf9d970e9807bbb01b48ee1fddda" prot="public" virt="non-virtual"><scope>umidi::message::Continue</scope><name>ump</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

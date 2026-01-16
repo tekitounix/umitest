@@ -1,0 +1,229 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1_error" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::Error</compoundname>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structumidi_1_1_error_1a2a966602cfc24c2d1312db1de11ba6cd" prot="public" static="no" mutable="no">
+        <type>ErrorCode</type>
+        <definition>ErrorCode umidi::Error::code</definition>
+        <argsstring></argsstring>
+        <name>code</name>
+        <qualifiedname>umidi::Error::code</qualifiedname>
+        <initializer>= ErrorCode::IncompleteMessage</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/result.hh" line="26" column="15" bodyfile="include/umidi/core/result.hh" bodystart="26" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1_error_1a002193df596bcb780b9a23e72754a3d0" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::Error::context</definition>
+        <argsstring></argsstring>
+        <name>context</name>
+        <qualifiedname>umidi::Error::context</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/result.hh" line="27" column="13" bodyfile="include/umidi/core/result.hh" bodystart="27" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="structumidi_1_1_error_1a9e9c7aa305e246f80b5e11f523a9301a" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>constexpr</type>
+        <definition>umidi::Error::Error</definition>
+        <argsstring>() noexcept=default</argsstring>
+        <name>Error</name>
+        <qualifiedname>umidi::Error::Error</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/result.hh" line="29" column="15"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_error_1a864fa42798afda36820af8fc3968b10e" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>constexpr</type>
+        <definition>umidi::Error::Error</definition>
+        <argsstring>(ErrorCode c) noexcept</argsstring>
+        <name>Error</name>
+        <qualifiedname>umidi::Error::Error</qualifiedname>
+        <param>
+          <type>ErrorCode</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/result.hh" line="30" column="15" bodyfile="include/umidi/core/result.hh" bodystart="30" bodyend="30"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_error_1a8b8b10bf4bc318a195137ac797f55251" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>constexpr</type>
+        <definition>umidi::Error::Error</definition>
+        <argsstring>(ErrorCode c, uint8_t ctx) noexcept</argsstring>
+        <name>Error</name>
+        <qualifiedname>umidi::Error::Error</qualifiedname>
+        <param>
+          <type>ErrorCode</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>ctx</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/result.hh" line="31" column="15" bodyfile="include/umidi/core/result.hh" bodystart="31" bodyend="31"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="structumidi_1_1_error_1a2d8fbca5f29f24ccb9df8f8a3f76d30e" prot="public" static="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Error</type>
+        <definition>static constexpr Error umidi::Error::incomplete</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>incomplete</name>
+        <qualifiedname>umidi::Error::incomplete</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/result.hh" line="34" column="28" bodyfile="include/umidi/core/result.hh" bodystart="34" bodyend="36"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_error_1a6722a97a17782458599e1c37b4e69641" prot="public" static="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Error</type>
+        <definition>static constexpr Error umidi::Error::incomplete</definition>
+        <argsstring>(uint8_t byte) noexcept</argsstring>
+        <name>incomplete</name>
+        <qualifiedname>umidi::Error::incomplete</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>byte</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/result.hh" line="38" column="28" bodyfile="include/umidi/core/result.hh" bodystart="38" bodyend="40"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_error_1aebf2ca3ba3befbfce62194299315998d" prot="public" static="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Error</type>
+        <definition>static constexpr Error umidi::Error::invalid_status</definition>
+        <argsstring>(uint8_t status) noexcept</argsstring>
+        <name>invalid_status</name>
+        <qualifiedname>umidi::Error::invalid_status</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>status</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/result.hh" line="42" column="28" bodyfile="include/umidi/core/result.hh" bodystart="42" bodyend="44"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_error_1ae3b78c4cde44325b95f6650b8905b033" prot="public" static="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Error</type>
+        <definition>static constexpr Error umidi::Error::buffer_overflow</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>buffer_overflow</name>
+        <qualifiedname>umidi::Error::buffer_overflow</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/result.hh" line="46" column="28" bodyfile="include/umidi/core/result.hh" bodystart="46" bodyend="48"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_error_1ae2f431a5d052143622b1e7f18fd6e82d" prot="public" static="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Error</type>
+        <definition>static constexpr Error umidi::Error::invalid_data</definition>
+        <argsstring>(uint8_t data) noexcept</argsstring>
+        <name>invalid_data</name>
+        <qualifiedname>umidi::Error::invalid_data</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>data</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/result.hh" line="50" column="28" bodyfile="include/umidi/core/result.hh" bodystart="50" bodyend="52"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_error_1a6fe0be84ffb6563734d13137873af91d" prot="public" static="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Error</type>
+        <definition>static constexpr Error umidi::Error::channel_filtered</definition>
+        <argsstring>(uint8_t ch) noexcept</argsstring>
+        <name>channel_filtered</name>
+        <qualifiedname>umidi::Error::channel_filtered</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>ch</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/result.hh" line="54" column="28" bodyfile="include/umidi/core/result.hh" bodystart="54" bodyend="56"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1_error_1a7fa983c9a9085a147b81ec7cc37b16cf" prot="public" static="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Error</type>
+        <definition>static constexpr Error umidi::Error::not_implemented</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>not_implemented</name>
+        <qualifiedname>umidi::Error::not_implemented</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/core/result.hh" line="58" column="28" bodyfile="include/umidi/core/result.hh" bodystart="58" bodyend="60"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/core/result.hh" line="25" column="1" bodyfile="include/umidi/core/result.hh" bodystart="25" bodyend="61"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1_error_1ae3b78c4cde44325b95f6650b8905b033" prot="public" virt="non-virtual"><scope>umidi::Error</scope><name>buffer_overflow</name></member>
+      <member refid="structumidi_1_1_error_1a6fe0be84ffb6563734d13137873af91d" prot="public" virt="non-virtual"><scope>umidi::Error</scope><name>channel_filtered</name></member>
+      <member refid="structumidi_1_1_error_1a2a966602cfc24c2d1312db1de11ba6cd" prot="public" virt="non-virtual"><scope>umidi::Error</scope><name>code</name></member>
+      <member refid="structumidi_1_1_error_1a002193df596bcb780b9a23e72754a3d0" prot="public" virt="non-virtual"><scope>umidi::Error</scope><name>context</name></member>
+      <member refid="structumidi_1_1_error_1a9e9c7aa305e246f80b5e11f523a9301a" prot="public" virt="non-virtual"><scope>umidi::Error</scope><name>Error</name></member>
+      <member refid="structumidi_1_1_error_1a864fa42798afda36820af8fc3968b10e" prot="public" virt="non-virtual"><scope>umidi::Error</scope><name>Error</name></member>
+      <member refid="structumidi_1_1_error_1a8b8b10bf4bc318a195137ac797f55251" prot="public" virt="non-virtual"><scope>umidi::Error</scope><name>Error</name></member>
+      <member refid="structumidi_1_1_error_1a2d8fbca5f29f24ccb9df8f8a3f76d30e" prot="public" virt="non-virtual"><scope>umidi::Error</scope><name>incomplete</name></member>
+      <member refid="structumidi_1_1_error_1a6722a97a17782458599e1c37b4e69641" prot="public" virt="non-virtual"><scope>umidi::Error</scope><name>incomplete</name></member>
+      <member refid="structumidi_1_1_error_1ae2f431a5d052143622b1e7f18fd6e82d" prot="public" virt="non-virtual"><scope>umidi::Error</scope><name>invalid_data</name></member>
+      <member refid="structumidi_1_1_error_1aebf2ca3ba3befbfce62194299315998d" prot="public" virt="non-virtual"><scope>umidi::Error</scope><name>invalid_status</name></member>
+      <member refid="structumidi_1_1_error_1a7fa983c9a9085a147b81ec7cc37b16cf" prot="public" virt="non-virtual"><scope>umidi::Error</scope><name>not_implemented</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,72 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="classumidi_1_1message_1_1_sys_ex_serializer" kind="class" language="C++" prot="public">
+    <compoundname>umidi::message::SysExSerializer</compoundname>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="classumidi_1_1message_1_1_sys_ex_serializer_1aa3d729dff54c19e071364187e0b34037" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>size_t</type>
+        <definition>static constexpr size_t umidi::message::SysExSerializer::serialize</definition>
+        <argsstring>(const SysEx7 &amp;packet, uint8_t *out, bool include_markers=false) noexcept</argsstring>
+        <name>serialize</name>
+        <qualifiedname>umidi::message::SysExSerializer::serialize</qualifiedname>
+        <param>
+          <type>const SysEx7 &amp;</type>
+          <declname>packet</declname>
+        </param>
+        <param>
+          <type>uint8_t *</type>
+          <declname>out</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>include_markers</declname>
+          <defval>false</defval>
+        </param>
+        <briefdescription>
+<para>Serialize SysEx7 packet to MIDI 1.0 bytes. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>packet</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input SysEx7 packet </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>out</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Output buffer (must be at least 8 bytes for F0 + 6 data + F7) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>include_markers</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Whether to include F0/F7 markers </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>Number of bytes written </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/sysex.hh" line="214" column="30" bodyfile="include/umidi/messages/sysex.hh" bodystart="214" bodyend="243"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/messages/sysex.hh" line="207" column="1" bodyfile="include/umidi/messages/sysex.hh" bodystart="207" bodyend="244"/>
+    <listofallmembers>
+      <member refid="classumidi_1_1message_1_1_sys_ex_serializer_1aa3d729dff54c19e071364187e0b34037" prot="public" virt="non-virtual"><scope>umidi::message::SysExSerializer</scope><name>serialize</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

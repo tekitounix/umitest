@@ -1,0 +1,101 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="namespaceumidi_1_1message" kind="namespace" language="C++">
+    <compoundname>umidi::message</compoundname>
+    <innerclass refid="structumidi_1_1message_1_1_active_sensing" prot="public">umidi::message::ActiveSensing</innerclass>
+    <innerclass refid="structumidi_1_1message_1_1_channel_pressure" prot="public">umidi::message::ChannelPressure</innerclass>
+    <innerclass refid="structumidi_1_1message_1_1_continue" prot="public">umidi::message::Continue</innerclass>
+    <innerclass refid="structumidi_1_1message_1_1_control_change" prot="public">umidi::message::ControlChange</innerclass>
+    <innerclass refid="structumidi_1_1message_1_1_j_r_clock" prot="public">umidi::message::JRClock</innerclass>
+    <innerclass refid="structumidi_1_1message_1_1_j_r_timestamp" prot="public">umidi::message::JRTimestamp</innerclass>
+    <innerclass refid="classumidi_1_1message_1_1_j_r_timestamp_tracker" prot="public">umidi::message::JRTimestampTracker</innerclass>
+    <innerclass refid="structumidi_1_1message_1_1_midi_time_code" prot="public">umidi::message::MidiTimeCode</innerclass>
+    <innerclass refid="structumidi_1_1message_1_1_n_o_o_p" prot="public">umidi::message::NOOP</innerclass>
+    <innerclass refid="structumidi_1_1message_1_1_note_off" prot="public">umidi::message::NoteOff</innerclass>
+    <innerclass refid="structumidi_1_1message_1_1_note_on" prot="public">umidi::message::NoteOn</innerclass>
+    <innerclass refid="structumidi_1_1message_1_1_pitch_bend" prot="public">umidi::message::PitchBend</innerclass>
+    <innerclass refid="structumidi_1_1message_1_1_poly_pressure" prot="public">umidi::message::PolyPressure</innerclass>
+    <innerclass refid="structumidi_1_1message_1_1_program_change" prot="public">umidi::message::ProgramChange</innerclass>
+    <innerclass refid="structumidi_1_1message_1_1_song_position" prot="public">umidi::message::SongPosition</innerclass>
+    <innerclass refid="structumidi_1_1message_1_1_song_select" prot="public">umidi::message::SongSelect</innerclass>
+    <innerclass refid="structumidi_1_1message_1_1_start" prot="public">umidi::message::Start</innerclass>
+    <innerclass refid="structumidi_1_1message_1_1_stop" prot="public">umidi::message::Stop</innerclass>
+    <innerclass refid="structumidi_1_1message_1_1_sys_ex7" prot="public">umidi::message::SysEx7</innerclass>
+    <innerclass refid="classumidi_1_1message_1_1_sys_ex_parser" prot="public">umidi::message::SysExParser</innerclass>
+    <innerclass refid="classumidi_1_1message_1_1_sys_ex_serializer" prot="public">umidi::message::SysExSerializer</innerclass>
+    <innerclass refid="structumidi_1_1message_1_1_system_reset" prot="public">umidi::message::SystemReset</innerclass>
+    <innerclass refid="structumidi_1_1message_1_1_timing_clock" prot="public">umidi::message::TimingClock</innerclass>
+    <innerclass refid="structumidi_1_1message_1_1_tune_request" prot="public">umidi::message::TuneRequest</innerclass>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="channel__voice_8hh_1a357918c175003a54032caf866e58effa" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename Handler</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void umidi::message::dispatch</definition>
+        <argsstring>(const UMP32 &amp;ump, Handler &amp;&amp;handler) noexcept</argsstring>
+        <name>dispatch</name>
+        <qualifiedname>umidi::message::dispatch</qualifiedname>
+        <param>
+          <type>const <ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref> &amp;</type>
+          <declname>ump</declname>
+        </param>
+        <param>
+          <type>Handler &amp;&amp;</type>
+          <declname>handler</declname>
+        </param>
+        <briefdescription>
+<para>Dispatch <ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref> to appropriate handler based on message type Usage: dispatch(ump, [](auto&amp;&amp; msg) { if constexpr (std::is_same_v&lt;std::decay_t&lt;decltype(msg)&gt;, <ref refid="structumidi_1_1message_1_1_note_on" kindref="compound">NoteOn</ref>&gt;) { // handle note on } });. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/channel_voice.hh" line="189" column="16" bodyfile="include/umidi/messages/channel_voice.hh" bodystart="189" bodyend="205"/>
+      </memberdef>
+      <memberdef kind="function" id="system_8hh_1aa44d5a00124d4b8443c16e833f0647e0" prot="public" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::message::is_realtime_status</definition>
+        <argsstring>(uint8_t status) noexcept</argsstring>
+        <name>is_realtime_status</name>
+        <qualifiedname>umidi::message::is_realtime_status</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>status</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/system.hh" line="207" column="17" bodyfile="include/umidi/messages/system.hh" bodystart="207" bodyend="209"/>
+      </memberdef>
+      <memberdef kind="function" id="system_8hh_1ad1a357ef0ef7da0bfefb0798508cac3e" prot="public" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::message::is_system_common_status</definition>
+        <argsstring>(uint8_t status) noexcept</argsstring>
+        <name>is_system_common_status</name>
+        <qualifiedname>umidi::message::is_system_common_status</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>status</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/system.hh" line="211" column="17" bodyfile="include/umidi/messages/system.hh" bodystart="211" bodyend="213"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/messages/channel_voice.hh" line="9" column="1"/>
+  </compounddef>
+</doxygen>

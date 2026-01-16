@@ -1,0 +1,186 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1protocol_1_1_sequence_metadata" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::protocol::SequenceMetadata</compoundname>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_sequence_metadata_1a326b2fd27bfe7ca831c261d6e047bc2f" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::SequenceMetadata::steps</definition>
+        <argsstring></argsstring>
+        <name>steps</name>
+        <qualifiedname>umidi::protocol::SequenceMetadata::steps</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="125" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="125" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_sequence_metadata_1aada6e248f6c64cdd89877e09168ea5e4" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::SequenceMetadata::tracks</definition>
+        <argsstring></argsstring>
+        <name>tracks</name>
+        <qualifiedname>umidi::protocol::SequenceMetadata::tracks</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="126" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="126" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_sequence_metadata_1a229b244e0855d940b3bc7528179d5dd3" prot="public" static="no" mutable="no">
+        <type>uint16_t</type>
+        <definition>uint16_t umidi::protocol::SequenceMetadata::bpm_x10</definition>
+        <argsstring></argsstring>
+        <name>bpm_x10</name>
+        <qualifiedname>umidi::protocol::SequenceMetadata::bpm_x10</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="127" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="127" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_sequence_metadata_1a68f461e65f6671bb14fa970727775d8e" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::SequenceMetadata::time_sig_num</definition>
+        <argsstring></argsstring>
+        <name>time_sig_num</name>
+        <qualifiedname>umidi::protocol::SequenceMetadata::time_sig_num</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="128" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="128" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_sequence_metadata_1a2327567d90a2ac409d9f1a66233d2172" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::SequenceMetadata::time_sig_den</definition>
+        <argsstring></argsstring>
+        <name>time_sig_den</name>
+        <qualifiedname>umidi::protocol::SequenceMetadata::time_sig_den</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="129" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="129" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_sequence_metadata_1a8ae2445e756421762acde9f8d450f4cf" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::SequenceMetadata::swing</definition>
+        <argsstring></argsstring>
+        <name>swing</name>
+        <qualifiedname>umidi::protocol::SequenceMetadata::swing</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="130" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="130" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_sequence_metadata_1a6ab0edc450d32906c612c0a6bad1bc89" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::SequenceMetadata::quantize</definition>
+        <argsstring></argsstring>
+        <name>quantize</name>
+        <qualifiedname>umidi::protocol::SequenceMetadata::quantize</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="131" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="131" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_sequence_metadata_1aceed68d490e55d03f74f10c18ecaf4db" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::SequenceMetadata::loop_start</definition>
+        <argsstring></argsstring>
+        <name>loop_start</name>
+        <qualifiedname>umidi::protocol::SequenceMetadata::loop_start</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="132" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="132" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_sequence_metadata_1abef9b6a46668a4345fd5961715f48090" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::SequenceMetadata::loop_end</definition>
+        <argsstring></argsstring>
+        <name>loop_end</name>
+        <qualifiedname>umidi::protocol::SequenceMetadata::loop_end</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="133" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="133" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="structumidi_1_1protocol_1_1_sequence_metadata_1a7467d65241d4e825320337c2b13cfac3" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::SequenceMetadata::set_bpm</definition>
+        <argsstring>(float bpm) noexcept</argsstring>
+        <name>set_bpm</name>
+        <qualifiedname>umidi::protocol::SequenceMetadata::set_bpm</qualifiedname>
+        <param>
+          <type>float</type>
+          <declname>bpm</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="135" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="135" bodyend="137"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1protocol_1_1_sequence_metadata_1ac6cb93f4b0d95077abcf03b88fd89eca" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>float</type>
+        <definition>float umidi::protocol::SequenceMetadata::get_bpm</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>get_bpm</name>
+        <qualifiedname>umidi::protocol::SequenceMetadata::get_bpm</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="139" column="12" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="139" bodyend="141"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/umi_object.hh" line="124" column="1" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="124" bodyend="142"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1protocol_1_1_sequence_metadata_1a229b244e0855d940b3bc7528179d5dd3" prot="public" virt="non-virtual"><scope>umidi::protocol::SequenceMetadata</scope><name>bpm_x10</name></member>
+      <member refid="structumidi_1_1protocol_1_1_sequence_metadata_1ac6cb93f4b0d95077abcf03b88fd89eca" prot="public" virt="non-virtual"><scope>umidi::protocol::SequenceMetadata</scope><name>get_bpm</name></member>
+      <member refid="structumidi_1_1protocol_1_1_sequence_metadata_1abef9b6a46668a4345fd5961715f48090" prot="public" virt="non-virtual"><scope>umidi::protocol::SequenceMetadata</scope><name>loop_end</name></member>
+      <member refid="structumidi_1_1protocol_1_1_sequence_metadata_1aceed68d490e55d03f74f10c18ecaf4db" prot="public" virt="non-virtual"><scope>umidi::protocol::SequenceMetadata</scope><name>loop_start</name></member>
+      <member refid="structumidi_1_1protocol_1_1_sequence_metadata_1a6ab0edc450d32906c612c0a6bad1bc89" prot="public" virt="non-virtual"><scope>umidi::protocol::SequenceMetadata</scope><name>quantize</name></member>
+      <member refid="structumidi_1_1protocol_1_1_sequence_metadata_1a7467d65241d4e825320337c2b13cfac3" prot="public" virt="non-virtual"><scope>umidi::protocol::SequenceMetadata</scope><name>set_bpm</name></member>
+      <member refid="structumidi_1_1protocol_1_1_sequence_metadata_1a326b2fd27bfe7ca831c261d6e047bc2f" prot="public" virt="non-virtual"><scope>umidi::protocol::SequenceMetadata</scope><name>steps</name></member>
+      <member refid="structumidi_1_1protocol_1_1_sequence_metadata_1a8ae2445e756421762acde9f8d450f4cf" prot="public" virt="non-virtual"><scope>umidi::protocol::SequenceMetadata</scope><name>swing</name></member>
+      <member refid="structumidi_1_1protocol_1_1_sequence_metadata_1a2327567d90a2ac409d9f1a66233d2172" prot="public" virt="non-virtual"><scope>umidi::protocol::SequenceMetadata</scope><name>time_sig_den</name></member>
+      <member refid="structumidi_1_1protocol_1_1_sequence_metadata_1a68f461e65f6671bb14fa970727775d8e" prot="public" virt="non-virtual"><scope>umidi::protocol::SequenceMetadata</scope><name>time_sig_num</name></member>
+      <member refid="structumidi_1_1protocol_1_1_sequence_metadata_1aada6e248f6c64cdd89877e09168ea5e4" prot="public" virt="non-virtual"><scope>umidi::protocol::SequenceMetadata</scope><name>tracks</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

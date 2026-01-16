@@ -1,0 +1,145 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="classumidi_1_1protocol_1_1_transport_manager" kind="class" language="C++" prot="public">
+    <compoundname>umidi::protocol::TransportManager</compoundname>
+    <templateparamlist>
+      <param>
+        <type>size_t</type>
+        <declname>MaxTransports</declname>
+        <defname>MaxTransports</defname>
+        <defval>2</defval>
+      </param>
+    </templateparamlist>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_transport_manager_1a59d62b81f0fe2594dc6a7161d9ebc206" prot="private" static="no" mutable="no">
+        <type>Transport *</type>
+        <definition>Transport* umidi::protocol::TransportManager&lt; MaxTransports &gt;::transports_[MaxTransports]</definition>
+        <argsstring>[MaxTransports]</argsstring>
+        <name>transports_</name>
+        <qualifiedname>umidi::protocol::TransportManager::transports_</qualifiedname>
+        <initializer>= {}</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="436" column="15" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="436" bodyend="436"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1protocol_1_1_transport_manager_1ab06eb619bc0e4313eaa96b44aedbc25d" prot="private" static="no" mutable="no">
+        <type>size_t</type>
+        <definition>size_t umidi::protocol::TransportManager&lt; MaxTransports &gt;::count_</definition>
+        <argsstring></argsstring>
+        <name>count_</name>
+        <qualifiedname>umidi::protocol::TransportManager::count_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="437" column="12" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="437" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_transport_manager_1aa4067da6552b81a1056070e6a21f55c7" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::TransportManager&lt; MaxTransports &gt;::register_transport</definition>
+        <argsstring>(Transport *transport) noexcept</argsstring>
+        <name>register_transport</name>
+        <qualifiedname>umidi::protocol::TransportManager::register_transport</qualifiedname>
+        <param>
+          <type>Transport *</type>
+          <declname>transport</declname>
+        </param>
+        <briefdescription>
+<para>Register a transport. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="392" column="10" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="392" bodyend="396"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_transport_manager_1ac2e8547d969c86e01ceb6517cfbe56a3" prot="public" static="no" nodiscard="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Transport *</type>
+        <definition>Transport * umidi::protocol::TransportManager&lt; MaxTransports &gt;::get_best</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>get_best</name>
+        <qualifiedname>umidi::protocol::TransportManager::get_best</qualifiedname>
+        <briefdescription>
+<para>Get best available transport Prefers Bulk over SysEx for performance. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="400" column="16" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="400" bodyend="410"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_transport_manager_1a0383cb2d2b4bf8e1099fa19c855f897f" prot="public" static="no" nodiscard="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>Transport *</type>
+        <definition>Transport * umidi::protocol::TransportManager&lt; MaxTransports &gt;::get</definition>
+        <argsstring>(TransportType type) noexcept</argsstring>
+        <name>get</name>
+        <qualifiedname>umidi::protocol::TransportManager::get</qualifiedname>
+        <param>
+          <type>TransportType</type>
+          <declname>type</declname>
+        </param>
+        <briefdescription>
+<para>Get transport by type. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="413" column="16" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="413" bodyend="420"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_transport_manager_1ab775e782628bd4b072201b0a59647a87" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::TransportManager&lt; MaxTransports &gt;::any_connected</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>any_connected</name>
+        <qualifiedname>umidi::protocol::TransportManager::any_connected</qualifiedname>
+        <briefdescription>
+<para>Check if any transport is connected. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="423" column="11" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="423" bodyend="430"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1protocol_1_1_transport_manager_1a21fb7bac6908f88988bce8f454d68ccd" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t umidi::protocol::TransportManager&lt; MaxTransports &gt;::count</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>count</name>
+        <qualifiedname>umidi::protocol::TransportManager::count</qualifiedname>
+        <briefdescription>
+<para>Get number of registered transports. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_transport.hh" line="433" column="13" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="433" bodyend="433"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/umi_transport.hh" line="389" column="1" bodyfile="include/umidi/protocol/umi_transport.hh" bodystart="389" bodyend="438"/>
+    <listofallmembers>
+      <member refid="classumidi_1_1protocol_1_1_transport_manager_1ab775e782628bd4b072201b0a59647a87" prot="public" virt="non-virtual"><scope>umidi::protocol::TransportManager</scope><name>any_connected</name></member>
+      <member refid="classumidi_1_1protocol_1_1_transport_manager_1a21fb7bac6908f88988bce8f454d68ccd" prot="public" virt="non-virtual"><scope>umidi::protocol::TransportManager</scope><name>count</name></member>
+      <member refid="classumidi_1_1protocol_1_1_transport_manager_1ab06eb619bc0e4313eaa96b44aedbc25d" prot="private" virt="non-virtual"><scope>umidi::protocol::TransportManager</scope><name>count_</name></member>
+      <member refid="classumidi_1_1protocol_1_1_transport_manager_1a0383cb2d2b4bf8e1099fa19c855f897f" prot="public" virt="non-virtual"><scope>umidi::protocol::TransportManager</scope><name>get</name></member>
+      <member refid="classumidi_1_1protocol_1_1_transport_manager_1ac2e8547d969c86e01ceb6517cfbe56a3" prot="public" virt="non-virtual"><scope>umidi::protocol::TransportManager</scope><name>get_best</name></member>
+      <member refid="classumidi_1_1protocol_1_1_transport_manager_1aa4067da6552b81a1056070e6a21f55c7" prot="public" virt="non-virtual"><scope>umidi::protocol::TransportManager</scope><name>register_transport</name></member>
+      <member refid="classumidi_1_1protocol_1_1_transport_manager_1a59d62b81f0fe2594dc6a7161d9ebc206" prot="private" virt="non-virtual"><scope>umidi::protocol::TransportManager</scope><name>transports_</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

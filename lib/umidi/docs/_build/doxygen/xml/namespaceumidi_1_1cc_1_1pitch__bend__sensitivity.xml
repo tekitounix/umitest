@@ -1,0 +1,130 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="namespaceumidi_1_1cc_1_1pitch__bend__sensitivity" kind="namespace" language="C++">
+    <compoundname>umidi::cc::pitch_bend_sensitivity</compoundname>
+    <innerclass refid="structumidi_1_1cc_1_1pitch__bend__sensitivity_1_1_value" prot="public">umidi::cc::pitch_bend_sensitivity::Value</innerclass>
+    <sectiondef kind="var">
+      <memberdef kind="variable" id="cc_2decoder_8hh_1a7aa12153ec6f71bf0468f2655b8c6efd" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>uint16_t</type>
+        <definition>uint16_t umidi::cc::pitch_bend_sensitivity::DEFAULT</definition>
+        <argsstring></argsstring>
+        <name>DEFAULT</name>
+        <qualifiedname>umidi::cc::pitch_bend_sensitivity::DEFAULT</qualifiedname>
+        <initializer>= make(2, 0)</initializer>
+        <briefdescription>
+<para>Default: +/- 2 semitones. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/decoder.hh" line="246" column="27" bodyfile="include/umidi/cc/decoder.hh" bodystart="246" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="cc_2decoder_8hh_1af007764e38df1f6cb7aa176dbd64c217" prot="public" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type><ref refid="structumidi_1_1cc_1_1pitch__bend__sensitivity_1_1_value" kindref="compound">Value</ref></type>
+        <definition>Value umidi::cc::pitch_bend_sensitivity::parse</definition>
+        <argsstring>(uint16_t rpn_value) noexcept</argsstring>
+        <name>parse</name>
+        <qualifiedname>umidi::cc::pitch_bend_sensitivity::parse</qualifiedname>
+        <param>
+          <type>uint16_t</type>
+          <declname>rpn_value</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/decoder.hh" line="237" column="18" bodyfile="include/umidi/cc/decoder.hh" bodystart="237" bodyend="239"/>
+      </memberdef>
+      <memberdef kind="function" id="cc_2decoder_8hh_1a201a74e81d461c3fc575583c25852a26" prot="public" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>uint16_t</type>
+        <definition>uint16_t umidi::cc::pitch_bend_sensitivity::make</definition>
+        <argsstring>(uint8_t semitones, uint8_t cents) noexcept</argsstring>
+        <name>make</name>
+        <qualifiedname>umidi::cc::pitch_bend_sensitivity::make</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>semitones</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>cents</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/decoder.hh" line="241" column="21" bodyfile="include/umidi/cc/decoder.hh" bodystart="241" bodyend="243"/>
+      </memberdef>
+      <memberdef kind="function" id="types_8hh_1ada00fc39f1e7b59ba0a13688e48c2897" prot="public" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::cc::pitch_bend_sensitivity::get_semitones</definition>
+        <argsstring>(uint16_t value) noexcept</argsstring>
+        <name>get_semitones</name>
+        <qualifiedname>umidi::cc::pitch_bend_sensitivity::get_semitones</qualifiedname>
+        <param>
+          <type>uint16_t</type>
+          <declname>value</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="177" column="20" bodyfile="include/umidi/cc/types.hh" bodystart="177" bodyend="179"/>
+      </memberdef>
+      <memberdef kind="function" id="types_8hh_1ac1f632ef5a322fcb5430172668ce6fde" prot="public" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::cc::pitch_bend_sensitivity::get_cents</definition>
+        <argsstring>(uint16_t value) noexcept</argsstring>
+        <name>get_cents</name>
+        <qualifiedname>umidi::cc::pitch_bend_sensitivity::get_cents</qualifiedname>
+        <param>
+          <type>uint16_t</type>
+          <declname>value</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="181" column="20" bodyfile="include/umidi/cc/types.hh" bodystart="181" bodyend="183"/>
+      </memberdef>
+      <memberdef kind="function" id="types_8hh_1a9e36cdf15ef7bbcdacaec22ad2ec0684" prot="public" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>uint16_t</type>
+        <definition>uint16_t umidi::cc::pitch_bend_sensitivity::make_value</definition>
+        <argsstring>(uint8_t semitones, uint8_t cents) noexcept</argsstring>
+        <name>make_value</name>
+        <qualifiedname>umidi::cc::pitch_bend_sensitivity::make_value</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>semitones</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>cents</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/cc/types.hh" line="185" column="21" bodyfile="include/umidi/cc/types.hh" bodystart="185" bodyend="187"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/cc/decoder.hh" line="225" column="1"/>
+  </compounddef>
+</doxygen>

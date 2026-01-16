@@ -1,0 +1,161 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1protocol_1_1_sample_metadata" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::protocol::SampleMetadata</compoundname>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_sample_metadata_1a14f3845ea72e06e8126d6607d8c0a5a5" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::SampleMetadata::sample_rate</definition>
+        <argsstring></argsstring>
+        <name>sample_rate</name>
+        <qualifiedname>umidi::protocol::SampleMetadata::sample_rate</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="148" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="148" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_sample_metadata_1af44697355644bbb21c6c4d34da6ec779" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::SampleMetadata::bit_depth</definition>
+        <argsstring></argsstring>
+        <name>bit_depth</name>
+        <qualifiedname>umidi::protocol::SampleMetadata::bit_depth</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="149" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="149" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_sample_metadata_1ae848a9a579b3a46eb1dda29adc63f249" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::SampleMetadata::channels</definition>
+        <argsstring></argsstring>
+        <name>channels</name>
+        <qualifiedname>umidi::protocol::SampleMetadata::channels</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="150" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="150" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_sample_metadata_1adcaec412b21dcec56499292b1a14f7d6" prot="public" static="no" mutable="no">
+        <type>uint16_t</type>
+        <definition>uint16_t umidi::protocol::SampleMetadata::root_note</definition>
+        <argsstring></argsstring>
+        <name>root_note</name>
+        <qualifiedname>umidi::protocol::SampleMetadata::root_note</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="151" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="151" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_sample_metadata_1a54ad08c068cc4a7f33936fff2b030136" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::SampleMetadata::loop_start</definition>
+        <argsstring></argsstring>
+        <name>loop_start</name>
+        <qualifiedname>umidi::protocol::SampleMetadata::loop_start</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="152" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="152" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_sample_metadata_1a9ca1df3d8c6cfe0c2e14d261103d047e" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::SampleMetadata::loop_end</definition>
+        <argsstring></argsstring>
+        <name>loop_end</name>
+        <qualifiedname>umidi::protocol::SampleMetadata::loop_end</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="153" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="153" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="structumidi_1_1protocol_1_1_sample_metadata_1a5e537c5d6743cec8ab13026212a37153" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::SampleMetadata::set_root_note</definition>
+        <argsstring>(uint8_t note, int8_t cents=0) noexcept</argsstring>
+        <name>set_root_note</name>
+        <qualifiedname>umidi::protocol::SampleMetadata::set_root_note</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>note</declname>
+        </param>
+        <param>
+          <type>int8_t</type>
+          <declname>cents</declname>
+          <defval>0</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="155" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="155" bodyend="157"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1protocol_1_1_sample_metadata_1ac5b18f8198f4ac9e899743c231f75573" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::SampleMetadata::get_root_note</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>get_root_note</name>
+        <qualifiedname>umidi::protocol::SampleMetadata::get_root_note</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="159" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="159" bodyend="161"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1protocol_1_1_sample_metadata_1a08d399de1cdc8fc208c0b55e08cdcad5" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>int8_t</type>
+        <definition>int8_t umidi::protocol::SampleMetadata::get_fine_tune</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>get_fine_tune</name>
+        <qualifiedname>umidi::protocol::SampleMetadata::get_fine_tune</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="163" column="13" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="163" bodyend="165"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/umi_object.hh" line="147" column="1" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="147" bodyend="166"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1protocol_1_1_sample_metadata_1af44697355644bbb21c6c4d34da6ec779" prot="public" virt="non-virtual"><scope>umidi::protocol::SampleMetadata</scope><name>bit_depth</name></member>
+      <member refid="structumidi_1_1protocol_1_1_sample_metadata_1ae848a9a579b3a46eb1dda29adc63f249" prot="public" virt="non-virtual"><scope>umidi::protocol::SampleMetadata</scope><name>channels</name></member>
+      <member refid="structumidi_1_1protocol_1_1_sample_metadata_1a08d399de1cdc8fc208c0b55e08cdcad5" prot="public" virt="non-virtual"><scope>umidi::protocol::SampleMetadata</scope><name>get_fine_tune</name></member>
+      <member refid="structumidi_1_1protocol_1_1_sample_metadata_1ac5b18f8198f4ac9e899743c231f75573" prot="public" virt="non-virtual"><scope>umidi::protocol::SampleMetadata</scope><name>get_root_note</name></member>
+      <member refid="structumidi_1_1protocol_1_1_sample_metadata_1a9ca1df3d8c6cfe0c2e14d261103d047e" prot="public" virt="non-virtual"><scope>umidi::protocol::SampleMetadata</scope><name>loop_end</name></member>
+      <member refid="structumidi_1_1protocol_1_1_sample_metadata_1a54ad08c068cc4a7f33936fff2b030136" prot="public" virt="non-virtual"><scope>umidi::protocol::SampleMetadata</scope><name>loop_start</name></member>
+      <member refid="structumidi_1_1protocol_1_1_sample_metadata_1adcaec412b21dcec56499292b1a14f7d6" prot="public" virt="non-virtual"><scope>umidi::protocol::SampleMetadata</scope><name>root_note</name></member>
+      <member refid="structumidi_1_1protocol_1_1_sample_metadata_1a14f3845ea72e06e8126d6607d8c0a5a5" prot="public" virt="non-virtual"><scope>umidi::protocol::SampleMetadata</scope><name>sample_rate</name></member>
+      <member refid="structumidi_1_1protocol_1_1_sample_metadata_1a5e537c5d6743cec8ab13026212a37153" prot="public" virt="non-virtual"><scope>umidi::protocol::SampleMetadata</scope><name>set_root_note</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

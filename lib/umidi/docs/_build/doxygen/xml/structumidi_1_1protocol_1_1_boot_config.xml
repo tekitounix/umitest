@@ -1,0 +1,257 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1protocol_1_1_boot_config" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::protocol::BootConfig</compoundname>
+    <includes refid="umi__bootloader_8hh" local="no">umi_bootloader.hh</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_boot_config_1a0cc115121cf8327dc82b5e74271db428" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::BootConfig::magic</definition>
+        <argsstring></argsstring>
+        <name>magic</name>
+        <qualifiedname>umidi::protocol::BootConfig::magic</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="58" column="14" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="58" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_boot_config_1a62d463ecc3b0ede5309a24f678ac2967" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::BootConfig::config_version</definition>
+        <argsstring></argsstring>
+        <name>config_version</name>
+        <qualifiedname>umidi::protocol::BootConfig::config_version</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="59" column="14" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="59" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_boot_config_1ae060ce53250e4e9ac468180567a15f20" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::BootConfig::active_slot</definition>
+        <argsstring></argsstring>
+        <name>active_slot</name>
+        <qualifiedname>umidi::protocol::BootConfig::active_slot</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="60" column="14" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="60" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_boot_config_1a14b051b8a55186f4a2c029ee55b835d4" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::BootConfig::boot_count</definition>
+        <argsstring></argsstring>
+        <name>boot_count</name>
+        <qualifiedname>umidi::protocol::BootConfig::boot_count</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="61" column="14" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="61" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_boot_config_1a21c873e5a01a164a35ef0387ddc82fcd" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::BootConfig::max_boot_attempts</definition>
+        <argsstring></argsstring>
+        <name>max_boot_attempts</name>
+        <qualifiedname>umidi::protocol::BootConfig::max_boot_attempts</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="62" column="14" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="62" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_boot_config_1ae05ee560283eed13a0c41904fc370556" prot="public" static="no" mutable="no">
+        <type>SlotState</type>
+        <definition>SlotState umidi::protocol::BootConfig::slot_a_state</definition>
+        <argsstring></argsstring>
+        <name>slot_a_state</name>
+        <qualifiedname>umidi::protocol::BootConfig::slot_a_state</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="64" column="15" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="64" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_boot_config_1ae101317bc8e82d3945f1490ce669ab89" prot="public" static="no" mutable="no">
+        <type>SlotState</type>
+        <definition>SlotState umidi::protocol::BootConfig::slot_b_state</definition>
+        <argsstring></argsstring>
+        <name>slot_b_state</name>
+        <qualifiedname>umidi::protocol::BootConfig::slot_b_state</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="65" column="15" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="65" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_boot_config_1ab5fbfdbd80aad6bfa2dbe109d750bffd" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::BootConfig::reserved1[2]</definition>
+        <argsstring>[2]</argsstring>
+        <name>reserved1</name>
+        <qualifiedname>umidi::protocol::BootConfig::reserved1</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="66" column="14" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="66" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_boot_config_1a82ee5b8869f47c915a1bda99ea75e96f" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::BootConfig::slot_a_version</definition>
+        <argsstring></argsstring>
+        <name>slot_a_version</name>
+        <qualifiedname>umidi::protocol::BootConfig::slot_a_version</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="68" column="14" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="68" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_boot_config_1ae32a2a143205a479f44b52fa7ab61148" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::BootConfig::slot_b_version</definition>
+        <argsstring></argsstring>
+        <name>slot_b_version</name>
+        <qualifiedname>umidi::protocol::BootConfig::slot_b_version</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="69" column="14" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="69" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_boot_config_1afe379500c3c57b9ccff7ba136bca0af5" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::BootConfig::slot_a_crc</definition>
+        <argsstring></argsstring>
+        <name>slot_a_crc</name>
+        <qualifiedname>umidi::protocol::BootConfig::slot_a_crc</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="71" column="14" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="71" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_boot_config_1a703071acf9e2cc941a9207c7f0388fc1" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::BootConfig::slot_b_crc</definition>
+        <argsstring></argsstring>
+        <name>slot_b_crc</name>
+        <qualifiedname>umidi::protocol::BootConfig::slot_b_crc</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="72" column="14" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="72" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_boot_config_1a8523de57ca1888abdb1aa24a0ead7d34" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::BootConfig::last_update_time</definition>
+        <argsstring></argsstring>
+        <name>last_update_time</name>
+        <qualifiedname>umidi::protocol::BootConfig::last_update_time</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="74" column="14" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="74" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_boot_config_1ae609d734bf9f86e09648ee078070fd2c" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::BootConfig::boot_success_count</definition>
+        <argsstring></argsstring>
+        <name>boot_success_count</name>
+        <qualifiedname>umidi::protocol::BootConfig::boot_success_count</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="75" column="14" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="75" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_boot_config_1a88ac5b8761ed3badcf551f10e1159b99" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::BootConfig::reserved2[6]</definition>
+        <argsstring>[6]</argsstring>
+        <name>reserved2</name>
+        <qualifiedname>umidi::protocol::BootConfig::reserved2</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="77" column="14" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="77" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_boot_config_1ac19d5082566c3ea2f8ff5d2f10381ff8" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::BootConfig::checksum</definition>
+        <argsstring></argsstring>
+        <name>checksum</name>
+        <qualifiedname>umidi::protocol::BootConfig::checksum</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_bootloader.hh" line="78" column="14" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="78" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Boot configuration (stored in flash) Must fit in a single flash sector. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/umi_bootloader.hh" line="57" column="1" bodyfile="include/umidi/protocol/umi_bootloader.hh" bodystart="57" bodyend="81"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1protocol_1_1_boot_config_1ae060ce53250e4e9ac468180567a15f20" prot="public" virt="non-virtual"><scope>umidi::protocol::BootConfig</scope><name>active_slot</name></member>
+      <member refid="structumidi_1_1protocol_1_1_boot_config_1a14b051b8a55186f4a2c029ee55b835d4" prot="public" virt="non-virtual"><scope>umidi::protocol::BootConfig</scope><name>boot_count</name></member>
+      <member refid="structumidi_1_1protocol_1_1_boot_config_1ae609d734bf9f86e09648ee078070fd2c" prot="public" virt="non-virtual"><scope>umidi::protocol::BootConfig</scope><name>boot_success_count</name></member>
+      <member refid="structumidi_1_1protocol_1_1_boot_config_1ac19d5082566c3ea2f8ff5d2f10381ff8" prot="public" virt="non-virtual"><scope>umidi::protocol::BootConfig</scope><name>checksum</name></member>
+      <member refid="structumidi_1_1protocol_1_1_boot_config_1a62d463ecc3b0ede5309a24f678ac2967" prot="public" virt="non-virtual"><scope>umidi::protocol::BootConfig</scope><name>config_version</name></member>
+      <member refid="structumidi_1_1protocol_1_1_boot_config_1a8523de57ca1888abdb1aa24a0ead7d34" prot="public" virt="non-virtual"><scope>umidi::protocol::BootConfig</scope><name>last_update_time</name></member>
+      <member refid="structumidi_1_1protocol_1_1_boot_config_1a0cc115121cf8327dc82b5e74271db428" prot="public" virt="non-virtual"><scope>umidi::protocol::BootConfig</scope><name>magic</name></member>
+      <member refid="structumidi_1_1protocol_1_1_boot_config_1a21c873e5a01a164a35ef0387ddc82fcd" prot="public" virt="non-virtual"><scope>umidi::protocol::BootConfig</scope><name>max_boot_attempts</name></member>
+      <member refid="structumidi_1_1protocol_1_1_boot_config_1ab5fbfdbd80aad6bfa2dbe109d750bffd" prot="public" virt="non-virtual"><scope>umidi::protocol::BootConfig</scope><name>reserved1</name></member>
+      <member refid="structumidi_1_1protocol_1_1_boot_config_1a88ac5b8761ed3badcf551f10e1159b99" prot="public" virt="non-virtual"><scope>umidi::protocol::BootConfig</scope><name>reserved2</name></member>
+      <member refid="structumidi_1_1protocol_1_1_boot_config_1afe379500c3c57b9ccff7ba136bca0af5" prot="public" virt="non-virtual"><scope>umidi::protocol::BootConfig</scope><name>slot_a_crc</name></member>
+      <member refid="structumidi_1_1protocol_1_1_boot_config_1ae05ee560283eed13a0c41904fc370556" prot="public" virt="non-virtual"><scope>umidi::protocol::BootConfig</scope><name>slot_a_state</name></member>
+      <member refid="structumidi_1_1protocol_1_1_boot_config_1a82ee5b8869f47c915a1bda99ea75e96f" prot="public" virt="non-virtual"><scope>umidi::protocol::BootConfig</scope><name>slot_a_version</name></member>
+      <member refid="structumidi_1_1protocol_1_1_boot_config_1a703071acf9e2cc941a9207c7f0388fc1" prot="public" virt="non-virtual"><scope>umidi::protocol::BootConfig</scope><name>slot_b_crc</name></member>
+      <member refid="structumidi_1_1protocol_1_1_boot_config_1ae101317bc8e82d3945f1490ce669ab89" prot="public" virt="non-virtual"><scope>umidi::protocol::BootConfig</scope><name>slot_b_state</name></member>
+      <member refid="structumidi_1_1protocol_1_1_boot_config_1ae32a2a143205a479f44b52fa7ab61148" prot="public" virt="non-virtual"><scope>umidi::protocol::BootConfig</scope><name>slot_b_version</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

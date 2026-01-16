@@ -1,0 +1,14 @@
+.. _exhale_variable_types_8hh_1ab51163845c701a0e0bf7331a71609453:
+
+Variable umidi::cc::is_rpn_type_v
+=================================
+
+- Defined in :ref:`file_include_umidi_cc_types.hh`
+
+
+Variable Documentation
+----------------------
+
+
+.. doxygenvariable:: umidi::cc::is_rpn_type_v
+   :project: umidi

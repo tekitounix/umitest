@@ -1,0 +1,152 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1message_1_1_song_position" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::message::SongPosition</compoundname>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structumidi_1_1message_1_1_song_position_1a98b41fde09159b18ba63f404eae6bca4" prot="public" static="no" mutable="no">
+        <type><ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref></type>
+        <definition>UMP32 umidi::message::SongPosition::ump</definition>
+        <argsstring></argsstring>
+        <name>ump</name>
+        <qualifiedname>umidi::message::SongPosition::ump</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/system.hh" line="145" column="11" bodyfile="include/umidi/messages/system.hh" bodystart="145" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-attrib">
+      <memberdef kind="variable" id="structumidi_1_1message_1_1_song_position_1a264ac901255c2f30183a3c4a8cd90a1d" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::message::SongPosition::STATUS</definition>
+        <argsstring></argsstring>
+        <name>STATUS</name>
+        <qualifiedname>umidi::message::SongPosition::STATUS</qualifiedname>
+        <initializer>= 0xF2</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/system.hh" line="147" column="30" bodyfile="include/umidi/messages/system.hh" bodystart="147" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="structumidi_1_1message_1_1_song_position_1a812707f737609b70a11a6b4a54ae1ccf" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::message::SongPosition::group</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>group</name>
+        <qualifiedname>umidi::message::SongPosition::group</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/system.hh" line="149" column="24" bodyfile="include/umidi/messages/system.hh" bodystart="149" bodyend="149"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_song_position_1a78be5010328f5e0a0efef796c127e57d" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint16_t</type>
+        <definition>uint16_t umidi::message::SongPosition::position</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>position</name>
+        <qualifiedname>umidi::message::SongPosition::position</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/system.hh" line="150" column="25" bodyfile="include/umidi/messages/system.hh" bodystart="150" bodyend="152"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_song_position_1ace1b6af9b3c500a7375fc66d1a60e6e4" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::message::SongPosition::is_valid</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>is_valid</name>
+        <qualifiedname>umidi::message::SongPosition::is_valid</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/system.hh" line="154" column="21" bodyfile="include/umidi/messages/system.hh" bodystart="154" bodyend="156"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="structumidi_1_1message_1_1_song_position_1ae6f5022fd0a0dd98dce0176e97dd32a1" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>SongPosition</type>
+        <definition>static constexpr SongPosition umidi::message::SongPosition::create</definition>
+        <argsstring>(uint16_t position, uint8_t group=0) noexcept</argsstring>
+        <name>create</name>
+        <qualifiedname>umidi::message::SongPosition::create</qualifiedname>
+        <param>
+          <type>uint16_t</type>
+          <declname>position</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>group</declname>
+          <defval>0</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/system.hh" line="159" column="5" bodyfile="include/umidi/messages/system.hh" bodystart="159" bodyend="161"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1message_1_1_song_position_1aab8760bdb6595ca0bceb2ff1627df42c" prot="public" static="yes" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>SongPosition</type>
+        <definition>static constexpr SongPosition umidi::message::SongPosition::from_ump</definition>
+        <argsstring>(UMP32 u) noexcept</argsstring>
+        <name>from_ump</name>
+        <qualifiedname>umidi::message::SongPosition::from_ump</qualifiedname>
+        <param>
+          <type><ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref></type>
+          <declname>u</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/system.hh" line="163" column="36" bodyfile="include/umidi/messages/system.hh" bodystart="163" bodyend="163"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="2">
+        <label>umidi::UMP32</label>
+        <link refid="structumidi_1_1_u_m_p32"/>
+      </node>
+      <node id="1">
+        <label>umidi::message::SongPosition</label>
+        <childnode refid="2" relation="usage">
+          <edgelabel>ump</edgelabel>
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="include/umidi/messages/system.hh" line="144" column="1" bodyfile="include/umidi/messages/system.hh" bodystart="144" bodyend="164"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1message_1_1_song_position_1ae6f5022fd0a0dd98dce0176e97dd32a1" prot="public" virt="non-virtual"><scope>umidi::message::SongPosition</scope><name>create</name></member>
+      <member refid="structumidi_1_1message_1_1_song_position_1aab8760bdb6595ca0bceb2ff1627df42c" prot="public" virt="non-virtual"><scope>umidi::message::SongPosition</scope><name>from_ump</name></member>
+      <member refid="structumidi_1_1message_1_1_song_position_1a812707f737609b70a11a6b4a54ae1ccf" prot="public" virt="non-virtual"><scope>umidi::message::SongPosition</scope><name>group</name></member>
+      <member refid="structumidi_1_1message_1_1_song_position_1ace1b6af9b3c500a7375fc66d1a60e6e4" prot="public" virt="non-virtual"><scope>umidi::message::SongPosition</scope><name>is_valid</name></member>
+      <member refid="structumidi_1_1message_1_1_song_position_1a78be5010328f5e0a0efef796c127e57d" prot="public" virt="non-virtual"><scope>umidi::message::SongPosition</scope><name>position</name></member>
+      <member refid="structumidi_1_1message_1_1_song_position_1a264ac901255c2f30183a3c4a8cd90a1d" prot="public" virt="non-virtual"><scope>umidi::message::SongPosition</scope><name>STATUS</name></member>
+      <member refid="structumidi_1_1message_1_1_song_position_1a98b41fde09159b18ba63f404eae6bca4" prot="public" virt="non-virtual"><scope>umidi::message::SongPosition</scope><name>ump</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

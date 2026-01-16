@@ -1,0 +1,92 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1protocol_1_1_timeout_config" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::protocol::TimeoutConfig</compoundname>
+    <includes refid="umi__session_8hh" local="no">umi_session.hh</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_timeout_config_1ac6e9abbf209b13e441eed518dbb59693" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::TimeoutConfig::session_timeout_ms</definition>
+        <argsstring></argsstring>
+        <name>session_timeout_ms</name>
+        <qualifiedname>umidi::protocol::TimeoutConfig::session_timeout_ms</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="25" column="14" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="25" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_timeout_config_1a1e0b5684f3ca8f0d482dacf286198c02" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::TimeoutConfig::chunk_timeout_ms</definition>
+        <argsstring></argsstring>
+        <name>chunk_timeout_ms</name>
+        <qualifiedname>umidi::protocol::TimeoutConfig::chunk_timeout_ms</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="26" column="14" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="26" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_timeout_config_1abcc47124ce0e3d7fb834b9d188f3ce95" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::TimeoutConfig::ack_timeout_ms</definition>
+        <argsstring></argsstring>
+        <name>ack_timeout_ms</name>
+        <qualifiedname>umidi::protocol::TimeoutConfig::ack_timeout_ms</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="27" column="14" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="27" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_timeout_config_1a19d2554847df733d848cdf6f48c07a7a" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::TimeoutConfig::idle_timeout_ms</definition>
+        <argsstring></argsstring>
+        <name>idle_timeout_ms</name>
+        <qualifiedname>umidi::protocol::TimeoutConfig::idle_timeout_ms</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="28" column="14" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="28" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_timeout_config_1ad110dc28c8bc46a2180e4b1e33ce8d8e" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::TimeoutConfig::max_retries</definition>
+        <argsstring></argsstring>
+        <name>max_retries</name>
+        <qualifiedname>umidi::protocol::TimeoutConfig::max_retries</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_session.hh" line="29" column="14" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="29" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Timeout configuration. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/umi_session.hh" line="24" column="1" bodyfile="include/umidi/protocol/umi_session.hh" bodystart="24" bodyend="30"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1protocol_1_1_timeout_config_1abcc47124ce0e3d7fb834b9d188f3ce95" prot="public" virt="non-virtual"><scope>umidi::protocol::TimeoutConfig</scope><name>ack_timeout_ms</name></member>
+      <member refid="structumidi_1_1protocol_1_1_timeout_config_1a1e0b5684f3ca8f0d482dacf286198c02" prot="public" virt="non-virtual"><scope>umidi::protocol::TimeoutConfig</scope><name>chunk_timeout_ms</name></member>
+      <member refid="structumidi_1_1protocol_1_1_timeout_config_1a19d2554847df733d848cdf6f48c07a7a" prot="public" virt="non-virtual"><scope>umidi::protocol::TimeoutConfig</scope><name>idle_timeout_ms</name></member>
+      <member refid="structumidi_1_1protocol_1_1_timeout_config_1ad110dc28c8bc46a2180e4b1e33ce8d8e" prot="public" virt="non-virtual"><scope>umidi::protocol::TimeoutConfig</scope><name>max_retries</name></member>
+      <member refid="structumidi_1_1protocol_1_1_timeout_config_1ac6e9abbf209b13e441eed518dbb59693" prot="public" virt="non-virtual"><scope>umidi::protocol::TimeoutConfig</scope><name>session_timeout_ms</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

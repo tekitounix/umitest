@@ -1,0 +1,197 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="namespaceumidi_1_1codec" kind="namespace" language="C++">
+    <compoundname>umidi::codec</compoundname>
+    <innerclass refid="structumidi_1_1codec_1_1_channel_config" prot="public">umidi::codec::ChannelConfig</innerclass>
+    <innerclass refid="classumidi_1_1codec_1_1_decoder" prot="public">umidi::codec::Decoder</innerclass>
+    <innerclass refid="structumidi_1_1codec_1_1message__traits" prot="public">umidi::codec::message_traits</innerclass>
+    <innerclass refid="structumidi_1_1codec_1_1message__traits_3_01message_1_1_channel_pressure_01_4" prot="public">umidi::codec::message_traits&lt; message::ChannelPressure &gt;</innerclass>
+    <innerclass refid="structumidi_1_1codec_1_1message__traits_3_01message_1_1_continue_01_4" prot="public">umidi::codec::message_traits&lt; message::Continue &gt;</innerclass>
+    <innerclass refid="structumidi_1_1codec_1_1message__traits_3_01message_1_1_control_change_01_4" prot="public">umidi::codec::message_traits&lt; message::ControlChange &gt;</innerclass>
+    <innerclass refid="structumidi_1_1codec_1_1message__traits_3_01message_1_1_j_r_clock_01_4" prot="public">umidi::codec::message_traits&lt; message::JRClock &gt;</innerclass>
+    <innerclass refid="structumidi_1_1codec_1_1message__traits_3_01message_1_1_j_r_timestamp_01_4" prot="public">umidi::codec::message_traits&lt; message::JRTimestamp &gt;</innerclass>
+    <innerclass refid="structumidi_1_1codec_1_1message__traits_3_01message_1_1_note_off_01_4" prot="public">umidi::codec::message_traits&lt; message::NoteOff &gt;</innerclass>
+    <innerclass refid="structumidi_1_1codec_1_1message__traits_3_01message_1_1_note_on_01_4" prot="public">umidi::codec::message_traits&lt; message::NoteOn &gt;</innerclass>
+    <innerclass refid="structumidi_1_1codec_1_1message__traits_3_01message_1_1_pitch_bend_01_4" prot="public">umidi::codec::message_traits&lt; message::PitchBend &gt;</innerclass>
+    <innerclass refid="structumidi_1_1codec_1_1message__traits_3_01message_1_1_poly_pressure_01_4" prot="public">umidi::codec::message_traits&lt; message::PolyPressure &gt;</innerclass>
+    <innerclass refid="structumidi_1_1codec_1_1message__traits_3_01message_1_1_program_change_01_4" prot="public">umidi::codec::message_traits&lt; message::ProgramChange &gt;</innerclass>
+    <innerclass refid="structumidi_1_1codec_1_1message__traits_3_01message_1_1_start_01_4" prot="public">umidi::codec::message_traits&lt; message::Start &gt;</innerclass>
+    <innerclass refid="structumidi_1_1codec_1_1message__traits_3_01message_1_1_stop_01_4" prot="public">umidi::codec::message_traits&lt; message::Stop &gt;</innerclass>
+    <innerclass refid="structumidi_1_1codec_1_1message__traits_3_01message_1_1_sys_ex7_01_4" prot="public">umidi::codec::message_traits&lt; message::SysEx7 &gt;</innerclass>
+    <innerclass refid="structumidi_1_1codec_1_1message__traits_3_01message_1_1_timing_clock_01_4" prot="public">umidi::codec::message_traits&lt; message::TimingClock &gt;</innerclass>
+    <sectiondef kind="enum">
+      <memberdef kind="enum" id="codec_2decoder_8hh_1a9d9833f9a1360722a03a2396289ecd20" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>MidiMode</name>
+        <qualifiedname>umidi::codec::MidiMode</qualifiedname>
+        <enumvalue id="codec_2decoder_8hh_1a9d9833f9a1360722a03a2396289ecd20a6e369b5d39f123ebe085024b7bc491c9" prot="public">
+          <name>OMNI_ON_POLY</name>
+          <initializer>= 1</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="codec_2decoder_8hh_1a9d9833f9a1360722a03a2396289ecd20afb07022d4b9b47a38e82c37aa136cf42" prot="public">
+          <name>OMNI_ON_MONO</name>
+          <initializer>= 2</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="codec_2decoder_8hh_1a9d9833f9a1360722a03a2396289ecd20aa4e696223250fdae8edd0351f2d5bb67" prot="public">
+          <name>OMNI_OFF_POLY</name>
+          <initializer>= 3</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="codec_2decoder_8hh_1a9d9833f9a1360722a03a2396289ecd20ac828c11feb79ab67a4b816695f18585f" prot="public">
+          <name>OMNI_OFF_MONO</name>
+          <initializer>= 4</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="94" column="1" bodyfile="include/umidi/codec/decoder.hh" bodystart="94" bodyend="99"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="typedef">
+      <memberdef kind="typedef" id="codec_2decoder_8hh_1a57e5e5c2ee6b58f85817147e27051e1f" prot="public" static="no">
+        <type>Decoder&lt; default_config, <ref refid="structumidi_1_1message_1_1_note_on" kindref="compound">message::NoteOn</ref>, message::NoteOff, message::ControlChange, message::ProgramChange, message::PitchBend, message::ChannelPressure, message::PolyPressure, message::TimingClock, message::Start, message::Continue, message::Stop &gt;</type>
+        <definition>using umidi::codec::FullDecoder =  Decoder&lt;
+    default_config,
+    message::NoteOn, message::NoteOff,
+    message::ControlChange, message::ProgramChange,
+    message::PitchBend, message::ChannelPressure, message::PolyPressure,
+    message::TimingClock, message::Start, message::Continue, message::Stop
+&gt;</definition>
+        <argsstring></argsstring>
+        <name>FullDecoder</name>
+        <qualifiedname>umidi::codec::FullDecoder</qualifiedname>
+        <briefdescription>
+<para>Full MIDI 1.0 decoder (all channel voice + realtime) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="354" column="1" bodyfile="include/umidi/codec/decoder.hh" bodystart="354" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="codec_2decoder_8hh_1a7cd48266989582e2ded31a45bc878dd4" prot="public" static="no">
+        <type>Decoder&lt; default_config, <ref refid="structumidi_1_1message_1_1_note_on" kindref="compound">message::NoteOn</ref>, message::NoteOff &gt;</type>
+        <definition>using umidi::codec::SynthDecoder =  Decoder&lt;
+    default_config,
+    message::NoteOn, message::NoteOff
+&gt;</definition>
+        <argsstring></argsstring>
+        <name>SynthDecoder</name>
+        <qualifiedname>umidi::codec::SynthDecoder</qualifiedname>
+        <briefdescription>
+<para>Minimal synth decoder (Note On/Off only) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="363" column="1" bodyfile="include/umidi/codec/decoder.hh" bodystart="363" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="codec_2decoder_8hh_1a2d852bf412b29ee0a3d80b59586e45f0" prot="public" static="no">
+        <type>Decoder&lt; default_config, <ref refid="structumidi_1_1message_1_1_note_on" kindref="compound">message::NoteOn</ref>, message::NoteOff, message::ControlChange, message::PitchBend &gt;</type>
+        <definition>using umidi::codec::NoteCCDecoder =  Decoder&lt;
+    default_config,
+    message::NoteOn, message::NoteOff, message::ControlChange, message::PitchBend
+&gt;</definition>
+        <argsstring></argsstring>
+        <name>NoteCCDecoder</name>
+        <qualifiedname>umidi::codec::NoteCCDecoder</qualifiedname>
+        <briefdescription>
+<para>Note + CC decoder (common for synths with mod wheel etc.) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="369" column="1" bodyfile="include/umidi/codec/decoder.hh" bodystart="369" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="codec_2decoder_8hh_1a421726ad44a5f9e392cb8b9b01d21280" prot="public" static="no">
+        <templateparamlist>
+          <param>
+            <type>uint8_t</type>
+            <declname>Channel</declname>
+            <defname>Channel</defname>
+          </param>
+          <param>
+            <type>typename...</type>
+            <declname>MessageTypes</declname>
+            <defname>MessageTypes</defname>
+          </param>
+        </templateparamlist>
+        <type>Decoder&lt; single_channel_config(Channel), MessageTypes... &gt;</type>
+        <definition>using umidi::codec::SingleChannelDecoder =  Decoder&lt;single_channel_config(Channel), MessageTypes...&gt;</definition>
+        <argsstring></argsstring>
+        <name>SingleChannelDecoder</name>
+        <qualifiedname>umidi::codec::SingleChannelDecoder</qualifiedname>
+        <briefdescription>
+<para>Single-channel decoder factory. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="376" column="1" bodyfile="include/umidi/codec/decoder.hh" bodystart="376" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="var">
+      <memberdef kind="variable" id="codec_2decoder_8hh_1a6f3d0db1bbb50aa1a081bd18f64af00b" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>ChannelConfig</type>
+        <definition>ChannelConfig umidi::codec::default_config</definition>
+        <argsstring></argsstring>
+        <name>default_config</name>
+        <qualifiedname>umidi::codec::default_config</qualifiedname>
+        <initializer>{}</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="119" column="32" bodyfile="include/umidi/codec/decoder.hh" bodystart="119" bodyend="119"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="codec_2decoder_8hh_1a3bdc252f6e9050d8d80602a434947eef" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>ChannelConfig</type>
+        <definition>ChannelConfig umidi::codec::single_channel_config</definition>
+        <argsstring>(uint8_t ch)</argsstring>
+        <name>single_channel_config</name>
+        <qualifiedname>umidi::codec::single_channel_config</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>ch</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/codec/decoder.hh" line="121" column="25" bodyfile="include/umidi/codec/decoder.hh" bodystart="121" bodyend="123"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/codec/decoder.hh" line="15" column="1"/>
+  </compounddef>
+</doxygen>

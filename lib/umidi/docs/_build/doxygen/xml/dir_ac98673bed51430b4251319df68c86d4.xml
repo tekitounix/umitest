@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="dir_ac98673bed51430b4251319df68c86d4" kind="dir">
+    <compoundname>include/umidi/util</compoundname>
+    <innerfile refid="convert_8hh">convert.hh</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/util/"/>
+  </compounddef>
+</doxygen>

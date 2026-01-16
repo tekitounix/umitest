@@ -1,0 +1,375 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="namespaceumidi_1_1convert" kind="namespace" language="C++">
+    <compoundname>umidi::convert</compoundname>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="convert_8hh_1a7c095ca85ed9210c879f3d171906dfc3" prot="public" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::convert::velocity_16_to_7</definition>
+        <argsstring>(uint16_t velocity_16) noexcept</argsstring>
+        <name>velocity_16_to_7</name>
+        <qualifiedname>umidi::convert::velocity_16_to_7</qualifiedname>
+        <param>
+          <type>uint16_t</type>
+          <declname>velocity_16</declname>
+        </param>
+        <briefdescription>
+<para>MIDI 2.0 (16-bit) -&gt; MIDI 1.0 (7-bit) velocity. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/util/convert.hh" line="16" column="20" bodyfile="include/umidi/util/convert.hh" bodystart="16" bodyend="27"/>
+      </memberdef>
+      <memberdef kind="function" id="convert_8hh_1af5224bd9bad0987c24d02b6c1546ace7" prot="public" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>uint16_t</type>
+        <definition>uint16_t umidi::convert::velocity_7_to_16</definition>
+        <argsstring>(uint8_t velocity_7) noexcept</argsstring>
+        <name>velocity_7_to_16</name>
+        <qualifiedname>umidi::convert::velocity_7_to_16</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>velocity_7</declname>
+        </param>
+        <briefdescription>
+<para>MIDI 1.0 (7-bit) -&gt; MIDI 2.0 (16-bit) velocity. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/util/convert.hh" line="30" column="21" bodyfile="include/umidi/util/convert.hh" bodystart="30" bodyend="37"/>
+      </memberdef>
+      <memberdef kind="function" id="convert_8hh_1af8841f530bf07ff1b3a0b2b8b5ae1379" prot="public" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>uint16_t</type>
+        <definition>uint16_t umidi::convert::cc_7_to_14</definition>
+        <argsstring>(uint8_t value_7) noexcept</argsstring>
+        <name>cc_7_to_14</name>
+        <qualifiedname>umidi::convert::cc_7_to_14</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>value_7</declname>
+        </param>
+        <briefdescription>
+<para>7-bit -&gt; 14-bit controller value </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/util/convert.hh" line="44" column="21" bodyfile="include/umidi/util/convert.hh" bodystart="44" bodyend="46"/>
+      </memberdef>
+      <memberdef kind="function" id="convert_8hh_1a1b797ff2956f6175009213ef0a511dc9" prot="public" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::convert::cc_14_to_7</definition>
+        <argsstring>(uint16_t value_14) noexcept</argsstring>
+        <name>cc_14_to_7</name>
+        <qualifiedname>umidi::convert::cc_14_to_7</qualifiedname>
+        <param>
+          <type>uint16_t</type>
+          <declname>value_14</declname>
+        </param>
+        <briefdescription>
+<para>14-bit -&gt; 7-bit controller value </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/util/convert.hh" line="49" column="20" bodyfile="include/umidi/util/convert.hh" bodystart="49" bodyend="51"/>
+      </memberdef>
+      <memberdef kind="function" id="convert_8hh_1a7a1fee2943051c2c80182358bd000f72" prot="public" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::convert::cc_7_to_32</definition>
+        <argsstring>(uint8_t value_7) noexcept</argsstring>
+        <name>cc_7_to_32</name>
+        <qualifiedname>umidi::convert::cc_7_to_32</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>value_7</declname>
+        </param>
+        <briefdescription>
+<para>7-bit -&gt; 32-bit controller value (MIDI 2.0) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/util/convert.hh" line="54" column="21" bodyfile="include/umidi/util/convert.hh" bodystart="54" bodyend="61"/>
+      </memberdef>
+      <memberdef kind="function" id="convert_8hh_1aec19553f2af998b837f8684de21ecb1f" prot="public" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::convert::cc_32_to_7</definition>
+        <argsstring>(uint32_t value_32) noexcept</argsstring>
+        <name>cc_32_to_7</name>
+        <qualifiedname>umidi::convert::cc_32_to_7</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>value_32</declname>
+        </param>
+        <briefdescription>
+<para>32-bit -&gt; 7-bit controller value (MIDI 2.0) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/util/convert.hh" line="64" column="20" bodyfile="include/umidi/util/convert.hh" bodystart="64" bodyend="66"/>
+      </memberdef>
+      <memberdef kind="function" id="convert_8hh_1aa385c12bcebd0a35ebfa731af3e524db" prot="public" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::convert::cc_14_to_32</definition>
+        <argsstring>(uint16_t value_14) noexcept</argsstring>
+        <name>cc_14_to_32</name>
+        <qualifiedname>umidi::convert::cc_14_to_32</qualifiedname>
+        <param>
+          <type>uint16_t</type>
+          <declname>value_14</declname>
+        </param>
+        <briefdescription>
+<para>14-bit -&gt; 32-bit controller value </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/util/convert.hh" line="69" column="21" bodyfile="include/umidi/util/convert.hh" bodystart="69" bodyend="74"/>
+      </memberdef>
+      <memberdef kind="function" id="convert_8hh_1a6062689175be156efc076054015611ca" prot="public" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>uint16_t</type>
+        <definition>uint16_t umidi::convert::cc_32_to_14</definition>
+        <argsstring>(uint32_t value_32) noexcept</argsstring>
+        <name>cc_32_to_14</name>
+        <qualifiedname>umidi::convert::cc_32_to_14</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>value_32</declname>
+        </param>
+        <briefdescription>
+<para>32-bit -&gt; 14-bit controller value </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/util/convert.hh" line="77" column="21" bodyfile="include/umidi/util/convert.hh" bodystart="77" bodyend="79"/>
+      </memberdef>
+      <memberdef kind="function" id="convert_8hh_1ac74327372d927547c9b13a0c9566e6ec" prot="public" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::convert::pitch_bend_14_to_32</definition>
+        <argsstring>(uint16_t bend_14) noexcept</argsstring>
+        <name>pitch_bend_14_to_32</name>
+        <qualifiedname>umidi::convert::pitch_bend_14_to_32</qualifiedname>
+        <param>
+          <type>uint16_t</type>
+          <declname>bend_14</declname>
+        </param>
+        <briefdescription>
+<para>MIDI 1.0 (14-bit) -&gt; MIDI 2.0 (32-bit) pitch bend. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/util/convert.hh" line="86" column="21" bodyfile="include/umidi/util/convert.hh" bodystart="86" bodyend="91"/>
+      </memberdef>
+      <memberdef kind="function" id="convert_8hh_1ab0b901c2cf8695f243e5097ebfd9db16" prot="public" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>uint16_t</type>
+        <definition>uint16_t umidi::convert::pitch_bend_32_to_14</definition>
+        <argsstring>(uint32_t bend_32) noexcept</argsstring>
+        <name>pitch_bend_32_to_14</name>
+        <qualifiedname>umidi::convert::pitch_bend_32_to_14</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>bend_32</declname>
+        </param>
+        <briefdescription>
+<para>MIDI 2.0 (32-bit) -&gt; MIDI 1.0 (14-bit) pitch bend. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/util/convert.hh" line="94" column="21" bodyfile="include/umidi/util/convert.hh" bodystart="94" bodyend="96"/>
+      </memberdef>
+      <memberdef kind="function" id="convert_8hh_1a5f04aff800408c18768957782bdeee51" prot="public" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>float</type>
+        <definition>float umidi::convert::pitch_bend_to_semitones</definition>
+        <argsstring>(uint16_t bend_value, float range=2.0f) noexcept</argsstring>
+        <name>pitch_bend_to_semitones</name>
+        <qualifiedname>umidi::convert::pitch_bend_to_semitones</qualifiedname>
+        <param>
+          <type>uint16_t</type>
+          <declname>bend_value</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>range</declname>
+          <defval>2.0f</defval>
+        </param>
+        <briefdescription>
+<para>Pitch bend value to semitones. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/util/convert.hh" line="99" column="18" bodyfile="include/umidi/util/convert.hh" bodystart="99" bodyend="101"/>
+      </memberdef>
+      <memberdef kind="function" id="convert_8hh_1aba210f5855a245169acf27a022d307cf" prot="public" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>uint16_t</type>
+        <definition>uint16_t umidi::convert::semitones_to_pitch_bend</definition>
+        <argsstring>(float semitones, float range=2.0f) noexcept</argsstring>
+        <name>semitones_to_pitch_bend</name>
+        <qualifiedname>umidi::convert::semitones_to_pitch_bend</qualifiedname>
+        <param>
+          <type>float</type>
+          <declname>semitones</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>range</declname>
+          <defval>2.0f</defval>
+        </param>
+        <briefdescription>
+<para>Semitones to pitch bend value. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/util/convert.hh" line="104" column="21" bodyfile="include/umidi/util/convert.hh" bodystart="104" bodyend="110"/>
+      </memberdef>
+      <memberdef kind="function" id="convert_8hh_1a0e821771e1eb5e32ba6ebeccab6603e0" prot="public" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::convert::pressure_7_to_32</definition>
+        <argsstring>(uint8_t pressure_7) noexcept</argsstring>
+        <name>pressure_7_to_32</name>
+        <qualifiedname>umidi::convert::pressure_7_to_32</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>pressure_7</declname>
+        </param>
+        <briefdescription>
+<para>7-bit -&gt; 32-bit channel pressure </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/util/convert.hh" line="117" column="21" bodyfile="include/umidi/util/convert.hh" bodystart="117" bodyend="119"/>
+      </memberdef>
+      <memberdef kind="function" id="convert_8hh_1a8435924dff5a54366f13bcd8d86ab39a" prot="public" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::convert::pressure_32_to_7</definition>
+        <argsstring>(uint32_t pressure_32) noexcept</argsstring>
+        <name>pressure_32_to_7</name>
+        <qualifiedname>umidi::convert::pressure_32_to_7</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>pressure_32</declname>
+        </param>
+        <briefdescription>
+<para>32-bit -&gt; 7-bit channel pressure </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/util/convert.hh" line="122" column="20" bodyfile="include/umidi/util/convert.hh" bodystart="122" bodyend="124"/>
+      </memberdef>
+      <memberdef kind="function" id="convert_8hh_1aaa9c9327932a8f84234e0d6d88806bc6" prot="public" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::convert::is_note_off_equivalent</definition>
+        <argsstring>(const UMP32 &amp;ump) noexcept</argsstring>
+        <name>is_note_off_equivalent</name>
+        <qualifiedname>umidi::convert::is_note_off_equivalent</qualifiedname>
+        <param>
+          <type>const <ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref> &amp;</type>
+          <declname>ump</declname>
+        </param>
+        <briefdescription>
+<para>Check if Note On with velocity=0 (MIDI 1.0 Note Off equivalent) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/util/convert.hh" line="131" column="17" bodyfile="include/umidi/util/convert.hh" bodystart="131" bodyend="133"/>
+      </memberdef>
+      <memberdef kind="function" id="convert_8hh_1aac6186be8996fc3c76ae0f99216fd017" prot="public" static="no" nodiscard="yes" constexpr="yes" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type><ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref></type>
+        <definition>UMP32 umidi::convert::convert_to_note_off</definition>
+        <argsstring>(const UMP32 &amp;note_on) noexcept</argsstring>
+        <name>convert_to_note_off</name>
+        <qualifiedname>umidi::convert::convert_to_note_off</qualifiedname>
+        <param>
+          <type>const <ref refid="structumidi_1_1_u_m_p32" kindref="compound">UMP32</ref> &amp;</type>
+          <declname>note_on</declname>
+        </param>
+        <briefdescription>
+<para>Convert Note On velocity=0 to Note Off. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/util/convert.hh" line="136" column="18" bodyfile="include/umidi/util/convert.hh" bodystart="136" bodyend="141"/>
+      </memberdef>
+      <memberdef kind="function" id="convert_8hh_1ad459c95138ad6fcd7c8f9b8e7c8b9bfc" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>float</type>
+        <definition>float umidi::convert::note_to_frequency</definition>
+        <argsstring>(uint8_t note, float a4_freq=440.0f) noexcept</argsstring>
+        <name>note_to_frequency</name>
+        <qualifiedname>umidi::convert::note_to_frequency</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>note</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>a4_freq</declname>
+          <defval>440.0f</defval>
+        </param>
+        <briefdescription>
+<para>MIDI note number to frequency (Hz) Note: Uses float math, not constexpr in all compilers. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/util/convert.hh" line="149" column="14" bodyfile="include/umidi/util/convert.hh" bodystart="149" bodyend="161"/>
+      </memberdef>
+      <memberdef kind="function" id="convert_8hh_1a044fa119cc9f3bef2f5250d4c09b1507" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::convert::frequency_to_note</definition>
+        <argsstring>(float freq, float a4_freq=440.0f) noexcept</argsstring>
+        <name>frequency_to_note</name>
+        <qualifiedname>umidi::convert::frequency_to_note</qualifiedname>
+        <param>
+          <type>float</type>
+          <declname>freq</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>a4_freq</declname>
+          <defval>440.0f</defval>
+        </param>
+        <briefdescription>
+<para>Frequency to MIDI note number (nearest note) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/util/convert.hh" line="164" column="16" bodyfile="include/umidi/util/convert.hh" bodystart="164" bodyend="177"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/util/convert.hh" line="9" column="1"/>
+  </compounddef>
+</doxygen>

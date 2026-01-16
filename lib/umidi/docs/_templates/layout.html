@@ -1,0 +1,15 @@
+{% extends "!layout.html" %}
+
+{% block sidebartitle %}
+{{ super() }}
+<div class="language-switcher" style="margin-top: 10px; padding: 8px; background: #f0f0f0; border-radius: 4px;">
+  <span style="font-size: 0.85em; color: #333;">Language:</span>
+  {% if current_language == 'en' %}
+    <strong style="color: #2980b9;">EN</strong> |
+    <a href="ja/index.html" style="color: #2980b9; text-decoration: underline;">JA</a>
+  {% else %}
+    <a href="../index.html" style="color: #2980b9; text-decoration: underline;">EN</a> |
+    <strong style="color: #2980b9;">JA</strong>
+  {% endif %}
+</div>
+{% endblock %}

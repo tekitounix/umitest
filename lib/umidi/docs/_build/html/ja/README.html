@@ -1,0 +1,222 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>umidi - UMI-OS MIDIライブラリ &mdash; umidi ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=144c8c96"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/translations.js?v=4755f45a"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="genindex.html" />
+    <link rel="search" title="検索" href="search.html" />
+    <link rel="next" title="umidi 設計ドキュメント" href="design.html" />
+    <link rel="prev" title="umidi ドキュメント" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            umidi
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+<div class="language-switcher" style="margin-top: 10px; padding: 8px; background: #f0f0f0; border-radius: 4px;">
+  <span style="font-size: 0.85em; color: #333;">Language:</span>
+  
+    <a href="../index.html" style="color: #2980b9; text-decoration: underline;">EN</a> |
+    <strong style="color: #2980b9;">JA</strong>
+  
+</div>
+
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">umidi - UMI-OS MIDIライブラリ</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">特徴</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">クイックスタート</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">ディレクトリ構成</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">独立性</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">要件</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id6">ライセンス</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="design.html">umidi 設計ドキュメント</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="design.html#id1">概要</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design.html#id2">アーキテクチャ</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="design.html#id3">レイヤー構造</a></li>
+<li class="toctree-l3"><a class="reference internal" href="design.html#ump-opt">コア設計: UMP-Opt形式</a></li>
+<li class="toctree-l3"><a class="reference internal" href="design.html#id4">型チェックの最適化</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="design.html#id5">パフォーマンス考慮事項</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="design.html#id6">メモリ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="design.html#id7">タイミング</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="design.html#id8">スレッドセーフティ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="design.html#id9">エラーハンドリング</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">使用例</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#midi">基本的なMIDIパース</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#id2">型安全なメッセージラッパー</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#id3">メッセージディスパッチ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#id4">MIDI出力</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#sysex">SysEx通信</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#id5">割り込み安全な使用</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">umidi</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">umidi - UMI-OS MIDIライブラリ</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/README.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="umidi-umi-os-midi">
+<h1>umidi - UMI-OS MIDIライブラリ<a class="headerlink" href="#umidi-umi-os-midi" title="Link to this heading"></a></h1>
+<p>ARM Cortex-M向けに最適化された高性能MIDI 1.0/2.0処理ライブラリ。</p>
+<section id="id1">
+<h2>特徴<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>UMP-Opt形式</strong>: UMP32を単一の<code class="docutils literal notranslate"><span class="pre">uint32_t</span></code>として格納し効率的な比較を実現</p></li>
+<li><p><strong>シングルマスク型チェック</strong>: <code class="docutils literal notranslate"><span class="pre">is_note_on()</span></code>, <code class="docutils literal notranslate"><span class="pre">is_cc()</span></code>が1オペレーションで完了</p></li>
+<li><p><strong>40%のメモリ削減</strong>: 8バイト/イベント（従来の20バイトから）</p></li>
+<li><p><strong>ゼロコピーパース</strong>: インクリメンタルなUMP構築</p></li>
+<li><p><strong>ヒープ割り当てなし</strong>: 完全な静的メモリ管理</p></li>
+</ul>
+</section>
+<section id="id2">
+<h2>クイックスタート<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;umidi/umidi.hh&gt;</span>
+
+<span class="n">umidi</span><span class="o">::</span><span class="n">Parser</span><span class="w"> </span><span class="n">parser</span><span class="p">;</span>
+<span class="n">umidi</span><span class="o">::</span><span class="n">UMP32</span><span class="w"> </span><span class="n">ump</span><span class="p">;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">process_byte</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">byte</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">parser</span><span class="p">.</span><span class="n">parse</span><span class="p">(</span><span class="n">byte</span><span class="p">,</span><span class="w"> </span><span class="n">ump</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ump</span><span class="p">.</span><span class="n">is_note_on</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">ch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ump</span><span class="p">.</span><span class="n">channel</span><span class="p">();</span>
+<span class="w">            </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">note</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ump</span><span class="p">.</span><span class="n">note</span><span class="p">();</span>
+<span class="w">            </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">vel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ump</span><span class="p">.</span><span class="n">velocity</span><span class="p">();</span>
+<span class="w">            </span><span class="c1">// Note On処理</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h2>ディレクトリ構成<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>lib/umidi/
+├── README.md             # このファイル
+├── xmake.lua             # ビルド設定
+├── include/umidi/        # ヘッダーファイル
+│   ├── umidi.hh          # メインヘッダー
+│   ├── core/             # コア型
+│   ├── messages/         # メッセージラッパー
+│   └── protocol/         # UMI SysExプロトコル
+├── test/                 # ユニットテスト
+├── examples/             # サンプルコード
+└── docs/                 # ドキュメント
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h2>独立性<a class="headerlink" href="#id4" title="Link to this heading"></a></h2>
+<p>umidiはUMI-OSコアから<strong>完全に独立</strong>しています:</p>
+<ul class="simple">
+<li><p>UMI-OSの型に依存しない</p></li>
+<li><p>独自の名前空間<code class="docutils literal notranslate"><span class="pre">umidi::</span></code>を使用</p></li>
+<li><p>単体でビルド・使用可能</p></li>
+</ul>
+</section>
+<section id="id5">
+<h2>要件<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>C++23 (<code class="docutils literal notranslate"><span class="pre">std::expected</span></code>)</p></li>
+<li><p>例外なし (<code class="docutils literal notranslate"><span class="pre">-fno-exceptions</span></code>互換)</p></li>
+<li><p>ヒープ割り当てなし</p></li>
+<li><p>リトルエンディアンターゲット (ARM, x86)</p></li>
+</ul>
+</section>
+<section id="id6">
+<h2>ライセンス<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
+<p>MIT License</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="umidi ドキュメント" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="design.html" class="btn btn-neutral float-right" title="umidi 設計ドキュメント" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, UMI-OS Project.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

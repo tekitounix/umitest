@@ -1,0 +1,326 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1protocol_1_1_object_header" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::protocol::ObjectHeader</compoundname>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_object_header_1afbc2a73c93904f25187dd31893e2bab3" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::ObjectHeader::magic</definition>
+        <argsstring></argsstring>
+        <name>magic</name>
+        <qualifiedname>umidi::protocol::ObjectHeader::magic</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="59" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="59" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_object_header_1a6b4f6a0621a5f2be2582ebb039c73f12" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::ObjectHeader::header_version</definition>
+        <argsstring></argsstring>
+        <name>header_version</name>
+        <qualifiedname>umidi::protocol::ObjectHeader::header_version</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="60" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="60" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_object_header_1a16cd5aeb093322f48b3a3361cf677e82" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::ObjectHeader::object_type</definition>
+        <argsstring></argsstring>
+        <name>object_type</name>
+        <qualifiedname>umidi::protocol::ObjectHeader::object_type</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="61" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="61" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_object_header_1abc7bf236efa6e9325b1be6c050ef6860" prot="public" static="no" mutable="no">
+        <type>uint16_t</type>
+        <definition>uint16_t umidi::protocol::ObjectHeader::flags</definition>
+        <argsstring></argsstring>
+        <name>flags</name>
+        <qualifiedname>umidi::protocol::ObjectHeader::flags</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="62" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="62" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_object_header_1a0d05b7b330765630f1e11ebcc12b4122" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::ObjectHeader::object_id</definition>
+        <argsstring></argsstring>
+        <name>object_id</name>
+        <qualifiedname>umidi::protocol::ObjectHeader::object_id</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="63" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="63" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_object_header_1a05f5f93de31125bdc696af74725d66ce" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::ObjectHeader::data_size</definition>
+        <argsstring></argsstring>
+        <name>data_size</name>
+        <qualifiedname>umidi::protocol::ObjectHeader::data_size</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="64" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="64" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_object_header_1a3b67d6934bc0a759ab4bb49e4ae64d1d" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::ObjectHeader::data_crc32</definition>
+        <argsstring></argsstring>
+        <name>data_crc32</name>
+        <qualifiedname>umidi::protocol::ObjectHeader::data_crc32</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="65" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="65" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_object_header_1a1ccb71aa49a93c42884b11d7273323e1" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::ObjectHeader::name[32]</definition>
+        <argsstring>[32]</argsstring>
+        <name>name</name>
+        <qualifiedname>umidi::protocol::ObjectHeader::name</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="66" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="66" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_object_header_1a718b64e4753fb5bb324f0e2b3de8a0ec" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t umidi::protocol::ObjectHeader::metadata[16]</definition>
+        <argsstring>[16]</argsstring>
+        <name>metadata</name>
+        <qualifiedname>umidi::protocol::ObjectHeader::metadata</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="67" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="67" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_object_header_1aad84a5498cdf941d0982bb32ed166336" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::ObjectHeader::created_time</definition>
+        <argsstring></argsstring>
+        <name>created_time</name>
+        <qualifiedname>umidi::protocol::ObjectHeader::created_time</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="68" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="68" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_object_header_1a4a65e5916fa6cab6e14832aeb97309e4" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::ObjectHeader::modified_time</definition>
+        <argsstring></argsstring>
+        <name>modified_time</name>
+        <qualifiedname>umidi::protocol::ObjectHeader::modified_time</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="69" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="69" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structumidi_1_1protocol_1_1_object_header_1a224b5593cf0acf2a7d1c0eac3c40f207" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::protocol::ObjectHeader::header_crc</definition>
+        <argsstring></argsstring>
+        <name>header_crc</name>
+        <qualifiedname>umidi::protocol::ObjectHeader::header_crc</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="70" column="14" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="70" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="structumidi_1_1protocol_1_1_object_header_1a11a3d41b3d9c66e37e2147566c6b2548" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::protocol::ObjectHeader::is_valid</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>is_valid</name>
+        <qualifiedname>umidi::protocol::ObjectHeader::is_valid</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="72" column="21" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="72" bodyend="74"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1protocol_1_1_object_header_1a1faea0c48fb0ee1915e164452933e4d4" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>ObjectType</type>
+        <definition>ObjectType umidi::protocol::ObjectHeader::type</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>type</name>
+        <qualifiedname>umidi::protocol::ObjectHeader::type</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="76" column="17" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="76" bodyend="78"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1protocol_1_1_object_header_1a332ac32a838ee6c4a3cf63379946f457" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>ObjectFlags</type>
+        <definition>ObjectFlags umidi::protocol::ObjectHeader::get_flags</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>get_flags</name>
+        <qualifiedname>umidi::protocol::ObjectHeader::get_flags</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="80" column="18" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="80" bodyend="82"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1protocol_1_1_object_header_1a8677b25e5037f4c855166529ee30bed7" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::ObjectHeader::set_flags</definition>
+        <argsstring>(ObjectFlags f) noexcept</argsstring>
+        <name>set_flags</name>
+        <qualifiedname>umidi::protocol::ObjectHeader::set_flags</qualifiedname>
+        <param>
+          <type>ObjectFlags</type>
+          <declname>f</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="84" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="84" bodyend="86"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1protocol_1_1_object_header_1a598216f3faccce62cb153cd8a5309485" prot="public" static="no" nodiscard="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>const char *</type>
+        <definition>const char * umidi::protocol::ObjectHeader::get_name</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>get_name</name>
+        <qualifiedname>umidi::protocol::ObjectHeader::get_name</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="88" column="17" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="88" bodyend="90"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1protocol_1_1_object_header_1a691bc1179c2a9d587ee58a8c15df1176" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::ObjectHeader::set_name</definition>
+        <argsstring>(const char *n) noexcept</argsstring>
+        <name>set_name</name>
+        <qualifiedname>umidi::protocol::ObjectHeader::set_name</qualifiedname>
+        <param>
+          <type>const char *</type>
+          <declname>n</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="92" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="92" bodyend="99"/>
+      </memberdef>
+      <memberdef kind="function" id="structumidi_1_1protocol_1_1_object_header_1aca5196c50dd48444ffcf51fdb5c43ca1" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::protocol::ObjectHeader::init</definition>
+        <argsstring>(ObjectType t, uint32_t id, const char *obj_name, uint32_t size) noexcept</argsstring>
+        <name>init</name>
+        <qualifiedname>umidi::protocol::ObjectHeader::init</qualifiedname>
+        <param>
+          <type>ObjectType</type>
+          <declname>t</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>id</declname>
+        </param>
+        <param>
+          <type>const char *</type>
+          <declname>obj_name</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>size</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/protocol/umi_object.hh" line="101" column="10" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="101" bodyend="114"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/protocol/umi_object.hh" line="58" column="1" bodyfile="include/umidi/protocol/umi_object.hh" bodystart="58" bodyend="115"/>
+    <listofallmembers>
+      <member refid="structumidi_1_1protocol_1_1_object_header_1aad84a5498cdf941d0982bb32ed166336" prot="public" virt="non-virtual"><scope>umidi::protocol::ObjectHeader</scope><name>created_time</name></member>
+      <member refid="structumidi_1_1protocol_1_1_object_header_1a3b67d6934bc0a759ab4bb49e4ae64d1d" prot="public" virt="non-virtual"><scope>umidi::protocol::ObjectHeader</scope><name>data_crc32</name></member>
+      <member refid="structumidi_1_1protocol_1_1_object_header_1a05f5f93de31125bdc696af74725d66ce" prot="public" virt="non-virtual"><scope>umidi::protocol::ObjectHeader</scope><name>data_size</name></member>
+      <member refid="structumidi_1_1protocol_1_1_object_header_1abc7bf236efa6e9325b1be6c050ef6860" prot="public" virt="non-virtual"><scope>umidi::protocol::ObjectHeader</scope><name>flags</name></member>
+      <member refid="structumidi_1_1protocol_1_1_object_header_1a332ac32a838ee6c4a3cf63379946f457" prot="public" virt="non-virtual"><scope>umidi::protocol::ObjectHeader</scope><name>get_flags</name></member>
+      <member refid="structumidi_1_1protocol_1_1_object_header_1a598216f3faccce62cb153cd8a5309485" prot="public" virt="non-virtual"><scope>umidi::protocol::ObjectHeader</scope><name>get_name</name></member>
+      <member refid="structumidi_1_1protocol_1_1_object_header_1a224b5593cf0acf2a7d1c0eac3c40f207" prot="public" virt="non-virtual"><scope>umidi::protocol::ObjectHeader</scope><name>header_crc</name></member>
+      <member refid="structumidi_1_1protocol_1_1_object_header_1a6b4f6a0621a5f2be2582ebb039c73f12" prot="public" virt="non-virtual"><scope>umidi::protocol::ObjectHeader</scope><name>header_version</name></member>
+      <member refid="structumidi_1_1protocol_1_1_object_header_1aca5196c50dd48444ffcf51fdb5c43ca1" prot="public" virt="non-virtual"><scope>umidi::protocol::ObjectHeader</scope><name>init</name></member>
+      <member refid="structumidi_1_1protocol_1_1_object_header_1a11a3d41b3d9c66e37e2147566c6b2548" prot="public" virt="non-virtual"><scope>umidi::protocol::ObjectHeader</scope><name>is_valid</name></member>
+      <member refid="structumidi_1_1protocol_1_1_object_header_1afbc2a73c93904f25187dd31893e2bab3" prot="public" virt="non-virtual"><scope>umidi::protocol::ObjectHeader</scope><name>magic</name></member>
+      <member refid="structumidi_1_1protocol_1_1_object_header_1a718b64e4753fb5bb324f0e2b3de8a0ec" prot="public" virt="non-virtual"><scope>umidi::protocol::ObjectHeader</scope><name>metadata</name></member>
+      <member refid="structumidi_1_1protocol_1_1_object_header_1a4a65e5916fa6cab6e14832aeb97309e4" prot="public" virt="non-virtual"><scope>umidi::protocol::ObjectHeader</scope><name>modified_time</name></member>
+      <member refid="structumidi_1_1protocol_1_1_object_header_1a1ccb71aa49a93c42884b11d7273323e1" prot="public" virt="non-virtual"><scope>umidi::protocol::ObjectHeader</scope><name>name</name></member>
+      <member refid="structumidi_1_1protocol_1_1_object_header_1a0d05b7b330765630f1e11ebcc12b4122" prot="public" virt="non-virtual"><scope>umidi::protocol::ObjectHeader</scope><name>object_id</name></member>
+      <member refid="structumidi_1_1protocol_1_1_object_header_1a16cd5aeb093322f48b3a3361cf677e82" prot="public" virt="non-virtual"><scope>umidi::protocol::ObjectHeader</scope><name>object_type</name></member>
+      <member refid="structumidi_1_1protocol_1_1_object_header_1a8677b25e5037f4c855166529ee30bed7" prot="public" virt="non-virtual"><scope>umidi::protocol::ObjectHeader</scope><name>set_flags</name></member>
+      <member refid="structumidi_1_1protocol_1_1_object_header_1a691bc1179c2a9d587ee58a8c15df1176" prot="public" virt="non-virtual"><scope>umidi::protocol::ObjectHeader</scope><name>set_name</name></member>
+      <member refid="structumidi_1_1protocol_1_1_object_header_1a1faea0c48fb0ee1915e164452933e4d4" prot="public" virt="non-virtual"><scope>umidi::protocol::ObjectHeader</scope><name>type</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

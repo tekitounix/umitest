@@ -1,0 +1,172 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="classumidi_1_1message_1_1_j_r_timestamp_tracker" kind="class" language="C++" prot="public">
+    <compoundname>umidi::message::JRTimestampTracker</compoundname>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classumidi_1_1message_1_1_j_r_timestamp_tracker_1a5a509849f35ff20c5e9c5ae3bd7f4d2e" prot="private" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::message::JRTimestampTracker::sample_rate_</definition>
+        <argsstring></argsstring>
+        <name>sample_rate_</name>
+        <qualifiedname>umidi::message::JRTimestampTracker::sample_rate_</qualifiedname>
+        <initializer>= 48000</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/utility.hh" line="151" column="14" bodyfile="include/umidi/messages/utility.hh" bodystart="151" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1message_1_1_j_r_timestamp_tracker_1a73f70cb8349a5ae94f697cdb230d99be" prot="private" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::message::JRTimestampTracker::samples_per_tick_fp_</definition>
+        <argsstring></argsstring>
+        <name>samples_per_tick_fp_</name>
+        <qualifiedname>umidi::message::JRTimestampTracker::samples_per_tick_fp_</qualifiedname>
+        <initializer>= (48000 * 32u) / 1000u</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/utility.hh" line="152" column="14" bodyfile="include/umidi/messages/utility.hh" bodystart="152" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1message_1_1_j_r_timestamp_tracker_1a426889ad847bb3ab47011b523e0c1f84" prot="private" static="no" mutable="no">
+        <type>uint16_t</type>
+        <definition>uint16_t umidi::message::JRTimestampTracker::last_timestamp_</definition>
+        <argsstring></argsstring>
+        <name>last_timestamp_</name>
+        <qualifiedname>umidi::message::JRTimestampTracker::last_timestamp_</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/utility.hh" line="153" column="14" bodyfile="include/umidi/messages/utility.hh" bodystart="153" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classumidi_1_1message_1_1_j_r_timestamp_tracker_1a15657226f30fd1947f7b4f08df53e7d3" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool umidi::message::JRTimestampTracker::has_timestamp_</definition>
+        <argsstring></argsstring>
+        <name>has_timestamp_</name>
+        <qualifiedname>umidi::message::JRTimestampTracker::has_timestamp_</qualifiedname>
+        <initializer>= false</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/utility.hh" line="154" column="10" bodyfile="include/umidi/messages/utility.hh" bodystart="154" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classumidi_1_1message_1_1_j_r_timestamp_tracker_1a26cd15ac37e3a41a5080b852221bb239" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::message::JRTimestampTracker::set_sample_rate</definition>
+        <argsstring>(uint32_t rate) noexcept</argsstring>
+        <name>set_sample_rate</name>
+        <qualifiedname>umidi::message::JRTimestampTracker::set_sample_rate</qualifiedname>
+        <param>
+          <type>uint32_t</type>
+          <declname>rate</declname>
+        </param>
+        <briefdescription>
+<para>Configure sample rate. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/utility.hh" line="118" column="20" bodyfile="include/umidi/messages/utility.hh" bodystart="118" bodyend="124"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1message_1_1_j_r_timestamp_tracker_1a9e1e779a8001901291d0a43442b73953" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::message::JRTimestampTracker::process</definition>
+        <argsstring>(const JRTimestamp &amp;ts) noexcept</argsstring>
+        <name>process</name>
+        <qualifiedname>umidi::message::JRTimestampTracker::process</qualifiedname>
+        <param>
+          <type>const JRTimestamp &amp;</type>
+          <declname>ts</declname>
+        </param>
+        <briefdescription>
+<para>Process JR Timestamp message. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/utility.hh" line="127" column="20" bodyfile="include/umidi/messages/utility.hh" bodystart="127" bodyend="130"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1message_1_1_j_r_timestamp_tracker_1aca3dfd8b4194f73077f3bd5fb4ba06c3" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t umidi::message::JRTimestampTracker::get_sample_offset</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>get_sample_offset</name>
+        <qualifiedname>umidi::message::JRTimestampTracker::get_sample_offset</qualifiedname>
+        <briefdescription>
+<para>Get sample offset for current timestamp. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>Sample offset from buffer start (0 if no timestamp) </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/utility.hh" line="134" column="25" bodyfile="include/umidi/messages/utility.hh" bodystart="134" bodyend="138"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1message_1_1_j_r_timestamp_tracker_1a1638c6caf4be8722b773355327e2cfd5" prot="public" static="no" constexpr="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void umidi::message::JRTimestampTracker::clear</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>clear</name>
+        <qualifiedname>umidi::message::JRTimestampTracker::clear</qualifiedname>
+        <briefdescription>
+<para>Clear current timestamp (call at start of each audio buffer) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/utility.hh" line="141" column="20" bodyfile="include/umidi/messages/utility.hh" bodystart="141" bodyend="143"/>
+      </memberdef>
+      <memberdef kind="function" id="classumidi_1_1message_1_1_j_r_timestamp_tracker_1a3ac6e5e347ed7f9c8a02df29ee672615" prot="public" static="no" nodiscard="yes" constexpr="yes" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool umidi::message::JRTimestampTracker::has_timestamp</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>has_timestamp</name>
+        <qualifiedname>umidi::message::JRTimestampTracker::has_timestamp</qualifiedname>
+        <briefdescription>
+<para>Check if timestamp is available. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/umidi/messages/utility.hh" line="146" column="21" bodyfile="include/umidi/messages/utility.hh" bodystart="146" bodyend="148"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/messages/utility.hh" line="115" column="1" bodyfile="include/umidi/messages/utility.hh" bodystart="115" bodyend="155"/>
+    <listofallmembers>
+      <member refid="classumidi_1_1message_1_1_j_r_timestamp_tracker_1a1638c6caf4be8722b773355327e2cfd5" prot="public" virt="non-virtual"><scope>umidi::message::JRTimestampTracker</scope><name>clear</name></member>
+      <member refid="classumidi_1_1message_1_1_j_r_timestamp_tracker_1aca3dfd8b4194f73077f3bd5fb4ba06c3" prot="public" virt="non-virtual"><scope>umidi::message::JRTimestampTracker</scope><name>get_sample_offset</name></member>
+      <member refid="classumidi_1_1message_1_1_j_r_timestamp_tracker_1a3ac6e5e347ed7f9c8a02df29ee672615" prot="public" virt="non-virtual"><scope>umidi::message::JRTimestampTracker</scope><name>has_timestamp</name></member>
+      <member refid="classumidi_1_1message_1_1_j_r_timestamp_tracker_1a15657226f30fd1947f7b4f08df53e7d3" prot="private" virt="non-virtual"><scope>umidi::message::JRTimestampTracker</scope><name>has_timestamp_</name></member>
+      <member refid="classumidi_1_1message_1_1_j_r_timestamp_tracker_1a426889ad847bb3ab47011b523e0c1f84" prot="private" virt="non-virtual"><scope>umidi::message::JRTimestampTracker</scope><name>last_timestamp_</name></member>
+      <member refid="classumidi_1_1message_1_1_j_r_timestamp_tracker_1a9e1e779a8001901291d0a43442b73953" prot="public" virt="non-virtual"><scope>umidi::message::JRTimestampTracker</scope><name>process</name></member>
+      <member refid="classumidi_1_1message_1_1_j_r_timestamp_tracker_1a5a509849f35ff20c5e9c5ae3bd7f4d2e" prot="private" virt="non-virtual"><scope>umidi::message::JRTimestampTracker</scope><name>sample_rate_</name></member>
+      <member refid="classumidi_1_1message_1_1_j_r_timestamp_tracker_1a73f70cb8349a5ae94f697cdb230d99be" prot="private" virt="non-virtual"><scope>umidi::message::JRTimestampTracker</scope><name>samples_per_tick_fp_</name></member>
+      <member refid="classumidi_1_1message_1_1_j_r_timestamp_tracker_1a26cd15ac37e3a41a5080b852221bb239" prot="public" virt="non-virtual"><scope>umidi::message::JRTimestampTracker</scope><name>set_sample_rate</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

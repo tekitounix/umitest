@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.14.0" xml:lang="en-US">
+  <compounddef id="structumidi_1_1cc_1_1_c_c7_bit_1_1_state" kind="struct" language="C++" prot="public">
+    <compoundname>umidi::cc::CC7Bit::State</compoundname>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="include/umidi/cc/types.hh" line="44" column="5" bodyfile="include/umidi/cc/types.hh" bodystart="44" bodyend="44"/>
+    <listofallmembers>
+    </listofallmembers>
+  </compounddef>
+</doxygen>
