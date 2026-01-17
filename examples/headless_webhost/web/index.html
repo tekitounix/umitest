@@ -99,6 +99,22 @@
         .backend-status.connected { color: #4ecca3; }
         .backend-status.error { color: #e74c3c; }
 
+        /* Theme toggle */
+        .theme-toggle {
+            margin-left: 12px;
+            padding: 6px 10px;
+            background: var(--umi-bg-primary, #0a0a15);
+            border: 1px solid var(--umi-border, #2a2a4e);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .theme-toggle:hover {
+            border-color: var(--umi-accent, #4ecca3);
+            background: var(--umi-bg-hover, rgba(255,255,255,0.05));
+        }
+        .theme-icon { font-size: 16px; }
+
         /* Application selection */
         .app-select-wrapper {
             display: flex;
@@ -778,6 +794,11 @@
                 <span class="app-info" id="appInfo"></span>
             </div>
             <span class="backend-status" id="backendStatus">Ready</span>
+
+            <!-- Theme Toggle -->
+            <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+                <span class="theme-icon">🌙</span>
+            </button>
         </div>
 
         <div class="main-grid three-col">
@@ -1174,6 +1195,7 @@
             MidiMonitor,
             // Theme
             darkTheme,
+            lightTheme,
             applyTheme,
             getCompleteStyles
         } from './lib/umi_web/index.js';
@@ -3083,9 +3105,43 @@
             document.getElementById('backendRenode').click();
         }
 
-        // Apply theme
+        // ==================== Theme System ====================
         const themeStyle = document.getElementById('theme-styles');
-        themeStyle.textContent = getCompleteStyles(darkTheme);
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = themeToggle.querySelector('.theme-icon');
+
+        // Available themes
+        const themes = {
+            dark: { theme: darkTheme, icon: '🌙', next: 'light' },
+            light: { theme: lightTheme, icon: '☀️', next: 'dark' }
+        };
+
+        // Load saved theme or default to dark
+        let currentThemeName = localStorage.getItem('umi-theme') || 'dark';
+
+        function setTheme(themeName) {
+            const themeConfig = themes[themeName];
+            if (!themeConfig) return;
+
+            currentThemeName = themeName;
+            themeStyle.textContent = getCompleteStyles(themeConfig.theme);
+            themeIcon.textContent = themeConfig.icon;
+            themeToggle.title = `Switch to ${themeConfig.next} theme`;
+
+            // Save preference
+            localStorage.setItem('umi-theme', themeName);
+        }
+
+        // Initialize theme
+        setTheme(currentThemeName);
+
+        // Toggle handler
+        themeToggle.addEventListener('click', () => {
+            const next = themes[currentThemeName].next;
+            setTheme(next);
+            log(`Theme switched to ${next}`);
+        });
+
         log('Theme system initialized');
     </script>
 </body>
