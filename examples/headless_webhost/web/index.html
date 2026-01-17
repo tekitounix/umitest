@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UMI-OS Synth Simulator</title>
+    <style id="theme-styles">
+        /* Theme CSS variables will be injected here by JavaScript */
+    </style>
     <style>
         * { box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #1a1a2e;
-            color: #eee;
+            background: var(--umi-bg-secondary, #1a1a2e);
+            color: var(--umi-text-primary, #eee);
             margin: 0;
             padding: 20px;
             min-height: 100vh;
@@ -95,6 +98,37 @@
         }
         .backend-status.connected { color: #4ecca3; }
         .backend-status.error { color: #e74c3c; }
+
+        /* Application selection */
+        .app-select-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 16px;
+            padding-left: 16px;
+            border-left: 1px solid #2a2a4e;
+        }
+        .app-select {
+            background: #0a0a15;
+            border: 1px solid #2a2a4e;
+            border-radius: 4px;
+            color: #4ecca3;
+            font-size: 12px;
+            padding: 6px 10px;
+            min-width: 180px;
+            cursor: pointer;
+        }
+        .app-select:hover { border-color: #4ecca3; }
+        .app-select:focus { outline: none; border-color: #4ecca3; }
+        .app-select option { background: #0a0a15; color: #eee; }
+        .app-info {
+            font-size: 10px;
+            color: #666;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
 
         .panel {
             background: #16213e;
@@ -441,6 +475,81 @@
             color: #666;
             cursor: not-allowed;
         }
+        /* MIDI Device List (multi-select checkboxes) */
+        .midi-device-list {
+            background: #0a0a15;
+            border: 1px solid #1a1a2e;
+            border-radius: 4px;
+            max-height: 80px;
+            overflow-y: auto;
+            font-size: 10px;
+            padding: 2px;
+        }
+        .midi-device-list.disabled { opacity: 0.5; pointer-events: none; }
+        .midi-device-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 4px;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        .midi-device-item:hover { background: #1a1a2e; }
+        .midi-device-item input[type="checkbox"] {
+            accent-color: #4ecca3;
+            width: 12px;
+            height: 12px;
+        }
+        .midi-device-item label {
+            color: #888;
+            cursor: pointer;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .midi-device-item:has(input:checked) label { color: #4ecca3; }
+        .midi-device-empty {
+            color: #666;
+            font-style: italic;
+            padding: 4px;
+            text-align: center;
+        }
+        /* MIDI Thru */
+        .midi-thru-options {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            font-size: 10px;
+        }
+        .midi-thru-label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #888;
+        }
+        .midi-thru-label input[type="checkbox"] {
+            accent-color: #4ecca3;
+        }
+        .midi-thru-label select {
+            background: #0a0a15;
+            border: 1px solid #1a1a2e;
+            border-radius: 3px;
+            color: #4ecca3;
+            font-size: 10px;
+            padding: 2px;
+        }
+        /* Audio Device Select */
+        .audio-device-select {
+            width: 100%;
+            background: #0a0a15;
+            border: 1px solid #1a1a2e;
+            border-radius: 4px;
+            color: #4ecca3;
+            font-size: 11px;
+            padding: 4px 6px;
+        }
+        .audio-device-select:disabled { color: #666; cursor: not-allowed; }
         .midi-learn-row {
             display: flex;
             align-items: center;
@@ -661,6 +770,13 @@
                     <span class="backend-desc">HW Accurate</span>
                 </button>
             </div>
+            <div class="app-select-wrapper">
+                <span class="backend-label">App:</span>
+                <select class="app-select" id="appSelect">
+                    <option value="">Loading...</option>
+                </select>
+                <span class="app-info" id="appInfo"></span>
+            </div>
             <span class="backend-status" id="backendStatus">Ready</span>
         </div>
 
@@ -706,7 +822,7 @@
                 <div class="panel">
                     <h2>Virtual Keyboard</h2>
                     <p class="info">Click keys or use computer keyboard (A-L, W-P)</p>
-                    <div class="keyboard" id="keyboard"></div>
+                    <div id="keyboard"></div>
                     <div class="keybindings" id="keybindings"></div>
                 </div>
 
@@ -848,24 +964,54 @@
                     </div>
                 </div>
 
+                <!-- Audio I/O -->
+                <div class="panel compact category-audio">
+                    <h2><span class="indicator" id="audioIndicator"></span>Audio I/O</h2>
+                    <div class="hw-settings">
+                        <div class="hw-setting">
+                            <label>Output</label>
+                            <select class="audio-device-select" id="audioOutputSelect" disabled>
+                                <option value="">-- Default --</option>
+                            </select>
+                        </div>
+                        <div class="hw-setting">
+                            <label>Input</label>
+                            <select class="audio-device-select" id="audioInputSelect" disabled>
+                                <option value="">-- None --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- MIDI I/O -->
                 <div class="panel compact category-midi">
                     <h2><span class="indicator" id="midiIndicator"></span>MIDI I/O
                         <span class="midi-activity" id="midiRxActivity" title="RX"></span>
                         <span class="midi-activity" id="midiTxActivity" title="TX"></span>
                     </h2>
-                    <div class="hw-settings">
-                        <div class="hw-setting">
-                            <label>Input</label>
-                            <select class="midi-device-select" id="midiInputSelect" disabled>
-                                <option value="">-- No MIDI --</option>
-                            </select>
+                    <div class="hw-setting" style="margin-bottom:6px;">
+                        <label>Inputs (multi-select)</label>
+                        <div class="midi-device-list disabled" id="midiInputList">
+                            <div class="midi-device-empty">No MIDI devices</div>
                         </div>
-                        <div class="hw-setting">
-                            <label>Output</label>
-                            <select class="midi-device-select" id="midiOutputSelect" disabled>
-                                <option value="">-- No MIDI --</option>
-                            </select>
+                    </div>
+                    <div class="hw-setting" style="margin-bottom:6px;">
+                        <label>Outputs (multi-select)</label>
+                        <div class="midi-device-list disabled" id="midiOutputList">
+                            <div class="midi-device-empty">No MIDI devices</div>
+                        </div>
+                    </div>
+                    <div class="hw-setting" style="margin-bottom:6px;">
+                        <label>MIDI Thru</label>
+                        <div class="midi-thru-options">
+                            <label class="midi-thru-label"><input type="checkbox" id="midiThruEnabled"> Enable</label>
+                            <label class="midi-thru-label">Ch: <select id="midiThruChannel" style="width:60px;">
+                                <option value="0">All</option>
+                                <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+                                <option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>
+                                <option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                                <option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option>
+                            </select></label>
                         </div>
                     </div>
                     <div class="status-2col" style="margin-top:4px;">
@@ -1014,16 +1160,38 @@
     </div>
 
     <script type="module">
-        // ==================== Backend Manager ====================
-        import { BackendManager, BackendType, UmimBackend, UmiosBackend, RenodeBackend } from './backend_manager.js';
+        // ==================== UMI Web Library ====================
+        import {
+            // Core
+            BackendManager,
+            BackendType,
+            UmimBackend,
+            UmiosBackend,
+            RenodeBackend,
+            // Components
+            Keyboard,
+            DEFAULT_KEY_MAP,
+            MidiMonitor,
+            // Theme
+            darkTheme,
+            applyTheme,
+            getCompleteStyles
+        } from './lib/umi_web/index.js';
 
         const backendManager = new BackendManager();
         // Default to UMI-OS kernel simulation (full UMI-OS with task scheduler, etc.)
         let currentBackendType = BackendType.UMIOS;
+        let currentApp = null;  // Current application config
 
-        // Check URL params for backend selection
+        // Application selection UI
+        const appSelect = document.getElementById('appSelect');
+        const appInfo = document.getElementById('appInfo');
+
+        // Check URL params for backend/app selection
         const urlParams = new URLSearchParams(window.location.search);
         const backendParam = urlParams.get('backend');
+        const appParam = urlParams.get('app');
+
         if (backendParam === 'renode') {
             currentBackendType = BackendType.RENODE;
         } else if (backendParam === 'umim' || backendParam === 'dsp') {
@@ -1031,6 +1199,75 @@
         } else if (backendParam === 'wasm' || backendParam === 'umios') {
             currentBackendType = BackendType.UMIOS;
         }
+
+        // Load applications from manifest
+        async function loadApplications() {
+            try {
+                const apps = await backendManager.loadApplications();
+                appSelect.innerHTML = '';
+
+                if (apps.length === 0) {
+                    appSelect.innerHTML = '<option value="">No apps found</option>';
+                    return;
+                }
+
+                apps.forEach(app => {
+                    const option = document.createElement('option');
+                    option.value = app.id;
+                    option.textContent = app.name;
+                    option.title = app.description || '';
+                    if (app.default) option.selected = true;
+                    appSelect.appendChild(option);
+                });
+
+                // Select app from URL param or default
+                if (appParam) {
+                    const app = backendManager.getApplication(appParam);
+                    if (app) {
+                        appSelect.value = appParam;
+                        currentApp = app;
+                        currentBackendType = app.backend;
+                    }
+                }
+
+                // Update app info
+                updateAppInfo();
+
+                log('Loaded ' + apps.length + ' applications');
+            } catch (err) {
+                console.error('Failed to load applications:', err);
+                appSelect.innerHTML = '<option value="">Error loading apps</option>';
+            }
+        }
+
+        // Update app info display
+        function updateAppInfo() {
+            const appId = appSelect.value;
+            const app = backendManager.getApplication(appId);
+            if (app) {
+                currentApp = app;
+                appInfo.textContent = app.description || '';
+                appInfo.title = `${app.vendor || 'Unknown'} v${app.version || '0.0.0'}`;
+
+                // Update backend type from app config
+                if (app.backend === 'umim' || app.backend === 'umios') {
+                    currentBackendType = app.backend;
+                    // Update backend buttons
+                    document.querySelectorAll('.backend-btn').forEach(btn => {
+                        btn.classList.toggle('active', btn.dataset.backend === app.backend);
+                    });
+                }
+            }
+        }
+
+        // App selection change handler
+        appSelect.addEventListener('change', () => {
+            if (isPlaying) {
+                stopAudio();
+            }
+            updateAppInfo();
+            checkWasm();
+        });
 
         // Backend switching
         async function switchBackend(type) {
@@ -1087,17 +1324,8 @@
             });
         });
 
-        const keyMap = {
-            'a': { note: 48, label: 'C3' },  'w': { note: 49, label: 'C#3' },
-            's': { note: 50, label: 'D3' },  'e': { note: 51, label: 'D#3' },
-            'd': { note: 52, label: 'E3' },  'f': { note: 53, label: 'F3' },
-            't': { note: 54, label: 'F#3' }, 'g': { note: 55, label: 'G3' },
-            'y': { note: 56, label: 'G#3' }, 'h': { note: 57, label: 'A3' },
-            'u': { note: 58, label: 'A#3' }, 'j': { note: 59, label: 'B3' },
-            'k': { note: 60, label: 'C4' },  'o': { note: 61, label: 'C#4' },
-            'l': { note: 62, label: 'D4' },  'p': { note: 63, label: 'D#4' },
-            ';': { note: 64, label: 'E4' },
-        };
+        // Use keyboard keymap from library
+        const keyMap = DEFAULT_KEY_MAP;
 
         let audioContext = null;
         let workletNode = null;
@@ -1113,15 +1341,22 @@
 
         // WebMIDI
         let midiAccess = null;
-        let midiInput = null;
-        let midiOutput = null;
+        let midiInputs = new Map();  // id -> MIDIInput (connected)
+        let midiOutputs = new Map(); // id -> MIDIOutput (connected)
         let midiRxCount = 0;
         let midiTxCount = 0;
-        const midiInputSelect = document.getElementById('midiInputSelect');
-        const midiOutputSelect = document.getElementById('midiOutputSelect');
+        const midiInputList = document.getElementById('midiInputList');
+        const midiOutputList = document.getElementById('midiOutputList');
         const midiMonitor = document.getElementById('midiMonitor');
         const midiRxActivity = document.getElementById('midiRxActivity');
         const midiTxActivity = document.getElementById('midiTxActivity');
+
+        // MIDI Thru settings
+        let midiThruEnabled = false;
+        let midiThruChannel = 0; // 0 = all channels
+
+        // Audio output device
+        const audioOutputSelect = document.getElementById('audioOutputSelect');
 
         // MIDI Learn
         let midiLearnMode = false;
@@ -1371,8 +1606,8 @@
                     updateMIDIDevices();
                 };
 
-                midiInputSelect.disabled = false;
-                midiOutputSelect.disabled = false;
+                midiInputList.classList.remove('disabled');
+                midiOutputList.classList.remove('disabled');
                 document.getElementById('midiIndicator').className = 'indicator active';
 
             } catch (err) {
@@ -1380,79 +1615,186 @@
             }
         }
 
+        // Get saved MIDI input selections from localStorage
+        function getSavedMidiInputs() {
+            try {
+                const saved = localStorage.getItem('umi-synth-midi-inputs');
+                return saved ? JSON.parse(saved) : [];
+            } catch { return []; }
+        }
+
+        // Save MIDI input selections to localStorage
+        function saveMidiInputs(inputIds) {
+            try {
+                localStorage.setItem('umi-synth-midi-inputs', JSON.stringify(inputIds));
+            } catch {}
+        }
+
+        function getSavedMidiOutputs() {
+            try {
+                const saved = localStorage.getItem('umi-synth-midi-outputs');
+                return saved ? JSON.parse(saved) : [];
+            } catch { return []; }
+        }
+
+        function saveMidiOutputs(outputIds) {
+            try {
+                localStorage.setItem('umi-synth-midi-outputs', JSON.stringify(outputIds));
+            } catch {}
+        }
+
         function updateMIDIDevices() {
             if (!midiAccess) return;
 
-            // Update input select
-            const currentInputId = midiInputSelect.value;
-            midiInputSelect.innerHTML = '<option value="">-- None --</option>';
-            let firstInputId = null;
+            const savedInputs = getSavedMidiInputs();
+
+            // Update input list (checkboxes for multi-select)
+            midiInputList.innerHTML = '';
+            let hasInputs = false;
+
             for (const input of midiAccess.inputs.values()) {
-                if (!firstInputId) firstInputId = input.id;
-                const opt = document.createElement('option');
-                opt.value = input.id;
-                opt.textContent = input.name || input.id;
-                if (input.id === currentInputId) opt.selected = true;
-                midiInputSelect.appendChild(opt);
+                hasInputs = true;
+                const item = document.createElement('div');
+                item.className = 'midi-device-item';
+
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.id = `midi-in-${input.id}`;
+                cb.value = input.id;
+                cb.checked = savedInputs.includes(input.id) || (savedInputs.length === 0);
+
+                const label = document.createElement('label');
+                label.htmlFor = cb.id;
+                label.textContent = input.name || input.id;
+
+                cb.addEventListener('change', () => {
+                    if (cb.checked) {
+                        connectMIDIInput(input.id);
+                    } else {
+                        disconnectMIDIInput(input.id);
+                    }
+                    // Save selections
+                    const selected = Array.from(midiInputList.querySelectorAll('input:checked'))
+                        .map(el => el.value);
+                    saveMidiInputs(selected);
+                });
+
+                item.appendChild(cb);
+                item.appendChild(label);
+                midiInputList.appendChild(item);
+
+                // Auto-connect if saved or if no saved preferences (auto-select all)
+                if (cb.checked) {
+                    connectMIDIInput(input.id);
+                }
             }
 
-            // Update output select
-            const currentOutputId = midiOutputSelect.value;
-            midiOutputSelect.innerHTML = '<option value="">-- None --</option>';
-            let firstOutputId = null;
+            if (!hasInputs) {
+                midiInputList.innerHTML = '<div class="midi-device-empty">No MIDI devices</div>';
+            }
+
+            // Update output list (checkboxes for multi-select)
+            const savedOutputs = getSavedMidiOutputs();
+            midiOutputList.innerHTML = '';
+            let hasOutputs = false;
+
             for (const output of midiAccess.outputs.values()) {
-                if (!firstOutputId) firstOutputId = output.id;
-                const opt = document.createElement('option');
-                opt.value = output.id;
-                opt.textContent = output.name || output.id;
-                if (output.id === currentOutputId) opt.selected = true;
-                midiOutputSelect.appendChild(opt);
+                hasOutputs = true;
+                const item = document.createElement('div');
+                item.className = 'midi-device-item';
+
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.id = `midi-out-${output.id}`;
+                cb.value = output.id;
+                cb.checked = savedOutputs.includes(output.id) || (savedOutputs.length === 0);
+
+                const label = document.createElement('label');
+                label.htmlFor = cb.id;
+                label.textContent = output.name || output.id;
+
+                cb.addEventListener('change', () => {
+                    if (cb.checked) {
+                        connectMIDIOutput(output.id);
+                    } else {
+                        disconnectMIDIOutput(output.id);
+                    }
+                    // Save selections
+                    const selected = Array.from(midiOutputList.querySelectorAll('input:checked'))
+                        .map(el => el.value);
+                    saveMidiOutputs(selected);
+                });
+
+                item.appendChild(cb);
+                item.appendChild(label);
+                midiOutputList.appendChild(item);
+
+                // Auto-connect if saved or if no saved preferences (auto-select all)
+                if (cb.checked) {
+                    connectMIDIOutput(output.id);
+                }
             }
 
-            // Auto-select first input if none selected
-            if (!currentInputId && firstInputId) {
-                midiInputSelect.value = firstInputId;
-                connectMIDIInput(firstInputId);
-                log(`Auto-selected MIDI input: ${midiAccess.inputs.get(firstInputId)?.name}`);
-            } else if (currentInputId && midiAccess.inputs.has(currentInputId)) {
-                connectMIDIInput(currentInputId);
-            } else if (midiInput) {
-                disconnectMIDIInput();
-            }
-
-            // Auto-select first output if none selected
-            if (!currentOutputId && firstOutputId) {
-                midiOutputSelect.value = firstOutputId;
-                midiOutput = midiAccess.outputs.get(firstOutputId);
-                log(`Auto-selected MIDI output: ${midiOutput?.name}`);
-            } else if (currentOutputId && midiAccess.outputs.has(currentOutputId)) {
-                midiOutput = midiAccess.outputs.get(currentOutputId);
-            } else {
-                midiOutput = null;
+            if (!hasOutputs) {
+                midiOutputList.innerHTML = '<div class="midi-device-empty">No MIDI devices</div>';
             }
         }
 
         function connectMIDIInput(inputId) {
-            disconnectMIDIInput();
-            if (!inputId || !midiAccess) return;
+            if (!inputId || !midiAccess || midiInputs.has(inputId)) return;
 
-            midiInput = midiAccess.inputs.get(inputId);
-            if (midiInput) {
-                midiInput.onmidimessage = handleMIDIMessage;
-                log(`Connected MIDI input: ${midiInput.name}`);
+            const input = midiAccess.inputs.get(inputId);
+            if (input) {
+                input.onmidimessage = handleMIDIMessage;
+                midiInputs.set(inputId, input);
+                log(`Connected MIDI input: ${input.name}`);
             }
         }
 
-        function disconnectMIDIInput() {
-            if (midiInput) {
-                midiInput.onmidimessage = null;
-                midiInput = null;
+        function disconnectMIDIInput(inputId) {
+            const input = midiInputs.get(inputId);
+            if (input) {
+                input.onmidimessage = null;
+                midiInputs.delete(inputId);
+                log(`Disconnected MIDI input: ${input.name}`);
             }
+        }
+
+        function disconnectAllMIDIInputs() {
+            for (const [id, input] of midiInputs) {
+                input.onmidimessage = null;
+            }
+            midiInputs.clear();
+        }
+
+        function connectMIDIOutput(outputId) {
+            if (!outputId || !midiAccess || midiOutputs.has(outputId)) return;
+
+            const output = midiAccess.outputs.get(outputId);
+            if (output) {
+                midiOutputs.set(outputId, output);
+                log(`Connected MIDI output: ${output.name}`);
+            }
+        }
+
+        function disconnectMIDIOutput(outputId) {
+            const output = midiOutputs.get(outputId);
+            if (output) {
+                midiOutputs.delete(outputId);
+                log(`Disconnected MIDI output: ${output.name}`);
+            }
+        }
+
+        function disconnectAllMIDIOutputs() {
+            midiOutputs.clear();
         }
 
         function handleMIDIMessage(event) {
             const data = event.data;
             if (!data || data.length === 0) return;
+
+            // MIDI Thru - forward to outputs immediately
+            sendMIDIThru(data);
 
             midiRxCount++;
             document.getElementById('midiRx').textContent = midiRxCount;
@@ -1505,10 +1847,13 @@
         }
 
         function sendMIDI(data) {
-            if (!midiOutput) return;
+            if (midiOutputs.size === 0) return;
 
             try {
-                midiOutput.send(data);
+                // Send to all connected outputs
+                for (const output of midiOutputs.values()) {
+                    output.send(data);
+                }
                 midiTxCount++;
                 document.getElementById('midiTx').textContent = midiTxCount;
 
@@ -1521,6 +1866,30 @@
                 addMIDIMonitorEntry(data, 'tx');
             } catch (err) {
                 log('MIDI send error: ' + err.message, 'error');
+            }
+        }
+
+        // MIDI Thru - forward input to outputs
+        function sendMIDIThru(data) {
+            if (!midiThruEnabled || midiOutputs.size === 0) return;
+
+            // Check channel filter (if not 0/all)
+            if (midiThruChannel > 0) {
+                const status = data[0];
+                // Only filter channel voice messages (0x80-0xEF)
+                if (status >= 0x80 && status < 0xF0) {
+                    const channel = (status & 0x0F) + 1;
+                    if (channel !== midiThruChannel) return;
+                }
+            }
+
+            // Send to all outputs
+            for (const output of midiOutputs.values()) {
+                try {
+                    output.send(data);
+                } catch (err) {
+                    // Ignore individual output errors
+                }
             }
         }
 
@@ -1615,16 +1984,163 @@
             }
         }
 
-        // MIDI device selection handlers
-        midiInputSelect.addEventListener('change', (e) => {
-            connectMIDIInput(e.target.value);
+        // MIDI output selection handler
+        // ==================== MIDI Thru Settings ====================
+        const midiThruEnabledEl = document.getElementById('midiThruEnabled');
+        const midiThruChannelEl = document.getElementById('midiThruChannel');
+
+        // Load saved settings
+        midiThruEnabled = localStorage.getItem('umi-synth-midi-thru') === 'true';
+        midiThruChannel = parseInt(localStorage.getItem('umi-synth-midi-thru-channel') || '0');
+
+        if (midiThruEnabledEl) {
+            midiThruEnabledEl.checked = midiThruEnabled;
+            midiThruEnabledEl.addEventListener('change', (e) => {
+                midiThruEnabled = e.target.checked;
+                localStorage.setItem('umi-synth-midi-thru', midiThruEnabled);
+                log(`MIDI Thru ${midiThruEnabled ? 'enabled' : 'disabled'}`);
+            });
+        }
+
+        if (midiThruChannelEl) {
+            midiThruChannelEl.value = midiThruChannel;
+            midiThruChannelEl.addEventListener('change', (e) => {
+                midiThruChannel = parseInt(e.target.value) || 0;
+                localStorage.setItem('umi-synth-midi-thru-channel', midiThruChannel);
+                log(`MIDI Thru channel: ${midiThruChannel === 0 ? 'All' : midiThruChannel}`);
+            });
+        }
+
+        // ==================== Audio Output Device ====================
+
+        async function initAudioDevices() {
+            // Check if setSinkId is supported
+            if (!AudioContext.prototype.setSinkId && !('sinkId' in AudioContext.prototype)) {
+                log('Audio output selection not supported in this browser', 'warn');
+                audioOutputSelect.disabled = true;
+                return;
+            }
+
+            try {
+                // Request permission to enumerate devices
+                await navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => stream.getTracks().forEach(t => t.stop()))
+                    .catch(() => {});  // Ignore errors, we just need to trigger permission
+
+                await updateAudioDevices();
+
+                // Listen for device changes
+                navigator.mediaDevices.addEventListener('devicechange', updateAudioDevices);
+
+                audioOutputSelect.disabled = false;
+                const audioInputSelect = document.getElementById('audioInputSelect');
+                if (audioInputSelect) audioInputSelect.disabled = false;
+                document.getElementById('audioIndicator').className = 'indicator active';
+            } catch (err) {
+                log('Audio device enumeration failed: ' + err.message, 'error');
+            }
+        }
+
+        async function updateAudioDevices() {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const outputs = devices.filter(d => d.kind === 'audiooutput');
+            const inputs = devices.filter(d => d.kind === 'audioinput');
+
+            // Update output devices
+            const currentOutputId = audioOutputSelect.value;
+            audioOutputSelect.innerHTML = '<option value="">-- Default --</option>';
+
+            for (const device of outputs) {
+                const opt = document.createElement('option');
+                opt.value = device.deviceId;
+                opt.textContent = device.label || `Speaker ${device.deviceId.slice(0, 8)}`;
+                if (device.deviceId === currentOutputId) opt.selected = true;
+                audioOutputSelect.appendChild(opt);
+            }
+
+            // Restore saved output selection
+            const savedOutput = localStorage.getItem('umi-synth-audio-output');
+            if (savedOutput && !currentOutputId) {
+                audioOutputSelect.value = savedOutput;
+            }
+
+            // Update input devices
+            const audioInputSelect = document.getElementById('audioInputSelect');
+            if (audioInputSelect) {
+                const currentInputId = audioInputSelect.value;
+                audioInputSelect.innerHTML = '<option value="">-- None --</option>';
+
+                for (const device of inputs) {
+                    const opt = document.createElement('option');
+                    opt.value = device.deviceId;
+                    opt.textContent = device.label || `Mic ${device.deviceId.slice(0, 8)}`;
+                    if (device.deviceId === currentInputId) opt.selected = true;
+                    audioInputSelect.appendChild(opt);
+                }
+
+                // Restore saved input selection
+                const savedInput = localStorage.getItem('umi-synth-audio-input');
+                if (savedInput && !currentInputId) {
+                    audioInputSelect.value = savedInput;
+                }
+            }
+        }
+
+        audioOutputSelect.addEventListener('change', async (e) => {
+            const deviceId = e.target.value;
+            localStorage.setItem('umi-synth-audio-output', deviceId);
+
+            // Apply to current AudioContext if available
+            if (backend && backend.audioContext && backend.audioContext.setSinkId) {
+                try {
+                    await backend.audioContext.setSinkId(deviceId || '');
+                    log(`Audio output changed: ${audioOutputSelect.selectedOptions[0]?.textContent || 'Default'}`);
+                } catch (err) {
+                    log('Failed to change audio output: ' + err.message, 'error');
+                }
+            } else {
+                log('Audio output will be applied on next start');
+            }
         });
 
-        midiOutputSelect.addEventListener('change', (e) => {
-            if (!midiAccess) return;
-            midiOutput = e.target.value ? midiAccess.outputs.get(e.target.value) : null;
-            if (midiOutput) {
-                log(`Connected MIDI output: ${midiOutput.name}`);
+        // Audio input change handler
+        let audioInputStream = null;
+        let audioInputNode = null;
+
+        document.getElementById('audioInputSelect')?.addEventListener('change', async (e) => {
+            const deviceId = e.target.value;
+            localStorage.setItem('umi-synth-audio-input', deviceId);
+
+            // Disconnect existing input
+            if (audioInputNode) {
+                audioInputNode.disconnect();
+                audioInputNode = null;
+            }
+            if (audioInputStream) {
+                audioInputStream.getTracks().forEach(track => track.stop());
+                audioInputStream = null;
+            }
+
+            if (!deviceId) {
+                log('Audio input disconnected');
+                return;
+            }
+
+            // Connect new input
+            if (backend && backend.audioContext) {
+                try {
+                    audioInputStream = await navigator.mediaDevices.getUserMedia({
+                        audio: { deviceId: { exact: deviceId } }
+                    });
+                    audioInputNode = backend.audioContext.createMediaStreamSource(audioInputStream);
+                    // Note: Input routing to worklet will be implemented per backend
+                    const inputSelect = document.getElementById('audioInputSelect');
+                    log(`Audio input connected: ${inputSelect?.selectedOptions[0]?.textContent || deviceId}`);
+                } catch (err) {
+                    log('Failed to connect audio input: ' + err.message, 'error');
+                }
+            } else {
+                log('Audio input will be connected on next start');
             }
         });
 
@@ -1903,14 +2419,18 @@
         async function checkWasm() {
             try {
                 setStatus('Checking WASM...', 'loading');
-                const response = await fetch('./webhost_sim.wasm', { method: 'HEAD' });
+
+                // Use app's WASM URL if available, otherwise use default
+                const wasmUrl = currentApp?.wasmUrl || './build/webhost_sim.wasm';
+                const response = await fetch(wasmUrl, { method: 'HEAD' });
+
                 if (response.ok) {
                     setStatus('Ready', 'ready');
                     startBtn.disabled = false;
-                    log('WASM module found');
+                    log('WASM module found: ' + wasmUrl);
                 } else {
                     setStatus('WASM not found', 'error');
-                    log('WASM module not found', 'error');
+                    log('WASM module not found: ' + wasmUrl, 'error');
                 }
             } catch (err) {
                 console.error('WASM check error:', err);
@@ -1922,10 +2442,17 @@
         async function initAudio() {
             try {
                 setStatus('Starting...', 'loading');
-                log('Initializing audio with backend: ' + currentBackendType);
 
-                // Use BackendManager to create appropriate backend
-                const backend = await backendManager.switchBackend(currentBackendType);
+                let backend;
+
+                // Check if we have a selected app
+                if (currentApp) {
+                    log('Initializing audio with app: ' + currentApp.name + ' (' + currentApp.backend + ')');
+                    backend = await backendManager.switchToApp(currentApp.id);
+                } else {
+                    log('Initializing audio with backend: ' + currentBackendType);
+                    backend = await backendManager.switchBackend(currentBackendType);
+                }
 
                 // Set up callbacks
                 backend.onMessage = (msg) => {
@@ -1966,6 +2493,17 @@
                 // Get audio context and analyzer from backend
                 audioContext = backend.getAudioContext();
                 analyzerNode = backend.getAnalyzer();
+
+                // Apply saved audio output device
+                const savedAudioDevice = localStorage.getItem('umi-synth-audio-output');
+                if (savedAudioDevice && audioContext && audioContext.setSinkId) {
+                    try {
+                        await audioContext.setSinkId(savedAudioDevice);
+                        log(`Audio output: ${audioOutputSelect.selectedOptions[0]?.textContent || savedAudioDevice}`);
+                    } catch (err) {
+                        console.warn('Failed to set audio output device:', err);
+                    }
+                }
                 workletNode = null;  // Not used directly when using BackendManager
 
                 // Store backend reference for sending MIDI/commands
@@ -1980,9 +2518,15 @@
                 resetBtn.disabled = false;
 
                 // Update processor info
-                document.getElementById('procName').textContent = 'UMI Synth';
-                document.getElementById('procVendor').textContent = 'UMI-OS';
-                document.getElementById('procVersion').textContent = '1.0.0 (' + currentBackendType + ')';
+                if (currentApp) {
+                    document.getElementById('procName').textContent = currentApp.name;
+                    document.getElementById('procVendor').textContent = currentApp.vendor || 'Unknown';
+                    document.getElementById('procVersion').textContent = (currentApp.version || '0.0.0') + ' (' + currentApp.backend + ')';
+                } else {
+                    document.getElementById('procName').textContent = 'UMI Synth';
+                    document.getElementById('procVendor').textContent = 'UMI-OS';
+                    document.getElementById('procVersion').textContent = '1.0.0 (' + currentBackendType + ')';
+                }
 
                 // Enable shell input (only for UMI-OS kernel backend which has full shell support)
                 if (currentBackendType === 'umios') {
@@ -2202,34 +2746,18 @@
             if (backend) backend.noteOff(note);
         }
 
-        function buildKeyboard() {
-            const notes = [
-                { note: 48, label: 'C3', black: false }, { note: 49, label: 'C#', black: true },
-                { note: 50, label: 'D3', black: false }, { note: 51, label: 'D#', black: true },
-                { note: 52, label: 'E3', black: false }, { note: 53, label: 'F3', black: false },
-                { note: 54, label: 'F#', black: true },  { note: 55, label: 'G3', black: false },
-                { note: 56, label: 'G#', black: true },  { note: 57, label: 'A3', black: false },
-                { note: 58, label: 'A#', black: true },  { note: 59, label: 'B3', black: false },
-                { note: 60, label: 'C4', black: false }, { note: 61, label: 'C#', black: true },
-                { note: 62, label: 'D4', black: false }, { note: 63, label: 'D#', black: true },
-                { note: 64, label: 'E4', black: false },
-            ];
+        // Use Keyboard component from library
+        let keyboard = null;
 
-            for (const n of notes) {
-                const key = document.createElement('div');
-                key.className = 'key ' + (n.black ? 'black' : 'white');
-                key.dataset.note = n.note;
-                if (!n.black) {
-                    const label = document.createElement('span');
-                    label.className = 'key-label';
-                    label.textContent = n.label;
-                    key.appendChild(label);
-                }
-                key.addEventListener('mousedown', (e) => { e.preventDefault(); noteOn(n.note); key.classList.add('active'); });
-                key.addEventListener('mouseup', () => { noteOff(n.note); key.classList.remove('active'); });
-                key.addEventListener('mouseleave', () => { if (activeNotes.has(n.note)) { noteOff(n.note); key.classList.remove('active'); } });
-                keyboardEl.appendChild(key);
-            }
+        function buildKeyboard() {
+            keyboard = new Keyboard(keyboardEl);
+            keyboard.onNoteOn = (note, velocity) => {
+                noteOn(note);
+            };
+            keyboard.onNoteOff = (note) => {
+                noteOff(note);
+            };
+            keyboard.enable();
         }
 
         function buildKeybindings() {
@@ -2238,24 +2766,6 @@
                 el.className = 'keybind';
                 el.innerHTML = `<kbd>${key.toUpperCase()}</kbd><span class="note">${info.label}</span>`;
                 keybindingsEl.appendChild(el);
-            }
-        }
-
-        function handleKeyDown(e) {
-            if (e.repeat) return;
-            const info = keyMap[e.key.toLowerCase()];
-            if (info) {
-                e.preventDefault();
-                noteOn(info.note);
-                keyboardEl.querySelector(`[data-note="${info.note}"]`)?.classList.add('active');
-            }
-        }
-
-        function handleKeyUp(e) {
-            const info = keyMap[e.key.toLowerCase()];
-            if (info) {
-                noteOff(info.note);
-                keyboardEl.querySelector(`[data-note="${info.note}"]`)?.classList.remove('active');
             }
         }
 
@@ -2455,8 +2965,7 @@
         startBtn.addEventListener('click', initAudio);
         stopBtn.addEventListener('click', stopAudio);
         resetBtn.addEventListener('click', resetSystem);
-        document.addEventListener('keydown', handleKeyDown);
-        document.addEventListener('keyup', handleKeyUp);
+        // Keyboard event handlers are now managed by Keyboard component
 
         loadMidiMappings();
 
@@ -2465,8 +2974,19 @@
             btn.classList.toggle('active', btn.dataset.backend === currentBackendType);
         });
 
-        checkWasm();
+        // Load applications then check WASM
+        loadApplications().then(() => {
+            // If app was loaded from URL param, update backend buttons
+            if (currentApp) {
+                document.querySelectorAll('.backend-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.backend === currentApp.backend);
+                });
+            }
+            checkWasm();
+        });
+
         initWebMIDI();
+        initAudioDevices();
 
         // ==================== Auto Performance ====================
         let autoPlayInterval = null;
@@ -2562,6 +3082,11 @@
         if (currentBackendType === BackendType.RENODE) {
             document.getElementById('backendRenode').click();
         }
+
+        // Apply theme
+        const themeStyle = document.getElementById('theme-styles');
+        themeStyle.textContent = getCompleteStyles(darkTheme);
+        log('Theme system initialized');
     </script>
 </body>
 </html>
