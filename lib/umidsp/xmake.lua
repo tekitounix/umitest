@@ -7,9 +7,6 @@ set_version("1.0.0")
 set_languages("c++23")
 add_rules("mode.debug", "mode.release")
 
--- Build directory
-set_targetdir(".build")
-
 -- Compiler settings
 set_warnings("all", "extra")
 add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
@@ -17,7 +14,7 @@ add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
 -- Header-only library target
 target("umidsp")
     set_kind("headeronly")
-    add_headerfiles("include/(dsp/**.hh)")
+    add_headerfiles("include/(**.hh)")
     add_includedirs("include", {public = true})
 target_end()
 
@@ -42,7 +39,7 @@ target("test")
     set_default(false)
     on_run(function (target)
         print("Running umidsp_test...")
-        os.execv(path.join(".build", "umidsp_test"))
+        os.execv(path.join("build", "umidsp_test"))
     end)
     add_deps("umidsp_test")
 target_end()

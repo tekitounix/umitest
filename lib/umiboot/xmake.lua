@@ -6,7 +6,6 @@ set_version("1.0.0")
 set_languages("c++23")
 
 add_rules("mode.debug", "mode.release")
-set_targetdir(".build")
 set_warnings("all", "extra")
 add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
 
@@ -49,7 +48,7 @@ target("test")
         local tests = {"umiboot_test_auth", "umiboot_test_firmware", "umiboot_test_session"}
         for _, name in ipairs(tests) do
             print("Running " .. name .. "...")
-            os.execv(path.join(".build", name))
+            os.execv(path.join("build", name))
         end
         print("All tests passed!")
     end)

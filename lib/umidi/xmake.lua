@@ -7,9 +7,6 @@ set_version("1.0.0")
 set_languages("c++23")
 add_rules("mode.debug", "mode.release")
 
--- Build directory
-set_targetdir(".build")
-
 -- Compiler settings
 set_warnings("all", "extra")
 add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
@@ -95,7 +92,7 @@ target("test")
         }
         for _, name in ipairs(tests) do
             print("Running " .. name .. "...")
-            os.execv(path.join(".build", name))
+            os.execv(path.join("build", name))
         end
     end)
     add_deps("umidi_test_core", "umidi_test_messages", "umidi_test_protocol", "umidi_test_extended")

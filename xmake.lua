@@ -42,14 +42,12 @@ end
 add_requires("arm-embedded", {optional = true})
 
 -- Request coding-rules for clangd/clang-format/clang-tidy configuration
-add_requires("coding-rules", {optional = true})
+-- Note: Temporarily disabled - needs task loading mechanism fix
+-- add_requires("coding-rules", {optional = true})
 
 -- =====================================================================
 -- Global Configuration
 -- =====================================================================
-
--- Build directory (統一: .build/)
-set_config("buildir", ".build")
 
 -- Language standard
 set_languages("c++23")
@@ -58,10 +56,12 @@ set_languages("c++23")
 add_rules("mode.debug", "mode.release")
 
 -- Generate compile_commands.json for clangd/VS Code IntelliSense
-add_rules("plugin.compile_commands.autoupdate", {outputdir = ".build"})
+-- outputdir = "." generates at project root (clangd finds it automatically)
+add_rules("plugin.compile_commands.autoupdate", {outputdir = ".", lsp = "clangd"})
 
 -- Generate .vscode/settings.json with clangd configuration
-add_rules("embedded.vscode")
+-- Note: embedded.vscode rule disabled due to empty rule error
+-- add_rules("embedded.vscode")
 
 -- Strict warnings for all targets
 set_warnings("all", "extra", "error")
@@ -97,57 +97,6 @@ if has_config("coverage") and is_mode("debug") then
 end
 
 -- =====================================================================
--- Toolchain: ARM GCC (Cross-compilation)
--- =====================================================================
-
--- Try to find ARM GCC: first check known paths, then fall back to PATH
-local arm_gcc_path = nil
-local arm_paths = {
-    "/Applications/ArmGNUToolchain/14.2.rel1/arm-none-eabi",
-    "/usr/local/arm-none-eabi",
-    "/opt/arm-none-eabi",
-    "/opt/homebrew/arm-none-eabi",
-}
-for _, p in ipairs(arm_paths) do
-    if os.isdir(p) then
-        arm_gcc_path = p
-        break
-    end
-end
-
--- If not found in known paths, try to find via PATH
-local has_arm_toolchain = arm_gcc_path ~= nil
-if not has_arm_toolchain then
-    local gcc_path = os.which("arm-none-eabi-gcc")
-    if gcc_path then
-        -- Extract SDK dir from bin path: /path/to/bin/arm-none-eabi-gcc -> /path/to
-        arm_gcc_path = path.directory(path.directory(gcc_path))
-        has_arm_toolchain = true
-    end
-end
-
-if has_arm_toolchain then
-    toolchain("arm-none-eabi")
-        set_kind("cross")
-        set_sdkdir(arm_gcc_path)
-        set_bindir(path.join(arm_gcc_path, "bin"))
-        
-        set_toolset("cc", "arm-none-eabi-gcc")
-        set_toolset("cxx", "arm-none-eabi-g++")
-        set_toolset("ld", "arm-none-eabi-g++")
-        set_toolset("ar", "arm-none-eabi-ar")
-        set_toolset("as", "arm-none-eabi-gcc")
-        set_toolset("objcopy", "arm-none-eabi-objcopy")
-        set_toolset("objdump", "arm-none-eabi-objdump")
-        set_toolset("size", "arm-none-eabi-size")
-        
-        on_check(function (toolchain)
-            return true  -- Already verified path exists
-        end)
-    toolchain_end()
-end
-
--- =====================================================================
 -- Core Library (Header-only)
 -- =====================================================================
 
@@ -156,11 +105,8 @@ target("umios")
     set_group("libraries")
 
     add_headerfiles("lib/umios/*.hh")
-    add_headerfiles("include/umi/*.hpp")
     add_includedirs(".", {public = true})
     add_includedirs("lib/umios", {public = true})
-    add_includedirs("port", {public = true})
-    add_includedirs("include", {public = true})
     
     -- Preprocessor definitions based on config
     if is_config("kernel", "micro") then
@@ -173,424 +119,191 @@ target_end()
 -- =====================================================================
 -- These run on the development machine for rapid iteration
 
-target("test_dsp")
-    set_kind("binary")
-    set_group("tests/host")
-    set_default(true)
-    set_targetdir(".build")
+-- Common include paths for tests
+local test_includedirs = {
+    "lib/umios/core",
+    "lib/umios/kernel",
+    "lib/umidsp/include",
+    "lib/umiboot/include",
+    "lib/umidi/include",
+    "lib",
+    "tests"
+}
 
-    add_files("lib/umidsp/test/test_dsp.cc")
-    add_includedirs("lib/umidsp/include", "lib/umiboot/include", "lib/umidi/include", "lib", "test")
-    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
+-- Helper: Define a host test target
+local function host_test(name, source, opts)
+    opts = opts or {}
+    target(name)
+        set_kind("binary")
+        set_group(opts.group or "tests/host")
+        set_default(opts.default ~= false)
+        add_files(source)
+        add_includedirs(opts.includedirs or test_includedirs)
+        add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
+        on_run(function (target) os.execv(target:targetfile()) end)
+    target_end()
+end
 
-    on_run(function (target)
-        os.execv(target:targetfile())
-    end)
-target_end()
+-- Main host tests (default = true)
+host_test("test_dsp", "lib/umidsp/test/test_dsp.cc")
+host_test("test_kernel", "tests/test_kernel.cc")
+host_test("test_audio", "tests/test_audio.cc")
+host_test("test_midi", "tests/test_midi.cc")
+host_test("test_midi_lib", "tests/test_midi_lib.cc")
+host_test("test_umidi_comprehensive", "tests/test_umidi_comprehensive.cc")
 
-target("test_kernel")
-    set_kind("binary")
-    set_group("tests/host")
-    set_default(true)
-    set_targetdir(".build")
+-- umidi library tests (default = false)
+local umidi_dirs = {"lib/umidi/include", "lib/umiboot/include"}
+host_test("umidi_test_core", "lib/umidi/test/test_core.cc", {group = "tests/umidi", default = false, includedirs = umidi_dirs})
+host_test("umidi_test_messages", "lib/umidi/test/test_messages.cc", {group = "tests/umidi", default = false, includedirs = umidi_dirs})
+host_test("umidi_test_protocol", "lib/umidi/test/test_protocol.cc", {group = "tests/umidi", default = false, includedirs = umidi_dirs})
+host_test("umidi_test_extended", "lib/umidi/test/test_extended_protocol.cc", {group = "tests/umidi", default = false, includedirs = umidi_dirs})
 
-    add_files("test/test_kernel.cc")
-    add_includedirs("lib/umidsp/include", "lib/umiboot/include", "lib/umidi/include", "lib", "test")
-    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
-
-    on_run(function (target)
-        os.execv(target:targetfile())
-    end)
-target_end()
-
-target("test_audio")
-    set_kind("binary")
-    set_group("tests/host")
-    set_default(true)
-    set_targetdir(".build")
-
-    add_files("test/test_audio.cc")
-    add_includedirs("lib/umidsp/include", "lib/umiboot/include", "lib/umidi/include", "lib", "test")
-    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
-
-    on_run(function (target)
-        os.execv(target:targetfile())
-    end)
-target_end()
-
-target("test_midi")
-    set_kind("binary")
-    set_group("tests/host")
-    set_default(true)
-    set_targetdir(".build")
-
-    add_files("test/test_midi.cc")
-    add_includedirs("lib/umidsp/include", "lib/umiboot/include", "lib/umidi/include", "lib", "test")
-    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
-
-    on_run(function (target)
-        os.execv(target:targetfile())
-    end)
-target_end()
-
-target("test_midi_lib")
-    set_kind("binary")
-    set_group("tests/host")
-    set_default(true)
-    set_targetdir(".build")
-
-    add_files("test/test_midi_lib.cc")
-    add_includedirs("lib/umidsp/include", "lib/umiboot/include", "lib/umidi/include", "lib", "test")
-    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
-
-    on_run(function (target)
-        os.execv(target:targetfile())
-    end)
-target_end()
-
-target("test_umidi_comprehensive")
-    set_kind("binary")
-    set_group("tests/host")
-    set_default(true)
-    set_targetdir(".build")
-
-    add_files("test/test_umidi_comprehensive.cc")
-    add_includedirs("lib/umidsp/include", "lib/umiboot/include", "lib/umidi/include", "lib", "test")
-    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
-
-    on_run(function (target)
-        os.execv(target:targetfile())
-    end)
-target_end()
+-- umiboot library tests (default = false)
+local umiboot_dirs = {"lib/umiboot/include"}
+host_test("umiboot_test_auth", "lib/umiboot/test/test_auth.cc", {group = "tests/umiboot", default = false, includedirs = umiboot_dirs})
+host_test("umiboot_test_firmware", "lib/umiboot/test/test_firmware.cc", {group = "tests/umiboot", default = false, includedirs = umiboot_dirs})
+host_test("umiboot_test_session", "lib/umiboot/test/test_session.cc", {group = "tests/umiboot", default = false, includedirs = umiboot_dirs})
 
 -- =====================================================================
--- umidi Standalone Tests (lib/umidi/test/)
+-- ARM Firmware Targets (using embedded rule from arm-embedded package)
 -- =====================================================================
--- These tests are self-contained within the umidi library directory
+-- Configuration is handled by the 'embedded' rule:
+--   - MCU: stm32f407vg (STM32F4 Cortex-M4F with FPU)
+--   - Toolchain: gcc-arm (default) or clang-arm
+--   - Outputs: .elf, .hex, .bin, .map
 
-target("umidi_test_core")
-    set_kind("binary")
-    set_group("tests/umidi")
-    set_default(false)
-    set_targetdir(".build")
+-- Helper: Renode runner
+local function renode_run(script)
+    return function(target)
+        local renode = "/Applications/Renode.app/Contents/MacOS/Renode"
+        if not os.isfile(renode) then renode = "renode" end
+        os.execv(renode, {"--console", "--disable-xwt", "-e", "include @renode/" .. script})
+    end
+end
 
-    add_files("lib/umidi/test/test_core.cc")
-    add_includedirs("lib/umidi/include", "lib/umiboot/include")
-    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
+-- Common paths for STM32F4 BSP
+local stm32f4_bsp = "lib/bsp/stm32f4-disco"
+local stm32f4_linker = stm32f4_bsp .. "/linker.ld"
+local stm32f4_syscalls = stm32f4_bsp .. "/syscalls.cc"
 
-    on_run(function (target)
-        os.execv(target:targetfile())
-    end)
-target_end()
-
-target("umidi_test_messages")
-    set_kind("binary")
-    set_group("tests/umidi")
-    set_default(false)
-    set_targetdir(".build")
-
-    add_files("lib/umidi/test/test_messages.cc")
-    add_includedirs("lib/umidi/include", "lib/umiboot/include")
-    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
-
-    on_run(function (target)
-        os.execv(target:targetfile())
-    end)
-target_end()
-
-target("umidi_test_protocol")
-    set_kind("binary")
-    set_group("tests/umidi")
-    set_default(false)
-    set_targetdir(".build")
-
-    add_files("lib/umidi/test/test_protocol.cc")
-    add_includedirs("lib/umidi/include", "lib/umiboot/include")
-    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
-
-    on_run(function (target)
-        os.execv(target:targetfile())
-    end)
-target_end()
-
-target("umidi_test_extended")
-    set_kind("binary")
-    set_group("tests/umidi")
-    set_default(false)
-    set_targetdir(".build")
-
-    add_files("lib/umidi/test/test_extended_protocol.cc")
-    add_includedirs("lib/umidi/include", "lib/umiboot/include")
-    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
-
-    on_run(function (target)
-        os.execv(target:targetfile())
-    end)
-target_end()
-
--- =====================================================================
--- umi_boot Standalone Tests (lib/umiboot/test/)
--- =====================================================================
--- These tests are self-contained within the umi_boot library directory
-
-target("umiboot_test_auth")
-    set_kind("binary")
-    set_group("tests/umiboot")
-    set_default(false)
-    set_targetdir(".build")
-
-    add_files("lib/umiboot/test/test_auth.cc")
-    add_includedirs("lib/umiboot/include")
-    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
-
-    on_run(function (target)
-        os.execv(target:targetfile())
-    end)
-target_end()
-
-target("umiboot_test_firmware")
-    set_kind("binary")
-    set_group("tests/umiboot")
-    set_default(false)
-    set_targetdir(".build")
-
-    add_files("lib/umiboot/test/test_firmware.cc")
-    add_includedirs("lib/umiboot/include")
-    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
-
-    on_run(function (target)
-        os.execv(target:targetfile())
-    end)
-target_end()
-
-target("umiboot_test_session")
-    set_kind("binary")
-    set_group("tests/umiboot")
-    set_default(false)
-    set_targetdir(".build")
-
-    add_files("lib/umiboot/test/test_session.cc")
-    add_includedirs("lib/umiboot/include")
-    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
-
-    on_run(function (target)
-        os.execv(target:targetfile())
-    end)
-target_end()
-
--- =====================================================================
--- ARM Firmware Targets (only when ARM toolchain is available)
--- =====================================================================
-
-if has_arm_toolchain then
-
--- Common ARM Cortex-M4F configuration rule
-rule("cortex-m4f")
-    on_load(function (target)
-        target:set("plat", "cross")
-        target:set("arch", "arm")
-        target:set("toolchains", "arm-none-eabi")
-        
-        -- CPU flags
-        local cpu_flags = {
-            "-mcpu=cortex-m4",
-            "-mthumb",
-            "-mfloat-abi=hard",
-            "-mfpu=fpv4-sp-d16",
-        }
-        for _, flag in ipairs(cpu_flags) do
-            target:add("cxflags", flag, {force = true})
-            target:add("ldflags", flag, {force = true})
-        end
-        
-        -- Embedded C++ flags
-        target:add("cxflags", "-fno-exceptions", "-fno-rtti", {force = true})
-        target:add("cxflags", "-ffunction-sections", "-fdata-sections", {force = true})
-        target:add("ldflags", "-Wl,--gc-sections", {force = true})
-        target:add("ldflags", "-nostartfiles", "--specs=nosys.specs", {force = true})
-    end)
-    
-    -- Generate .bin and .hex after linking
-    after_build(function (target)
-        local elf = target:targetfile()
-        local bin = elf:gsub("%.elf$", ".bin")
-        local hex = elf:gsub("%.elf$", ".hex")
-        
-        os.execv("arm-none-eabi-objcopy", {"-O", "binary", elf, bin})
-        os.execv("arm-none-eabi-objcopy", {"-O", "ihex", elf, hex})
-        os.execv("arm-none-eabi-size", {elf})
-    end)
-rule_end()
+-- Common include paths for embedded targets
+local embedded_includedirs = {
+    ".",
+    "lib",
+    "lib/umios/core",
+    "lib/umios/kernel",
+    "lib/umios/adapter",
+    "lib/umios/backend/cm",
+    "lib/bsp/stm32f4-disco",
+    "lib/hal/stm32",
+    "lib/umidi/include",
+    "lib/umiboot/include",
+    "lib/umidsp/include",
+}
 
 target("firmware")
-    set_kind("binary")
     set_group("firmware")
     set_default(false)
-    set_targetdir(".build")
-    set_filename("umi_firmware.elf")
-    
-    add_rules("cortex-m4f")
+    add_rules("embedded")
+    set_values("embedded.mcu", "stm32f407vg")
+    set_values("embedded.linker_script", stm32f4_linker)
+
     add_deps("umios")
-    add_includedirs(".", "lib/umios", "port", "lib")
+    add_includedirs(embedded_includedirs)
     add_defines("STM32F4", "BOARD_STM32F4")
-    
-    -- Linker script
-    add_ldflags("-Tport/board/stm32f4/linker.ld", {force = true})
-    
-    -- Sources
-    add_files("port/board/stm32f4/syscalls.cc")
+
+    add_files(stm32f4_syscalls)
     add_files("examples/embedded/example_app.cc")
 target_end()
 
 target("renode_test")
-    set_kind("binary")
     set_group("firmware")
     set_default(false)
-    set_targetdir(".build")
-    set_filename("renode_test.elf")
+    add_rules("embedded")
+    set_values("embedded.mcu", "stm32f407vg")
+    set_values("embedded.linker_script", stm32f4_linker)
+    set_values("embedded.optimize", "size")
 
-    add_rules("cortex-m4f")
     add_deps("umios")
-    add_includedirs(".", "lib/umios", "port", "include", "lib/umidi/include", "lib/umiboot/include")
+    add_includedirs(embedded_includedirs)
     add_defines("STM32F4", "BOARD_STM32F4")
 
-    -- Optimize for size with debug info
-    add_cxflags("-Os", "-g", {force = true})
+    add_files("tests/renode_test.cc")
+    add_files(stm32f4_syscalls)
 
-    -- Linker script
-    add_ldflags("-Tport/board/stm32f4/linker.ld", {force = true})
-
-    -- Sources
-    add_files("test/renode_test.cc")
-    add_files("port/board/stm32f4/syscalls.cc")
-
-    -- Run with Renode
-    on_run(function (target)
-        local renode = "/Applications/Renode.app/Contents/MacOS/Renode"
-        if not os.isfile(renode) then renode = "renode" end
-        os.execv(renode, {"--console", "--disable-xwt", "-e", "include @renode/test.resc"})
-    end)
+    on_run(renode_run("test.resc"))
 target_end()
 
 target("bench_midi_format")
-    set_kind("binary")
     set_group("firmware")
     set_default(false)
-    set_targetdir(".build")
-    set_filename("bench_midi_format.elf")
+    add_rules("embedded")
+    set_values("embedded.mcu", "stm32f407vg")
+    set_values("embedded.linker_script", stm32f4_linker)
+    set_values("embedded.optimize", "size")
 
-    add_rules("cortex-m4f")
-    add_includedirs(".", "port")
+    add_includedirs(embedded_includedirs)
     add_defines("STM32F4", "BOARD_STM32F4")
 
-    -- Optimize for size with debug info
-    add_cxflags("-Os", "-g", {force = true})
+    add_files("tests/bench_midi_format.cc")
+    add_files(stm32f4_syscalls)
 
-    -- Linker script
-    add_ldflags("-Tport/board/stm32f4/linker.ld", {force = true})
-
-    -- Sources
-    add_files("test/bench_midi_format.cc")
-    add_files("port/board/stm32f4/syscalls.cc")
-
-    -- Run with Renode
-    on_run(function (target)
-        local renode = "/Applications/Renode.app/Contents/MacOS/Renode"
-        if not os.isfile(renode) then renode = "renode" end
-        os.execv(renode, {"--console", "--disable-xwt", "-e", "include @renode/bench_midi.resc"})
-    end)
+    on_run(renode_run("bench_midi.resc"))
 target_end()
 
 target("umidi_test_renode")
-    set_kind("binary")
     set_group("tests/umidi")
     set_default(false)
-    set_targetdir(".build")
-    set_filename("umidi_test_renode.elf")
+    add_rules("embedded")
+    set_values("embedded.mcu", "stm32f407vg")
+    set_values("embedded.linker_script", stm32f4_linker)
+    set_values("embedded.optimize", "size")
 
-    add_rules("cortex-m4f")
-    add_includedirs(".", "port", "lib", "lib/umidi/include", "lib/umiboot/include")
+    add_includedirs(embedded_includedirs)
     add_defines("STM32F4", "BOARD_STM32F4")
 
-    -- Optimize for size with debug info
-    add_cxflags("-Os", "-g", {force = true})
-
-    -- Linker script
-    add_ldflags("-Tport/board/stm32f4/linker.ld", {force = true})
-
-    -- Sources
     add_files("lib/umidi/test/test_renode.cc")
-    add_files("port/board/stm32f4/syscalls.cc")
+    add_files(stm32f4_syscalls)
 
-    -- Run with Renode
-    on_run(function (target)
-        local renode = "/Applications/Renode.app/Contents/MacOS/Renode"
-        if not os.isfile(renode) then renode = "renode" end
-        os.execv(renode, {"--console", "--disable-xwt", "-e", "include @renode/umidi_test.resc"})
-    end)
+    on_run(renode_run("umidi_test.resc"))
 target_end()
 
 target("synth_example")
-    set_kind("binary")
     set_group("examples")
     set_default(false)
-    set_targetdir(".build")
-    set_filename("synth_example.elf")
+    add_rules("embedded")
+    set_values("embedded.mcu", "stm32f407vg")
+    set_values("embedded.linker_script", stm32f4_linker)
+    set_values("embedded.optimize", "size")
 
-    add_rules("cortex-m4f")
     add_deps("umios")
-    add_includedirs(".", "lib/umios", "port", "lib", "lib/umidsp/include")
+    add_includedirs(embedded_includedirs)
     add_defines("STM32F4", "BOARD_STM32F4")
 
-    -- Optimize for size with debug info
-    add_cxflags("-Os", "-g", {force = true})
-
-    -- Linker script
-    add_ldflags("-Tport/board/stm32f4/linker.ld", {force = true})
-
-    -- Sources
     add_files("examples/synth/synth_example.cc")
-    add_files("port/board/stm32f4/syscalls.cc")
+    add_files(stm32f4_syscalls)
 
-    -- Run with Renode
-    on_run(function (target)
-        local renode = "/Applications/Renode.app/Contents/MacOS/Renode"
-        if not os.isfile(renode) then renode = "renode" end
-        os.execv(renode, {"--console", "--disable-xwt", "-e", "include @renode/synth.resc"})
-    end)
+    on_run(renode_run("synth.resc"))
 target_end()
 
 target("synth_renode")
-    set_kind("binary")
     set_group("examples")
     set_default(false)
-    set_targetdir(".build")
-    set_filename("synth_renode.elf")
+    add_rules("embedded")
+    set_values("embedded.mcu", "stm32f407vg")
+    set_values("embedded.linker_script", stm32f4_linker)
+    set_values("embedded.optimize", "size")
 
-    add_rules("cortex-m4f")
     add_deps("umios")
-    add_includedirs(".", "lib/umios", "port", "lib", "lib/umidsp/include", "lib/umim")
+    add_includedirs(embedded_includedirs)
     add_defines("STM32F4", "BOARD_STM32F4")
 
-    -- Optimize for size with debug info
-    add_cxflags("-Os", "-g", {force = true})
-
-    -- Linker script
-    add_ldflags("-Tport/board/stm32f4/linker.ld", {force = true})
-
-    -- Sources
     add_files("examples/synth/synth_renode.cc")
-    add_files("port/board/stm32f4/syscalls.cc")
+    add_files(stm32f4_syscalls)
 
-    -- Run with Renode + Web Bridge
-    on_run(function (target)
-        local renode = "/Applications/Renode.app/Contents/MacOS/Renode"
-        if not os.isfile(renode) then renode = "renode" end
-        os.execv(renode, {"--console", "--disable-xwt", "-e", "include @renode/synth_audio.resc"})
-    end)
+    on_run(renode_run("synth_audio.resc"))
 target_end()
-
-end  -- if has_arm_toolchain
 
 -- =====================================================================
 -- WASM Targets (Emscripten)
@@ -661,10 +374,10 @@ local function umim_target(name, source_file)
         set_plat("wasm")
         set_arch("wasm32")
         set_toolchains("emcc")
-        set_targetdir(".build/umim")
+        set_targetdir("build/umim")
         set_filename(name .. ".js")
 
-        add_includedirs("lib/umios", "lib", "lib/umim", "lib/umidsp/include", "examples/synth")
+        add_includedirs("lib/umios/core", "lib/umios/kernel", "lib/umios/adapter", "lib", "lib/umidsp/include", "examples/synth")
         add_files(source_file)
 
         add_cxflags("-fno-exceptions", "-fno-rtti", "-O3", {force = true})
@@ -719,8 +432,9 @@ target("synth_sim")
 
     add_files("examples/synth/synth_sim.cc")
     add_includedirs(
-        "lib/umios",
-        "lib/umim",
+        "lib/umios/core",
+        "lib/umios/kernel",
+        "lib/umios/backend/wasm",
         "lib/umidsp/include",
         "lib",
         "examples/synth"
@@ -818,7 +532,7 @@ task("renode-test")
         os.execv(renode, {"--console", "--disable-xwt", "-e", "include @renode/test.resc"})
         
         -- Display results
-        local logfile = ".build/renode_uart.log"
+        local logfile = "build/renode_uart.log"
         if os.isfile(logfile) then
             print("\n" .. string.rep("=", 60))
             print("UART Output")
@@ -846,7 +560,7 @@ task("renode-synth")
         os.execv(renode, {"--console", "--disable-xwt", "-e", "include @renode/synth.resc"})
 
         -- Display results
-        local logfile = ".build/synth_uart.log"
+        local logfile = "build/synth_uart.log"
         if os.isfile(logfile) then
             print("\n" .. string.rep("=", 60))
             print("UART Output")
@@ -887,12 +601,12 @@ task("robot")
         
         print("\nRunning Robot Framework tests...")
         os.exec(string.format(
-            "cd '%s' && env PATH=\"%s\" %s renode/umi_tests_simple.robot -r .build",
+            "cd '%s' && env PATH=\"%s\" %s renode/umi_tests_simple.robot -r build",
             os.projectdir(), env_path, runner
         ))
         
         -- Summary
-        local xml = ".build/robot_output.xml"
+        local xml = "build/robot_output.xml"
         if os.isfile(xml) then
             local f = io.open(xml, "r")
             if f then
@@ -903,7 +617,7 @@ task("robot")
                     print("Robot tests PASSED ✓")
                 else
                     print("Robot tests FAILED ✗")
-                    print("See: .build/log.html")
+                    print("See: build/log.html")
                 end
             end
         end
@@ -919,7 +633,7 @@ task("clean-all")
     set_category("action")
     on_run(function ()
         print("Cleaning all build artifacts...")
-        os.tryrm(".build")
+        os.tryrm("build")
         os.tryrm(".xmake")
         print("Done ✓")
     end)
@@ -938,7 +652,7 @@ task("info")
         print("Board:   " .. (get_config("board") or "stm32f4"))
         print("Kernel:  " .. (get_config("kernel") or "mono"))
         print("Mode:    " .. (get_config("mode") or "release"))
-        print("Buildir: " .. (get_config("buildir") or ".build"))
+        print("Buildir: " .. (get_config("buildir") or "build"))
         print(string.rep("=", 40))
         
         -- Check toolchain (use known path)
@@ -979,11 +693,11 @@ task("wasm")
 
         print("\n" .. string.rep("=", 60))
         print("WASM build complete!")
-        print("Output: .build/umim/")
+        print("Output: build/umim/")
         print(string.rep("=", 60))
 
         -- List generated files
-        os.exec("ls -la .build/umim/")
+        os.exec("ls -la build/umim/")
     end)
     set_menu {
         usage = "xmake wasm",
