@@ -1,0 +1,34 @@
+{
+  "version": "1.0.0",
+  "applications": [
+    {
+      "id": "umi-synth-os",
+      "name": "UMI Synth (UMI-OS)",
+      "description": "Full kernel simulation with synth",
+      "vendor": "UMI-OS",
+      "version": "1.0.0",
+      "backend": "umios",
+      "wasmUrl": "./webhost_sim.wasm",
+      "workletUrl": "./synth_sim_worklet.js",
+      "features": ["kernel", "tasks", "memory", "shell"],
+      "default": true
+    },
+    {
+      "id": "umi-synth",
+      "name": "UMI Synth (UMIM)",
+      "description": "DSP-only synthesizer (lightweight)",
+      "vendor": "UMI-OS",
+      "version": "1.0.0",
+      "backend": "umim",
+      "wasmUrl": "./umim_synth.wasm",
+      "workletUrl": "./umim_generic_worklet.js"
+    }
+  ],
+  "directories": [
+    {
+      "name": "Local Apps",
+      "path": "./apps/",
+      "description": "Applications in the apps/ directory"
+    }
+  ]
+}
