@@ -77,28 +77,36 @@
 
     document.getElementById('start').addEventListener('click', async () => {
       try {
+        setStatus('Loading WASM...');
+        // Fetch WASM binary (UMI-OS kernel simulation)
+        const wasmResponse = await fetch('../synth/synth_sim.wasm');
+        if (!wasmResponse.ok) {
+          throw new Error('Failed to fetch WASM: ' + wasmResponse.status);
+        }
+        const wasmBytes = await wasmResponse.arrayBuffer();
+        log(`WASM loaded (${wasmBytes.byteLength} bytes)`);
+
         setStatus('Creating AudioContext...');
         audioContext = new AudioContext({ sampleRate: 48000 });
         log(`AudioContext created (${audioContext.sampleRate}Hz)`);
 
         setStatus('Loading worklet module...');
-        await audioContext.audioWorklet.addModule('./umim_modules/synth.js');
-        log('Worklet module loaded');
+        // Use synth_worklet.js which receives WASM via postMessage
+        await audioContext.audioWorklet.addModule('./synth_worklet.js');
+        log('Worklet module loaded (UMI-OS Kernel Simulation)');
 
         setStatus('Creating AudioWorkletNode...');
-        // Get processor name from WASM (it should be registered after addModule)
-        // The processor should be 'umi-synth-processor' based on synth_wasm.cc
-        synthNode = new AudioWorkletNode(audioContext, 'umi-synth-processor', {
+        synthNode = new AudioWorkletNode(audioContext, 'synth-worklet-processor', {
           processorOptions: { sampleRate: audioContext.sampleRate }
         });
         log('AudioWorkletNode created');
 
         // Wait for ready message
-        setStatus('Waiting for WASM init...');
+        setStatus('Initializing WASM...');
         await new Promise((resolve, reject) => {
           const timeout = setTimeout(() => reject(new Error('Timeout')), 10000);
           synthNode.port.onmessage = (e) => {
-            log(`Message from worklet: ${JSON.stringify(e.data)}`);
+            log(`Message from worklet: ${e.data.type}`);
             if (e.data.type === 'ready') {
               clearTimeout(timeout);
               resolve();
@@ -107,6 +115,8 @@
               reject(new Error(e.data.message));
             }
           };
+          // Send WASM bytes to worklet
+          synthNode.port.postMessage({ type: 'init', wasmBytes });
         });
 
         // Connect to output

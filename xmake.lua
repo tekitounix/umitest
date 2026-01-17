@@ -560,6 +560,36 @@ target("synth_example")
     end)
 target_end()
 
+target("synth_renode")
+    set_kind("binary")
+    set_group("examples")
+    set_default(false)
+    set_targetdir(".build")
+    set_filename("synth_renode.elf")
+
+    add_rules("cortex-m4f")
+    add_deps("umios")
+    add_includedirs(".", "lib/umios", "port", "lib", "lib/umidsp/include", "lib/umim")
+    add_defines("STM32F4", "BOARD_STM32F4")
+
+    -- Optimize for size with debug info
+    add_cxflags("-Os", "-g", {force = true})
+
+    -- Linker script
+    add_ldflags("-Tport/board/stm32f4/linker.ld", {force = true})
+
+    -- Sources
+    add_files("examples/synth/synth_renode.cc")
+    add_files("port/board/stm32f4/syscalls.cc")
+
+    -- Run with Renode + Web Bridge
+    on_run(function (target)
+        local renode = "/Applications/Renode.app/Contents/MacOS/Renode"
+        if not os.isfile(renode) then renode = "renode" end
+        os.execv(renode, {"--console", "--disable-xwt", "-e", "include @renode/synth_audio.resc"})
+    end)
+target_end()
+
 end  -- if has_arm_toolchain
 
 -- =====================================================================
@@ -653,6 +683,61 @@ end
 umim_target("synth", "examples/synth/synth_wasm.cc")
 umim_target("delay", "examples/workbench/umim/delay/delay_wasm.cc")
 umim_target("volume", "examples/workbench/umim/volume/volume.cc")
+
+-- =====================================================================
+-- Synth Simulator (umios simulation on Web)
+-- =====================================================================
+-- This is different from umim_synth - it simulates the embedded environment
+-- including the umios kernel, rather than just exposing a UMIM plugin.
+
+local sim_exported_funcs = "[" .. table.concat({
+    "'_malloc'", "'_free'",
+    -- Simulation API
+    "'_umi_sim_init'", "'_umi_sim_reset'", "'_umi_sim_process'",
+    "'_umi_sim_note_on'", "'_umi_sim_note_off'", "'_umi_sim_cc'", "'_umi_sim_midi'",
+    "'_umi_sim_load'", "'_umi_sim_position_lo'", "'_umi_sim_position_hi'",
+    "'_umi_sim_get_name'", "'_umi_sim_get_vendor'", "'_umi_sim_get_version'",
+    -- UMIM-compatible API (for standard worklet usage)
+    "'_umi_create'", "'_umi_destroy'", "'_umi_process'",
+    "'_umi_note_on'", "'_umi_note_off'",
+    "'_umi_get_processor_name'", "'_umi_get_name'", "'_umi_get_vendor'", "'_umi_get_version'",
+    "'_umi_get_type'", "'_umi_get_param_count'", "'_umi_set_param'", "'_umi_get_param'",
+    "'_umi_get_param_name'", "'_umi_get_param_min'", "'_umi_get_param_max'",
+    "'_umi_get_param_default'", "'_umi_get_param_curve'", "'_umi_get_param_id'",
+    "'_umi_get_param_unit'", "'_umi_process_cc'"
+}, ",") .. "]"
+
+target("synth_sim")
+    set_kind("binary")
+    set_group("simulator")
+    set_default(false)
+    set_plat("wasm")
+    set_arch("wasm32")
+    set_toolchains("emcc")
+    set_targetdir("examples/synth")
+    set_filename("synth_sim.js")
+
+    add_files("examples/synth/synth_sim.cc")
+    add_includedirs(
+        "lib/umios",
+        "lib/umim",
+        "lib/umidsp/include",
+        "lib",
+        "examples/synth"
+    )
+
+    add_cxflags("-fno-exceptions", "-fno-rtti", "-O3", {force = true})
+    add_ldflags("-sWASM=1", {force = true})
+    add_ldflags("-sALLOW_MEMORY_GROWTH=0", {force = true})
+    add_ldflags("-sSTACK_SIZE=65536", {force = true})
+    add_ldflags("-sINITIAL_MEMORY=1048576", {force = true})
+    add_ldflags("-sEXPORTED_FUNCTIONS=" .. sim_exported_funcs, {force = true})
+    add_ldflags("-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','UTF8ToString','HEAPF32','HEAP8']", {force = true})
+    add_ldflags("-sENVIRONMENT=web,worker", {force = true})
+    add_ldflags("-sWASM_ASYNC_COMPILATION=1", {force = true})
+    add_ldflags("-sMODULARIZE=1", {force = true})
+    add_ldflags("-sEXPORT_NAME='createSynthModule'", {force = true})
+target_end()
 
 end  -- if has_emscripten
 

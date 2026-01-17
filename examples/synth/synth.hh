@@ -10,6 +10,7 @@
 
 #include <dsp/dsp.hh>
 #include <cstdint>
+#include <cstddef>
 
 namespace umi::synth {
 
@@ -18,6 +19,23 @@ namespace umi::synth {
 // =====================================================================
 
 constexpr int NUM_VOICES = 4;
+
+// =====================================================================
+// Parameter IDs
+// =====================================================================
+
+enum class ParamId {
+    Attack = 0,
+    Decay,
+    Sustain,
+    Release,
+    Cutoff,
+    Resonance,
+    Volume,
+    Count
+};
+
+constexpr int PARAM_COUNT = static_cast<int>(ParamId::Count);
 
 // =====================================================================
 // Port definitions (for UMIM spec compliance)
@@ -38,12 +56,9 @@ public:
     void init(float sample_rate) {
         sample_rate_ = sample_rate;
         dt_ = 1.0f / sample_rate;
-
-        // ADSR: 10ms attack, 100ms decay, 0.7 sustain, 200ms release
-        env_.set_params(10.0f, 100.0f, 0.7f, 200.0f);
-
-        // Filter: cutoff at 2kHz, moderate resonance
-        filter_.set_params(2000.0f / sample_rate, 0.3f);
+        // Note: ADSR and filter parameters are NOT set here.
+        // They must be set via set_adsr() and set_filter() by PolySynth.
+        // This ensures single source of truth for default values.
     }
 
     void note_on(uint8_t note, uint8_t velocity) {
@@ -67,6 +82,15 @@ public:
 
     bool is_active() const { return active_; }
     uint8_t note() const { return note_; }
+
+    // Parameter setters
+    void set_adsr(float attack_ms, float decay_ms, float sustain, float release_ms) {
+        env_.set_params(attack_ms, decay_ms, sustain, release_ms);
+    }
+
+    void set_filter(float cutoff_hz, float resonance) {
+        filter_.set_params(cutoff_hz / sample_rate_, resonance);
+    }
 
     float process() {
         if (!active_) return 0.0f;
@@ -114,6 +138,9 @@ public:
         for (int i = 0; i < NUM_VOICES; ++i) {
             voices_[i].init(sample_rate);
         }
+        // Apply current parameter values to all voices
+        update_adsr();
+        update_filter();
     }
 
     // === MIDI event handling ===
@@ -167,6 +194,55 @@ public:
         }
     }
 
+    // === Parameter control ===
+
+    void set_param(ParamId id, float value) {
+        switch (id) {
+            case ParamId::Attack:
+                attack_ms_ = value;
+                update_adsr();
+                break;
+            case ParamId::Decay:
+                decay_ms_ = value;
+                update_adsr();
+                break;
+            case ParamId::Sustain:
+                sustain_ = value;
+                update_adsr();
+                break;
+            case ParamId::Release:
+                release_ms_ = value;
+                update_adsr();
+                break;
+            case ParamId::Cutoff:
+                cutoff_hz_ = value;
+                update_filter();
+                break;
+            case ParamId::Resonance:
+                resonance_ = value;
+                update_filter();
+                break;
+            case ParamId::Volume:
+                volume_ = value;
+                break;
+            default:
+                break;
+        }
+    }
+
+    float get_param(ParamId id) const {
+        switch (id) {
+            case ParamId::Attack:   return attack_ms_;
+            case ParamId::Decay:    return decay_ms_;
+            case ParamId::Sustain:  return sustain_;
+            case ParamId::Release:  return release_ms_;
+            case ParamId::Cutoff:   return cutoff_hz_;
+            case ParamId::Resonance: return resonance_;
+            case ParamId::Volume:   return volume_;
+            default: return 0.0f;
+        }
+    }
+
     // === Audio processing ===
 
     /// Process single sample
@@ -175,8 +251,8 @@ public:
         for (int i = 0; i < NUM_VOICES; ++i) {
             sum += voices_[i].process();
         }
-        // Soft clip to prevent clipping
-        return dsp::soft_clip(sum);
+        // Scale down and soft clip to prevent clipping
+        return dsp::soft_clip(sum * volume_ * 0.25f);
     }
 
     /// Process buffer
@@ -188,9 +264,41 @@ public:
 
     float sample_rate() const { return sample_rate_; }
 
+    /// Get number of active voices
+    uint32_t active_voice_count() const {
+        uint32_t count = 0;
+        for (int i = 0; i < NUM_VOICES; ++i) {
+            if (voices_[i].is_active()) {
+                ++count;
+            }
+        }
+        return count;
+    }
+
 private:
+    void update_adsr() {
+        for (int i = 0; i < NUM_VOICES; ++i) {
+            voices_[i].set_adsr(attack_ms_, decay_ms_, sustain_, release_ms_);
+        }
+    }
+
+    void update_filter() {
+        for (int i = 0; i < NUM_VOICES; ++i) {
+            voices_[i].set_filter(cutoff_hz_, resonance_);
+        }
+    }
+
     Voice voices_[NUM_VOICES];
     float sample_rate_ = 48000.0f;
+
+    // Parameters with defaults
+    float attack_ms_ = 10.0f;
+    float decay_ms_ = 100.0f;
+    float sustain_ = 0.7f;
+    float release_ms_ = 200.0f;
+    float cutoff_hz_ = 2000.0f;
+    float resonance_ = 0.3f;
+    float volume_ = 1.0f;
 };
 
 } // namespace umi::synth
