@@ -1,6 +1,11 @@
 # Build outputs
 .build/
 
+# WASM build artifacts in examples
+examples/**/*.wasm
+examples/**/*.js
+!examples/**/README.js
+
 # xmake cache
 .xmake/
 
