@@ -35,6 +35,9 @@
 // USB Classes
 #include "audio.hh"
 
+// Compile-time descriptor builder
+#include "descriptor.hh"
+
 // Version
 namespace umiusb {
 inline constexpr uint16_t VERSION_MAJOR = 0;
