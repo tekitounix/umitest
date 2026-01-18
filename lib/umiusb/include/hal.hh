@@ -4,7 +4,6 @@
 
 #include <cstdint>
 #include <concepts>
-#include <functional>
 #include "types.hh"
 
 namespace umiusb {
@@ -46,26 +45,29 @@ concept Hal = requires(T& hal, const T& chal,
 // HAL Event Callbacks
 // ============================================================================
 
-/// Callbacks from HAL to Device core
+/// Callbacks from HAL to Device core (function pointers with context for embedded)
 struct HalCallbacks {
+    // Context pointer passed to all callbacks
+    void* context = nullptr;
+
     // USB bus reset
-    std::function<void()> on_reset;
+    void (*on_reset)(void* ctx) = nullptr;
 
     // SETUP packet received (EP0)
-    std::function<void(const SetupPacket&)> on_setup;
+    void (*on_setup)(void* ctx, const SetupPacket&) = nullptr;
 
     // Data received on EP0 (DATA OUT stage)
-    std::function<void(const uint8_t*, uint16_t)> on_ep0_rx;
+    void (*on_ep0_rx)(void* ctx, const uint8_t*, uint16_t) = nullptr;
 
     // Data received on non-EP0 endpoint
-    std::function<void(uint8_t ep, const uint8_t*, uint16_t)> on_rx;
+    void (*on_rx)(void* ctx, uint8_t endpoint, const uint8_t*, uint16_t) = nullptr;
 
     // Transmit complete on endpoint
-    std::function<void(uint8_t ep)> on_tx_complete;
+    void (*on_tx_complete)(void* ctx, uint8_t endpoint) = nullptr;
 
     // Suspend/resume
-    std::function<void()> on_suspend;
-    std::function<void()> on_resume;
+    void (*on_suspend)(void* ctx) = nullptr;
+    void (*on_resume)(void* ctx) = nullptr;
 };
 
 // ============================================================================
@@ -90,31 +92,45 @@ protected:
     // Event notification helpers for derived classes
     void notify_reset() {
         address_ = 0;
-        if (callbacks.on_reset) callbacks.on_reset();
+        if (callbacks.on_reset != nullptr) {
+            callbacks.on_reset(callbacks.context);
+        }
     }
 
     void notify_setup(const SetupPacket& setup) {
-        if (callbacks.on_setup) callbacks.on_setup(setup);
+        if (callbacks.on_setup != nullptr) {
+            callbacks.on_setup(callbacks.context, setup);
+        }
     }
 
     void notify_ep0_rx(const uint8_t* data, uint16_t len) {
-        if (callbacks.on_ep0_rx) callbacks.on_ep0_rx(data, len);
+        if (callbacks.on_ep0_rx != nullptr) {
+            callbacks.on_ep0_rx(callbacks.context, data, len);
+        }
     }
 
-    void notify_rx(uint8_t ep, const uint8_t* data, uint16_t len) {
-        if (callbacks.on_rx) callbacks.on_rx(ep, data, len);
+    void notify_rx(uint8_t endpoint, const uint8_t* data, uint16_t len) {
+        if (callbacks.on_rx != nullptr) {
+            callbacks.on_rx(callbacks.context, endpoint, data, len);
+        }
     }
 
-    void notify_tx_complete(uint8_t ep) {
-        if (callbacks.on_tx_complete) callbacks.on_tx_complete(ep);
+    void notify_tx_complete(uint8_t endpoint) {
+        if (callbacks.on_tx_complete != nullptr) {
+            callbacks.on_tx_complete(callbacks.context, endpoint);
+        }
     }
 
     void notify_suspend() {
-        if (callbacks.on_suspend) callbacks.on_suspend();
+        if (callbacks.on_suspend != nullptr) {
+            callbacks.on_suspend(callbacks.context);
+        }
     }
 
     void notify_resume() {
-        if (callbacks.on_resume) callbacks.on_resume();
+        if (callbacks.on_resume != nullptr) {
+            callbacks.on_resume(callbacks.context);
+        }
     }
 };
 

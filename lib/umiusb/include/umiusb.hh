@@ -33,7 +33,8 @@
 #include "device.hh"
 
 // USB Classes
-#include "audio.hh"
+#include "audio_types.hh"
+#include "audio_interface.hh"
 
 // Compile-time descriptor builder
 #include "descriptor.hh"

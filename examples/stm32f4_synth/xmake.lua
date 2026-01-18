@@ -14,6 +14,9 @@ target("stm32f4_synth")
     add_includedirs("$(projectdir)/lib/umios")
     add_includedirs("$(projectdir)/lib")
 
+    -- USB device stack
+    add_includedirs("$(projectdir)/lib/umiusb/include")
+
     -- Synth engine from headless_webhost (unchanged)
     add_includedirs("$(projectdir)/examples/headless_webhost/src")
 

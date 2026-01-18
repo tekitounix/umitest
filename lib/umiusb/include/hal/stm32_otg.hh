@@ -116,6 +116,9 @@ inline constexpr uint32_t DCFG_DSPD_FS = 3U << 0;
 inline constexpr uint32_t DCFG_DAD_MASK = 0x7FU << 4;
 inline constexpr uint32_t DCFG_DAD(uint8_t a) { return static_cast<uint32_t>(a) << 4; }
 
+// DSTS
+inline constexpr uint32_t DSTS_FNSOF_ODD = 1U << 8;  // Frame number bit 0 (odd/even)
+
 // DCTL
 inline constexpr uint32_t DCTL_RWUSIG = 1U << 0;
 inline constexpr uint32_t DCTL_SDIS = 1U << 1;
@@ -132,7 +135,8 @@ inline constexpr uint32_t DEPCTL_STALL = 1U << 21;
 inline constexpr uint32_t DEPCTL_TXFNUM(uint8_t n) { return static_cast<uint32_t>(n) << 22; }
 inline constexpr uint32_t DEPCTL_CNAK = 1U << 26;
 inline constexpr uint32_t DEPCTL_SNAK = 1U << 27;
-inline constexpr uint32_t DEPCTL_SD0PID = 1U << 28;
+inline constexpr uint32_t DEPCTL_SD0PID = 1U << 28;      // Set DATA0 PID (bulk/int) / Set even frame (iso)
+inline constexpr uint32_t DEPCTL_SODDFRM = 1U << 29;     // Set odd frame (isochronous)
 inline constexpr uint32_t DEPCTL_EPDIS = 1U << 30;
 inline constexpr uint32_t DEPCTL_EPENA = 1U << 31;
 
@@ -191,7 +195,11 @@ private:
     // Buffers
     alignas(4) uint8_t setup_buf_[8];
     alignas(4) uint8_t ep0_buf_[EP0_SIZE];
-    alignas(4) uint8_t ep_rx_buf_[MAX_EP][64];
+    alignas(4) uint8_t ep_rx_buf_[MAX_EP][256];  // 256 for isochronous audio (max 192 bytes)
+
+    // OUT endpoint configuration cache (for re-enabling after XFRC)
+    std::array<uint16_t, MAX_EP> out_ep_mps_{};
+    std::array<TransferType, MAX_EP> out_ep_type_{};
 
 public:
     void init() {
@@ -296,42 +304,63 @@ public:
         uint32_t type = transfer_type_to_hw(config.type);
 
         if (config.direction == Direction::In) {
-            Regs::reg(Regs::DIEPCTL(ep)) = otg::DEPCTL_MPSIZ(config.max_packet_size) |
-                                           otg::DEPCTL_USBAEP |
-                                           otg::DEPCTL_EPTYP(type) |
-                                           otg::DEPCTL_TXFNUM(ep) |
-                                           otg::DEPCTL_SD0PID;
+            uint32_t diepctl = otg::DEPCTL_MPSIZ(config.max_packet_size) |
+                               otg::DEPCTL_EPTYP(type) |
+                               otg::DEPCTL_TXFNUM(ep) |
+                               otg::DEPCTL_SD0PID |
+                               otg::DEPCTL_USBAEP;
+            Regs::reg(Regs::DIEPCTL(ep)) = diepctl;
             Regs::reg(Regs::DAINTMSK) |= (1U << ep);
         } else {
+            // Cache OUT endpoint configuration for re-enabling
+            out_ep_mps_[ep] = config.max_packet_size;
+            out_ep_type_[ep] = config.type;
+
+            Regs::reg(Regs::DAINTMSK) |= (1U << (ep + 16));
             Regs::reg(Regs::DOEPCTL(ep)) = otg::DEPCTL_MPSIZ(config.max_packet_size) |
-                                           otg::DEPCTL_USBAEP |
                                            otg::DEPCTL_EPTYP(type) |
                                            otg::DEPCTL_SD0PID |
-                                           otg::DEPCTL_EPENA |
-                                           otg::DEPCTL_CNAK;
+                                           otg::DEPCTL_USBAEP;
+
+            // Setup transfer size
             Regs::reg(Regs::DOEPTSIZ(ep)) = (1U << 19) | config.max_packet_size;
-            Regs::reg(Regs::DAINTMSK) |= (1U << (ep + 16));
+
+            // Enable endpoint
+            Regs::reg(Regs::DOEPCTL(ep)) |= otg::DEPCTL_CNAK | otg::DEPCTL_EPENA;
         }
     }
 
     void ep_write(uint8_t ep, const uint8_t* data, uint16_t len) {
         constexpr uint16_t mps = 64;
 
-        // Set transfer size
-        if (len == 0) {
-            Regs::reg(Regs::DIEPTSIZ(ep)) = (1U << 19);  // PKTCNT=1, XFRSIZ=0
-        } else {
-            uint16_t pktcnt = (len + mps - 1) / mps;
-            Regs::reg(Regs::DIEPTSIZ(ep)) = (static_cast<uint32_t>(pktcnt) << 19) | len;
-        }
+        // Check if endpoint is isochronous (EPTYP bits 19:18 = 01)
+        bool is_iso = ((Regs::reg(Regs::DIEPCTL(ep)) >> 18) & 0x3) == otg::EPTYP_ISOCHRONOUS;
+
+        // Setup transfer size
+        uint16_t pktcnt = len == 0 ? 1 : (len + mps - 1) / mps;
+        Regs::reg(Regs::DIEPTSIZ(ep)) = (static_cast<uint32_t>(pktcnt) << 19) | len;
 
         // Enable endpoint
         Regs::reg(Regs::DIEPCTL(ep)) |= otg::DEPCTL_CNAK | otg::DEPCTL_EPENA;
 
+        // ISO: set frame parity based on current SOF frame number (STM32Cube style)
+        if (is_iso) {
+            if ((Regs::reg(Regs::DSTS) & (1U << 8)) == 0) {
+                Regs::reg(Regs::DIEPCTL(ep)) |= otg::DEPCTL_SODDFRM;  // Odd frame
+            } else {
+                Regs::reg(Regs::DIEPCTL(ep)) |= otg::DEPCTL_SD0PID;   // Even frame
+            }
+        }
+
         // Write to FIFO
-        if (len > 0 && data) {
+        if (len > 0 && data != nullptr) {
             uint32_t words = (len + 3) / 4;
-            while ((Regs::reg(Regs::DTXFSTS(ep)) & 0xFFFF) < words) {}
+
+            // Wait for FIFO space, but skip for ISO (must not block in interrupt context)
+            if (!is_iso) {
+                uint32_t timeout = 10000;
+                while ((Regs::reg(Regs::DTXFSTS(ep)) & 0xFFFF) < words && --timeout > 0) {}
+            }
 
             volatile uint32_t& fifo_reg = Regs::fifo(ep);
             const uint32_t* src = reinterpret_cast<const uint32_t*>(data);
@@ -474,9 +503,28 @@ private:
                 if (epints & otg::DEPINT_XFRC) {
                     Regs::reg(Regs::DOEPINT(ep)) = otg::DEPINT_XFRC;
                     if (ep != 0) {
-                        // Re-enable OUT endpoint
-                        Regs::reg(Regs::DOEPTSIZ(ep)) = (1U << 19) | 64;
-                        Regs::reg(Regs::DOEPCTL(ep)) |= otg::DEPCTL_EPENA | otg::DEPCTL_CNAK;
+                        // Re-enable OUT endpoint (STM32Cube USB_EPStartXfer compatible)
+                        uint16_t mps = out_ep_mps_[ep];
+                        if (mps == 0) mps = 64;
+
+                        // Clear and set DOEPTSIZ (STM32Cube style)
+                        // XFRSIZ mask: 0x7FFFF (bits 0-18)
+                        // PKTCNT mask: 0x3FF << 19 (bits 19-28)
+                        Regs::reg(Regs::DOEPTSIZ(ep)) &= ~(0x7FFFFU);         // Clear XFRSIZ
+                        Regs::reg(Regs::DOEPTSIZ(ep)) &= ~(0x3FFU << 19);     // Clear PKTCNT
+                        Regs::reg(Regs::DOEPTSIZ(ep)) |= (1U << 19) | mps;    // PKTCNT=1, XFRSIZ=mps
+
+                        // For isochronous: set frame parity (STM32Cube compatible)
+                        if (out_ep_type_[ep] == TransferType::Isochronous) {
+                            if ((Regs::reg(Regs::DSTS) & otg::DSTS_FNSOF_ODD) == 0) {
+                                Regs::reg(Regs::DOEPCTL(ep)) |= otg::DEPCTL_SODDFRM;
+                            } else {
+                                Regs::reg(Regs::DOEPCTL(ep)) |= otg::DEPCTL_SD0PID;
+                            }
+                        }
+
+                        // EP enable (separate write as per STM32Cube)
+                        Regs::reg(Regs::DOEPCTL(ep)) |= otg::DEPCTL_CNAK | otg::DEPCTL_EPENA;
                     }
                 }
 
@@ -506,6 +554,7 @@ private:
     void configure_ep0_out() {
         if (Regs::reg(Regs::DOEPCTL(0)) & otg::DEPCTL_EPENA) return;
         Regs::reg(Regs::DOEPTSIZ(0)) = (1U << 19) | (3U * 8U) | (3U << 29);
+        Regs::reg(Regs::DOEPCTL(0)) |= otg::DEPCTL_EPENA | otg::DEPCTL_CNAK;
     }
 
     void read_packet(uint8_t* buf, uint16_t len) {
@@ -553,7 +602,9 @@ private:
     }
 
     static void delay(uint32_t count) {
-        for (volatile uint32_t i = 0; i < count; ++i) {}
+        for (uint32_t i = 0; i < count; ++i) {
+            asm volatile("" ::: "memory");
+        }
     }
 
     static constexpr uint32_t transfer_type_to_hw(TransferType type) {

@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <cstring>
 #include <span>
-#include <functional>
+#include <array>
 #include "types.hh"
 #include "hal.hh"
 
@@ -72,6 +72,7 @@ private:
 
     // State
     bool configured_ = false;
+    std::array<uint8_t, 4> alt_settings_{};  // Alternate setting per interface
 
     // EP0 buffer for responses
     alignas(4) uint8_t ep0_buf_[EP0_SIZE];
@@ -89,14 +90,19 @@ public:
 
     /// Initialize the USB device
     void init() {
-        // Wire up HAL callbacks
-        hal_.callbacks.on_reset = [this]() { handle_reset(); };
-        hal_.callbacks.on_setup = [this](const SetupPacket& s) { handle_setup(s); };
-        hal_.callbacks.on_ep0_rx = [this](const uint8_t* d, uint16_t l) {
-            handle_ep0_rx(d, l);
+        // Wire up HAL callbacks with static trampolines
+        hal_.callbacks.context = this;
+        hal_.callbacks.on_reset = [](void* ctx) {
+            static_cast<Device*>(ctx)->handle_reset();
         };
-        hal_.callbacks.on_rx = [this](uint8_t ep, const uint8_t* d, uint16_t l) {
-            class_.on_rx(ep, std::span<const uint8_t>(d, l));
+        hal_.callbacks.on_setup = [](void* ctx, const SetupPacket& s) {
+            static_cast<Device*>(ctx)->handle_setup(s);
+        };
+        hal_.callbacks.on_ep0_rx = [](void* ctx, const uint8_t* d, uint16_t l) {
+            static_cast<Device*>(ctx)->handle_ep0_rx(d, l);
+        };
+        hal_.callbacks.on_rx = [](void* ctx, uint8_t ep, const uint8_t* d, uint16_t l) {
+            static_cast<Device*>(ctx)->class_.on_rx(ep, std::span<const uint8_t>(d, l));
         };
 
         hal_.init();
@@ -161,6 +167,9 @@ private:
 
             case bRequest::SetConfiguration:
                 configured_ = (setup.wValue != 0);
+                if (configured_) {
+                    class_.configure_endpoints(hal_);
+                }
                 class_.on_configured(configured_);
                 send_zlp();
                 break;
@@ -182,12 +191,12 @@ private:
                 break;
 
             case bRequest::GetInterface:
-                ep0_buf_[0] = 0;  // Alternate setting 0
+                ep0_buf_[0] = get_alt_setting(setup.wIndex & 0xFF);
                 send_response(ep0_buf_, 1, setup.wLength);
                 break;
 
             case bRequest::SetInterface:
-                send_zlp();
+                handle_set_interface(setup);
                 break;
 
             default:
@@ -273,6 +282,27 @@ private:
 
     void handle_ep0_rx(const uint8_t* /*data*/, uint16_t /*len*/) {
         // DATA OUT stage - currently not used
+    }
+
+    void handle_set_interface(const SetupPacket& setup) {
+        uint8_t interface = setup.wIndex & 0xFF;
+        uint8_t alt_setting = setup.wValue & 0xFF;
+
+        if (interface < alt_settings_.size()) {
+            alt_settings_[interface] = alt_setting;
+            // Notify class of interface alt setting change
+            if constexpr (requires { class_.set_interface(hal_, interface, alt_setting); }) {
+                class_.set_interface(hal_, interface, alt_setting);
+            }
+        }
+        send_zlp();
+    }
+
+    [[nodiscard]] uint8_t get_alt_setting(uint8_t interface) const {
+        if (interface < alt_settings_.size()) {
+            return alt_settings_[interface];
+        }
+        return 0;
     }
 
     void send_zlp() {
