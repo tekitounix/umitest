@@ -82,6 +82,7 @@ struct GPIO {
 
     void set(uint8_t pin) { reg(BSRR) = 1U << pin; }
     void reset(uint8_t pin) { reg(BSRR) = 1U << (pin + 16); }
+    void toggle(uint8_t pin) { reg(ODR) ^= 1U << pin; }
     bool read(uint8_t pin) const { return (reg(IDR) & (1U << pin)) != 0; }
 
     /// Configure pin as alternate function

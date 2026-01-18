@@ -111,6 +111,13 @@ public:
         hal_.callbacks.on_resume = [](void* ctx) {
             static_cast<Device*>(ctx)->handle_resume();
         };
+        hal_.callbacks.on_sof = [](void* ctx) {
+            auto* dev = static_cast<Device*>(ctx);
+            dev->class_.on_sof(dev->hal_);
+        };
+        hal_.callbacks.on_tx_complete = [](void* ctx, uint8_t ep) {
+            static_cast<Device*>(ctx)->class_.on_tx_complete(ep);
+        };
 
         hal_.init();
     }

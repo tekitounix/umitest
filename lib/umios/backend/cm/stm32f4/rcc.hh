@@ -72,6 +72,7 @@ struct RCC {
     }
 
     static void enable_i2c1() { reg(APB1ENR) |= APB1ENR_I2C1EN; }
+    static void enable_spi2() { reg(APB1ENR) |= APB1ENR_SPI2EN; }
     static void enable_spi3() { reg(APB1ENR) |= APB1ENR_SPI3EN; }
     static void enable_dma1() { reg(AHB1ENR) |= AHB1ENR_DMA1EN; }
     static void enable_usb_otg_fs() { reg(AHB2ENR) |= AHB2ENR_OTGFSEN; }

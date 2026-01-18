@@ -68,6 +68,9 @@ struct HalCallbacks {
     // Suspend/resume
     void (*on_suspend)(void* ctx) = nullptr;
     void (*on_resume)(void* ctx) = nullptr;
+
+    // Start of Frame (for isochronous timing)
+    void (*on_sof)(void* ctx) = nullptr;
 };
 
 // ============================================================================

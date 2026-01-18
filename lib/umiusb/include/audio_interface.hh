@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-// UMI-USB: Professional Audio Interface Class
-// Supports UAC1/UAC2 with Asynchronous/Adaptive/Sync modes
+// UMI-USB: Professional Audio/MIDI Interface Class
+// Supports UAC1/UAC2 with any combination of Audio IN/OUT and MIDI IN/OUT
 #pragma once
 
 #include <cstdint>
@@ -12,44 +12,101 @@
 namespace umiusb {
 
 // ============================================================================
-// USB Audio Interface Class
+// Port Configuration Types
 // ============================================================================
 
-/// Professional USB Audio Interface with full sync mode support
-/// Can be configured as Audio-only, MIDI-only, or Audio+MIDI
-/// Supports both UAC1 (wide compatibility) and UAC2 (high performance)
-template<UacVersion Version = UacVersion::Uac1,
-         bool AudioEnabled = true,
-         uint32_t SampleRate = 48000,
-         uint8_t Channels = 2,
-         uint8_t BitDepth = 16,
-         uint8_t AudioEp = 1,
-         uint8_t FeedbackEp = 2,
-         AudioSyncMode DefaultMode = AudioSyncMode::Async,
-         bool MidiEnabled = false,
-         uint8_t MidiEp = 3,
-         uint16_t MidiPacketSz = 64>
+/// Audio port configuration (for IN or OUT)
+template<uint8_t Channels_, uint8_t BitDepth_, uint32_t SampleRate_, uint8_t Endpoint_>
+struct AudioPort {
+    static constexpr bool ENABLED = true;
+    static constexpr uint8_t CHANNELS = Channels_;
+    static constexpr uint8_t BIT_DEPTH = BitDepth_;
+    static constexpr uint32_t SAMPLE_RATE = SampleRate_;
+    static constexpr uint8_t ENDPOINT = Endpoint_;
+    static constexpr uint16_t BYTES_PER_FRAME = Channels_ * (BitDepth_ / 8);
+    static constexpr uint16_t PACKET_SIZE = ((SampleRate_ / 1000) + 1) * BYTES_PER_FRAME;
+};
+
+/// Disabled audio port
+struct NoAudioPort {
+    static constexpr bool ENABLED = false;
+    static constexpr uint8_t CHANNELS = 0;
+    static constexpr uint8_t BIT_DEPTH = 0;
+    static constexpr uint32_t SAMPLE_RATE = 0;
+    static constexpr uint8_t ENDPOINT = 0;
+    static constexpr uint16_t BYTES_PER_FRAME = 0;
+    static constexpr uint16_t PACKET_SIZE = 0;
+};
+
+/// MIDI port configuration (for IN or OUT)
+template<uint8_t Cables_, uint8_t Endpoint_, uint16_t PacketSize_ = 64>
+struct MidiPort {
+    static constexpr bool ENABLED = true;
+    static constexpr uint8_t CABLES = Cables_;
+    static constexpr uint8_t ENDPOINT = Endpoint_;
+    static constexpr uint16_t PACKET_SIZE = PacketSize_;
+};
+
+/// Disabled MIDI port
+struct NoMidiPort {
+    static constexpr bool ENABLED = false;
+    static constexpr uint8_t CABLES = 0;
+    static constexpr uint8_t ENDPOINT = 0;
+    static constexpr uint16_t PACKET_SIZE = 0;
+};
+
+// Common audio port presets
+using AudioStereo48k = AudioPort<2, 16, 48000, 1>;
+using AudioStereo44k = AudioPort<2, 16, 44100, 1>;
+using AudioStereo96k = AudioPort<2, 24, 96000, 1>;
+using AudioMono48k = AudioPort<1, 16, 48000, 1>;
+
+// ============================================================================
+// USB Audio/MIDI Interface Class
+// ============================================================================
+
+/// Flexible USB Audio/MIDI Interface
+/// Supports any combination of Audio OUT, Audio IN, MIDI OUT, MIDI IN
+template<
+    UacVersion Version = UacVersion::Uac1,
+    typename AudioOut_ = AudioStereo48k,
+    typename AudioIn_ = NoAudioPort,
+    typename MidiOut_ = NoMidiPort,
+    typename MidiIn_ = NoMidiPort,
+    uint8_t FeedbackEp_ = 2
+>
 class AudioInterface {
 public:
-    // Version and configuration
+    // Version
     static constexpr UacVersion UAC_VERSION = Version;
     static constexpr bool IS_UAC2 = (Version == UacVersion::Uac2);
 
-    // Audio configuration
-    static constexpr bool HAS_AUDIO = AudioEnabled;
-    static constexpr uint32_t SAMPLE_RATE = SampleRate;
-    static constexpr uint8_t CHANNELS = Channels;
-    static constexpr uint8_t BIT_DEPTH = BitDepth;
-    static constexpr uint16_t BYTES_PER_FRAME = Channels * (BitDepth / 8);
-    static constexpr uint16_t AUDIO_PACKET_SIZE = HAS_AUDIO ? ((SampleRate / 1000) + 1) * BYTES_PER_FRAME : 0;
-    static constexpr uint8_t EP_AUDIO = AudioEp;
-    static constexpr uint8_t EP_FEEDBACK = FeedbackEp;
-    static constexpr AudioSyncMode DEFAULT_SYNC_MODE = DefaultMode;
+    // Port types
+    using AudioOut = AudioOut_;
+    using AudioIn = AudioIn_;
+    using MidiOut = MidiOut_;
+    using MidiIn = MidiIn_;
 
-    // MIDI configuration
-    static constexpr bool HAS_MIDI = MidiEnabled;
-    static constexpr uint8_t EP_MIDI = MidiEp;
-    static constexpr uint16_t MIDI_PACKET_SIZE = MidiPacketSz;
+    // Feature flags
+    static constexpr bool HAS_AUDIO_OUT = AudioOut::ENABLED;
+    static constexpr bool HAS_AUDIO_IN = AudioIn::ENABLED;
+    static constexpr bool HAS_AUDIO = HAS_AUDIO_OUT || HAS_AUDIO_IN;
+    static constexpr bool HAS_MIDI_OUT = MidiOut::ENABLED;
+    static constexpr bool HAS_MIDI_IN = MidiIn::ENABLED;
+    static constexpr bool HAS_MIDI = HAS_MIDI_OUT || HAS_MIDI_IN;
+
+    // Endpoint assignments
+    static constexpr uint8_t EP_AUDIO_OUT = AudioOut::ENDPOINT;
+    static constexpr uint8_t EP_AUDIO_IN = AudioIn::ENDPOINT;
+    static constexpr uint8_t EP_FEEDBACK = FeedbackEp_;
+    static constexpr uint8_t EP_MIDI_OUT = MidiOut::ENDPOINT;
+    static constexpr uint8_t EP_MIDI_IN = MidiIn::ENDPOINT;
+
+    // Audio OUT configuration (for backward compatibility)
+    static constexpr uint32_t SAMPLE_RATE = HAS_AUDIO_OUT ? AudioOut::SAMPLE_RATE : (HAS_AUDIO_IN ? AudioIn::SAMPLE_RATE : 48000);
+    static constexpr uint8_t CHANNELS = HAS_AUDIO_OUT ? AudioOut::CHANNELS : (HAS_AUDIO_IN ? AudioIn::CHANNELS : 2);
+    static constexpr uint8_t BIT_DEPTH = HAS_AUDIO_OUT ? AudioOut::BIT_DEPTH : (HAS_AUDIO_IN ? AudioIn::BIT_DEPTH : 16);
+    static constexpr uint16_t BYTES_PER_FRAME = CHANNELS * (BIT_DEPTH / 8);
 
     // UAC constants
     static constexpr uint8_t SUBCLASS_AUDIOCONTROL = 0x01;
@@ -61,77 +118,115 @@ public:
     using MidiCallback = void(*)(uint8_t cable, const uint8_t* data, uint8_t len);
     using SysExCallback = void(*)(const uint8_t* data, uint16_t len);
 
-    StatusCallback on_streaming_change = nullptr;
+    StatusCallback on_streaming_change = nullptr;  // Audio OUT streaming state
+    StatusCallback on_audio_in_change = nullptr;   // Audio IN streaming state
+    void (*on_audio_rx)(void) = nullptr;           // Called on each Audio OUT packet
 
     void set_midi_callback(MidiCallback cb) { midi_processor_.on_midi = cb; }
     void set_sysex_callback(SysExCallback cb) { midi_processor_.on_sysex = cb; }
 
 private:
     // ========================================================================
-    // Descriptor Builder
+    // Descriptor Size Calculation
     // ========================================================================
 
-    static constexpr std::size_t calc_descriptor_size(AudioSyncMode mode) {
-        std::size_t size = 9;  // Configuration
+    static constexpr std::size_t calc_descriptor_size() {
+        std::size_t size = 9;  // Configuration descriptor
 
         if constexpr (HAS_AUDIO) {
+            // Audio Control Interface (shared for IN and OUT)
+            size += 9;  // Interface descriptor
+
             if constexpr (IS_UAC2) {
-                // UAC2 Audio Control Interface
-                size += 9;   // Interface (AC)
+                // UAC2 AC Header
                 size += 9;   // AC Header
                 size += 8;   // Clock Source
-                size += 17;  // Input Terminal
-                size += 12;  // Output Terminal
 
-                // UAC2 Audio Streaming Interface
-                size += 9;   // Alt 0
-                size += 9;   // Alt 1
-                size += 16;  // AS General
-                size += 6;   // AS Format Type I
-                size += 7;   // Audio Endpoint
-                size += 8;   // CS Audio Endpoint
-
-                if (mode == AudioSyncMode::Async) {
-                    size += 7;  // Feedback Endpoint
+                if constexpr (HAS_AUDIO_OUT) {
+                    size += 17;  // Input Terminal (USB streaming -> device)
+                    size += 12;  // Output Terminal (device -> speaker)
+                }
+                if constexpr (HAS_AUDIO_IN) {
+                    size += 17;  // Input Terminal (microphone -> device)
+                    size += 12;  // Output Terminal (device -> USB streaming)
                 }
             } else {
-                // UAC1 Audio Control Interface
-                size += 9;   // Interface
-                size += 9;   // AC Header
-                size += 12;  // Input Terminal
-                size += 10;  // Feature Unit (stereo: 7 + 3)
-                size += 9;   // Output Terminal
+                // UAC1 AC Header
+                std::size_t ac_size = 9;  // Header base (8 + bInCollection)
+                if constexpr (HAS_AUDIO_OUT) {
+                    ac_size += 12 + 10 + 9;  // IT + FU + OT
+                }
+                if constexpr (HAS_AUDIO_IN) {
+                    ac_size += 12 + 10 + 9;  // IT + FU + OT
+                }
+                // Add interface count to header
+                uint8_t num_streaming = (HAS_AUDIO_OUT ? 1 : 0) + (HAS_AUDIO_IN ? 1 : 0);
+                ac_size += num_streaming - 1;  // baInterfaceNr array
+                size += ac_size;
+            }
 
-                // UAC1 Audio Streaming Interface
-                size += 9;   // Alt 0
-                size += 9;   // Alt 1
-                size += 7;   // AS General
-                size += 11;  // AS Format Type I
-                size += 9;   // Audio Endpoint
-                size += 7;   // CS Audio Endpoint
+            // Audio Streaming Interfaces
+            if constexpr (HAS_AUDIO_OUT) {
+                size += 9 + 9;  // Alt 0 + Alt 1 interfaces
+                if constexpr (IS_UAC2) {
+                    size += 16 + 6 + 7 + 8;  // AS General + Format + EP + CS EP
+                    size += 7;  // Feedback EP (async)
+                } else {
+                    size += 7 + 11 + 9 + 7;  // AS General + Format + EP + CS EP
+                    size += 9;  // Feedback EP (async)
+                }
+            }
 
-                if (mode == AudioSyncMode::Async) {
-                    size += 9;  // Feedback Endpoint
+            if constexpr (HAS_AUDIO_IN) {
+                size += 9 + 9;  // Alt 0 + Alt 1 interfaces
+                if constexpr (IS_UAC2) {
+                    size += 16 + 6 + 7 + 8;  // AS General + Format + EP + CS EP
+                } else {
+                    size += 7 + 11 + 9 + 7;  // AS General + Format + EP + CS EP
                 }
             }
         }
 
-        // MIDI Streaming interface (same for UAC1 and UAC2)
+        // MIDI Streaming Interface
         if constexpr (HAS_MIDI) {
             size += 9;   // Interface
             size += 7;   // MS Header
-            size += static_cast<std::size_t>(6 * 2);  // IN Jacks
-            size += static_cast<std::size_t>(9 * 2);  // OUT Jacks
-            size += 9 + 5;  // OUT Endpoint + CS
-            size += 9 + 5;  // IN Endpoint + CS
+
+            // Jacks for MIDI OUT (host -> device)
+            if constexpr (HAS_MIDI_OUT) {
+                size += 6;   // IN Jack Embedded
+                size += 6;   // IN Jack External
+                size += 9;   // OUT Jack Embedded
+                size += 9;   // OUT Jack External
+            }
+
+            // Jacks for MIDI IN (device -> host)
+            if constexpr (HAS_MIDI_IN) {
+                size += 6;   // IN Jack Embedded
+                size += 6;   // IN Jack External
+                size += 9;   // OUT Jack Embedded
+                size += 9;   // OUT Jack External
+            }
+
+            // Endpoints
+            if constexpr (HAS_MIDI_OUT) {
+                size += 9 + 5;  // Bulk OUT EP + CS
+            }
+            if constexpr (HAS_MIDI_IN) {
+                size += 9 + 5;  // Bulk IN EP + CS
+            }
         }
 
         return size;
     }
 
-    static constexpr std::size_t MAX_DESC_SIZE = calc_descriptor_size(AudioSyncMode::Async);
+    static constexpr std::size_t MAX_DESC_SIZE = calc_descriptor_size();
 
-    static constexpr auto build_descriptor(AudioSyncMode mode) {
+    // ========================================================================
+    // Descriptor Builder
+    // ========================================================================
+
+    static constexpr auto build_descriptor() {
         std::array<uint8_t, MAX_DESC_SIZE> desc{};
         std::size_t p = 0;
 
@@ -157,353 +252,560 @@ private:
             desc[p++] = (val >> 24) & 0xFF;
         };
 
-        bool has_feedback = HAS_AUDIO && (mode == AudioSyncMode::Async);
-        uint8_t num_audio_eps = has_feedback ? 2 : 1;
-        std::size_t total_size = calc_descriptor_size(mode);
-        uint8_t num_interfaces = (HAS_AUDIO ? 2 : 0) + (HAS_MIDI ? 1 : 0);
-        uint8_t midi_interface = HAS_AUDIO ? 2 : 0;
+        // Interface numbering
+        uint8_t iface_num = 0;
+        uint8_t audio_ctrl_iface = 0;
+        uint8_t audio_out_iface = 0;
+        uint8_t audio_in_iface = 0;
+        uint8_t midi_iface = 0;
+
+        if constexpr (HAS_AUDIO) {
+            audio_ctrl_iface = iface_num++;
+            if constexpr (HAS_AUDIO_OUT) audio_out_iface = iface_num++;
+            if constexpr (HAS_AUDIO_IN) audio_in_iface = iface_num++;
+        }
+        if constexpr (HAS_MIDI) {
+            midi_iface = iface_num++;
+        }
+
+        std::size_t total_size = calc_descriptor_size();
 
         // === Configuration Descriptor ===
         w(9, bDescriptorType::Configuration);
         w16(total_size);
-        w(num_interfaces);
-        w(1);           // bConfigurationValue
-        w(0);           // iConfiguration
-        w(0x80);        // bmAttributes
-        w(100);         // bMaxPower (200mA)
+        w(iface_num);  // bNumInterfaces
+        w(1);          // bConfigurationValue
+        w(0);          // iConfiguration
+        w(0x80);       // bmAttributes (bus powered)
+        w(100);        // bMaxPower (200mA)
 
+        // ================================================================
+        // Audio Control Interface
+        // ================================================================
         if constexpr (HAS_AUDIO) {
+            // Interface descriptor
+            w(9, bDescriptorType::Interface);
+            w(audio_ctrl_iface);
+            w(0);  // bAlternateSetting
+            w(0);  // bNumEndpoints
+            w(bDeviceClass::Audio);
+            w(SUBCLASS_AUDIOCONTROL);
+            w(IS_UAC2 ? uac::uac2::IP_VERSION_02_00 : 0);
+            w(0);  // iInterface
+
             if constexpr (IS_UAC2) {
-                // ============================================================
-                // UAC2 Descriptors
-                // ============================================================
+                // UAC2: Calculate AC header total length
+                constexpr uint16_t ac_total = 9 + 8 +
+                    (HAS_AUDIO_OUT ? (17 + 12) : 0) +
+                    (HAS_AUDIO_IN ? (17 + 12) : 0);
 
-                // Interface 0: Audio Control
-                w(9, bDescriptorType::Interface);
-                w(0);  // bInterfaceNumber
-                w(0);  // bAlternateSetting
-                w(0);  // bNumEndpoints
-                w(bDeviceClass::Audio);
-                w(SUBCLASS_AUDIOCONTROL);
-                w(uac::uac2::IP_VERSION_02_00);  // bInterfaceProtocol
-                w(0);  // iInterface
-
-                // AC Header (UAC2)
-                constexpr uint16_t ac_total = 9 + 8 + 17 + 12;
+                // AC Header
                 w(9, bDescriptorType::CsInterface, uac::ac::HEADER);
                 w16(0x0200);  // bcdADC = 2.0
-                w(uac::uac2::FUNCTION_SUBCLASS);  // bCategory
-                w16(ac_total);  // wTotalLength
+                w(uac::uac2::FUNCTION_SUBCLASS);
+                w16(ac_total);
                 w(0x00);  // bmControls
 
-                // Clock Source (UAC2)
+                // Clock Source (shared)
                 w(8, bDescriptorType::CsInterface, uac::ac::CLOCK_SOURCE);
                 w(1);  // bClockID
-                w(uac::uac2::CLOCK_INTERNAL_FIXED);  // bmAttributes
-                w(0x07);  // bmControls (freq r/w, validity r)
+                w(uac::uac2::CLOCK_INTERNAL_FIXED);
+                w(0x07);  // bmControls
                 w(0);  // bAssocTerminal
                 w(0);  // iClockSource
 
-                // Input Terminal (UAC2)
-                w(17, bDescriptorType::CsInterface, uac::ac::INPUT_TERMINAL);
-                w(2);  // bTerminalID
-                w16(uac::TERMINAL_USB_STREAMING);
-                w(0);  // bAssocTerminal
-                w(1);  // bCSourceID (clock)
-                w(CHANNELS);  // bNrChannels
-                w32(CHANNELS == 2 ? 0x00000003 : 0x00000000);  // bmChannelConfig
-                w(0);  // iChannelNames
-                w16(0x0000);  // bmControls
-                w(0);  // iTerminal
+                // Audio OUT path: IT(2) -> OT(3)
+                if constexpr (HAS_AUDIO_OUT) {
+                    // Input Terminal (USB streaming)
+                    w(17, bDescriptorType::CsInterface, uac::ac::INPUT_TERMINAL);
+                    w(2);  // bTerminalID
+                    w16(uac::TERMINAL_USB_STREAMING);
+                    w(0);  // bAssocTerminal
+                    w(1);  // bCSourceID
+                    w(AudioOut::CHANNELS);
+                    w32(AudioOut::CHANNELS == 2 ? 0x00000003 : 0x00000000);
+                    w(0);  // iChannelNames
+                    w16(0x0000);  // bmControls
+                    w(0);  // iTerminal
 
-                // Output Terminal (UAC2)
-                w(12, bDescriptorType::CsInterface, uac::ac::OUTPUT_TERMINAL);
-                w(3);  // bTerminalID
-                w16(uac::TERMINAL_SPEAKER);
-                w(0);  // bAssocTerminal
-                w(2);  // bSourceID
-                w(1);  // bCSourceID (clock)
-                w16(0x0000);  // bmControls
-                w(0);  // iTerminal
+                    // Output Terminal (speaker)
+                    w(12, bDescriptorType::CsInterface, uac::ac::OUTPUT_TERMINAL);
+                    w(3);  // bTerminalID
+                    w16(uac::TERMINAL_SPEAKER);
+                    w(0);  // bAssocTerminal
+                    w(2);  // bSourceID
+                    w(1);  // bCSourceID
+                    w16(0x0000);
+                    w(0);
+                }
 
-                // Interface 1: Audio Streaming (Alt 0 - zero bandwidth)
+                // Audio IN path: IT(4) -> OT(5)
+                if constexpr (HAS_AUDIO_IN) {
+                    // Input Terminal (microphone)
+                    w(17, bDescriptorType::CsInterface, uac::ac::INPUT_TERMINAL);
+                    w(4);  // bTerminalID
+                    w16(uac::TERMINAL_MICROPHONE);
+                    w(0);
+                    w(1);  // bCSourceID
+                    w(AudioIn::CHANNELS);
+                    w32(AudioIn::CHANNELS == 2 ? 0x00000003 : 0x00000000);
+                    w(0);
+                    w16(0x0000);
+                    w(0);
+
+                    // Output Terminal (USB streaming)
+                    w(12, bDescriptorType::CsInterface, uac::ac::OUTPUT_TERMINAL);
+                    w(5);  // bTerminalID
+                    w16(uac::TERMINAL_USB_STREAMING);
+                    w(0);
+                    w(4);  // bSourceID
+                    w(1);  // bCSourceID
+                    w16(0x0000);
+                    w(0);
+                }
+            } else {
+                // UAC1: AC Header with feature units
+                // Entity IDs:
+                //   Audio OUT: IT=1, FU=2, OT=3
+                //   Audio IN:  IT=4, FU=5, OT=6
+                uint8_t num_streaming = (HAS_AUDIO_OUT ? 1 : 0) + (HAS_AUDIO_IN ? 1 : 0);
+                std::size_t ac_total = 8 + num_streaming +
+                    (HAS_AUDIO_OUT ? (12 + 10 + 9) : 0) +
+                    (HAS_AUDIO_IN ? (12 + 10 + 9) : 0);
+
+                // AC Header
+                w(static_cast<uint8_t>(8 + num_streaming), bDescriptorType::CsInterface, uac::ac::HEADER);
+                w16(0x0100);  // bcdADC = 1.0
+                w16(ac_total);
+                w(num_streaming);  // bInCollection
+                if constexpr (HAS_AUDIO_OUT) w(audio_out_iface);
+                if constexpr (HAS_AUDIO_IN) w(audio_in_iface);
+
+                // Audio OUT path: IT(1) -> FU(2) -> OT(3)
+                if constexpr (HAS_AUDIO_OUT) {
+                    // Input Terminal
+                    w(12, bDescriptorType::CsInterface, uac::ac::INPUT_TERMINAL);
+                    w(1);  // bTerminalID
+                    w16(uac::TERMINAL_USB_STREAMING);
+                    w(0);
+                    w(AudioOut::CHANNELS);
+                    w16(AudioOut::CHANNELS == 2 ? 0x0003 : 0x0000);
+                    w(0);
+                    w(0);
+
+                    // Feature Unit
+                    w(10, bDescriptorType::CsInterface, uac::ac::FEATURE_UNIT);
+                    w(2);     // bUnitID
+                    w(1);     // bSourceID
+                    w(1);     // bControlSize
+                    w(0x03);  // bmaControls[0] Master: Mute + Volume
+                    w(0x00);  // bmaControls[1]
+                    w(0x00);  // bmaControls[2]
+                    w(0);
+
+                    // Output Terminal
+                    w(9, bDescriptorType::CsInterface, uac::ac::OUTPUT_TERMINAL);
+                    w(3);  // bTerminalID
+                    w16(uac::TERMINAL_SPEAKER);
+                    w(0);
+                    w(2);  // bSourceID (Feature Unit)
+                    w(0);
+                }
+
+                // Audio IN path: IT(4) -> FU(5) -> OT(6)
+                if constexpr (HAS_AUDIO_IN) {
+                    // Input Terminal (microphone)
+                    w(12, bDescriptorType::CsInterface, uac::ac::INPUT_TERMINAL);
+                    w(4);  // bTerminalID
+                    w16(uac::TERMINAL_MICROPHONE);
+                    w(0);
+                    w(AudioIn::CHANNELS);
+                    w16(AudioIn::CHANNELS == 2 ? 0x0003 : 0x0000);
+                    w(0);
+                    w(0);
+
+                    // Feature Unit
+                    w(10, bDescriptorType::CsInterface, uac::ac::FEATURE_UNIT);
+                    w(5);     // bUnitID
+                    w(4);     // bSourceID
+                    w(1);
+                    w(0x03);  // Mute + Volume
+                    w(0x00);
+                    w(0x00);
+                    w(0);
+
+                    // Output Terminal (USB streaming)
+                    w(9, bDescriptorType::CsInterface, uac::ac::OUTPUT_TERMINAL);
+                    w(6);  // bTerminalID
+                    w16(uac::TERMINAL_USB_STREAMING);
+                    w(0);
+                    w(5);  // bSourceID (Feature Unit)
+                    w(0);
+                }
+            }
+
+            // ============================================================
+            // Audio OUT Streaming Interface
+            // ============================================================
+            if constexpr (HAS_AUDIO_OUT) {
+                // Alt 0 (zero bandwidth)
                 w(9, bDescriptorType::Interface);
-                w(1);
+                w(audio_out_iface);
                 w(0);  // bAlternateSetting
                 w(0);  // bNumEndpoints
                 w(bDeviceClass::Audio);
                 w(SUBCLASS_AUDIOSTREAMING);
-                w(uac::uac2::IP_VERSION_02_00);
+                w(IS_UAC2 ? uac::uac2::IP_VERSION_02_00 : 0);
                 w(0);
 
-                // Interface 1: Audio Streaming (Alt 1 - active)
+                // Alt 1 (active)
                 w(9, bDescriptorType::Interface);
-                w(1);
+                w(audio_out_iface);
                 w(1);  // bAlternateSetting
-                w(num_audio_eps);
+                w(2);  // bNumEndpoints (audio + feedback)
                 w(bDeviceClass::Audio);
                 w(SUBCLASS_AUDIOSTREAMING);
-                w(uac::uac2::IP_VERSION_02_00);
+                w(IS_UAC2 ? uac::uac2::IP_VERSION_02_00 : 0);
                 w(0);
 
-                // AS General (UAC2)
-                w(16, bDescriptorType::CsInterface, uac::as::GENERAL);
-                w(2);  // bTerminalLink
-                w(0x00);  // bmControls
-                w(uac::FORMAT_TYPE_I);  // bFormatType
-                w32(0x00000001);  // bmFormats (PCM)
-                w(CHANNELS);  // bNrChannels
-                w32(CHANNELS == 2 ? 0x00000003 : 0x00000000);  // bmChannelConfig
-                w(0);  // iChannelNames
+                if constexpr (IS_UAC2) {
+                    // AS General
+                    w(16, bDescriptorType::CsInterface, uac::as::GENERAL);
+                    w(2);  // bTerminalLink (IT)
+                    w(0x00);
+                    w(uac::FORMAT_TYPE_I);
+                    w32(0x00000001);  // PCM
+                    w(AudioOut::CHANNELS);
+                    w32(AudioOut::CHANNELS == 2 ? 0x00000003 : 0x00000000);
+                    w(0);
 
-                // AS Format Type I (UAC2)
-                w(6, bDescriptorType::CsInterface, uac::as::FORMAT_TYPE);
-                w(uac::FORMAT_TYPE_I);
-                w(BIT_DEPTH / 8);  // bSubslotSize
-                w(BIT_DEPTH);  // bBitResolution
+                    // Format Type I
+                    w(6, bDescriptorType::CsInterface, uac::as::FORMAT_TYPE);
+                    w(uac::FORMAT_TYPE_I);
+                    w(AudioOut::BIT_DEPTH / 8);
+                    w(AudioOut::BIT_DEPTH);
 
-                // Audio OUT Endpoint (UAC2)
-                w(7, bDescriptorType::Endpoint);
-                w(EP_AUDIO);
-                w(static_cast<uint8_t>(mode));
-                w16(AUDIO_PACKET_SIZE);
-                w(1);  // bInterval
-                w(0);  // unused
+                    // Audio Endpoint
+                    w(7, bDescriptorType::Endpoint);
+                    w(EP_AUDIO_OUT);
+                    w(static_cast<uint8_t>(AudioSyncMode::Async));
+                    w16(AudioOut::PACKET_SIZE);
+                    w(1);
+                    w(0);
 
-                // CS Audio Endpoint (UAC2)
-                w(8, bDescriptorType::CsEndpoint, uac::as::GENERAL);
-                w(0x00);  // bmAttributes
-                w(0x00);  // bmControls
-                w(0);  // bLockDelayUnits
-                w16(0);  // wLockDelay
+                    // CS Audio Endpoint
+                    w(8, bDescriptorType::CsEndpoint, uac::as::GENERAL);
+                    w(0x00);
+                    w(0x00);
+                    w(0);
+                    w16(0);
 
-                // Feedback Endpoint (UAC2, Async only)
-                if (has_feedback) {
+                    // Feedback Endpoint
                     w(7, bDescriptorType::Endpoint);
                     w(0x80 | EP_FEEDBACK);
                     w(0x11);  // Iso, Feedback
-                    w16(4);   // UAC2: 4 bytes (16.16 format)
-                    w(4);     // bInterval = 2^4 = 16 SOFs
+                    w16(4);   // 4 bytes for UAC2
+                    w(4);     // bInterval
                     w(0);
-                }
-            } else {
-                // ============================================================
-                // UAC1 Descriptors
-                // ============================================================
+                } else {
+                    // UAC1 AS General
+                    w(7, bDescriptorType::CsInterface, uac::as::GENERAL);
+                    w(1);  // bTerminalLink (IT)
+                    w(1);  // bDelay
+                    w16(uac::FORMAT_PCM);
 
-                // Interface 0: Audio Control
-                w(9, bDescriptorType::Interface);
-                w(0);
-                w(0);
-                w(0);
-                w(bDeviceClass::Audio);
-                w(SUBCLASS_AUDIOCONTROL);
-                w(0);
-                w(0);
+                    // Format Type I
+                    w(11, bDescriptorType::CsInterface, uac::as::FORMAT_TYPE);
+                    w(uac::FORMAT_TYPE_I);
+                    w(AudioOut::CHANNELS);
+                    w(AudioOut::BIT_DEPTH / 8);
+                    w(AudioOut::BIT_DEPTH);
+                    w(1);  // bSamFreqType
+                    w24(AudioOut::SAMPLE_RATE);
 
-                // AC Header (UAC1)
-                // Signal path: IT(1) -> FU(2) -> OT(3)
-                constexpr std::size_t ac_total = 9 + 12 + 10 + 9;  // Header + IT + FU + OT = 40
-                w(9, bDescriptorType::CsInterface, uac::ac::HEADER);
-                w16(0x0100);  // bcdADC = 1.0
-                w16(ac_total);
-                w(1);  // bInCollection
-                w(1);  // baInterfaceNr
+                    // Audio Endpoint
+                    w(9, bDescriptorType::Endpoint);
+                    w(EP_AUDIO_OUT);
+                    w(static_cast<uint8_t>(AudioSyncMode::Async));
+                    w16(AudioOut::PACKET_SIZE);
+                    w(1);
+                    w(0);
+                    w(0x80 | EP_FEEDBACK);  // bSynchAddress
 
-                // Input Terminal (UAC1) - ID=1
-                w(12, bDescriptorType::CsInterface, uac::ac::INPUT_TERMINAL);
-                w(1);  // bTerminalID
-                w16(uac::TERMINAL_USB_STREAMING);
-                w(0);  // bAssocTerminal
-                w(CHANNELS);
-                w16(CHANNELS == 2 ? 0x0003 : 0x0000);  // wChannelConfig
-                w(0);  // iChannelNames
-                w(0);  // iTerminal
+                    // CS Audio Endpoint
+                    w(7, bDescriptorType::CsEndpoint, uac::as::GENERAL);
+                    w(0x00);
+                    w(0);
+                    w16(0);
 
-                // Feature Unit (UAC1) - ID=2, Source=IT(1)
-                // bLength = 7 + (ch+1) * bControlSize = 7 + 3*1 = 10
-                w(10, bDescriptorType::CsInterface, uac::ac::FEATURE_UNIT);
-                w(2);     // bUnitID
-                w(1);     // bSourceID (Input Terminal)
-                w(1);     // bControlSize
-                w(0x03);  // bmaControls[0] Master: Mute + Volume
-                w(0x00);  // bmaControls[1] Ch1: none
-                w(0x00);  // bmaControls[2] Ch2: none
-                w(0);     // iFeature
-
-                // Output Terminal (UAC1) - ID=3, Source=FU(2)
-                w(9, bDescriptorType::CsInterface, uac::ac::OUTPUT_TERMINAL);
-                w(3);  // bTerminalID
-                w16(uac::TERMINAL_SPEAKER);
-                w(0);  // bAssocTerminal
-                w(2);  // bSourceID (Feature Unit)
-                w(0);  // iTerminal
-
-                // Interface 1: Audio Streaming (Alt 0)
-                w(9, bDescriptorType::Interface);
-                w(1);
-                w(0);
-                w(0);
-                w(bDeviceClass::Audio);
-                w(SUBCLASS_AUDIOSTREAMING);
-                w(0);
-                w(0);
-
-                // Interface 1: Audio Streaming (Alt 1)
-                w(9, bDescriptorType::Interface);
-                w(1);
-                w(1);
-                w(num_audio_eps);
-                w(bDeviceClass::Audio);
-                w(SUBCLASS_AUDIOSTREAMING);
-                w(0);
-                w(0);
-
-                // AS General (UAC1)
-                w(7, bDescriptorType::CsInterface, uac::as::GENERAL);
-                w(1);  // bTerminalLink
-                w(1);  // bDelay
-                w16(uac::FORMAT_PCM);
-
-                // AS Format Type I (UAC1)
-                w(11, bDescriptorType::CsInterface, uac::as::FORMAT_TYPE);
-                w(uac::FORMAT_TYPE_I);
-                w(CHANNELS);
-                w(BIT_DEPTH / 8);  // bSubFrameSize
-                w(BIT_DEPTH);  // bBitResolution
-                w(1);  // bSamFreqType (1 discrete frequency)
-                w24(SAMPLE_RATE);
-
-                // Audio OUT Endpoint (UAC1)
-                w(9, bDescriptorType::Endpoint);
-                w(EP_AUDIO);
-                w(static_cast<uint8_t>(mode));
-                w16(AUDIO_PACKET_SIZE);
-                w(1);  // bInterval
-                w(0);  // bRefresh
-                w(has_feedback ? (0x80 | EP_FEEDBACK) : 0);  // bSynchAddress
-
-                // CS Audio Endpoint (UAC1)
-                w(7, bDescriptorType::CsEndpoint, uac::as::GENERAL);
-                w(0x00);  // bmAttributes
-                w(0);  // bLockDelayUnits
-                w16(0);  // wLockDelay
-
-                // Feedback Endpoint (UAC1, Async only)
-                if (has_feedback) {
+                    // Feedback Endpoint
                     w(9, bDescriptorType::Endpoint);
                     w(0x80 | EP_FEEDBACK);
                     w(0x11);  // Iso, Feedback
-                    w16(3);   // UAC1 FS: 3 bytes (10.14 format)
-                    w(1);     // bInterval
-                    w(4);     // bRefresh = 2^4 = 16ms
-                    w(0);     // bSynchAddress
+                    w16(3);   // 3 bytes for UAC1 FS
+                    w(1);
+                    w(4);     // bRefresh = 16ms
+                    w(0);
+                }
+            }
+
+            // ============================================================
+            // Audio IN Streaming Interface
+            // ============================================================
+            if constexpr (HAS_AUDIO_IN) {
+                // Alt 0 (zero bandwidth)
+                w(9, bDescriptorType::Interface);
+                w(audio_in_iface);
+                w(0);
+                w(0);
+                w(bDeviceClass::Audio);
+                w(SUBCLASS_AUDIOSTREAMING);
+                w(IS_UAC2 ? uac::uac2::IP_VERSION_02_00 : 0);
+                w(0);
+
+                // Alt 1 (active)
+                w(9, bDescriptorType::Interface);
+                w(audio_in_iface);
+                w(1);
+                w(1);  // 1 endpoint (no feedback for IN)
+                w(bDeviceClass::Audio);
+                w(SUBCLASS_AUDIOSTREAMING);
+                w(IS_UAC2 ? uac::uac2::IP_VERSION_02_00 : 0);
+                w(0);
+
+                if constexpr (IS_UAC2) {
+                    // AS General
+                    w(16, bDescriptorType::CsInterface, uac::as::GENERAL);
+                    w(5);  // bTerminalLink (OT for IN)
+                    w(0x00);
+                    w(uac::FORMAT_TYPE_I);
+                    w32(0x00000001);
+                    w(AudioIn::CHANNELS);
+                    w32(AudioIn::CHANNELS == 2 ? 0x00000003 : 0x00000000);
+                    w(0);
+
+                    // Format Type I
+                    w(6, bDescriptorType::CsInterface, uac::as::FORMAT_TYPE);
+                    w(uac::FORMAT_TYPE_I);
+                    w(AudioIn::BIT_DEPTH / 8);
+                    w(AudioIn::BIT_DEPTH);
+
+                    // Audio Endpoint (IN)
+                    w(7, bDescriptorType::Endpoint);
+                    w(0x80 | EP_AUDIO_IN);
+                    w(static_cast<uint8_t>(AudioSyncMode::Async));
+                    w16(AudioIn::PACKET_SIZE);
+                    w(1);
+                    w(0);
+
+                    // CS Audio Endpoint
+                    w(8, bDescriptorType::CsEndpoint, uac::as::GENERAL);
+                    w(0x00);
+                    w(0x00);
+                    w(0);
+                    w16(0);
+                } else {
+                    // UAC1 AS General
+                    w(7, bDescriptorType::CsInterface, uac::as::GENERAL);
+                    w(6);  // bTerminalLink (OT)
+                    w(1);
+                    w16(uac::FORMAT_PCM);
+
+                    // Format Type I
+                    w(11, bDescriptorType::CsInterface, uac::as::FORMAT_TYPE);
+                    w(uac::FORMAT_TYPE_I);
+                    w(AudioIn::CHANNELS);
+                    w(AudioIn::BIT_DEPTH / 8);
+                    w(AudioIn::BIT_DEPTH);
+                    w(1);
+                    w24(AudioIn::SAMPLE_RATE);
+
+                    // Audio Endpoint (IN) - Use Synchronous mode for Full Duplex
+                    // Synch to Audio OUT endpoint (share same clock source)
+                    // bmAttributes: Isochronous (01), Synchronous (11 << 2) = 0x0D
+                    w(9, bDescriptorType::Endpoint);
+                    w(0x80 | EP_AUDIO_IN);
+                    w(0x0D);  // bmAttributes: Isochronous, Synchronous
+                    w16(AudioIn::PACKET_SIZE);
+                    w(1);
+                    w(0);
+                    w(EP_AUDIO_OUT);  // bSynchAddress: synch to Audio OUT
+
+                    // CS Audio Endpoint
+                    w(7, bDescriptorType::CsEndpoint, uac::as::GENERAL);
+                    w(0x00);
+                    w(0);
+                    w16(0);
                 }
             }
         }
 
-        // === MIDI Streaming Interface (same for UAC1/UAC2) ===
+        // ================================================================
+        // MIDI Streaming Interface
+        // ================================================================
         if constexpr (HAS_MIDI) {
+            // Calculate MS header total length
+            constexpr uint16_t ms_total = 7 +
+                (HAS_MIDI_OUT ? (6 + 6 + 9 + 9) : 0) +
+                (HAS_MIDI_IN ? (6 + 6 + 9 + 9) : 0) +
+                (HAS_MIDI_OUT ? (9 + 5) : 0) +
+                (HAS_MIDI_IN ? (9 + 5) : 0);
+
+            uint8_t num_midi_eps = (HAS_MIDI_OUT ? 1 : 0) + (HAS_MIDI_IN ? 1 : 0);
+
+            // Interface
             w(9, bDescriptorType::Interface);
-            w(midi_interface);
+            w(midi_iface);
             w(0);
-            w(2);  // bNumEndpoints
+            w(num_midi_eps);
             w(bDeviceClass::Audio);
             w(SUBCLASS_MIDISTREAMING);
             w(0);
             w(0);
 
             // MS Header
-            constexpr uint16_t ms_total = 7 + (6*2) + (9*2) + ((9+5)*2);
             w(7, bDescriptorType::CsInterface, uac::ms::HEADER);
-            w16(0x0100);  // bcdMSC
+            w16(0x0100);
             w16(ms_total);
 
-            // MIDI IN Jack - Embedded
-            w(6, bDescriptorType::CsInterface, uac::ms::MIDI_IN_JACK);
-            w(uac::JACK_EMBEDDED);
-            w(1);  // bJackID
-            w(0);  // iJack
+            // Jack IDs:
+            //   MIDI OUT: IN_EMB=1, IN_EXT=2, OUT_EMB=3, OUT_EXT=4
+            //   MIDI IN:  IN_EMB=5, IN_EXT=6, OUT_EMB=7, OUT_EXT=8
+            if constexpr (HAS_MIDI_OUT) {
+                // IN Jack Embedded (receives from host)
+                w(6, bDescriptorType::CsInterface, uac::ms::MIDI_IN_JACK);
+                w(uac::JACK_EMBEDDED);
+                w(1);  // bJackID
+                w(0);
 
-            // MIDI IN Jack - External
-            w(6, bDescriptorType::CsInterface, uac::ms::MIDI_IN_JACK);
-            w(uac::JACK_EXTERNAL);
-            w(2);  // bJackID
-            w(0);  // iJack
+                // IN Jack External
+                w(6, bDescriptorType::CsInterface, uac::ms::MIDI_IN_JACK);
+                w(uac::JACK_EXTERNAL);
+                w(2);
+                w(0);
 
-            // MIDI OUT Jack - Embedded
-            w(9, bDescriptorType::CsInterface, uac::ms::MIDI_OUT_JACK);
-            w(uac::JACK_EMBEDDED);
-            w(3);  // bJackID
-            w(1);  // bNrInputPins
-            w(2);  // baSourceID
-            w(1);  // baSourcePin
-            w(0);  // iJack
+                // OUT Jack Embedded (connected to external IN)
+                w(9, bDescriptorType::CsInterface, uac::ms::MIDI_OUT_JACK);
+                w(uac::JACK_EMBEDDED);
+                w(3);
+                w(1);  // bNrInputPins
+                w(2);  // baSourceID (external IN)
+                w(1);  // baSourcePin
+                w(0);
 
-            // MIDI OUT Jack - External
-            w(9, bDescriptorType::CsInterface, uac::ms::MIDI_OUT_JACK);
-            w(uac::JACK_EXTERNAL);
-            w(4);  // bJackID
-            w(1);  // bNrInputPins
-            w(1);  // baSourceID
-            w(1);  // baSourcePin
-            w(0);  // iJack
+                // OUT Jack External (connected to embedded IN)
+                w(9, bDescriptorType::CsInterface, uac::ms::MIDI_OUT_JACK);
+                w(uac::JACK_EXTERNAL);
+                w(4);
+                w(1);
+                w(1);  // baSourceID (embedded IN)
+                w(1);
+                w(0);
+            }
 
-            // Bulk OUT Endpoint
-            w(9, bDescriptorType::Endpoint);
-            w(EP_MIDI);
-            w(static_cast<uint8_t>(TransferType::Bulk));
-            w16(MIDI_PACKET_SIZE);
-            w(0);
-            w(0);
-            w(0);
+            if constexpr (HAS_MIDI_IN) {
+                // IN Jack Embedded (receives from device HW)
+                w(6, bDescriptorType::CsInterface, uac::ms::MIDI_IN_JACK);
+                w(uac::JACK_EMBEDDED);
+                w(5);
+                w(0);
 
-            // CS MS Bulk OUT
-            w(5, bDescriptorType::CsEndpoint, uac::ms::GENERAL);
-            w(1);  // bNumEmbMIDIJack
-            w(1);  // baAssocJackID
+                // IN Jack External
+                w(6, bDescriptorType::CsInterface, uac::ms::MIDI_IN_JACK);
+                w(uac::JACK_EXTERNAL);
+                w(6);
+                w(0);
 
-            // Bulk IN Endpoint
-            w(9, bDescriptorType::Endpoint);
-            w(0x80 | EP_MIDI);
-            w(static_cast<uint8_t>(TransferType::Bulk));
-            w16(MIDI_PACKET_SIZE);
-            w(0);
-            w(0);
-            w(0);
+                // OUT Jack Embedded (sends to host)
+                w(9, bDescriptorType::CsInterface, uac::ms::MIDI_OUT_JACK);
+                w(uac::JACK_EMBEDDED);
+                w(7);
+                w(1);
+                w(6);  // From external IN
+                w(1);
+                w(0);
 
-            // CS MS Bulk IN
-            w(5, bDescriptorType::CsEndpoint, uac::ms::GENERAL);
-            w(1);  // bNumEmbMIDIJack
-            w(3);  // baAssocJackID
+                // OUT Jack External
+                w(9, bDescriptorType::CsInterface, uac::ms::MIDI_OUT_JACK);
+                w(uac::JACK_EXTERNAL);
+                w(8);
+                w(1);
+                w(5);  // From embedded IN
+                w(1);
+                w(0);
+            }
+
+            // MIDI OUT Endpoint (host -> device, Bulk OUT)
+            if constexpr (HAS_MIDI_OUT) {
+                w(9, bDescriptorType::Endpoint);
+                w(EP_MIDI_OUT);
+                w(static_cast<uint8_t>(TransferType::Bulk));
+                w16(MidiOut::PACKET_SIZE);
+                w(0);
+                w(0);
+                w(0);
+
+                // CS MS Endpoint
+                w(5, bDescriptorType::CsEndpoint, uac::ms::GENERAL);
+                w(1);  // bNumEmbMIDIJack
+                w(1);  // baAssocJackID (embedded IN jack)
+            }
+
+            // MIDI IN Endpoint (device -> host, Bulk IN)
+            if constexpr (HAS_MIDI_IN) {
+                w(9, bDescriptorType::Endpoint);
+                w(0x80 | EP_MIDI_IN);
+                w(static_cast<uint8_t>(TransferType::Bulk));
+                w16(MidiIn::PACKET_SIZE);
+                w(0);
+                w(0);
+                w(0);
+
+                // CS MS Endpoint
+                w(5, bDescriptorType::CsEndpoint, uac::ms::GENERAL);
+                w(1);
+                w(7);  // baAssocJackID (embedded OUT jack)
+            }
         }
 
         return desc;
     }
 
-    // Async mode only - industry standard for quality audio
-    static constexpr auto descriptor_ = build_descriptor(AudioSyncMode::Async);
+    static constexpr auto descriptor_ = build_descriptor();
 
-    // State (Async mode fixed)
-    bool audio_streaming_ = false;
+    // ========================================================================
+    // State
+    // ========================================================================
+
+    bool audio_out_streaming_ = false;
+    bool audio_in_streaming_ = false;
     bool midi_configured_ = false;
     bool feedback_pending_ = false;
+    bool audio_in_pending_ = false;  // Ready to send next Audio IN packet
 
-    // Feature Unit state (UAC1)
-    bool fu_mute_ = false;
-    // Volume: 1/256 dB units. 0x0000 = 0dB, 0x8100 = -127dB
-    // Initial value: 0dB (maximum)
-    int16_t fu_volume_ = 0;
+    // Feature Unit state (UAC1) - Audio OUT
+    bool fu_out_mute_ = false;
+    int16_t fu_out_volume_ = 0;  // 1/256 dB
 
-    // Pending SET request info (for EP0 data stage)
-    uint8_t pending_set_ctrl_ = 0;  // Control selector (0=none, 1=mute, 2=volume)
-    uint8_t pending_set_len_ = 0;   // Expected data length
+    // Feature Unit state (UAC1) - Audio IN
+    bool fu_in_mute_ = false;
+    int16_t fu_in_volume_ = 0;
+
+    // Pending SET request
+    uint8_t pending_set_entity_ = 0;
+    uint8_t pending_set_ctrl_ = 0;
+    uint8_t pending_set_len_ = 0;
 
     // Audio processing
-    AudioRingBuffer<256, CHANNELS> ring_buffer_;
+    AudioRingBuffer<256, HAS_AUDIO_OUT ? AudioOut::CHANNELS : 2> out_ring_buffer_;
+    AudioRingBuffer<256, HAS_AUDIO_IN ? AudioIn::CHANNELS : 2> in_ring_buffer_;
     FeedbackCalculator<Version> feedback_calc_;
     PllRateController pll_controller_;
     MidiProcessor midi_processor_;
+
+    // Interface numbers (runtime, matches descriptor)
+    static constexpr uint8_t audio_out_iface_num_ = HAS_AUDIO ? 1 : 0;
+    static constexpr uint8_t audio_in_iface_num_ = HAS_AUDIO ? (HAS_AUDIO_OUT ? 2 : 1) : 0;
 
 public:
     // ========================================================================
@@ -511,15 +813,23 @@ public:
     // ========================================================================
 
     AudioInterface() {
-        feedback_calc_.reset(SAMPLE_RATE);
+        if constexpr (HAS_AUDIO_OUT) {
+            feedback_calc_.reset(AudioOut::SAMPLE_RATE);
+        }
         pll_controller_.reset();
     }
 
     void reset() {
-        ring_buffer_.reset();
-        feedback_calc_.reset(SAMPLE_RATE);
+        if constexpr (HAS_AUDIO_OUT) {
+            out_ring_buffer_.reset();
+            feedback_calc_.reset(AudioOut::SAMPLE_RATE);
+        }
+        if constexpr (HAS_AUDIO_IN) {
+            in_ring_buffer_.reset();
+        }
         pll_controller_.reset();
-        audio_streaming_ = false;
+        audio_out_streaming_ = false;
+        audio_in_streaming_ = false;
         midi_configured_ = false;
         feedback_pending_ = false;
     }
@@ -529,119 +839,136 @@ public:
     // ========================================================================
 
     [[nodiscard]] std::span<const uint8_t> config_descriptor() const {
-        constexpr std::size_t size = calc_descriptor_size(AudioSyncMode::Async);
-        return {descriptor_.data(), size};
+        return {descriptor_.data(), calc_descriptor_size()};
     }
 
     void on_configured(bool configured) {
         if (!configured) {
-            audio_streaming_ = false;
+            audio_out_streaming_ = false;
+            audio_in_streaming_ = false;
             midi_configured_ = false;
             feedback_pending_ = false;
-            if (on_streaming_change) {
-                on_streaming_change(false);
-            }
+            audio_in_pending_ = false;
+            if (on_streaming_change) on_streaming_change(false);
+            if (on_audio_in_change) on_audio_in_change(false);
         }
     }
 
     template<typename HalT>
     void configure_endpoints(HalT& hal) {
-        if constexpr (HAS_MIDI) {
-            hal.ep_configure({EP_MIDI, Direction::Out, TransferType::Bulk, MIDI_PACKET_SIZE});
-            hal.ep_configure({EP_MIDI, Direction::In, TransferType::Bulk, MIDI_PACKET_SIZE});
-            midi_configured_ = true;
+        if constexpr (HAS_MIDI_OUT) {
+            hal.ep_configure({EP_MIDI_OUT, Direction::Out, TransferType::Bulk, MidiOut::PACKET_SIZE});
         }
+        if constexpr (HAS_MIDI_IN) {
+            hal.ep_configure({EP_MIDI_IN, Direction::In, TransferType::Bulk, MidiIn::PACKET_SIZE});
+        }
+        midi_configured_ = HAS_MIDI;
     }
 
     template<typename HalT>
     void set_interface(HalT& hal, uint8_t interface, uint8_t alt_setting) {
-        if constexpr (!HAS_AUDIO) {
-            (void)hal; (void)interface; (void)alt_setting;
-            return;
-        } else {
-            if (interface != 1) return;
+        // Audio OUT streaming interface
+        if constexpr (HAS_AUDIO_OUT) {
+            if (interface == audio_out_iface_num_) {
+                bool was_streaming = audio_out_streaming_;
 
-            bool was_streaming = audio_streaming_;
+                if (alt_setting == 1) {
+                    hal.ep_configure({EP_AUDIO_OUT, Direction::Out,
+                                     TransferType::Isochronous, AudioOut::PACKET_SIZE});
 
-            if (alt_setting == 1) {
-                hal.ep_configure({EP_AUDIO, Direction::Out,
-                                 TransferType::Isochronous, AUDIO_PACKET_SIZE});
+                    constexpr uint16_t fb_size = IS_UAC2 ? 4 : 3;
+                    hal.ep_configure({EP_FEEDBACK, Direction::In,
+                                     TransferType::Isochronous, fb_size});
+                    feedback_pending_ = true;
 
-                // Async mode: always configure feedback endpoint
-                constexpr uint16_t fb_size = IS_UAC2 ? 4 : 3;
-                hal.ep_configure({EP_FEEDBACK, Direction::In,
-                                 TransferType::Isochronous, fb_size});
-                feedback_pending_ = true;
+                    audio_out_streaming_ = true;
+                    out_ring_buffer_.reset();
+                    feedback_calc_.reset(AudioOut::SAMPLE_RATE);
+                    pll_controller_.reset();
+                } else {
+                    audio_out_streaming_ = false;
+                    feedback_pending_ = false;
+                }
 
-                audio_streaming_ = true;
-                ring_buffer_.reset();
-                feedback_calc_.reset(SAMPLE_RATE);
-                pll_controller_.reset();
-            } else {
-                audio_streaming_ = false;
-                feedback_pending_ = false;
-            }
-
-            if (was_streaming != audio_streaming_ && on_streaming_change) {
-                on_streaming_change(audio_streaming_);
+                if (was_streaming != audio_out_streaming_ && on_streaming_change) {
+                    on_streaming_change(audio_out_streaming_);
+                }
+                return;
             }
         }
+
+        // Audio IN streaming interface
+        if constexpr (HAS_AUDIO_IN) {
+            if (interface == audio_in_iface_num_) {
+                bool was_streaming = audio_in_streaming_;
+
+                if (alt_setting == 1) {
+                    hal.ep_configure({EP_AUDIO_IN, Direction::In,
+                                     TransferType::Isochronous, AudioIn::PACKET_SIZE});
+                    audio_in_streaming_ = true;
+                    audio_in_pending_ = true;  // Ready to send first packet
+                    in_ring_buffer_.reset();
+                } else {
+                    audio_in_streaming_ = false;
+                    audio_in_pending_ = false;
+                }
+
+                if (was_streaming != audio_in_streaming_ && on_audio_in_change) {
+                    on_audio_in_change(audio_in_streaming_);
+                }
+                return;
+            }
+        }
+
+        (void)hal; (void)interface; (void)alt_setting;
     }
 
+    // ========================================================================
+    // Class Request Handling
+    // ========================================================================
+
     bool handle_request(const SetupPacket& setup, std::span<uint8_t>& response) {
+        // UAC2 Clock Source requests
         if constexpr (IS_UAC2 && HAS_AUDIO) {
-            // UAC2 Clock Source requests
-            if ((setup.bmRequestType & 0x1F) == 0x01) {  // Interface request
+            if ((setup.bmRequestType & 0x1F) == 0x01) {
                 uint8_t ctrl = setup.wValue >> 8;
                 uint8_t entity = setup.wIndex >> 8;
 
                 if (entity == 1) {  // Clock Source
-                    if (ctrl == 0x01) {  // CUR - Sampling Frequency
-                        if (setup.bRequest == 0x01) {  // GET CUR
-                            if (response.size() >= 4) {
-                                response[0] = SAMPLE_RATE & 0xFF;
-                                response[1] = (SAMPLE_RATE >> 8) & 0xFF;
-                                response[2] = (SAMPLE_RATE >> 16) & 0xFF;
-                                response[3] = (SAMPLE_RATE >> 24) & 0xFF;
-                                response = response.subspan(0, 4);
-                                return true;
-                            }
-                        }
-                    } else if (ctrl == 0x02) {  // RANGE
-                        if (setup.bRequest == 0x02) {  // GET RANGE
-                            if (response.size() >= 14) {
-                                // wNumSubRanges = 1
-                                response[0] = 1; response[1] = 0;
-                                // dMIN
-                                response[2] = SAMPLE_RATE & 0xFF;
-                                response[3] = (SAMPLE_RATE >> 8) & 0xFF;
-                                response[4] = (SAMPLE_RATE >> 16) & 0xFF;
-                                response[5] = (SAMPLE_RATE >> 24) & 0xFF;
-                                // dMAX
-                                response[6] = SAMPLE_RATE & 0xFF;
-                                response[7] = (SAMPLE_RATE >> 8) & 0xFF;
-                                response[8] = (SAMPLE_RATE >> 16) & 0xFF;
-                                response[9] = (SAMPLE_RATE >> 24) & 0xFF;
-                                // dRES
-                                response[10] = 0; response[11] = 0;
-                                response[12] = 0; response[13] = 0;
-                                response = response.subspan(0, 14);
-                                return true;
-                            }
-                        }
+                    if (ctrl == 0x01 && setup.bRequest == 0x01) {  // GET CUR freq
+                        uint32_t rate = HAS_AUDIO_OUT ? AudioOut::SAMPLE_RATE : AudioIn::SAMPLE_RATE;
+                        response[0] = rate & 0xFF;
+                        response[1] = (rate >> 8) & 0xFF;
+                        response[2] = (rate >> 16) & 0xFF;
+                        response[3] = (rate >> 24) & 0xFF;
+                        response = response.subspan(0, 4);
+                        return true;
+                    }
+                    if (ctrl == 0x02 && setup.bRequest == 0x02) {  // GET RANGE
+                        uint32_t rate = HAS_AUDIO_OUT ? AudioOut::SAMPLE_RATE : AudioIn::SAMPLE_RATE;
+                        response[0] = 1; response[1] = 0;  // 1 subrange
+                        response[2] = rate & 0xFF;
+                        response[3] = (rate >> 8) & 0xFF;
+                        response[4] = (rate >> 16) & 0xFF;
+                        response[5] = (rate >> 24) & 0xFF;
+                        response[6] = rate & 0xFF;
+                        response[7] = (rate >> 8) & 0xFF;
+                        response[8] = (rate >> 16) & 0xFF;
+                        response[9] = (rate >> 24) & 0xFF;
+                        response[10] = 0; response[11] = 0;
+                        response[12] = 0; response[13] = 0;
+                        response = response.subspan(0, 14);
+                        return true;
                     }
                 }
             }
         }
 
-        // UAC1 Audio Control requests
-        // bmRequestType for UAC1: 0x21/0xA1 (Class + Interface)
+        // UAC1 Feature Unit requests
         if constexpr (!IS_UAC2 && HAS_AUDIO) {
             uint8_t entity = setup.wIndex >> 8;
-            uint8_t ctrl = setup.wValue >> 8;  // Control Selector
+            uint8_t ctrl = setup.wValue >> 8;
 
-            // UAC1 Audio Class Request Codes (Table 5-1)
-            // GET requests have direction bit (0x80) set
             constexpr uint8_t kSetCur = 0x01;
             constexpr uint8_t kGetCur = 0x81;
             constexpr uint8_t kGetMin = 0x82;
@@ -649,75 +976,109 @@ public:
             constexpr uint8_t kGetRes = 0x84;
             bool is_get = (setup.bmRequestType & 0x80) != 0;
 
-            // Feature Unit (entity == 2)
-            if (entity == 2) {
-                if (is_get) {
-                    // Mute control (CS=0x01)
-                    if (ctrl == 0x01) {
-                        if (setup.bRequest == kGetCur) {
-                            response[0] = fu_mute_ ? 1 : 0;
-                            response = response.subspan(0, 1);
+            // Feature Unit for Audio OUT (entity 2)
+            if constexpr (HAS_AUDIO_OUT) {
+                if (entity == 2) {
+                    if (is_get) {
+                        if (ctrl == 0x01) {  // Mute
+                            if (setup.bRequest == kGetCur) {
+                                response[0] = fu_out_mute_ ? 1 : 0;
+                                response = response.subspan(0, 1);
+                                return true;
+                            }
+                            if (setup.bRequest == kGetMin || setup.bRequest == kGetMax || setup.bRequest == kGetRes) {
+                                response[0] = (setup.bRequest == kGetMin) ? 0 : 1;
+                                response = response.subspan(0, 1);
+                                return true;
+                            }
+                        }
+                        if (ctrl == 0x02) {  // Volume
+                            if (setup.bRequest == kGetCur) {
+                                response[0] = fu_out_volume_ & 0xFF;
+                                response[1] = (fu_out_volume_ >> 8) & 0xFF;
+                                response = response.subspan(0, 2);
+                                return true;
+                            }
+                            if (setup.bRequest == kGetMin) {
+                                response[0] = 0x00; response[1] = 0x81;  // -127dB
+                                response = response.subspan(0, 2);
+                                return true;
+                            }
+                            if (setup.bRequest == kGetMax) {
+                                response[0] = 0x00; response[1] = 0x00;  // 0dB
+                                response = response.subspan(0, 2);
+                                return true;
+                            }
+                            if (setup.bRequest == kGetRes) {
+                                response[0] = 0x00; response[1] = 0x01;  // 1dB
+                                response = response.subspan(0, 2);
+                                return true;
+                            }
+                        }
+                    } else {
+                        if (setup.bRequest == kSetCur) {
+                            pending_set_entity_ = 2;
+                            pending_set_ctrl_ = ctrl;
+                            pending_set_len_ = (ctrl == 0x01) ? 1 : 2;
+                            response = response.subspan(0, 0);
                             return true;
                         }
-                        // Mute doesn't have MIN/MAX/RES, but return 0/1/1 if asked
-                        if (setup.bRequest == kGetMin) {
-                            response[0] = 0;
-                            response = response.subspan(0, 1);
-                            return true;
-                        }
-                        if (setup.bRequest == kGetMax) {
-                            response[0] = 1;
-                            response = response.subspan(0, 1);
-                            return true;
-                        }
-                        if (setup.bRequest == kGetRes) {
-                            response[0] = 1;
-                            response = response.subspan(0, 1);
-                            return true;
-                        }
-                    }
-                    // Volume control (CS=0x02)
-                    // USB Audio 1.0: signed 16-bit, 1/256 dB units
-                    // 0x0000 = 0dB, 0x8000 = silence, 0x8001 = -127.9961dB
-                    if (ctrl == 0x02) {
-                        if (setup.bRequest == kGetCur) {
-                            response[0] = fu_volume_ & 0xFF;
-                            response[1] = (fu_volume_ >> 8) & 0xFF;
-                            response = response.subspan(0, 2);
-                            return true;
-                        }
-                        if (setup.bRequest == kGetMin) {
-                            // 0x8100 = -127dB (minimum, avoiding 0x8000 silence marker)
-                            response[0] = 0x00; response[1] = 0x81;
-                            response = response.subspan(0, 2);
-                            return true;
-                        }
-                        if (setup.bRequest == kGetMax) {
-                            // 0x0000 = 0dB
-                            response[0] = 0x00; response[1] = 0x00;
-                            response = response.subspan(0, 2);
-                            return true;
-                        }
-                        if (setup.bRequest == kGetRes) {
-                            // 0x0100 = 1dB resolution
-                            response[0] = 0x00; response[1] = 0x01;
-                            response = response.subspan(0, 2);
-                            return true;
-                        }
-                    }
-                } else {
-                    // SET requests
-                    if (setup.bRequest == kSetCur) {
-                        pending_set_ctrl_ = ctrl;
-                        pending_set_len_ = (ctrl == 0x01) ? 1 : 2;
-                        response = response.subspan(0, 0);  // No response data
-                        return true;
                     }
                 }
             }
 
-            // For other entities (IT=1, OT=3), return STALL is OK
-            // But some hosts may probe all entities, so accept any GET with zeros
+            // Feature Unit for Audio IN (entity 5)
+            if constexpr (HAS_AUDIO_IN) {
+                if (entity == 5) {
+                    if (is_get) {
+                        if (ctrl == 0x01) {
+                            if (setup.bRequest == kGetCur) {
+                                response[0] = fu_in_mute_ ? 1 : 0;
+                                response = response.subspan(0, 1);
+                                return true;
+                            }
+                            if (setup.bRequest == kGetMin || setup.bRequest == kGetMax || setup.bRequest == kGetRes) {
+                                response[0] = (setup.bRequest == kGetMin) ? 0 : 1;
+                                response = response.subspan(0, 1);
+                                return true;
+                            }
+                        }
+                        if (ctrl == 0x02) {
+                            if (setup.bRequest == kGetCur) {
+                                response[0] = fu_in_volume_ & 0xFF;
+                                response[1] = (fu_in_volume_ >> 8) & 0xFF;
+                                response = response.subspan(0, 2);
+                                return true;
+                            }
+                            if (setup.bRequest == kGetMin) {
+                                response[0] = 0x00; response[1] = 0x81;
+                                response = response.subspan(0, 2);
+                                return true;
+                            }
+                            if (setup.bRequest == kGetMax) {
+                                response[0] = 0x00; response[1] = 0x00;
+                                response = response.subspan(0, 2);
+                                return true;
+                            }
+                            if (setup.bRequest == kGetRes) {
+                                response[0] = 0x00; response[1] = 0x01;
+                                response = response.subspan(0, 2);
+                                return true;
+                            }
+                        }
+                    } else {
+                        if (setup.bRequest == kSetCur) {
+                            pending_set_entity_ = 5;
+                            pending_set_ctrl_ = ctrl;
+                            pending_set_len_ = (ctrl == 0x01) ? 1 : 2;
+                            response = response.subspan(0, 0);
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            // Accept other GET requests with zeros
             if (entity != 0 && is_get && setup.wLength > 0) {
                 uint16_t len = setup.wLength;
                 if (len > response.size()) len = static_cast<uint16_t>(response.size());
@@ -725,23 +1086,50 @@ public:
                 response = response.subspan(0, len);
                 return true;
             }
+
+            // Accept any SET request (return empty response = ZLP)
+            if (!is_get) {
+                response = response.subspan(0, 0);
+                return true;
+            }
         }
 
-        (void)setup; (void)response;
-        return false;
+        // Accept any unhandled class request with ZLP/zeros to avoid STALL
+        bool is_get = (setup.bmRequestType & 0x80) != 0;
+        if (is_get && setup.wLength > 0) {
+            uint16_t len = setup.wLength;
+            if (len > response.size()) len = static_cast<uint16_t>(response.size());
+            for (uint16_t i = 0; i < len; ++i) response[i] = 0;
+            response = response.subspan(0, len);
+            return true;
+        }
+        response = response.subspan(0, 0);
+        return true;
     }
 
-    /// Handle EP0 data received (for SET_CUR requests)
     void on_ep0_rx(std::span<const uint8_t> data) {
         if constexpr (!IS_UAC2 && HAS_AUDIO) {
             if (pending_set_ctrl_ != 0 && data.size() >= pending_set_len_) {
-                if (pending_set_ctrl_ == 0x01) {
-                    // Mute control
-                    fu_mute_ = (data[0] != 0);
-                } else if (pending_set_ctrl_ == 0x02 && data.size() >= 2) {
-                    // Volume control
-                    fu_volume_ = static_cast<int16_t>(data[0] | (data[1] << 8));
+                bool* mute_ptr = nullptr;
+                int16_t* vol_ptr = nullptr;
+
+                if (pending_set_entity_ == 2 && HAS_AUDIO_OUT) {
+                    mute_ptr = &fu_out_mute_;
+                    vol_ptr = &fu_out_volume_;
+                } else if (pending_set_entity_ == 5 && HAS_AUDIO_IN) {
+                    mute_ptr = &fu_in_mute_;
+                    vol_ptr = &fu_in_volume_;
                 }
+
+                if (mute_ptr && vol_ptr) {
+                    if (pending_set_ctrl_ == 0x01) {
+                        *mute_ptr = (data[0] != 0);
+                    } else if (pending_set_ctrl_ == 0x02 && data.size() >= 2) {
+                        *vol_ptr = static_cast<int16_t>(data[0] | (data[1] << 8));
+                    }
+                }
+
+                pending_set_entity_ = 0;
                 pending_set_ctrl_ = 0;
                 pending_set_len_ = 0;
             }
@@ -749,15 +1137,16 @@ public:
     }
 
     void on_rx(uint8_t ep, std::span<const uint8_t> data) {
-        if constexpr (HAS_AUDIO) {
-            if (ep == EP_AUDIO && audio_streaming_) {
-                uint16_t frame_count = data.size() / BYTES_PER_FRAME;
-                ring_buffer_.write(reinterpret_cast<const int16_t*>(data.data()), frame_count);
+        if constexpr (HAS_AUDIO_OUT) {
+            if (ep == EP_AUDIO_OUT && audio_out_streaming_) {
+                uint16_t frame_count = data.size() / AudioOut::BYTES_PER_FRAME;
+                out_ring_buffer_.write(reinterpret_cast<const int16_t*>(data.data()), frame_count);
+                if (on_audio_rx) on_audio_rx();
             }
         }
 
-        if constexpr (HAS_MIDI) {
-            if (ep == EP_MIDI) {
+        if constexpr (HAS_MIDI_OUT) {
+            if (ep == EP_MIDI_OUT) {
                 for (std::size_t i = 0; i + 3 < data.size(); i += 4) {
                     midi_processor_.process_packet(data[i], data[i+1], data[i+2], data[i+3]);
                 }
@@ -766,117 +1155,103 @@ public:
     }
 
     // ========================================================================
-    // SOF and Feedback Handling
+    // SOF and Feedback
     // ========================================================================
 
     template<typename HalT>
     void on_sof(HalT& hal) {
-        if constexpr (!HAS_AUDIO) {
-            (void)hal;
-            return;
+        if constexpr (HAS_AUDIO_OUT) {
+            if (audio_out_streaming_) {
+                feedback_calc_.on_sof();
+                // Send feedback if ready
+                if (feedback_pending_) {
+                    auto fb = feedback_calc_.get_feedback_bytes();
+                    hal.ep_write(EP_FEEDBACK, fb.data(), static_cast<uint16_t>(fb.size()));
+                    feedback_pending_ = false;
+                }
+            }
         }
+        // Audio IN: Send synchronized with SOF
+        // Now using Synchronous mode - synched to Audio OUT clock
+        if constexpr (HAS_AUDIO_IN) {
+            if (audio_in_streaming_ && audio_in_pending_) {
+                send_audio_in(hal);
+                audio_in_pending_ = false;
+            }
+        }
+        (void)hal;
+    }
 
-        if (!audio_streaming_) {
-            return;
+    /// Called when TX completes on an endpoint
+    void on_tx_complete(uint8_t ep) {
+        if constexpr (HAS_AUDIO_OUT) {
+            if (ep == EP_FEEDBACK) {
+                feedback_pending_ = true;  // Ready for next transmission
+            }
         }
-
-        feedback_calc_.on_sof();
-        if (feedback_pending_) {
-            auto fb = feedback_calc_.get_feedback_bytes();
-            hal.ep_write(EP_FEEDBACK, fb.data(), fb.size());
+        if constexpr (HAS_AUDIO_IN) {
+            if (ep == EP_AUDIO_IN) {
+                audio_in_pending_ = true;  // Ready for next Audio IN packet
+            }
         }
+        (void)ep;
     }
 
     void on_samples_consumed(uint32_t frame_count) {
-        if constexpr (!HAS_AUDIO) return;
-        feedback_calc_.add_consumed_samples(frame_count);
+        if constexpr (HAS_AUDIO_OUT) {
+            feedback_calc_.add_consumed_samples(frame_count);
+        }
+        (void)frame_count;
     }
 
     // ========================================================================
-    // Audio Buffer Access
+    // Audio OUT Buffer Access
     // ========================================================================
 
     uint32_t read_audio(int16_t* dest, uint32_t frame_count) {
-        uint32_t read = ring_buffer_.read(dest, frame_count);
-
-        // Apply Mute from Feature Unit
-        if (fu_mute_ && read > 0) {
-            __builtin_memset(dest, 0, static_cast<size_t>(read) * BYTES_PER_FRAME);
+        if constexpr (!HAS_AUDIO_OUT) {
+            (void)dest; (void)frame_count;
+            return 0;
+        } else {
+            uint32_t read = out_ring_buffer_.read(dest, frame_count);
+            apply_volume_out(dest, read);
             return read;
         }
-
-        // Apply Volume from Feature Unit
-        // fu_volume_ is in 1/256 dB: 0x0000=0dB, negative values = attenuation
-        // Range: 0 (0dB) to -32512 (0x8100 = -127dB)
-        // macOS sends dB values linearly mapped from slider position
-        // Use proper dB to linear conversion: gain = 10^(dB/20)
-        // But limit the range to -48dB for practical use
-        if (fu_volume_ < 0 && read > 0) {
-            int32_t neg_vol = -static_cast<int32_t>(fu_volume_);
-
-            // Scale: macOS sends 0 to -32512, map to 0 to -48dB range
-            // -48dB = 1/256 amplitude, good practical range
-            // neg_vol / 32512 * 48 * 256 = neg_vol * 48 / 127 in 1/256 dB
-            // Convert to actual dB (1/256 units): neg_vol * 48 / 127
-            int32_t db_256 = (neg_vol * 48) / 127;  // 0 to 12288 (48*256)
-
-            // Below -48dB, treat as mute
-            if (db_256 >= 12288) {
-                __builtin_memset(dest, 0, static_cast<size_t>(read) * BYTES_PER_FRAME);
-                return read;
-            }
-
-            // dB to linear: gain = 10^(-db/20) = 2^(-db/6.0206)
-            // In 1/256 dB: gain = 2^(-db_256 / 1541)
-            // Use 6dB steps (each step halves amplitude)
-            int32_t shift = db_256 / 1541;  // Integer 6dB steps
-            int32_t frac = db_256 % 1541;   // Fractional part
-
-            // Base gain from integer shifts (max shift ~8 for -48dB)
-            int32_t gain = 32768 >> shift;
-            // Linear interpolation for fractional part
-            gain = gain - ((gain * frac) / 3082);  // Smooth transition
-            if (gain < 1) gain = 1;
-
-            uint32_t samples = read * CHANNELS;
-            for (uint32_t i = 0; i < samples; ++i) {
-                int32_t sample = dest[i];
-                sample = (sample * gain) >> 15;
-                dest[i] = static_cast<int16_t>(sample);
-            }
-        }
-
-        return read;
     }
 
-    /// Read audio with ASRC (Asynchronous Sample Rate Conversion)
-    /// Uses cubic hermite interpolation based on buffer level
-    /// Call this instead of read_audio() for automatic drift compensation
     uint32_t read_audio_asrc(int16_t* dest, uint32_t frame_count) {
-        // Calculate rate based on buffer level (PI controller output)
-        int32_t level = ring_buffer_.buffer_level();
-        int32_t ppm = pll_controller_.update(level);
-        uint32_t rate = AudioRingBuffer<256, CHANNELS>::ppm_to_rate_q16(ppm);
+        if constexpr (!HAS_AUDIO_OUT) {
+            (void)dest; (void)frame_count;
+            return 0;
+        } else {
+            int32_t level = out_ring_buffer_.buffer_level();
+            int32_t ppm = pll_controller_.update(level);
+            uint32_t rate = AudioRingBuffer<256, AudioOut::CHANNELS>::ppm_to_rate_q16(ppm);
 
-        uint32_t read = ring_buffer_.read_interpolated(dest, frame_count, rate);
-
-        // Notify feedback calculator
-        feedback_calc_.add_consumed_samples(read);
-
-        // Apply Mute
-        if (fu_mute_ && read > 0) {
-            __builtin_memset(dest, 0, static_cast<size_t>(read) * BYTES_PER_FRAME);
+            uint32_t read = out_ring_buffer_.read_interpolated(dest, frame_count, rate);
+            feedback_calc_.add_consumed_samples(read);
+            apply_volume_out(dest, read);
             return read;
         }
+    }
 
-        // Apply Volume (same as read_audio)
-        if (fu_volume_ < 0 && read > 0) {
-            int32_t neg_vol = -static_cast<int32_t>(fu_volume_);
+private:
+    void apply_volume_out(int16_t* dest, uint32_t read) {
+        if constexpr (!HAS_AUDIO_OUT) return;
+        if (read == 0) return;
+
+        if (fu_out_mute_) {
+            __builtin_memset(dest, 0, static_cast<size_t>(read) * AudioOut::BYTES_PER_FRAME);
+            return;
+        }
+
+        if (fu_out_volume_ < 0) {
+            int32_t neg_vol = -static_cast<int32_t>(fu_out_volume_);
             int32_t db_256 = (neg_vol * 48) / 127;
 
             if (db_256 >= 12288) {
-                __builtin_memset(dest, 0, static_cast<size_t>(read) * BYTES_PER_FRAME);
-                return read;
+                __builtin_memset(dest, 0, static_cast<size_t>(read) * AudioOut::BYTES_PER_FRAME);
+                return;
             }
 
             int32_t shift = db_256 / 1541;
@@ -885,20 +1260,74 @@ public:
             gain = gain - ((gain * frac) / 3082);
             if (gain < 1) gain = 1;
 
-            uint32_t samples = read * CHANNELS;
+            uint32_t samples = read * AudioOut::CHANNELS;
             for (uint32_t i = 0; i < samples; ++i) {
                 int32_t sample = dest[i];
                 sample = (sample * gain) >> 15;
                 dest[i] = static_cast<int16_t>(sample);
             }
         }
-
-        return read;
     }
 
-    /// Get current ASRC rate (Q16.16, 0x10000 = 1.0)
-    [[nodiscard]] uint32_t current_asrc_rate() const {
-        return AudioRingBuffer<256, CHANNELS>::ppm_to_rate_q16(pll_controller_.current_ppm());
+public:
+    // ========================================================================
+    // Audio IN Buffer Access
+    // ========================================================================
+
+    uint32_t write_audio_in(const int16_t* src, uint32_t frame_count) {
+        if constexpr (!HAS_AUDIO_IN) {
+            (void)src; (void)frame_count;
+            return 0;
+        } else {
+            return in_ring_buffer_.write(src, frame_count);
+        }
+    }
+
+    template<typename HalT>
+    void send_audio_in(HalT& hal) {
+        if constexpr (!HAS_AUDIO_IN) {
+            (void)hal;
+            return;
+        } else {
+            if (!audio_in_streaming_) return;
+
+            constexpr uint32_t frames_per_packet = AudioIn::SAMPLE_RATE / 1000;
+            int16_t buf[frames_per_packet * AudioIn::CHANNELS];
+
+            uint32_t read = in_ring_buffer_.read(buf, frames_per_packet);
+
+            // For isochronous IN, we must send data every frame even if buffer is empty
+            // Send silence if no data available
+            if (read < frames_per_packet) {
+                __builtin_memset(buf + (read * AudioIn::CHANNELS), 0,
+                                (frames_per_packet - read) * AudioIn::BYTES_PER_FRAME);
+                read = frames_per_packet;
+            }
+
+            // Apply mute/volume
+            if (fu_in_mute_) {
+                __builtin_memset(buf, 0, read * AudioIn::BYTES_PER_FRAME);
+            } else if (fu_in_volume_ < 0) {
+                // Volume attenuation (same algorithm as OUT)
+                int32_t neg_vol = -static_cast<int32_t>(fu_in_volume_);
+                int32_t db_256 = (neg_vol * 48) / 127;
+                if (db_256 < 12288) {
+                    int32_t shift = db_256 / 1541;
+                    int32_t frac = db_256 % 1541;
+                    int32_t gain = 32768 >> shift;
+                    gain = gain - ((gain * frac) / 3082);
+                    if (gain < 1) { gain = 1; }
+                    for (uint32_t i = 0; i < read * AudioIn::CHANNELS; ++i) {
+                        buf[i] = static_cast<int16_t>((buf[i] * gain) >> 15);
+                    }
+                } else {
+                    __builtin_memset(buf, 0, read * AudioIn::BYTES_PER_FRAME);
+                }
+            }
+
+            hal.ep_write(EP_AUDIO_IN, reinterpret_cast<uint8_t*>(buf),
+                        read * AudioIn::BYTES_PER_FRAME);
+        }
     }
 
     // ========================================================================
@@ -906,16 +1335,18 @@ public:
     // ========================================================================
 
     template<typename HalT>
-    void send_midi(HalT& hal, uint8_t cable, uint8_t status,
-                   uint8_t data1 = 0, uint8_t data2 = 0) {
-        if constexpr (!HAS_MIDI) return;
-
-        uint8_t cin = MidiProcessor::status_to_cin(status);
-        std::array<uint8_t, 4> packet = {
-            static_cast<uint8_t>((cable << 4) | cin),
-            status, data1, data2
-        };
-        hal.ep_write(EP_MIDI, packet.data(), 4);
+    void send_midi(HalT& hal, uint8_t cable, uint8_t status, uint8_t data1 = 0, uint8_t data2 = 0) {
+        if constexpr (!HAS_MIDI_IN) {
+            (void)hal; (void)cable; (void)status; (void)data1; (void)data2;
+            return;
+        } else {
+            uint8_t cin = MidiProcessor::status_to_cin(status);
+            std::array<uint8_t, 4> packet = {
+                static_cast<uint8_t>((cable << 4) | cin),
+                status, data1, data2
+            };
+            hal.ep_write(EP_MIDI_IN, packet.data(), 4);
+        }
     }
 
     template<typename HalT>
@@ -933,61 +1364,79 @@ public:
         send_midi(hal, cable, 0xB0 | (ch & 0x0F), cc & 0x7F, val & 0x7F);
     }
 
-    // Sync mode is fixed to Async (industry standard)
-    [[nodiscard]] static constexpr AudioSyncMode sync_mode() {
-        return AudioSyncMode::Async;
-    }
-
     // ========================================================================
     // Status
     // ========================================================================
 
-    [[nodiscard]] bool is_streaming() const { return audio_streaming_; }
+    [[nodiscard]] bool is_streaming() const { return audio_out_streaming_; }
+    [[nodiscard]] bool is_audio_in_streaming() const { return audio_in_streaming_; }
     [[nodiscard]] bool is_midi_configured() const { return midi_configured_; }
-    [[nodiscard]] bool is_playback_started() const { return ring_buffer_.is_playback_started(); }
-    [[nodiscard]] uint32_t buffered_frames() const { return ring_buffer_.buffered_frames(); }
-    [[nodiscard]] uint32_t underrun_count() const { return ring_buffer_.underrun_count(); }
-    [[nodiscard]] uint32_t overrun_count() const { return ring_buffer_.overrun_count(); }
-    [[nodiscard]] uint32_t current_feedback() const { return feedback_calc_.get_feedback(); }
-    [[nodiscard]] float feedback_rate() const { return feedback_calc_.get_feedback_rate(); }
-    [[nodiscard]] int32_t pll_adjustment_ppm() const { return pll_controller_.current_ppm(); }
 
-    // Feature Unit status (UAC1)
-    [[nodiscard]] bool is_muted() const { return fu_mute_; }
-    [[nodiscard]] int16_t volume_db256() const { return fu_volume_; }  // Volume in 1/256 dB
+    [[nodiscard]] bool is_playback_started() const {
+        if constexpr (HAS_AUDIO_OUT) return out_ring_buffer_.is_playback_started();
+        return false;
+    }
+    [[nodiscard]] uint32_t buffered_frames() const {
+        if constexpr (HAS_AUDIO_OUT) return out_ring_buffer_.buffered_frames();
+        return 0;
+    }
+    [[nodiscard]] uint32_t underrun_count() const {
+        if constexpr (HAS_AUDIO_OUT) return out_ring_buffer_.underrun_count();
+        return 0;
+    }
+    [[nodiscard]] uint32_t overrun_count() const {
+        if constexpr (HAS_AUDIO_OUT) return out_ring_buffer_.overrun_count();
+        return 0;
+    }
+    [[nodiscard]] uint32_t current_feedback() const {
+        if constexpr (HAS_AUDIO_OUT) return feedback_calc_.get_feedback();
+        return 0;
+    }
+    [[nodiscard]] float feedback_rate() const {
+        if constexpr (HAS_AUDIO_OUT) return feedback_calc_.get_feedback_rate();
+        return 0.0f;
+    }
+    [[nodiscard]] int32_t pll_adjustment_ppm() const {
+        return pll_controller_.current_ppm();
+    }
+
+    [[nodiscard]] uint32_t current_asrc_rate() const {
+        if constexpr (HAS_AUDIO_OUT) {
+            return AudioRingBuffer<256, AudioOut::CHANNELS>::ppm_to_rate_q16(pll_controller_.current_ppm());
+        }
+        return 0x10000;
+    }
+
+    [[nodiscard]] bool is_muted() const { return fu_out_mute_; }
+    [[nodiscard]] int16_t volume_db256() const { return fu_out_volume_; }
+
+    [[nodiscard]] static constexpr AudioSyncMode sync_mode() { return AudioSyncMode::Async; }
 };
 
 // ============================================================================
-// Convenience Type Aliases
+// Convenience Type Aliases (backward compatible)
 // ============================================================================
 
-// UAC1 (wide compatibility)
-// Template: Version, AudioEnabled, SampleRate, Channels, BitDepth, AudioEp, FeedbackEp, Mode, MidiEnabled, MidiEp, MidiPacketSz
+// Audio OUT only
+using AudioInterface48kAsync = AudioInterface<UacVersion::Uac1, AudioStereo48k, NoAudioPort, NoMidiPort, NoMidiPort, 2>;
+using AudioInterface44kAsync = AudioInterface<UacVersion::Uac1, AudioStereo44k, NoAudioPort, NoMidiPort, NoMidiPort, 2>;
+using AudioInterface48kAsyncV2 = AudioInterface<UacVersion::Uac2, AudioStereo48k, NoAudioPort, NoMidiPort, NoMidiPort, 2>;
+using AudioInterface96kAsyncV2 = AudioInterface<UacVersion::Uac2, AudioStereo96k, NoAudioPort, NoMidiPort, NoMidiPort, 2>;
 
-/// UAC1 48kHz stereo Async (studio-grade, wide compatibility)
-using AudioInterface48kAsync = AudioInterface<UacVersion::Uac1, true, 48000, 2, 16, 1, 2, AudioSyncMode::Async, false>;
+// Audio OUT + MIDI
+using AudioMidiInterface48k = AudioInterface<UacVersion::Uac1, AudioStereo48k, NoAudioPort, MidiPort<1, 3>, MidiPort<1, 3>, 2>;
+using AudioMidiInterface48kV2 = AudioInterface<UacVersion::Uac2, AudioStereo48k, NoAudioPort, MidiPort<1, 3>, MidiPort<1, 3>, 2>;
 
-/// UAC1 48kHz stereo Async + MIDI
-using AudioMidiInterface48k = AudioInterface<UacVersion::Uac1, true, 48000, 2, 16, 1, 2, AudioSyncMode::Async, true, 3, 64>;
+// MIDI only
+using MidiInterface = AudioInterface<UacVersion::Uac1, NoAudioPort, NoAudioPort, MidiPort<1, 1>, MidiPort<1, 1>, 0>;
+using MidiInterfaceV2 = AudioInterface<UacVersion::Uac2, NoAudioPort, NoAudioPort, MidiPort<1, 1>, MidiPort<1, 1>, 0>;
 
-/// UAC1 44.1kHz stereo Async
-using AudioInterface44kAsync = AudioInterface<UacVersion::Uac1, true, 44100, 2, 16, 1, 2, AudioSyncMode::Async, false>;
+// Audio IN/OUT (full duplex)
+// EP1=Audio OUT, EP2=Feedback, EP3=Audio IN
+using AudioFullDuplex48k = AudioInterface<UacVersion::Uac1, AudioStereo48k, AudioPort<2, 16, 48000, 3>, NoMidiPort, NoMidiPort, 2>;
+using AudioFullDuplex48kV2 = AudioInterface<UacVersion::Uac2, AudioStereo48k, AudioPort<2, 16, 48000, 3>, NoMidiPort, NoMidiPort, 2>;
 
-/// UAC1 MIDI only
-using MidiInterface = AudioInterface<UacVersion::Uac1, false, 48000, 2, 16, 1, 2, AudioSyncMode::Async, true, 1, 64>;
-
-// UAC2 (high performance, modern OS)
-
-/// UAC2 48kHz stereo Async (low latency, Win10+/macOS/Linux)
-using AudioInterface48kAsyncV2 = AudioInterface<UacVersion::Uac2, true, 48000, 2, 16, 1, 2, AudioSyncMode::Async, false>;
-
-/// UAC2 96kHz stereo Async (high sample rate)
-using AudioInterface96kAsyncV2 = AudioInterface<UacVersion::Uac2, true, 96000, 2, 24, 1, 2, AudioSyncMode::Async, false>;
-
-/// UAC2 48kHz stereo Async + MIDI
-using AudioMidiInterface48kV2 = AudioInterface<UacVersion::Uac2, true, 48000, 2, 16, 1, 2, AudioSyncMode::Async, true, 3, 64>;
-
-/// UAC2 MIDI only
-using MidiInterfaceV2 = AudioInterface<UacVersion::Uac2, false, 48000, 2, 16, 1, 2, AudioSyncMode::Async, true, 1, 64>;
+// Audio IN only (microphone)
+using AudioInOnly48k = AudioInterface<UacVersion::Uac1, NoAudioPort, AudioPort<2, 16, 48000, 1>, NoMidiPort, NoMidiPort, 0>;
 
 }  // namespace umiusb

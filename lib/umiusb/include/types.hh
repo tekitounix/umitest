@@ -56,6 +56,7 @@ namespace bDescriptorType {
     inline constexpr uint8_t DeviceQualifier = 0x06;
     inline constexpr uint8_t OtherSpeedConfig = 0x07;
     inline constexpr uint8_t InterfacePower = 0x08;
+    inline constexpr uint8_t InterfaceAssociation = 0x0B;  // IAD
     // Audio class specific
     inline constexpr uint8_t CsInterface = 0x24;
     inline constexpr uint8_t CsEndpoint = 0x25;

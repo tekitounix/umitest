@@ -16,6 +16,7 @@
 #include <umios/backend/cm/stm32f4/i2c.hh>
 #include <umios/backend/cm/stm32f4/i2s.hh>
 #include <umios/backend/cm/stm32f4/cs43l22.hh>
+#include <umios/backend/cm/stm32f4/pdm_mic.hh>
 #include <umios/backend/cm/common/systick.hh>
 #include <umios/backend/cm/common/nvic.hh>
 #include <umios/backend/cm/common/scb.hh>
@@ -50,6 +51,28 @@ int16_t audio_buf0[BUFFER_SIZE * 2];  // Stereo interleaved
 
 __attribute__((section(".dma_buffer")))
 int16_t audio_buf1[BUFFER_SIZE * 2];
+
+// PDM microphone DMA buffers
+// 64 samples at 48kHz = 1.33ms, PDM at 2.048MHz = ~2730 PDM bits = ~171 x 16-bit words
+// Round up to 256 for double buffering headroom
+constexpr uint32_t PDM_BUF_SIZE = 256;
+
+__attribute__((section(".dma_buffer")))
+uint16_t pdm_buf0[PDM_BUF_SIZE];
+
+__attribute__((section(".dma_buffer")))
+uint16_t pdm_buf1[PDM_BUF_SIZE];
+
+// PCM buffer for decimated audio (from PDM)
+// Each 64 PDM words -> ~1 PCM sample (64x decimation)
+// So 256 PDM words -> ~4 PCM samples, but we accumulate over multiple DMA transfers
+constexpr uint32_t PCM_BUF_SIZE = 128;
+int16_t pcm_buf[PCM_BUF_SIZE];
+
+// Resampled buffer (32kHz -> 48kHz)
+// 3:2 ratio means 128 * 3/2 = 192 max
+constexpr uint32_t RESAMPLED_BUF_SIZE = 192;
+int16_t resampled_buf[RESAMPLED_BUF_SIZE];
 
 // ============================================================================
 // USB Descriptors
@@ -87,8 +110,8 @@ CS43L22 codec(i2c1);
 
 // USB stack instances (umiusb) - using AudioInterface class
 umiusb::Stm32FsHal usb_hal;
-// UAC1, AudioEnabled, 48kHz, stereo, 16-bit, EP1=Audio, EP2=Feedback, default Async mode, no MIDI
-umiusb::AudioInterface<umiusb::UacVersion::Uac1, true, 48000, 2, 16, 1, 2, umiusb::AudioSyncMode::Async, false> usb_audio;
+// UAC1, 48kHz stereo Full Duplex (Audio IN + OUT)
+umiusb::AudioFullDuplex48k usb_audio;
 umiusb::Device<umiusb::Stm32FsHal, decltype(usb_audio)> usb_device(
     usb_hal, usb_audio,
     {
@@ -100,6 +123,12 @@ umiusb::Device<umiusb::Stm32FsHal, decltype(usb_audio)> usb_device(
         .serial_idx = 0,
     }
 );
+
+// PDM microphone
+PdmMic pdm_mic;
+DmaPdm dma_pdm;
+CicDecimator cic_decimator;
+Resampler32to48 resampler;
 
 // Synth engine
 umi::synth::PolySynth synth;
@@ -145,6 +174,7 @@ void init_gpio() {
 
     // Enable peripheral clocks before GPIO AF configuration
     RCC::enable_i2c1();
+    RCC::enable_spi2();  // For PDM microphone (I2S2)
     RCC::enable_spi3();
     RCC::enable_dma1();
     RCC::enable_usb_otg_fs();
@@ -167,11 +197,16 @@ void init_gpio() {
     gpio_b.config_af(6, GPIO::AF4, GPIO::SPEED_FAST, GPIO::PUPD_UP, true);
     gpio_b.config_af(9, GPIO::AF4, GPIO::SPEED_FAST, GPIO::PUPD_UP, true);
 
-    // I2S3: PC7 (MCK), PC10 (SCK), PC12 (SD), PA4 (WS)
+    // I2S3 (Audio OUT): PC7 (MCK), PC10 (SCK), PC12 (SD), PA4 (WS)
     gpio_c.config_af(7, GPIO::AF6, GPIO::SPEED_HIGH);   // MCK
     gpio_c.config_af(10, GPIO::AF6, GPIO::SPEED_HIGH);  // SCK
     gpio_c.config_af(12, GPIO::AF6, GPIO::SPEED_HIGH);  // SD
     gpio_a.config_af(4, GPIO::AF6, GPIO::SPEED_HIGH);   // WS
+
+    // I2S2 (PDM Microphone): PB10 (CLK), PC3 (DOUT)
+    // STM32F4-Discovery: MP45DT02 MEMS microphone
+    gpio_b.config_af(10, GPIO::AF5, GPIO::SPEED_HIGH);  // I2S2_CK - Clock to mic
+    gpio_c.config_af(3, GPIO::AF5, GPIO::SPEED_HIGH);   // I2S2_SD - PDM data from mic
 
     // USB OTG FS: PA11 (DM), PA12 (DP)
     gpio_a.config_af(11, GPIO::AF10, GPIO::SPEED_HIGH);
@@ -220,14 +255,60 @@ void init_audio() {
     codec.set_volume(0);  // 0dB
 }
 
+void init_pdm_mic() {
+    // Initialize PDM microphone (I2S2)
+    pdm_mic.init();
+
+    // Initialize CIC decimator and resampler
+    cic_decimator.reset();
+    resampler.reset();
+
+    // Initialize DMA for PDM input (double-buffered)
+    dma_pdm.init(pdm_buf0, pdm_buf1, PDM_BUF_SIZE, pdm_mic.dr_addr());
+
+    // Enable DMA interrupt (priority 5, same as audio)
+    // DMA1_Stream3 = IRQ 14
+    NVIC::set_prio(14, 5);
+    NVIC::enable(14);
+
+    // Start PDM capture
+    pdm_mic.enable_dma();
+    pdm_mic.enable();
+    dma_pdm.enable();
+}
+
 void init_usb() {
     // USB clock already enabled in init_gpio()
 
     // Small delay for USB PHY
     for (int i = 0; i < 10000; ++i) { asm volatile(""); }
 
-    // Set streaming status callback (optional, not used for LED indication)
-    usb_audio.on_streaming_change = nullptr;
+    // Set streaming status callback - Blue LED indicates Audio OUT streaming active
+    usb_audio.on_streaming_change = [](bool streaming) {
+        if (streaming) {
+            gpio_d.set(15);   // Blue LED ON when streaming starts
+        } else {
+            gpio_d.reset(15); // Blue LED OFF when streaming stops
+        }
+    };
+
+    // Set Audio IN streaming callback - Orange LED indicates Audio IN streaming active
+    usb_audio.on_audio_in_change = [](bool streaming) {
+        if (streaming) {
+            gpio_d.set(13);   // Orange LED ON when mic streaming starts
+        } else {
+            gpio_d.reset(13); // Orange LED OFF when mic streaming stops
+        }
+    };
+
+    // Debug: Toggle green LED on each audio packet received
+    usb_audio.on_audio_rx = []() {
+        static uint8_t cnt = 0;
+        if (++cnt >= 48) {  // Toggle every 48 packets (~48ms)
+            cnt = 0;
+            gpio_d.toggle(12);
+        }
+    };
 
     // Set string descriptors
     usb_device.set_strings(usb_config::string_table);
@@ -245,16 +326,8 @@ void init_usb() {
 /// Fill audio buffer from AudioInterface ring buffer
 /// Uses PI+ASRC: Software resampling with cubic hermite interpolation
 void fill_audio_buffer(int16_t* buf, uint32_t frame_count) {
-    uint32_t frames_read = usb_audio.read_audio_asrc(buf, frame_count);
-
-    // Check for underrun
-    if (frames_read < frame_count) {
-        // Underrun occurred - show red LED
-        gpio_d.set(14);
-    } else {
-        // Normal operation - clear red LED
-        gpio_d.reset(14);
-    }
+    usb_audio.read_audio_asrc(buf, frame_count);
+    // Note: Red LED is now used for DMA activity indicator in IRQ handler
 }
 
 #if 0  // Synth + USB mix version (for reference)
@@ -311,6 +384,34 @@ void fill_audio_buffer_synth(int16_t* buf, uint32_t samples) {
 // Interrupt Handlers
 // ============================================================================
 
+extern "C" void DMA1_Stream3_IRQHandler() {
+    // PDM microphone DMA transfer complete
+    if (dma_pdm.transfer_complete()) {
+        dma_pdm.clear_tc();
+
+        // Get the buffer that just completed (not the one currently being filled)
+        uint16_t* pdm_data = (dma_pdm.current_buffer() == 0) ? pdm_buf1 : pdm_buf0;
+
+        // Decimate PDM to PCM (2.048MHz -> 32kHz)
+        uint32_t pcm_count = cic_decimator.process_buffer(pdm_data, PDM_BUF_SIZE, pcm_buf, PCM_BUF_SIZE);
+
+        // Resample 32kHz -> 48kHz
+        if (pcm_count > 0) {
+            uint32_t resampled_count = resampler.process(pcm_buf, pcm_count, resampled_buf);
+
+            // Convert mono to stereo and send to USB Audio IN buffer
+            if (resampled_count > 0 && usb_audio.is_audio_in_streaming()) {
+                int16_t stereo_buf[RESAMPLED_BUF_SIZE * 2];
+                for (uint32_t i = 0; i < resampled_count; ++i) {
+                    stereo_buf[i * 2] = resampled_buf[i];
+                    stereo_buf[i * 2 + 1] = resampled_buf[i];
+                }
+                usb_audio.write_audio_in(stereo_buf, resampled_count);
+            }
+        }
+    }
+}
+
 extern "C" void DMA1_Stream5_IRQHandler() {
     if (dma_i2s.transfer_complete()) {
         dma_i2s.clear_tc();
@@ -321,12 +422,11 @@ extern "C" void DMA1_Stream5_IRQHandler() {
         int16_t* buf = (dma_i2s.current_buffer() == 0) ? audio_buf1 : audio_buf0;
         fill_audio_buffer(buf, BUFFER_SIZE);
 
-        // Activity indication: blink the mode LED briefly off
-        // (Mode LED is already set by update_sync_mode_led)
+        // Activity indication: blink red LED to show DMA is still running
         led_counter = led_counter + 1;
-        if (led_counter >= 100) {
+        if (led_counter >= 750) {  // ~1Hz blink (750 * 64 samples / 48000 = ~1s)
             led_counter = 0;
-            // Brief blink off to show activity
+            gpio_d.toggle(14);  // Red LED toggle
         }
     }
 }
@@ -336,8 +436,7 @@ extern "C" void OTG_FS_IRQHandler() {
 }
 
 extern "C" void SysTick_Handler() {
-    // 1ms tick - call on_sof for feedback calculation in Async mode
-    usb_audio.on_sof(usb_hal);
+    // SOF is now handled by USB OTG interrupt, not SysTick
 }
 
 // ============================================================================
@@ -375,14 +474,17 @@ extern "C" [[noreturn]] void Reset_Handler() {
     // Initialize hardware
     init_gpio();
 
-    // Orange LED on during init
-    gpio_d.set(13);
+    // Green LED on during init
+    gpio_d.set(12);
 
     // Initialize synth
     synth.init(static_cast<float>(SAMPLE_RATE));
 
-    // Initialize audio subsystem
+    // Initialize audio subsystem (Audio OUT to CS43L22 DAC)
     init_audio();
+
+    // Initialize PDM microphone (Audio IN from MP45DT02)
+    init_pdm_mic();
 
     // Initialize USB
     init_usb();
@@ -398,6 +500,35 @@ extern "C" [[noreturn]] void Reset_Handler() {
 
     // Main loop
     while (true) {
+        // Check USER button (PA0) for debug info display
+        if (gpio_a.read(0)) {
+            // Button pressed - show debug counters via LED blink
+            // Turn all LEDs off first
+            gpio_d.reset(12); gpio_d.reset(13); gpio_d.reset(14); gpio_d.reset(15);
+
+            // Blink count: STALL count (red LED)
+            for (uint32_t i = 0; i < usb_hal.dbg_ep0_stall_count_ && i < 20; ++i) {
+                gpio_d.set(14);
+                for (int d = 0; d < 500000; ++d) asm volatile("");
+                gpio_d.reset(14);
+                for (int d = 0; d < 500000; ++d) asm volatile("");
+            }
+
+            // Pause
+            for (int d = 0; d < 2000000; ++d) asm volatile("");
+
+            // Blink count: SETUP count mod 10 (green LED)
+            for (uint32_t i = 0; i < (usb_hal.dbg_setup_count_ % 10); ++i) {
+                gpio_d.set(12);
+                for (int d = 0; d < 500000; ++d) asm volatile("");
+                gpio_d.reset(12);
+                for (int d = 0; d < 500000; ++d) asm volatile("");
+            }
+
+            // Wait for button release
+            while (gpio_a.read(0)) {}
+        }
+
         // Wait for interrupts (saves power)
         CM4::wfi();
     }
@@ -457,7 +588,8 @@ extern "C" void Default_Handler() {
 }
 
 // Vector table - 84 entries total (16 system + 68 external for USB at 67)
-// DMA1_Stream5 = IRQ 16 (position 32 in table = 16 system + 16)
+// DMA1_Stream3 = IRQ 14 (position 30 in table = 16 system + 14) - PDM microphone
+// DMA1_Stream5 = IRQ 16 (position 32 in table = 16 system + 16) - Audio OUT
 // OTG_FS = IRQ 67 (position 83 in table = 16 system + 67)
 __attribute__((section(".isr_vector"), used))
 const void* const g_vector_table[16 + 68] = {
@@ -475,9 +607,13 @@ const void* const g_vector_table[16 + 68] = {
     reinterpret_cast<const void*>(Default_Handler),  // 14: PendSV
     reinterpret_cast<const void*>(SysTick_Handler),  // 15: SysTick
     // External interrupts starting at index 16
-    // IRQ 0-15: (table index 16-31)
+    // IRQ 0-13: (table index 16-29)
     nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    // IRQ 14: DMA1_Stream3 (table index 30)
+    reinterpret_cast<const void*>(DMA1_Stream3_IRQHandler),  // IRQ 14: DMA1_Stream3
+    // IRQ 15: (table index 31)
+    nullptr,
     // IRQ 16-31: (table index 32-47) DMA1_Stream5 = IRQ 16 (table index 32)
     reinterpret_cast<const void*>(DMA1_Stream5_IRQHandler),  // IRQ 16: DMA1_Stream5
     nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
