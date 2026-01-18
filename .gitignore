@@ -21,6 +21,13 @@ examples/**/webhost_sim.js
 # macOS
 .DS_Store
 
+# Build artifacts
+compile_commands.json
+.tmp/
+
+# Library build caches
+lib/**/.build/
+
 # Editor backups
 *~
 *.swp
