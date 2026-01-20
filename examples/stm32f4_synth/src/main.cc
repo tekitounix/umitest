@@ -458,6 +458,14 @@ void init_plli2s() {
     *reinterpret_cast<volatile uint32_t*>(RCC_CR) &= ~(1U << 26);
 
     // Configure: PLLI2SN=258, PLLI2SR=3
+    // PLLI2SCLK = 1MHz × 258 / 3 = 86 MHz
+    //
+    // With MCKOE=1 (master clock output enabled for CS43L22):
+    // Fs = I2SxCLK / [256 × (2×I2SDIV + ODD)]
+    // 48000 ≈ 86MHz / [256 × 7] = 86MHz / 1792 = 47,991 Hz (-0.019%)
+    //
+    // Note: Exact 48kHz requires I2SxCLK = 48000 × 256 × N
+    // N=7: 86.016 MHz (closest achievable with HSE=8MHz)
     *reinterpret_cast<volatile uint32_t*>(RCC_PLLI2SCFGR) =
         (3U << 28) |   // PLLI2SR = 3
         (258U << 6);   // PLLI2SN = 258

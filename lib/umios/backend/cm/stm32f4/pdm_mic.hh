@@ -324,19 +324,16 @@ struct PdmMic {
         // I2S prescaler calculation for ~2.048MHz PDM clock (32kHz output)
         // PLLI2S clock = 86MHz (from main.cc init_plli2s: N=258, R=3)
         //
-        // STM32F4 I2S bit clock formula (no MCLK):
+        // STM32F4 I2S bit clock formula (no MCLK for PDM):
         //   I2S_CK = PLLI2SCLK / (2 * I2SDIV + ODD)
-        //   (HAL uses packetlength but for PDM we care about raw bit clock)
         //
         // For 2.048MHz PDM clock (32kHz x 64 decimation):
-        //   2.048MHz = 86MHz / (2 * I2SDIV + ODD)
-        //   2 * I2SDIV + ODD = 42
         //   With I2SDIV=21, ODD=0: 2*21 + 0 = 42
         //   86MHz / 42 = 2.048MHz ✓
         //
         // CIC 64x decimation: 2.048MHz / 64 = 32kHz PCM output
         // Then resample 32kHz -> 48kHz for USB Audio
-        reg(I2SPR) = 21;  // ~2.048MHz PDM clock for 32kHz output
+        reg(I2SPR) = 21;  // 2.048MHz PDM clock for 32kHz output
     }
 
     void enable() {

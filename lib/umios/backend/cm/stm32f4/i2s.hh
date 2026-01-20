@@ -59,9 +59,9 @@ struct I2S {
             I2SCFGR_DATLEN_16 |
             I2SCFGR_CHLEN_16;
 
-        // I2S prescaler for 48kHz @ PLLI2S = 86MHz
-        // Fs = I2SxCLK / [(16*2)*((2*I2SDIV)+ODD)]
-        // 48000 = 86000000 / (32 * (2*3 + 1)) = 86000000 / 224 ≈ 48kHz
+        // I2S prescaler for ~48kHz @ PLLI2S = 86MHz
+        // With MCKOE=1: Fs = I2SxCLK / [256 × (2×I2SDIV + ODD)]
+        // 86MHz / [256 × (2×3 + 1)] = 86MHz / 1792 = 47,991 Hz
         // I2SDIV = 3, ODD = 1
         reg(I2SPR) = I2SPR_MCKOE | I2SPR_ODD | 3;
     }
