@@ -324,17 +324,31 @@ uint16_t pdm_buf1[PDM_BUF_SIZE];
 constexpr uint32_t PCM_BUF_SIZE = 64;
 int16_t pcm_buf[PCM_BUF_SIZE];
 
-// Synth buffer at 32kHz
-int16_t synth_buf[PCM_BUF_SIZE];
-
-// Resampled buffers (32kHz -> 48kHz)
+// Resampled mic buffer (32kHz -> 48kHz)
 constexpr uint32_t RESAMPLED_BUF_SIZE = 64;
 int16_t resampled_mic_buf[RESAMPLED_BUF_SIZE];
-int16_t resampled_synth_buf[RESAMPLED_BUF_SIZE];
 
-// Stereo buffer for USB Audio IN
+// Stereo buffer for USB Audio IN (mic L + synth R)
 constexpr uint32_t STEREO_BUF_SIZE = 128;
 int16_t stereo_buf[STEREO_BUF_SIZE];
+
+// Ring buffers for async timing between I2S DMA (~1.33ms/64samples) and USB SOF (1ms/48samples)
+// Size: 512 samples = ~10.6ms buffer at 48kHz
+constexpr uint32_t AUDIO_RING_SIZE = 512;
+
+// Mic ring buffer
+int16_t mic_ring_buf[AUDIO_RING_SIZE];
+volatile uint32_t mic_ring_write = 0;
+volatile uint32_t mic_ring_read = 0;
+int16_t mic_last_sample = 0;
+volatile uint32_t mic_underrun_count = 0;
+
+// Synth ring buffer
+int16_t synth_ring_buf[AUDIO_RING_SIZE];
+volatile uint32_t synth_ring_write = 0;
+volatile uint32_t synth_ring_read = 0;
+int16_t synth_last_sample = 0;
+volatile uint32_t synth_underrun_count = 0;
 
 // ============================================================================
 // USB Descriptors
@@ -387,10 +401,9 @@ umiusb::Device<umiusb::Stm32FsHal, decltype(usb_audio)> usb_device(
 PdmMic pdm_mic;
 DmaPdm dma_pdm;
 CicDecimator cic_decimator;
-Resampler32to48 resampler_mic;
-Resampler32to48 resampler_synth;
+Resampler32to48 resampler_mic;    // Mic only, synth runs at native 48kHz
 
-// Synth engine (initialized at 32kHz)
+// Synth engine (initialized at 48kHz - native I2S rate)
 umi::synth::PolySynth synth;
 
 // LED state
@@ -399,7 +412,6 @@ volatile uint32_t led_counter = 0;
 // Debug counters
 volatile uint32_t dbg_pdm_dma_count = 0;
 volatile uint32_t dbg_pdm_pcm_count = 0;
-volatile uint32_t dbg_usb_in_streaming = 0;
 
 // Audio task context (for deferred processing)
 struct AudioContext {
@@ -510,7 +522,18 @@ void init_pdm_mic() {
     pdm_mic.init();
     cic_decimator.reset();
     resampler_mic.reset();
-    resampler_synth.reset();
+
+    // Pre-fill ring buffers with silence to handle initial timing jitter
+    // ~3ms prebuffer = 144 samples at 48kHz
+    constexpr uint32_t PREBUFFER = 144;
+    for (uint32_t i = 0; i < PREBUFFER; ++i) {
+        mic_ring_buf[i] = 0;
+        synth_ring_buf[i] = 0;
+    }
+    mic_ring_write = PREBUFFER;
+    mic_ring_read = 0;
+    synth_ring_write = PREBUFFER;
+    synth_ring_read = 0;
 
     dma_pdm.init(pdm_buf0, pdm_buf1, PDM_BUF_SIZE, pdm_mic.dr_addr());
 
@@ -576,7 +599,28 @@ void init_usb() {
 // ============================================================================
 
 void fill_audio_buffer(int16_t* buf, uint32_t frame_count) {
+    // Fill I2S output from USB Audio OUT
     usb_audio.read_audio_asrc(buf, frame_count);
+    
+    // Process MIDI messages
+    while (auto msg = g_midi_queue.try_pop()) {
+        synth.handle_midi(msg->data, msg->len);
+    }
+    
+    // Process synth at 48kHz and write to ring buffer
+    for (uint32_t i = 0; i < frame_count; ++i) {
+        float synth_sample = synth.process_sample();
+        int32_t synth_s16 = static_cast<int32_t>(synth_sample * 32767.0f);
+        if (synth_s16 > 32767) synth_s16 = 32767;
+        if (synth_s16 < -32768) synth_s16 = -32768;
+        
+        // Write to synth ring buffer
+        uint32_t next = (synth_ring_write + 1) % AUDIO_RING_SIZE;
+        if (next != synth_ring_read) {  // Not full
+            synth_ring_buf[synth_ring_write] = static_cast<int16_t>(synth_s16);
+            synth_ring_write = next;
+        }
+    }
 }
 
 void process_pdm_buffer(uint16_t* pdm_data) {
@@ -586,39 +630,53 @@ void process_pdm_buffer(uint16_t* pdm_data) {
     uint32_t pcm_count = cic_decimator.process_buffer(pdm_data, PDM_BUF_SIZE, pcm_buf, PCM_BUF_SIZE);
     dbg_pdm_pcm_count = pcm_count;
 
-    // Process MIDI messages from queue
-    while (auto msg = g_midi_queue.try_pop()) {
-        synth.handle_midi(msg->data, msg->len);
-    }
+    // Resample mic 32kHz -> 48kHz
+    uint32_t resampled_count = resampler_mic.process(pcm_buf, pcm_count, resampled_mic_buf);
 
-    // Process synth at 32kHz
-    for (uint32_t i = 0; i < pcm_count; ++i) {
-        float synth_sample = synth.process_sample();
-        int32_t synth_s16 = static_cast<int32_t>(synth_sample * 32767.0f);
-        if (synth_s16 > 32767) synth_s16 = 32767;
-        if (synth_s16 < -32768) synth_s16 = -32768;
-        synth_buf[i] = static_cast<int16_t>(synth_s16);
-    }
-
-    // Resample 32kHz -> 48kHz
-    uint32_t resampled_mic_count = resampler_mic.process(pcm_buf, pcm_count, resampled_mic_buf);
-    uint32_t resampled_synth_count = resampler_synth.process(synth_buf, pcm_count, resampled_synth_buf);
-
-    dbg_usb_in_streaming = usb_audio.is_audio_in_streaming() ? 1 : 0;
-
-    // Build stereo buffer: ch1=mic, ch2=synth
-    uint32_t stereo_count = (resampled_mic_count < resampled_synth_count)
-                           ? resampled_mic_count : resampled_synth_count;
-    if (stereo_count > 0 && usb_audio.is_audio_in_streaming()) {
-        for (uint32_t i = 0; i < stereo_count; ++i) {
-            stereo_buf[i * 2] = resampled_mic_buf[i];
-            stereo_buf[i * 2 + 1] = resampled_synth_buf[i];
+    // Write to mic ring buffer
+    for (uint32_t i = 0; i < resampled_count; ++i) {
+        uint32_t next = (mic_ring_write + 1) % AUDIO_RING_SIZE;
+        if (next != mic_ring_read) {  // Not full
+            mic_ring_buf[mic_ring_write] = resampled_mic_buf[i];
+            mic_ring_write = next;
         }
-        usb_audio.write_audio_in(stereo_buf, stereo_count);
     }
 }
 
 }  // namespace
+
+// Called from SysTick (1ms) - matches USB SOF timing
+void send_audio_in_from_rings() {
+    if (!usb_audio.is_audio_in_streaming()) {
+        return;
+    }
+    
+    // USB Audio IN expects ~48 samples per 1ms SOF
+    constexpr uint32_t USB_FRAME_SIZE = 48;
+    
+    for (uint32_t i = 0; i < USB_FRAME_SIZE; ++i) {
+        // Read mic from ring buffer
+        if (mic_ring_read != mic_ring_write) {
+            mic_last_sample = mic_ring_buf[mic_ring_read];
+            mic_ring_read = (mic_ring_read + 1) % AUDIO_RING_SIZE;
+        } else {
+            mic_underrun_count = mic_underrun_count + 1;
+        }
+        
+        // Read synth from ring buffer
+        if (synth_ring_read != synth_ring_write) {
+            synth_last_sample = synth_ring_buf[synth_ring_read];
+            synth_ring_read = (synth_ring_read + 1) % AUDIO_RING_SIZE;
+        } else {
+            synth_underrun_count = synth_underrun_count + 1;
+        }
+        
+        stereo_buf[i * 2] = mic_last_sample;       // L = mic
+        stereo_buf[i * 2 + 1] = synth_last_sample; // R = synth
+    }
+    
+    usb_audio.write_audio_in(stereo_buf, USB_FRAME_SIZE);
+}
 
 // ============================================================================
 // Task Entry Points
@@ -633,10 +691,10 @@ void audio_task_entry(void*) {
         // Wait for audio events (PDM or I2S DMA complete)
         uint32_t events = g_kernel.wait_block(
             g_audio_task_id,
-            Event::PdmReady | Event::I2sReady | Event::MidiReady
+            Event::PdmReady | Event::I2sReady
         );
 
-        // Process PDM (microphone + synth)
+        // Process PDM (microphone only - synth moved to I2S timing)
         if (events & Event::PdmReady) {
             if (g_audio_ctx.pdm_pending && g_audio_ctx.pdm_data) {
                 process_pdm_buffer(g_audio_ctx.pdm_data);
@@ -644,18 +702,11 @@ void audio_task_entry(void*) {
             }
         }
 
-        // Process I2S (audio output)
+        // Process I2S (audio output + synth @ 48kHz + USB IN)
         if (events & Event::I2sReady) {
             if (g_audio_ctx.i2s_pending && g_audio_ctx.i2s_buf) {
                 fill_audio_buffer(g_audio_ctx.i2s_buf, BUFFER_SIZE);
                 g_audio_ctx.i2s_pending = false;
-            }
-        }
-
-        // Process any remaining MIDI messages
-        if (events & Event::MidiReady) {
-            while (auto msg = g_midi_queue.try_pop()) {
-                synth.handle_midi(msg->data, msg->len);
             }
         }
 
@@ -678,8 +729,8 @@ void usb_task_entry(void*) {
 
 /// Main task: User priority, initialization and UI
 void main_task_entry(void*) {
-    // Initialize synth at 32kHz
-    constexpr float SYNTH_RATE = 32000.0f;
+    // Initialize synth at 48kHz (native I2S rate, no resampling needed)
+    constexpr float SYNTH_RATE = 48000.0f;
     synth.init(SYNTH_RATE);
 
     // Initialize audio subsystem
@@ -776,8 +827,10 @@ extern "C" void OTG_FS_IRQHandler() {
 
 extern "C" void SysTick_Handler() {
     // Kernel tick (1ms)
-    // tick() may request a context switch via request_context_switch()
     g_kernel.tick(1000);  // 1ms = 1000us
+    
+    // Send audio IN at 1ms intervals (matches USB SOF timing)
+    send_audio_in_from_rings();
 }
 
 // ============================================================================
