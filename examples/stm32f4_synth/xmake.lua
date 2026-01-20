@@ -1,5 +1,6 @@
--- STM32F4-Discovery Synthesizer
+-- STM32F4-Discovery Synthesizer (umios kernel version)
 -- Uses CS43L22 audio codec (I2S) and USB MIDI
+-- Migrated to umios kernel-based architecture
 
 target("stm32f4_synth")
     set_group("firmware")
@@ -8,6 +9,9 @@ target("stm32f4_synth")
     set_values("embedded.mcu", "stm32f407vg")
     set_values("embedded.linker_script", "examples/stm32f4_synth/linker.ld")
     set_values("embedded.optimize", "size")
+
+    -- umios kernel
+    add_includedirs("$(projectdir)/lib/umios/kernel")
 
     -- Platform includes (Cortex-M backend)
     add_includedirs("$(projectdir)/lib/umios/backend/cm")

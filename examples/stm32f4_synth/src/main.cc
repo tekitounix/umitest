@@ -1,9 +1,14 @@
 // SPDX-License-Identifier: MIT
-// STM32F4-Discovery USB MIDI Synthesizer
+// STM32F4-Discovery USB MIDI Synthesizer (umios kernel version)
+// Migrated from bare-metal to umios kernel-based architecture
 // Uses synth.hh from headless_webhost (unchanged)
 // Uses umiusb for portable USB Device Stack
 
 #include <cstdint>
+
+// umios Kernel
+#include <umi_kernel.hh>
+#include <umi_startup.hh>
 
 // Platform includes
 #include <platform/syscall.hh>
@@ -35,6 +40,261 @@ using namespace umi::stm32;
 using namespace umi::port::arm;
 
 // ============================================================================
+// umios Kernel Configuration
+// ============================================================================
+
+/// Hardware abstraction layer for STM32F4 @ 168MHz
+struct Stm32f4Hw {
+    static constexpr uint32_t CPU_FREQ = 168'000'000;
+    static constexpr uint32_t CYCLES_PER_USEC = CPU_FREQ / 1'000'000;
+    
+    // Timer (using SysTick for now)
+    static void set_timer_absolute(umi::usec target) {
+        (void)target;  // SysTick is periodic, not one-shot
+    }
+    
+    static umi::usec monotonic_time_usecs() {
+        // Use DWT cycle counter for monotonic time
+        static uint64_t base_time = 0;
+        static uint32_t last_cycles = 0;
+        uint32_t now = DWT::cycles();
+        uint32_t delta = now - last_cycles;
+        last_cycles = now;
+        base_time += delta / CYCLES_PER_USEC;
+        return base_time;
+    }
+    
+    // Critical section (disable interrupts)
+    static void enter_critical() { CM4::cpsid_i(); }
+    static void exit_critical() { CM4::cpsie_i(); }
+    
+    // Multi-core (single core on STM32F4)
+    static void trigger_ipi(uint8_t) { }
+    static uint8_t current_core() { return 0; }
+    
+    // Context switch (trigger PendSV)
+    static void request_context_switch();  // Defined after g_task_contexts
+    
+    // FPU context save/restore
+    static void save_fpu() {
+        // Lazy stacking handled by hardware on Cortex-M4F
+    }
+    static void restore_fpu() {
+        // Lazy stacking handled by hardware on Cortex-M4F
+    }
+    
+    // Audio DMA mute
+    static void mute_audio_dma() {
+        // TODO: Stop DMA and mute codec
+    }
+    
+    // Persistent storage (backup RAM)
+    static void write_backup_ram(const void*, size_t) { }
+    static void read_backup_ram(void*, size_t) { }
+    
+    // MPU configuration
+    static void configure_mpu_region(size_t, const void*, size_t, bool, bool) { }
+    
+    // Cache (no cache on Cortex-M4)
+    static void cache_clean(const void*, size_t) { }
+    static void cache_invalidate(void*, size_t) { }
+    static void cache_clean_invalidate(void*, size_t) { }
+    
+    // System
+    static void system_reset() { SCB::reset(); }
+    static void enter_sleep() { CM4::wfi(); }
+    [[noreturn]] static void start_first_task();  // Defined after kernel instance
+    
+    // Watchdog (not implemented)
+    static void watchdog_init(uint32_t) { }
+    static void watchdog_feed() { }
+    
+    // Performance counters
+    static uint32_t cycle_count() { return DWT::cycles(); }
+    static uint32_t cycles_per_usec() { return CYCLES_PER_USEC; }
+};
+
+using HW = umi::Hw<Stm32f4Hw>;
+using Kernel = umi::Kernel<8, 16, HW>;
+
+// Global kernel instance
+Kernel g_kernel;
+
+// Task IDs
+umi::TaskId g_audio_task_id;
+umi::TaskId g_usb_task_id;
+umi::TaskId g_main_task_id;
+
+// Event definitions (for kernel notification)
+namespace Event {
+    constexpr uint32_t PdmReady  = 1 << 0;  // PDM DMA complete
+    constexpr uint32_t I2sReady  = 1 << 1;  // I2S DMA complete
+    constexpr uint32_t UsbReady  = 1 << 2;  // USB interrupt
+    constexpr uint32_t MidiReady = 1 << 3;  // MIDI data available
+}
+
+// MIDI queue (ISR -> Audio task)
+struct MidiMsg {
+    uint8_t data[4];
+    uint8_t len;
+};
+umi::SpscQueue<MidiMsg, 64> g_midi_queue;
+
+// ============================================================================
+// Context Switch Implementation (FreeRTOS-style)
+// ============================================================================
+
+// Task stacks (statically allocated)
+constexpr uint32_t AUDIO_STACK_SIZE = 1024;  // words (4KB)
+constexpr uint32_t USB_STACK_SIZE = 512;     // words (2KB)
+constexpr uint32_t MAIN_STACK_SIZE = 1024;   // words (4KB)
+constexpr uint32_t IDLE_STACK_SIZE = 256;    // words (1KB)
+constexpr uint32_t MAX_TASKS = 8;
+
+__attribute__((aligned(8)))
+uint32_t g_audio_stack[AUDIO_STACK_SIZE];
+
+__attribute__((aligned(8)))
+uint32_t g_usb_stack[USB_STACK_SIZE];
+
+__attribute__((aligned(8)))
+uint32_t g_main_stack[MAIN_STACK_SIZE];
+
+__attribute__((aligned(8)))
+uint32_t g_idle_stack[IDLE_STACK_SIZE];
+
+// Task control block (FreeRTOS-style: stack_ptr is FIRST member)
+// This allows simple pointer arithmetic in assembly
+struct TaskContext {
+    uint32_t* stack_ptr;     // Current stack pointer (PSP) - MUST BE FIRST
+    void (*entry)(void*);    // Entry function
+    void* arg;               // Entry argument
+    bool uses_fpu;           // Task uses FPU
+    bool initialized;        // Has been initialized
+};
+
+TaskContext g_task_contexts[MAX_TASKS] = {};
+
+// Pointer to current task's TCB (for PendSV handler)
+// FreeRTOS calls this pxCurrentTCB
+TaskContext* volatile g_pxCurrentTCB = nullptr;
+
+// Cortex-M4 exception stack frame (hardware pushed)
+// Order: R0, R1, R2, R3, R12, LR, PC, xPSR
+// With FPU: + S0-S15, FPSCR (lazy stacking)
+
+// Initial stack frame for a new task
+// Stack grows downward, so we build from top
+// Supports both FPU and non-FPU tasks
+uint32_t* init_task_stack(uint32_t* stack_top, void (*entry)(void*), void* arg, bool uses_fpu) {
+    // Align stack to 8 bytes
+    stack_top = reinterpret_cast<uint32_t*>(
+        reinterpret_cast<uintptr_t>(stack_top) & ~0x7UL
+    );
+    
+    // Exception return values:
+    // 0xFFFFFFFD = Thread mode, PSP, basic frame (no FPU context)
+    // 0xFFFFFFED = Thread mode, PSP, extended frame (with FPU context)
+    // Bit 4: 1 = basic frame, 0 = extended frame
+    constexpr uint32_t EXC_RETURN_PSP_BASIC = 0xFFFFFFFD;    // No FPU
+    constexpr uint32_t EXC_RETURN_PSP_EXTENDED = 0xFFFFFFED; // With FPU
+    
+    if (uses_fpu) {
+        // FPU extended frame: S0-S15, FPSCR, reserved (18 words)
+        // Hardware pushes these on exception entry when FPU was used
+        *(--stack_top) = 0x00000000;  // Reserved (alignment)
+        *(--stack_top) = 0x00000000;  // FPSCR
+        for (int i = 15; i >= 0; --i) {
+            *(--stack_top) = 0x00000000;  // S15..S0
+        }
+    }
+    
+    // Build hardware exception frame (pushed automatically on exception)
+    *(--stack_top) = 0x01000000;                          // xPSR (Thumb bit set)
+    *(--stack_top) = reinterpret_cast<uint32_t>(entry);   // PC (task entry)
+    *(--stack_top) = 0xFFFFFFFE;                          // LR (invalid, task should not return)
+    *(--stack_top) = 0x12121212;                          // R12
+    *(--stack_top) = 0x03030303;                          // R3
+    *(--stack_top) = 0x02020202;                          // R2
+    *(--stack_top) = 0x01010101;                          // R1
+    *(--stack_top) = reinterpret_cast<uint32_t>(arg);     // R0 (argument)
+    
+    if (uses_fpu) {
+        // S16-S31 (software saved, 16 words)
+        for (int i = 31; i >= 16; --i) {
+            *(--stack_top) = 0x00000000;  // S31..S16
+        }
+    }
+    
+    // Software saved context: ldmia pops in register order (r4,r5...r11,lr)
+    // So we must push in REVERSE order: LR first (highest addr), then r11..r4
+    // Stack grows down, ldmia reads from low to high
+    // Push order (stack_top decrements): lr, r11, r10, ..., r4
+    // Memory layout after: [r4][r5][r6][r7][r8][r9][r10][r11][lr]  <- stack_top points here
+    
+    // Exception return value (will be popped into LR)
+    *(--stack_top) = uses_fpu ? EXC_RETURN_PSP_EXTENDED : EXC_RETURN_PSP_BASIC;
+    
+    // R11-R4 (pushed in descending order so ldmia loads them correctly)
+    *(--stack_top) = 0x11111111;  // R11
+    *(--stack_top) = 0x10101010;  // R10
+    *(--stack_top) = 0x09090909;  // R9
+    *(--stack_top) = 0x08080808;  // R8
+    *(--stack_top) = 0x07070707;  // R7
+    *(--stack_top) = 0x06060606;  // R6
+    *(--stack_top) = 0x05050505;  // R5
+    *(--stack_top) = 0x04040404;  // R4
+    
+    return stack_top;
+}
+
+// Task wrapper to handle task exit
+extern "C" void task_exit_error() {
+    // Task returned - this should not happen
+    // Red LED and halt
+    GPIO gpio_d('D');
+    gpio_d.set(14);
+    while (true) { asm volatile(""); }
+}
+
+// Idle task entry
+void idle_task_entry(void*) {
+    while (true) {
+        CM4::wfi();
+    }
+}
+
+// request_context_switch implementation (FreeRTOS-style)
+// Called when scheduler determines a context switch is needed
+void Stm32f4Hw::request_context_switch() {
+    // Get the next task from kernel
+    auto next = g_kernel.get_next_task();
+    if (!next.has_value()) {
+        return;  // No task to switch to
+    }
+    
+    uint16_t next_idx = *next;
+    
+    // Check if task context is initialized
+    if (next_idx >= MAX_TASKS || !g_task_contexts[next_idx].initialized) {
+        return;
+    }
+    
+    // Don't switch to same task
+    if (g_pxCurrentTCB == &g_task_contexts[next_idx]) {
+        return;
+    }
+    
+    // Prepare kernel state for the switch
+    g_kernel.prepare_switch(next_idx);
+    
+    // Trigger PendSV - actual switch happens in PendSV_Handler
+    // PendSV will save current context to g_pxCurrentTCB->stack_ptr
+    // and restore next context from g_task_contexts[next_idx].stack_ptr
+    SCB::trigger_pendsv();
+}
+
+// ============================================================================
 // Configuration
 // ============================================================================
 
@@ -52,10 +312,6 @@ __attribute__((section(".dma_buffer")))
 int16_t audio_buf1[BUFFER_SIZE * 2];
 
 // PDM microphone DMA buffers
-// I2S2 clock = ~2.048MHz (from 86MHz PLLI2S / prescaler 42)
-// PDM: 128 x 16-bit words = 2048 bits at 2.048MHz = ~1ms of PDM data
-// After 64x CIC decimation: 2048/64 = 32 PCM samples at 32kHz
-// Then resample 32kHz -> 48kHz (3:2) for USB Audio
 constexpr uint32_t PDM_BUF_SIZE = 128;
 
 __attribute__((section(".dma_buffer")))
@@ -65,22 +321,18 @@ __attribute__((section(".dma_buffer")))
 uint16_t pdm_buf1[PDM_BUF_SIZE];
 
 // PCM buffer for decimated audio (from PDM)
-// 128 PDM words * 16 bits = 2048 PDM bits / 64 decimation = 32 PCM samples at 32kHz
-constexpr uint32_t PCM_BUF_SIZE = 64;  // Extra headroom
+constexpr uint32_t PCM_BUF_SIZE = 64;
 int16_t pcm_buf[PCM_BUF_SIZE];
 
-
-// Synth buffer at 32kHz (same rate as PDM decimation)
+// Synth buffer at 32kHz
 int16_t synth_buf[PCM_BUF_SIZE];
 
 // Resampled buffers (32kHz -> 48kHz)
-// 3:2 ratio means 32 * 1.5 = 48 max, use 64 for safety
 constexpr uint32_t RESAMPLED_BUF_SIZE = 64;
 int16_t resampled_mic_buf[RESAMPLED_BUF_SIZE];
 int16_t resampled_synth_buf[RESAMPLED_BUF_SIZE];
 
-// Stereo buffer for USB Audio IN (mono to stereo conversion)
-// resampled_count samples * 2 channels = up to 96 stereo samples
+// Stereo buffer for USB Audio IN
 constexpr uint32_t STEREO_BUF_SIZE = 128;
 int16_t stereo_buf[STEREO_BUF_SIZE];
 
@@ -92,10 +344,8 @@ namespace usb_config {
 using namespace umiusb::desc;
 
 constexpr auto str_manufacturer = String("UMI-OS");
-constexpr auto str_product = String("UMI Synth");
+constexpr auto str_product = String("UMI Synth (umios)");
 
-// String table: index 1 = manufacturer, index 2 = product
-// (index 0 = Language ID is handled internally by device.hh)
 constexpr std::array<std::span<const uint8_t>, 2> string_table = {{
     {str_manufacturer.data.data(), str_manufacturer.size},
     {str_product.data.data(), str_product.size},
@@ -118,17 +368,15 @@ I2S i2s3;
 DMA_I2S dma_i2s;
 CS43L22 codec(i2c1);
 
-// USB stack instances (umiusb) - using AudioInterface class
+// USB stack instances (umiusb)
 umiusb::Stm32FsHal usb_hal;
-// UAC1, 48kHz stereo Full Duplex + MIDI
-// EP1 OUT=Audio OUT, EP1 IN=MIDI IN, EP2 IN=Feedback, EP3 OUT=MIDI OUT, EP3 IN=Audio IN
 umiusb::AudioFullDuplexMidi48k usb_audio;
 umiusb::Device<umiusb::Stm32FsHal, decltype(usb_audio)> usb_device(
     usb_hal, usb_audio,
     {
         .vendor_id = 0x1209,
-        .product_id = 0x0006,  // Changed for Full Duplex to avoid macOS caching
-        .device_version = 0x0100,
+        .product_id = 0x0006,
+        .device_version = 0x0200,  // Version 2.0 for umios
         .manufacturer_idx = 1,
         .product_idx = 2,
         .serial_idx = 0,
@@ -139,66 +387,33 @@ umiusb::Device<umiusb::Stm32FsHal, decltype(usb_audio)> usb_device(
 PdmMic pdm_mic;
 DmaPdm dma_pdm;
 CicDecimator cic_decimator;
-Resampler32to48 resampler_mic;    // 32kHz mic -> 48kHz
-Resampler32to48 resampler_synth;  // 32kHz synth -> 48kHz
+Resampler32to48 resampler_mic;
+Resampler32to48 resampler_synth;
 
-// Synth engine (initialized at 32kHz, processed in PDM IRQ)
+// Synth engine (initialized at 32kHz)
 umi::synth::PolySynth synth;
 
-// LED state (for activity indication)
+// LED state
 volatile uint32_t led_counter = 0;
 
-// Debug counters for PDM microphone
-volatile uint32_t dbg_pdm_dma_count = 0;      // DMA interrupt count
-volatile uint32_t dbg_pdm_pcm_count = 0;      // PCM samples from CIC
-volatile uint32_t dbg_pdm_resampled_count = 0; // Resampled samples (48kHz)
-volatile int16_t dbg_pdm_max_sample = 0;      // Max PCM sample value
-volatile uint16_t dbg_pdm_raw0 = 0;           // First raw PDM word
-volatile uint16_t dbg_pdm_raw1 = 0;           // Second raw PDM word
-volatile uint32_t dbg_pdm_ones_count = 0;     // Count of 1-bits in PDM data
-volatile uint32_t dbg_pdm_total_bits = 0;     // Total PDM bits processed
-volatile int16_t dbg_pdm_min_sample = 0;      // Min PCM sample value (for DC offset check)
+// Debug counters
+volatile uint32_t dbg_pdm_dma_count = 0;
+volatile uint32_t dbg_pdm_pcm_count = 0;
+volatile uint32_t dbg_usb_in_streaming = 0;
 
-// Debug: I2S2 register values (for clock verification)
-volatile uint32_t dbg_i2s2_i2scfgr = 0;       // I2SCFGR register
-volatile uint32_t dbg_i2s2_i2spr = 0;         // I2SPR register
-volatile uint32_t dbg_rcc_cfgr = 0;           // RCC_CFGR (I2SSRC bit)
-volatile uint32_t dbg_rcc_cr = 0;             // RCC_CR (PLLI2SRDY bit)
-volatile uint32_t dbg_rcc_plli2scfgr = 0;     // PLLI2SCFGR register
+// Audio task context (for deferred processing)
+struct AudioContext {
+    uint16_t* pdm_data = nullptr;
+    bool pdm_pending = false;
+    bool i2s_pending = false;
+    int16_t* i2s_buf = nullptr;
+} g_audio_ctx;
 
-// Debug counters for USB Audio IN
-volatile uint32_t dbg_usb_in_write_count = 0;   // write_audio_in() call count
-volatile uint32_t dbg_usb_in_streaming = 0;     // is_audio_in_streaming() state
-volatile uint32_t dbg_usb_in_written = 0;       // Frames actually written to ring buffer
-volatile int16_t dbg_usb_in_first_sample = 0;   // First sample being sent
+// ============================================================================
+// Initialization Functions
+// ============================================================================
 
-// Persistent debug counters (survives soft reset) - placed in .noinit section
-__attribute__((section(".noinit")))
-volatile uint32_t dbg_persist_set_interface_count;  // SetInterface count since power-on
-__attribute__((section(".noinit")))
-volatile uint32_t dbg_persist_audio_in_alt1_count;  // Audio IN Alt=1 count
-__attribute__((section(".noinit")))
-volatile uint32_t dbg_persist_sof_count;            // SOF count
-__attribute__((section(".noinit")))
-volatile uint32_t dbg_persist_send_audio_in_count;  // send_audio_in() call count
-__attribute__((section(".noinit")))
-volatile uint32_t dbg_persist_ep3_write_count;      // EP3 write count
-__attribute__((section(".noinit")))
-volatile uint32_t dbg_persist_feedback_tx_count;    // Feedback EP TX count
-__attribute__((section(".noinit")))
-volatile uint32_t dbg_persist_magic;                // Magic value to detect fresh boot (0xDEADBEEF)
-
-// PLLI2S configuration for I2S clock
 void init_plli2s() {
-    // PLLI2S: N=192, R=2 -> PLLI2SCLK = 8MHz * 192 / 2 = 768MHz... that's wrong
-    // Actually: PLLI2SCLK = (HSE / PLLM) * PLLI2SN / PLLI2SR
-    // = (8MHz / 8) * 271 / 6 = 45.17MHz... still calculating
-
-    // For 48kHz with MCLK: Fs = I2SCLK / (256 * 2)
-    // Target I2SCLK = 48000 * 256 * 2 = 24.576MHz (not exact with HSE=8MHz)
-    // Close enough: PLLI2SN=258, PLLI2SR=3 -> 8 * 258 / 8 / 3 = 86MHz
-    // Then I2S prescaler will divide down
-
     constexpr uint32_t RCC_PLLI2SCFGR = 0x40023884;
     constexpr uint32_t RCC_CR = 0x40023800;
 
@@ -218,15 +433,12 @@ void init_plli2s() {
 }
 
 void init_gpio() {
-    // Enable GPIO clocks
     RCC::enable_gpio('A');
     RCC::enable_gpio('B');
     RCC::enable_gpio('C');
     RCC::enable_gpio('D');
-
-    // Enable peripheral clocks before GPIO AF configuration
     RCC::enable_i2c1();
-    RCC::enable_spi2();  // For PDM microphone (I2S2)
+    RCC::enable_spi2();
     RCC::enable_spi3();
     RCC::enable_dma1();
     RCC::enable_usb_otg_fs();
@@ -237,30 +449,27 @@ void init_gpio() {
     gpio_d.config_output(14);
     gpio_d.config_output(15);
 
-    // USER button: PA0 (directly connected, active high)
+    // USER button: PA0
     gpio_a.set_mode(0, GPIO::MODE_INPUT);
     gpio_a.set_pupd(0, GPIO::PUPD_DOWN);
 
     // CS43L22 Reset: PD4
     gpio_d.config_output(4);
-    gpio_d.reset(4);  // Hold in reset initially
+    gpio_d.reset(4);
 
-    // I2C1: PB6 (SCL), PB9 (SDA) - open-drain with pull-up
+    // I2C1: PB6 (SCL), PB9 (SDA)
     gpio_b.config_af(6, GPIO::AF4, GPIO::SPEED_FAST, GPIO::PUPD_UP, true);
     gpio_b.config_af(9, GPIO::AF4, GPIO::SPEED_FAST, GPIO::PUPD_UP, true);
 
     // I2S3 (Audio OUT): PC7 (MCK), PC10 (SCK), PC12 (SD), PA4 (WS)
-    gpio_c.config_af(7, GPIO::AF6, GPIO::SPEED_HIGH);   // MCK
-    gpio_c.config_af(10, GPIO::AF6, GPIO::SPEED_HIGH);  // SCK
-    gpio_c.config_af(12, GPIO::AF6, GPIO::SPEED_HIGH);  // SD
-    gpio_a.config_af(4, GPIO::AF6, GPIO::SPEED_HIGH);   // WS
+    gpio_c.config_af(7, GPIO::AF6, GPIO::SPEED_HIGH);
+    gpio_c.config_af(10, GPIO::AF6, GPIO::SPEED_HIGH);
+    gpio_c.config_af(12, GPIO::AF6, GPIO::SPEED_HIGH);
+    gpio_a.config_af(4, GPIO::AF6, GPIO::SPEED_HIGH);
 
     // I2S2 (PDM Microphone): PB10 (CLK), PC3 (SD)
-    // STM32F4-Discovery: MP45DT02 MEMS microphone
-    // PC3 = I2S2_SD (AF5) - NOT I2S2ext_SD!
-    // I2S2 in Master RX mode receives data on SD pin
-    gpio_b.config_af(10, GPIO::AF5, GPIO::SPEED_HIGH);  // I2S2_CK - Clock to mic
-    gpio_c.config_af(3, GPIO::AF5, GPIO::SPEED_HIGH);   // I2S2_SD - PDM data from mic (AF5)
+    gpio_b.config_af(10, GPIO::AF5, GPIO::SPEED_HIGH);
+    gpio_c.config_af(3, GPIO::AF5, GPIO::SPEED_HIGH);
 
     // USB OTG FS: PA11 (DM), PA12 (DP)
     gpio_a.config_af(11, GPIO::AF10, GPIO::SPEED_HIGH);
@@ -268,298 +477,411 @@ void init_gpio() {
 }
 
 void init_audio() {
-    // Clocks already enabled in init_gpio()
-
-    // Initialize I2C
     i2c1.init();
 
-    // Release codec from reset
     gpio_d.set(4);
-    for (int i = 0; i < 100000; ++i) { asm volatile(""); }  // Delay
+    for (int i = 0; i < 100000; ++i) { asm volatile(""); }
 
-    // Initialize codec
     if (!codec.init()) {
-        // Error: Red LED
-        gpio_d.set(14);
+        gpio_d.set(14);  // Red LED = error
         while (1) {}
     }
 
-    // Initialize PLLI2S for I2S clock
     init_plli2s();
-
-    // Initialize I2S
     i2s3.init_48khz();
 
-    // Clear audio buffers before DMA starts (prevent noise on startup)
     __builtin_memset(audio_buf0, 0, sizeof(audio_buf0));
     __builtin_memset(audio_buf1, 0, sizeof(audio_buf1));
 
-    // Initialize DMA
     dma_i2s.init(audio_buf0, audio_buf1, BUFFER_SIZE * 2, i2s3.dr_addr());
 
-    // Enable DMA interrupt (priority 5, like HAL audio examples)
-    NVIC::set_prio(16, 5);  // DMA1_Stream5 = IRQ 16
+    // DMA1_Stream5 = IRQ 16, priority 5 (audio priority)
+    NVIC::set_prio(16, 5);
     NVIC::enable(16);
 
-    // Start audio
     i2s3.enable_dma();
     i2s3.enable();
     dma_i2s.enable();
     codec.power_on();
-    codec.set_volume(0);  // 0dB
+    codec.set_volume(0);
 }
 
 void init_pdm_mic() {
-    // Initialize PDM microphone (I2S2)
     pdm_mic.init();
-
-    // Debug: capture I2S2 and RCC register values for clock verification
-    constexpr uint32_t SPI2_BASE = 0x40003800;
-    constexpr uint32_t RCC_BASE = 0x40023800;
-    dbg_i2s2_i2scfgr = *reinterpret_cast<volatile uint32_t*>(SPI2_BASE + 0x1C);  // I2SCFGR
-    dbg_i2s2_i2spr = *reinterpret_cast<volatile uint32_t*>(SPI2_BASE + 0x20);    // I2SPR
-    dbg_rcc_cfgr = *reinterpret_cast<volatile uint32_t*>(RCC_BASE + 0x08);       // CFGR
-    dbg_rcc_cr = *reinterpret_cast<volatile uint32_t*>(RCC_BASE + 0x00);         // CR
-    dbg_rcc_plli2scfgr = *reinterpret_cast<volatile uint32_t*>(RCC_BASE + 0x84); // PLLI2SCFGR
-
-    // Initialize CIC decimator and resamplers
     cic_decimator.reset();
     resampler_mic.reset();
     resampler_synth.reset();
 
-    // Initialize DMA for PDM input (double-buffered)
     dma_pdm.init(pdm_buf0, pdm_buf1, PDM_BUF_SIZE, pdm_mic.dr_addr());
 
-    // Enable DMA interrupt (priority 5, same as audio)
-    // DMA1_Stream3 = IRQ 14
+    // DMA1_Stream3 = IRQ 14, priority 5
     NVIC::set_prio(14, 5);
     NVIC::enable(14);
 
-    // Start PDM capture
     pdm_mic.enable_dma();
     pdm_mic.enable();
     dma_pdm.enable();
 }
 
 void init_usb() {
-    // USB clock already enabled in init_gpio()
-
-    // Small delay for USB PHY
     for (int i = 0; i < 10000; ++i) { asm volatile(""); }
 
-    // Set streaming status callback - Blue LED indicates Audio OUT streaming active
     usb_audio.on_streaming_change = [](bool streaming) {
         if (streaming) {
-            gpio_d.set(15);   // Blue LED ON when streaming starts
+            gpio_d.set(15);   // Blue LED ON
         } else {
-            gpio_d.reset(15); // Blue LED OFF when streaming stops
+            gpio_d.reset(15);
         }
     };
 
-    // Set Audio IN streaming callback - Orange LED indicates Audio IN streaming active
     usb_audio.on_audio_in_change = [](bool streaming) {
         if (streaming) {
-            gpio_d.set(13);   // Orange LED ON when mic streaming starts
-            dbg_persist_audio_in_alt1_count = dbg_persist_audio_in_alt1_count + 1;  // Track SetInterface(Alt=1)
+            gpio_d.set(13);   // Orange LED ON
         } else {
-            gpio_d.reset(13); // Orange LED OFF when mic streaming stops
+            gpio_d.reset(13);
         }
     };
 
-    // Debug: Toggle green LED on each audio packet received
     usb_audio.on_audio_rx = []() {
         static uint8_t cnt = 0;
-        if (++cnt >= 48) {  // Toggle every 48 packets (~48ms)
+        if (++cnt >= 48) {
             cnt = 0;
             gpio_d.toggle(12);
         }
     };
 
-    // Debug: Count feedback EP transmissions
-    usb_audio.on_feedback_sent = []() {
-        dbg_persist_feedback_tx_count = dbg_persist_feedback_tx_count + 1;
-    };
-
-    // USB MIDI -> Synth: Connect MIDI callback to synth engine
+    // USB MIDI -> MIDI queue (ISR context)
     usb_audio.set_midi_callback([](uint8_t /*cable*/, const uint8_t* data, uint8_t len) {
-        synth.handle_midi(data, len);
+        MidiMsg msg;
+        msg.len = (len > 4) ? 4 : len;
+        for (uint8_t i = 0; i < msg.len; ++i) {
+            msg.data[i] = data[i];
+        }
+        g_midi_queue.try_push(msg);
+        // Notify audio task that MIDI is available
+        g_kernel.notify(g_audio_task_id, Event::MidiReady);
     });
 
-    // Set string descriptors
     usb_device.set_strings(usb_config::string_table);
-
-    // Initialize USB device (umiusb)
     usb_device.init();
     usb_hal.connect();
 
-    // Enable USB interrupt (priority 6, lower than audio DMA at 5)
-    // Audio DMA must have higher priority for consistent timing
-    NVIC::set_prio(67, 6);  // OTG_FS = IRQ 67
+    // OTG_FS = IRQ 67, priority 6 (lower than audio)
+    NVIC::set_prio(67, 6);
     NVIC::enable(67);
 }
 
-/// Fill audio buffer from AudioInterface ring buffer
-/// Uses PI+ASRC: Software resampling with cubic hermite interpolation
+// ============================================================================
+// Audio Processing Functions (moved from ISR to task context)
+// ============================================================================
+
 void fill_audio_buffer(int16_t* buf, uint32_t frame_count) {
     usb_audio.read_audio_asrc(buf, frame_count);
-    // Note: Red LED is now used for DMA activity indicator in IRQ handler
 }
 
-#if 0  // Synth + USB mix version (for reference)
-void fill_audio_buffer_mix(int16_t* buf, uint32_t samples) {
-    for (uint32_t i = 0; i < samples; ++i) {
+void process_pdm_buffer(uint16_t* pdm_data) {
+    dbg_pdm_dma_count = dbg_pdm_dma_count + 1;
+
+    // Decimate PDM to PCM (2.048MHz -> 32kHz)
+    uint32_t pcm_count = cic_decimator.process_buffer(pdm_data, PDM_BUF_SIZE, pcm_buf, PCM_BUF_SIZE);
+    dbg_pdm_pcm_count = pcm_count;
+
+    // Process MIDI messages from queue
+    while (auto msg = g_midi_queue.try_pop()) {
+        synth.handle_midi(msg->data, msg->len);
+    }
+
+    // Process synth at 32kHz
+    for (uint32_t i = 0; i < pcm_count; ++i) {
         float synth_sample = synth.process_sample();
         int32_t synth_s16 = static_cast<int32_t>(synth_sample * 32767.0f);
-        if (synth_s16 > 32767) { synth_s16 = 32767; }
-        if (synth_s16 < -32768) { synth_s16 = -32768; }
+        if (synth_s16 > 32767) synth_s16 = 32767;
+        if (synth_s16 < -32768) synth_s16 = -32768;
+        synth_buf[i] = static_cast<int16_t>(synth_s16);
+    }
 
-        int16_t usb_l = 0, usb_r = 0;
-        uint32_t write_pos = usb_audio_write_pos;
-        uint32_t read_pos = usb_audio_read_pos;
-        if (read_pos != write_pos) {
-            usb_l = usb_audio_buf[read_pos * 2];
-            usb_r = usb_audio_buf[read_pos * 2 + 1];
-            usb_audio_read_pos = (read_pos + 1) % USB_AUDIO_BUF_SIZE;
+    // Resample 32kHz -> 48kHz
+    uint32_t resampled_mic_count = resampler_mic.process(pcm_buf, pcm_count, resampled_mic_buf);
+    uint32_t resampled_synth_count = resampler_synth.process(synth_buf, pcm_count, resampled_synth_buf);
+
+    dbg_usb_in_streaming = usb_audio.is_audio_in_streaming() ? 1 : 0;
+
+    // Build stereo buffer: ch1=mic, ch2=synth
+    uint32_t stereo_count = (resampled_mic_count < resampled_synth_count)
+                           ? resampled_mic_count : resampled_synth_count;
+    if (stereo_count > 0 && usb_audio.is_audio_in_streaming()) {
+        for (uint32_t i = 0; i < stereo_count; ++i) {
+            stereo_buf[i * 2] = resampled_mic_buf[i];
+            stereo_buf[i * 2 + 1] = resampled_synth_buf[i];
         }
-
-        int32_t mix_l = synth_s16 + usb_l;
-        int32_t mix_r = synth_s16 + usb_r;
-        if (mix_l > 32767) { mix_l = 32767; }
-        if (mix_l < -32768) { mix_l = -32768; }
-        if (mix_r > 32767) { mix_r = 32767; }
-        if (mix_r < -32768) { mix_r = -32768; }
-
-        buf[i * 2] = static_cast<int16_t>(mix_l);
-        buf[i * 2 + 1] = static_cast<int16_t>(mix_r);
+        usb_audio.write_audio_in(stereo_buf, stereo_count);
     }
 }
-#endif
-
-#if 0  // Synth version (for reference)
-/// Fill audio buffer with synth output
-void fill_audio_buffer_synth(int16_t* buf, uint32_t samples) {
-    for (uint32_t i = 0; i < samples; ++i) {
-        float sample = synth.process_sample();
-
-        // Convert to 16-bit signed
-        int32_t s16 = static_cast<int32_t>(sample * 32767.0f);
-        if (s16 > 32767) s16 = 32767;
-        if (s16 < -32768) s16 = -32768;
-
-        // Stereo (duplicate mono)
-        buf[i * 2] = static_cast<int16_t>(s16);
-        buf[i * 2 + 1] = static_cast<int16_t>(s16);
-    }
-}
-#endif
 
 }  // namespace
 
 // ============================================================================
-// Interrupt Handlers
+// Task Entry Points
+// ============================================================================
+
+/// Audio task: Realtime priority, processes audio in deferred context
+void audio_task_entry(void*) {
+    // Debug: Blue LED indicates audio_task started
+    gpio_d.set(15);
+    
+    while (true) {
+        // Wait for audio events (PDM or I2S DMA complete)
+        uint32_t events = g_kernel.wait_block(
+            g_audio_task_id,
+            Event::PdmReady | Event::I2sReady | Event::MidiReady
+        );
+
+        // Process PDM (microphone + synth)
+        if (events & Event::PdmReady) {
+            if (g_audio_ctx.pdm_pending && g_audio_ctx.pdm_data) {
+                process_pdm_buffer(g_audio_ctx.pdm_data);
+                g_audio_ctx.pdm_pending = false;
+            }
+        }
+
+        // Process I2S (audio output)
+        if (events & Event::I2sReady) {
+            if (g_audio_ctx.i2s_pending && g_audio_ctx.i2s_buf) {
+                fill_audio_buffer(g_audio_ctx.i2s_buf, BUFFER_SIZE);
+                g_audio_ctx.i2s_pending = false;
+            }
+        }
+
+        // Process any remaining MIDI messages
+        if (events & Event::MidiReady) {
+            while (auto msg = g_midi_queue.try_pop()) {
+                synth.handle_midi(msg->data, msg->len);
+            }
+        }
+
+        // Activity LED
+        led_counter = led_counter + 1;
+        if (led_counter >= 750) {
+            led_counter = 0;
+            gpio_d.toggle(14);
+        }
+    }
+}
+
+/// USB task: Server priority, handles USB events
+void usb_task_entry(void*) {
+    while (true) {
+        g_kernel.wait_block(g_usb_task_id, Event::UsbReady);
+        usb_device.poll();
+    }
+}
+
+/// Main task: User priority, initialization and UI
+void main_task_entry(void*) {
+    // Initialize synth at 32kHz
+    constexpr float SYNTH_RATE = 32000.0f;
+    synth.init(SYNTH_RATE);
+
+    // Initialize audio subsystem
+    init_audio();
+
+    // Initialize PDM microphone
+    init_pdm_mic();
+
+    // Initialize USB
+    init_usb();
+
+    // Initialize SysTick (1ms)
+    SysTick::init(168000 - 1);
+
+    // Enable DWT cycle counter
+    DWT::enable();
+
+    // Green LED indicates ready
+    gpio_d.set(12);
+
+    // Main loop: button handling - low priority task, yields to audio/usb
+    // Since main_task has User priority (lowest active), higher priority
+    // tasks (audio=Realtime, usb=Server) will preempt as needed.
+    while (true) {
+        if (gpio_a.read(0)) {
+            // Button pressed: debug indicator
+            gpio_d.reset(12); gpio_d.reset(13); gpio_d.reset(14); gpio_d.reset(15);
+
+            for (uint32_t i = 0; i < usb_hal.dbg_ep0_stall_count_ && i < 20; ++i) {
+                gpio_d.set(14);
+                for (int d = 0; d < 500000; ++d) asm volatile("");
+                gpio_d.reset(14);
+                for (int d = 0; d < 500000; ++d) asm volatile("");
+            }
+
+            for (int d = 0; d < 2000000; ++d) asm volatile("");
+
+            for (uint32_t i = 0; i < (usb_hal.dbg_setup_count_ % 10); ++i) {
+                gpio_d.set(12);
+                for (int d = 0; d < 500000; ++d) asm volatile("");
+                gpio_d.reset(12);
+                for (int d = 0; d < 500000; ++d) asm volatile("");
+            }
+
+            while (gpio_a.read(0)) {}
+        }
+
+        // WFI - wait for interrupt. When interrupt fires, ISR runs and
+        // may notify higher priority tasks. After ISR returns, PendSV
+        // context switch runs and scheduler picks highest priority ready task.
+        Stm32f4Hw::enter_sleep();
+    }
+}
+
+// ============================================================================
+// Interrupt Handlers (simplified: notify only)
 // ============================================================================
 
 extern "C" void DMA1_Stream3_IRQHandler() {
     // PDM microphone DMA transfer complete
     if (dma_pdm.transfer_complete()) {
         dma_pdm.clear_tc();
-        dbg_pdm_dma_count = dbg_pdm_dma_count + 1;
-
-        // Get the buffer that just completed (not the one currently being filled)
-        uint16_t* pdm_data = (dma_pdm.current_buffer() == 0) ? pdm_buf1 : pdm_buf0;
-
-        // Debug: capture raw PDM data and bit density
-        dbg_pdm_raw0 = pdm_data[0];
-        dbg_pdm_raw1 = pdm_data[1];
-
-        // Count 1-bits in PDM data (should be ~50% for silence/DC)
-        uint32_t ones = 0;
-        for (uint32_t i = 0; i < PDM_BUF_SIZE; ++i) {
-            ones += __builtin_popcount(pdm_data[i]);
-        }
-        dbg_pdm_ones_count = ones;
-        dbg_pdm_total_bits = PDM_BUF_SIZE * 16;
-
-        // Decimate PDM to PCM (2.048MHz PDM -> 32kHz PCM via 64x CIC)
-        uint32_t pcm_count = cic_decimator.process_buffer(pdm_data, PDM_BUF_SIZE, pcm_buf, PCM_BUF_SIZE);
-        dbg_pdm_pcm_count = pcm_count;
-
-        // Debug: find min/max sample value
-        for (uint32_t i = 0; i < pcm_count; ++i) {
-            if (pcm_buf[i] > dbg_pdm_max_sample) {
-                dbg_pdm_max_sample = pcm_buf[i];
-            }
-            if (pcm_buf[i] < dbg_pdm_min_sample) {
-                dbg_pdm_min_sample = pcm_buf[i];
-            }
-        }
-
-        // Process synth at 32kHz (same rate as PDM decimation)
-        for (uint32_t i = 0; i < pcm_count; ++i) {
-            float synth_sample = synth.process_sample();
-            int32_t synth_s16 = static_cast<int32_t>(synth_sample * 32767.0f);
-            if (synth_s16 > 32767) synth_s16 = 32767;
-            if (synth_s16 < -32768) synth_s16 = -32768;
-            synth_buf[i] = static_cast<int16_t>(synth_s16);
-        }
-
-        // Resample both mic and synth: 32kHz -> 48kHz (3:2 ratio)
-        uint32_t resampled_mic_count = resampler_mic.process(pcm_buf, pcm_count, resampled_mic_buf);
-        uint32_t resampled_synth_count = resampler_synth.process(synth_buf, pcm_count, resampled_synth_buf);
-        dbg_pdm_resampled_count = resampled_mic_count;
-
-        // DEBUG: Reset min/max periodically for current sample values
-        static uint32_t reset_counter = 0;
-        if (++reset_counter >= 100) {  // Reset every 100 DMA transfers (~100ms)
-            reset_counter = 0;
-            dbg_pdm_max_sample = -32768;
-            dbg_pdm_min_sample = 32767;
-        }
-
-        // Debug: track streaming state
-        dbg_usb_in_streaming = usb_audio.is_audio_in_streaming() ? 1 : 0;
-
-        // Build stereo buffer: ch1 = mic (PDM), ch2 = synth (both resampled to 48kHz)
-        // Use the smaller count to avoid buffer overrun
-        uint32_t stereo_count = (resampled_mic_count < resampled_synth_count)
-                               ? resampled_mic_count : resampled_synth_count;
-        if (stereo_count > 0 && usb_audio.is_audio_in_streaming()) {
-            dbg_usb_in_write_count = dbg_usb_in_write_count + 1;
-            for (uint32_t i = 0; i < stereo_count; ++i) {
-                stereo_buf[i * 2] = resampled_mic_buf[i];      // ch1 (left) = mic
-                stereo_buf[i * 2 + 1] = resampled_synth_buf[i]; // ch2 (right) = synth
-            }
-            dbg_usb_in_first_sample = stereo_buf[0];
-            dbg_usb_in_written = usb_audio.write_audio_in(stereo_buf, stereo_count);
-        }
+        
+        // Get the buffer that just completed
+        g_audio_ctx.pdm_data = (dma_pdm.current_buffer() == 0) ? pdm_buf1 : pdm_buf0;
+        g_audio_ctx.pdm_pending = true;
+        
+        // Notify audio task
+        g_kernel.notify(g_audio_task_id, Event::PdmReady);
     }
 }
 
 extern "C" void DMA1_Stream5_IRQHandler() {
+    // I2S DMA transfer complete
     if (dma_i2s.transfer_complete()) {
         dma_i2s.clear_tc();
-
-        // Fill the buffer that just finished (USB Audio OUT -> I2S)
-        // current_buffer() returns which buffer DMA is currently using
-        // We fill the OTHER one
-        int16_t* buf = (dma_i2s.current_buffer() == 0) ? audio_buf1 : audio_buf0;
-        fill_audio_buffer(buf, BUFFER_SIZE);
-
-        // Activity indication: blink red LED to show DMA is still running
-        led_counter = led_counter + 1;
-        if (led_counter >= 750) {  // ~1Hz blink (750 * 64 samples / 48000 = ~1s)
-            led_counter = 0;
-            gpio_d.toggle(14);  // Red LED toggle
-        }
+        
+        // Get the buffer to fill
+        g_audio_ctx.i2s_buf = (dma_i2s.current_buffer() == 0) ? audio_buf1 : audio_buf0;
+        g_audio_ctx.i2s_pending = true;
+        
+        // Notify audio task
+        g_kernel.notify(g_audio_task_id, Event::I2sReady);
     }
 }
 
 extern "C" void OTG_FS_IRQHandler() {
+    // USB interrupt: handle immediately in ISR context
+    // USB OTG requires immediate handling to clear interrupt flags
     usb_device.poll();
+    // Also notify USB task for any deferred processing
+    g_kernel.notify(g_usb_task_id, Event::UsbReady);
 }
 
 extern "C" void SysTick_Handler() {
-    // SOF is now handled by USB OTG interrupt, not SysTick
+    // Kernel tick (1ms)
+    // tick() may request a context switch via request_context_switch()
+    g_kernel.tick(1000);  // 1ms = 1000us
+}
+
+// ============================================================================
+// PendSV Handler - Context Switch (FreeRTOS-style)
+// ============================================================================
+// This is the core of the context switch mechanism.
+// - Save current task's context to its stack
+// - Get next task from kernel
+// - Restore next task's context from its stack
+//
+// Stack layout after save (FreeRTOS style):
+//   [Low address / top of saved stack]
+//   EXC_RETURN (LR)
+//   R4..R11     <- Software saved
+//   S16..S31    <- Software saved (if FPU used)
+//   R0..R3, R12, LR, PC, xPSR  <- Hardware pushed
+//   S0..S15, FPSCR, reserved   <- Hardware pushed (if FPU used)
+//   [High address / original stack top]
+
+extern "C" __attribute__((naked)) void PendSV_Handler() {
+    asm volatile(
+        "   .syntax unified                 \n"
+        
+        // Get PSP (current task's stack pointer)
+        "   mrs     r0, psp                 \n"
+        "   isb                             \n"
+        
+        // Get address of g_pxCurrentTCB
+        "   ldr     r3, =g_pxCurrentTCB     \n"
+        "   ldr     r2, [r3]                \n"  // r2 = g_pxCurrentTCB (pointer to current TCB)
+        
+        // Is the task using the FPU? If so, save S16-S31
+        "   tst     lr, #0x10               \n"  // Bit 4 = 0 means FPU was used
+        "   it      eq                      \n"
+        "   vstmdbeq r0!, {s16-s31}         \n"  // Push S16-S31 (FPU high registers)
+        
+        // Save R4-R11 and EXC_RETURN (LR)
+        "   stmdb   r0!, {r4-r11, lr}       \n"
+        
+        // Save new stack top to TCB (TCB->stack_ptr = r0)
+        "   str     r0, [r2]                \n"  // TCB's first member is stack_ptr
+        
+        // --- Context switch logic ---
+        // Disable interrupts during switch
+        "   mov     r0, %[max_prio]         \n"
+        "   msr     basepri, r0             \n"
+        "   dsb                             \n"
+        "   isb                             \n"
+        
+        // Call vTaskSwitchContext equivalent - select next task
+        "   bl      vPortSwitchContext      \n"
+        
+        // Re-enable interrupts
+        "   mov     r0, #0                  \n"
+        "   msr     basepri, r0             \n"
+        
+        // --- Restore next task ---
+        // Get the new current TCB (may have changed)
+        "   ldr     r3, =g_pxCurrentTCB     \n"
+        "   ldr     r1, [r3]                \n"  // r1 = new g_pxCurrentTCB
+        "   ldr     r0, [r1]                \n"  // r0 = TCB->stack_ptr
+        
+        // Restore R4-R11 and EXC_RETURN
+        "   ldmia   r0!, {r4-r11, lr}       \n"
+        
+        // Is the task using FPU? If so, restore S16-S31
+        "   tst     lr, #0x10               \n"
+        "   it      eq                      \n"
+        "   vldmiaeq r0!, {s16-s31}         \n"
+        
+        // Set PSP to restored value
+        "   msr     psp, r0                 \n"
+        "   isb                             \n"
+        
+        // Return from exception (hardware restores R0-R3, R12, LR, PC, xPSR)
+        "   bx      lr                      \n"
+        
+        ".align 4                           \n"
+        :
+        : [max_prio] "i" (0x50)  // Priority for critical section (adjustable)
+        : "memory"
+    );
+}
+
+// Context switch helper - called from PendSV
+extern "C" void vPortSwitchContext() {
+    // Get next task from kernel
+    auto next = g_kernel.get_next_task();
+    if (!next.has_value()) {
+        return;  // Stay on current task
+    }
+    
+    uint16_t next_idx = *next;
+    
+    // Check if task context is initialized
+    if (next_idx >= MAX_TASKS || !g_task_contexts[next_idx].initialized) {
+        return;
+    }
+    
+    // Update current TCB pointer
+    g_pxCurrentTCB = &g_task_contexts[next_idx];
+    
+    // Prepare kernel state for the switch
+    g_kernel.prepare_switch(next_idx);
 }
 
 // ============================================================================
@@ -569,6 +891,111 @@ extern "C" void SysTick_Handler() {
 extern uint32_t _sidata, _sdata, _edata, _sbss, _ebss, _estack;
 extern void (*__init_array_start[])();
 extern void (*__init_array_end[])();
+
+// Linker symbols for shared memory
+extern uint8_t _shared_audio, _shared_midi, _shared_display, _shared_hwstate;
+extern uint8_t _shared_end;
+
+// Initialize task stack and context
+void init_task_context(uint16_t task_idx, uint32_t* stack_base, uint32_t stack_size,
+                       void (*entry)(void*), void* arg, bool uses_fpu) {
+    uint32_t* stack_top = stack_base + stack_size;  // Stack grows down
+    uint32_t* sp = init_task_stack(stack_top, entry, arg, uses_fpu);
+    
+    g_task_contexts[task_idx].stack_ptr = sp;
+    g_task_contexts[task_idx].entry = entry;
+    g_task_contexts[task_idx].arg = arg;
+    g_task_contexts[task_idx].uses_fpu = uses_fpu;
+    g_task_contexts[task_idx].initialized = true;
+}
+
+// Start first task implementation (FreeRTOS-style using SVC)
+// This properly starts the first task using exception return
+[[noreturn]] void Stm32f4Hw::start_first_task() {
+    // Get first task to run
+    auto next = g_kernel.get_next_task();
+    if (!next.has_value()) {
+        // No task to run - halt
+        while (true) { CM4::wfi(); }
+    }
+    
+    uint16_t task_idx = *next;
+    g_kernel.prepare_switch(task_idx);
+    
+    // Set current TCB to the first task
+    g_pxCurrentTCB = &g_task_contexts[task_idx];
+    
+    // Set PendSV and SysTick priorities
+    // PendSV = lowest (0xFF), SysTick = lower than DMA but can preempt tasks
+    SCB::set_exc_prio(14, 0xFF);  // PendSV - lowest priority
+    SCB::set_exc_prio(15, 0xF0);  // SysTick - low priority
+    
+    // FreeRTOS-style: Reset MSP, clear FPU state, call SVC
+    asm volatile(
+        "   .syntax unified                 \n"
+        
+        // Use NVIC offset register to locate the stack (like FreeRTOS)
+        "   ldr     r0, =0xE000ED08         \n"  // VTOR address
+        "   ldr     r0, [r0]                \n"  // Read VTOR (vector table address)
+        "   ldr     r0, [r0]                \n"  // First entry is initial MSP
+        "   msr     msp, r0                 \n"  // Reset MSP to clean state
+        
+        // Clear FPCA bit in CONTROL to ensure clean FPU state
+        // This prevents stale FPU state from causing issues
+        "   mov     r0, #0                  \n"
+        "   msr     control, r0             \n"  // CONTROL = 0 (privileged, MSP, no FPU)
+        "   isb                             \n"
+        
+        // Enable interrupts
+        "   cpsie   i                       \n"
+        "   cpsie   f                       \n"
+        "   dsb                             \n"
+        "   isb                             \n"
+        
+        // Call SVC to start the first task
+        // SVC handler will restore context from g_pxCurrentTCB
+        "   svc     #0                      \n"
+        "   nop                             \n"
+        ::: "r0", "memory"
+    );
+    
+    // Should never reach here
+    while (true) { CM4::wfi(); }
+}
+
+// SVC Handler - Starts the first task (FreeRTOS-style)
+// Called via SVC #0 from start_first_task
+extern "C" __attribute__((naked)) void SVC_Handler() {
+    asm volatile(
+        "   .syntax unified                 \n"
+        
+        // Get the current TCB
+        "   ldr     r3, =g_pxCurrentTCB     \n"
+        "   ldr     r1, [r3]                \n"  // r1 = g_pxCurrentTCB (pointer to TCB)
+        "   ldr     r0, [r1]                \n"  // r0 = TCB->stack_ptr
+        
+        // Pop R4-R11 and EXC_RETURN (LR)
+        "   ldmia   r0!, {r4-r11, lr}       \n"
+        
+        // Check if FPU context needs to be restored
+        "   tst     lr, #0x10               \n"  // Bit 4 = 0 means FPU used
+        "   it      eq                      \n"
+        "   vldmiaeq r0!, {s16-s31}         \n"  // Pop S16-S31
+        
+        // Set PSP
+        "   msr     psp, r0                 \n"
+        "   isb                             \n"
+        
+        // Ensure interrupts are enabled
+        "   mov     r0, #0                  \n"
+        "   msr     basepri, r0             \n"
+        
+        // Return from exception - uses PSP, restores R0-R3, R12, LR, PC, xPSR
+        "   bx      lr                      \n"
+        
+        ".align 4                           \n"
+    );
+}
 
 extern "C" [[noreturn]] void Reset_Handler() {
     // Copy .data from Flash to RAM
@@ -580,17 +1007,6 @@ extern "C" [[noreturn]] void Reset_Handler() {
     // Zero .bss
     for (uint32_t* p = &_sbss; p < &_ebss;) {
         *p++ = 0;
-    }
-
-    // Initialize persistent debug counters on fresh power-on (not soft reset)
-    if (dbg_persist_magic != 0xDEADBEEF) {
-        dbg_persist_magic = 0xDEADBEEF;
-        dbg_persist_set_interface_count = 0;
-        dbg_persist_audio_in_alt1_count = 0;
-        dbg_persist_sof_count = 0;
-        dbg_persist_send_audio_in_count = 0;
-        dbg_persist_ep3_write_count = 0;
-        dbg_persist_feedback_tx_count = 0;
     }
 
     // Enable FPU
@@ -605,95 +1021,96 @@ extern "C" [[noreturn]] void Reset_Handler() {
     // Initialize clocks (168MHz)
     RCC::init_168mhz();
 
-    // Initialize hardware
+    // Initialize GPIO
     init_gpio();
 
     // Green LED on during init
     gpio_d.set(12);
 
-    // Initialize synth at 32kHz (PDM decimation rate, will be resampled to 48kHz)
-    constexpr float SYNTH_RATE = 32000.0f;
-    synth.init(SYNTH_RATE);
+    // Create kernel tasks and initialize their stacks
+    // Task priorities:
+    // - audio: Realtime (highest) - real-time audio processing
+    // - usb: Server - USB handling
+    // - main: User - button handling, UI
+    // - idle: Idle (lowest) - sleep when nothing to do
+    //
+    // Key: audio_task and usb_task start blocked (wait_block),
+    // so main_task will be selected first for initialization.
+    // After init, main_task loops in WFI. When DMA/USB interrupts fire,
+    // they notify audio/usb tasks which become Ready and get scheduled.
 
-    // Initialize audio subsystem (Audio OUT to CS43L22 DAC)
-    init_audio();
+    g_audio_task_id = g_kernel.create_task({
+        .entry = audio_task_entry,
+        .arg = nullptr,
+        .prio = umi::Priority::Realtime,  // Highest: real-time audio
+        .core_affinity = 0,
+        .uses_fpu = true,
+        .name = "audio"
+    });
+    init_task_context(g_audio_task_id.value, g_audio_stack, AUDIO_STACK_SIZE,
+                      audio_task_entry, nullptr, true);  // uses_fpu = true
 
-    // Initialize PDM microphone (Audio IN from MP45DT02)
-    init_pdm_mic();
+    g_usb_task_id = g_kernel.create_task({
+        .entry = usb_task_entry,
+        .arg = nullptr,
+        .prio = umi::Priority::Server,  // Medium: USB handling
+        .core_affinity = 0,
+        .uses_fpu = false,
+        .name = "usb"
+    });
+    init_task_context(g_usb_task_id.value, g_usb_stack, USB_STACK_SIZE,
+                      usb_task_entry, nullptr, false);  // uses_fpu = false
 
-    // Initialize USB
-    init_usb();
+    // Main task is User priority - will run first since others start blocked
+    g_main_task_id = g_kernel.create_task({
+        .entry = main_task_entry,
+        .arg = nullptr,
+        .prio = umi::Priority::User,  // Low: button/UI
+        .core_affinity = 0,
+        .uses_fpu = true,
+        .name = "main"
+    });
+    init_task_context(g_main_task_id.value, g_main_stack, MAIN_STACK_SIZE,
+                      main_task_entry, nullptr, true);  // uses_fpu = true
 
-    // Initialize SysTick (1ms)
-    SysTick::init(168000 - 1);  // 168MHz / 1000
+    // Create idle task
+    auto idle_task_id = g_kernel.create_task({
+        .entry = idle_task_entry,
+        .arg = nullptr,
+        .prio = umi::Priority::Idle,
+        .core_affinity = 0,
+        .uses_fpu = false,
+        .name = "idle"
+    });
+    init_task_context(idle_task_id.value, g_idle_stack, IDLE_STACK_SIZE,
+                      idle_task_entry, nullptr, false);  // uses_fpu = false
 
-    // Enable DWT cycle counter (for debugging/profiling)
-    DWT::enable();
+    // Set interrupt priorities for kernel
+    // SysTick = highest (0) for kernel tick
+    // PendSV = lowest (15) for context switch
+    NVIC::set_prio(-1, 0);   // SysTick
+    NVIC::set_prio(-2, 15);  // PendSV
 
-    // Show status LED (Green = streaming active)
-    gpio_d.set(12);
-
-    // Main loop
-    while (true) {
-        // Check USER button (PA0) for debug info display
-        if (gpio_a.read(0)) {
-            // Button pressed - show debug counters via LED blink
-            // Turn all LEDs off first
-            gpio_d.reset(12); gpio_d.reset(13); gpio_d.reset(14); gpio_d.reset(15);
-
-            // Blink count: STALL count (red LED)
-            for (uint32_t i = 0; i < usb_hal.dbg_ep0_stall_count_ && i < 20; ++i) {
-                gpio_d.set(14);
-                for (int d = 0; d < 500000; ++d) asm volatile("");
-                gpio_d.reset(14);
-                for (int d = 0; d < 500000; ++d) asm volatile("");
-            }
-
-            // Pause
-            for (int d = 0; d < 2000000; ++d) asm volatile("");
-
-            // Blink count: SETUP count mod 10 (green LED)
-            for (uint32_t i = 0; i < (usb_hal.dbg_setup_count_ % 10); ++i) {
-                gpio_d.set(12);
-                for (int d = 0; d < 500000; ++d) asm volatile("");
-                gpio_d.reset(12);
-                for (int d = 0; d < 500000; ++d) asm volatile("");
-            }
-
-            // Wait for button release
-            while (gpio_a.read(0)) {}
-        }
-
-        // Wait for interrupts (saves power)
-        CM4::wfi();
-    }
+    // Start the scheduler
+    Stm32f4Hw::start_first_task();
 }
 
 // ============================================================================
 // Fault Handlers
 // ============================================================================
 
-// Fault status registers for debugging
-volatile uint32_t g_fault_cfsr = 0;   // Configurable Fault Status Register
-volatile uint32_t g_fault_hfsr = 0;   // Hard Fault Status Register
-volatile uint32_t g_fault_bfar = 0;   // Bus Fault Address Register
-volatile uint32_t g_fault_mmfar = 0;  // MemManage Fault Address Register
-volatile uint32_t g_fault_pc = 0;     // Faulting PC
-volatile uint32_t g_fault_lr = 0;     // Link Register at fault
+volatile uint32_t g_fault_cfsr = 0;
+volatile uint32_t g_fault_hfsr = 0;
+volatile uint32_t g_fault_bfar = 0;
+volatile uint32_t g_fault_mmfar = 0;
 
 extern "C" [[noreturn]] void HardFault_Handler() {
-    // Read fault status registers
     g_fault_cfsr = *reinterpret_cast<volatile uint32_t*>(0xE000ED28);
     g_fault_hfsr = *reinterpret_cast<volatile uint32_t*>(0xE000ED2C);
     g_fault_bfar = *reinterpret_cast<volatile uint32_t*>(0xE000ED38);
     g_fault_mmfar = *reinterpret_cast<volatile uint32_t*>(0xE000ED34);
-
-    // Red LED on to indicate fault
     gpio_d.set(14);
-
-    while (true) {
-        asm volatile("" ::: "memory");
-    }
+    while (true) { asm volatile("" ::: "memory"); }
 }
 
 extern "C" [[noreturn]] void MemManage_Handler() {
@@ -716,16 +1133,15 @@ extern "C" [[noreturn]] void UsageFault_Handler() {
     while (true) { asm volatile(""); }
 }
 
-// Default handler for unused interrupts
 extern "C" void Default_Handler() {
-    gpio_d.set(14);  // Red LED
+    gpio_d.set(14);
     while (true) { asm volatile(""); }
 }
 
-// Vector table - 84 entries total (16 system + 68 external for USB at 67)
-// DMA1_Stream3 = IRQ 14 (position 30 in table = 16 system + 14) - PDM microphone
-// DMA1_Stream5 = IRQ 16 (position 32 in table = 16 system + 16) - Audio OUT
-// OTG_FS = IRQ 67 (position 83 in table = 16 system + 67)
+// ============================================================================
+// Vector Table
+// ============================================================================
+
 __attribute__((section(".isr_vector"), used))
 const void* const g_vector_table[16 + 68] = {
     // System exceptions (0-15)
@@ -737,29 +1153,25 @@ const void* const g_vector_table[16 + 68] = {
     reinterpret_cast<const void*>(BusFault_Handler),   // 5: BusFault
     reinterpret_cast<const void*>(UsageFault_Handler), // 6: UsageFault
     nullptr, nullptr, nullptr, nullptr,              // 7-10: Reserved
-    reinterpret_cast<const void*>(Default_Handler),  // 11: SVCall
+    reinterpret_cast<const void*>(SVC_Handler),      // 11: SVCall
     nullptr, nullptr,                                // 12-13: Reserved
-    reinterpret_cast<const void*>(Default_Handler),  // 14: PendSV
+    reinterpret_cast<const void*>(PendSV_Handler),   // 14: PendSV
     reinterpret_cast<const void*>(SysTick_Handler),  // 15: SysTick
-    // External interrupts starting at index 16
-    // IRQ 0-13: (table index 16-29)
+    // External interrupts (16+)
     nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
     nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-    // IRQ 14: DMA1_Stream3 (table index 30)
-    reinterpret_cast<const void*>(DMA1_Stream3_IRQHandler),  // IRQ 14: DMA1_Stream3
-    // IRQ 15: (table index 31)
+    // IRQ 14: DMA1_Stream3 (PDM)
+    reinterpret_cast<const void*>(DMA1_Stream3_IRQHandler),
     nullptr,
-    // IRQ 16-31: (table index 32-47) DMA1_Stream5 = IRQ 16 (table index 32)
-    reinterpret_cast<const void*>(DMA1_Stream5_IRQHandler),  // IRQ 16: DMA1_Stream5
+    // IRQ 16: DMA1_Stream5 (I2S)
+    reinterpret_cast<const void*>(DMA1_Stream5_IRQHandler),
     nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
     nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-    // IRQ 32-47: (table index 48-63)
     nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
     nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-    // IRQ 48-63: (table index 64-79)
     nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
     nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-    // IRQ 64-67: (table index 80-83) OTG_FS = IRQ 67 (table index 83)
     nullptr, nullptr, nullptr,
-    reinterpret_cast<const void*>(OTG_FS_IRQHandler),  // IRQ 67: OTG_FS
+    // IRQ 67: OTG_FS (USB)
+    reinterpret_cast<const void*>(OTG_FS_IRQHandler),
 };
