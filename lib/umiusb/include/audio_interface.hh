@@ -1367,8 +1367,14 @@ public:
             constexpr uint32_t frames_per_packet = AudioIn::SAMPLE_RATE / 1000;
             int16_t buf[frames_per_packet * AudioIn::CHANNELS];
 
-            // Simple read without ASRC for now - debug the basic flow first
-            uint32_t read = in_ring_buffer_.read(buf, frames_per_packet);
+            // ASRC: Use PI controller to track buffer level and adjust read rate
+            // For Audio IN, we invert polarity: if buffer is filling up, speed up read
+            int32_t level = in_ring_buffer_.buffer_level();
+            int32_t ppm = in_pll_controller_.update(level);
+            // Invert: positive level error = buffer filling = need to read faster
+            uint32_t rate = AudioRingBuffer<256, AudioIn::CHANNELS>::ppm_to_rate_q16(ppm);
+            
+            uint32_t read = in_ring_buffer_.read_interpolated(buf, frames_per_packet, rate);
 
             // For isochronous IN, we must send data every frame even if buffer is empty
             // Send silence if no data available
