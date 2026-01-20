@@ -1,83 +1,220 @@
 # UMI-Module (UMIM) 仕様書
 
-**バージョン:** 2.0.0-draft
-**拡張子:** `.umim`
+**バージョン:** 3.0.0-draft
+**拡張子:** `.umim` (Web), `.umiapp` (組込み)
 **ステータス:** ドラフト
 
 ## 概要
 
-UMI-Module (`.umim`) は、WebAssemblyベースのオーディオプラグインフォーマットです。
+UMI-Module は、UMIアプリケーションのバイナリ配布形式です。
 
-- **クロスプラットフォーム** - ブラウザ、Node.js、ネイティブ、組み込み
-- **サンドボックス** - メモリ安全な隔離実行
-- **シンプルAPI** - 約10関数
+| 形式 | 拡張子 | 対象環境 | 実行方式 |
+|------|--------|----------|----------|
+| **WASM** | `.umim` | Web、Node.js | AudioWorklet |
+| **Native** | `.umiapp` | 組込み | カーネルロード |
+
+**アプリコードは共通**。ビルドターゲットでバイナリ形式が変わる。
+
+## 統一アプリケーションモデル
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Application Code (共通)                  │
+│                                                             │
+│   int main() {                                              │
+│       umi::register_processor(synth);                       │
+│       while (umi::wait_event()) { ... }                     │
+│   }                                                         │
+├───────────────────────┬─────────────────────────────────────┤
+│   Native (.umiapp)    │           WASM (.umim)              │
+│   syscall ABI         │           WASM imports              │
+│   Kernel + MPU        │           AudioWorklet + Asyncify   │
+└───────────────────────┴─────────────────────────────────────┘
+```
 
 ## UMIP / UMIC / UMIM の関係
 
-| 仕様 | MVC | 役割 |
-|------|-----|------|
-| **UMIP** | Model | DSP処理（必須） |
-| **UMIC** | Controller | UIロジック（オプション） |
-| **UMIM** | ABI | WASMバイナリ形式 |
+| 仕様 | 役割 | 組込み | Web |
+|------|------|--------|-----|
+| **UMIP** | DSP処理（Processor） | ネイティブ | WASM |
+| **UMIC** | UIロジック（Controller） | ネイティブ | WASM |
+| **UMIM** | バイナリ形式 | ELF (.umiapp) | WASM (.umim) |
 
-```
-┌────────────────────────────────────┐
-│  UMIP (Model)  +  UMIC (Ctrl)?    │
-│          ↓  ビルド  ↓              │
-│        UMIM (.umim)               │
-└────────────────────────────────────┘
-            │
-    ┌───────┼───────┐
-    ▼       ▼       ▼
- Browser  Native  Embedded
-```
+## Web版 (.umim)
 
-## コアAPI
-
-### ライフサイクル
+### WASM エクスポート
 
 ```c
-void umi_create(void);
-void umi_destroy(void);  // オプション
-```
+// ライフサイクル
+void umi_init(void);      // main() を呼び出す
+void umi_destroy(void);   // オプション
 
-`umi_create()` はProcessorインスタンスを初期化する。サンプルレートは `umi_process()` 時に `AudioContext` 経由で渡される。
+// オーディオ処理
+void umi_process(float* input, float* output, uint32_t frames);
 
-### オーディオ処理
+// イベント
+void umi_push_event(uint32_t type, const uint8_t* data, uint32_t size);
 
-```c
-void umi_process(const float* input, float* output, uint32_t frames, uint32_t sample_rate);
-```
-
-### パラメータ
-
-```c
+// パラメータ
 uint32_t umi_get_param_count(void);
 void umi_set_param(uint32_t index, float value);
 float umi_get_param(uint32_t index);
-
-// メタデータ（オプション）
-const char* umi_get_param_name(uint32_t index);
-float umi_get_param_min(uint32_t index);
-float umi_get_param_max(uint32_t index);
-float umi_get_param_default(uint32_t index);
 ```
 
-### イベント
+### AudioWorklet統合
 
-```c
-void umi_send_event(uint32_t port, const uint8_t* data, uint8_t size, uint32_t sample_offset);
+```typescript
+// umi-worklet.ts
+class UmiProcessor extends AudioWorkletProcessor {
+    private wasm: WebAssembly.Instance;
+    
+    async init(wasmBytes: ArrayBuffer) {
+        this.wasm = await WebAssembly.instantiate(wasmBytes);
+        (this.wasm.exports.umi_init as Function)();
+    }
+    
+    process(inputs: Float32Array[][], outputs: Float32Array[][]): boolean {
+        const input = inputs[0]?.[0] ?? new Float32Array(128);
+        const output = outputs[0][0];
+        
+        (this.wasm.exports.umi_process as Function)(
+            this.inputPtr, this.outputPtr, output.length
+        );
+        
+        return true;
+    }
+}
+```
+
+## 組込み版 (.umiapp)
+
+### バイナリヘッダ
+
+```cpp
+struct AppHeader {
+    uint32_t magic;         // 0x414D4955 ("UMIA")
+    uint32_t version;       // ABI バージョン
+    uint32_t entry_offset;  // _start のオフセット
+    uint32_t text_size;     // コードサイズ
+    uint32_t data_size;     // 初期化データサイズ
+    uint32_t bss_size;      // 未初期化データサイズ
+    uint32_t stack_size;    // スタックサイズ
+    uint32_t crc32;         // CRC検証
+    uint8_t signature[64];  // Ed25519署名（製品アプリのみ）
+};
+```
+
+### カーネルロード
+
+```cpp
+TaskId load_app(const uint8_t* image, size_t size) {
+    auto* header = reinterpret_cast<const AppHeader*>(image);
+    
+    // 1. 検証
+    if (!validate_header(header)) return {};
+    
+    // 2. メモリ確保・MPU設定
+    setup_app_memory(header);
+    
+    // 3. Control Task として起動
+    return kernel.create_task({
+        .entry = app_entry,
+        .prio = Priority::User,
+    });
+}
 ```
 
 ## 実装例
 
-### 最小 UMIM（UMIC無し）
+### 共通アプリコード
 
 ```cpp
-// volume.cc
-#include <umi/umim.hh>
+// my_synth/main.cc - 組込み/Web共通
 
-struct Volume {
+#include <umi/app.hh>
+#include "synth.hh"
+
+int main() {
+    static Synth synth;
+    umi::register_processor(synth);
+    
+    while (true) {
+        auto ev = umi::wait_event();
+        if (ev.type == umi::EventType::Shutdown) break;
+        synth.handle_event(ev);
+    }
+    
+    return 0;
+}
+```
+
+### Processor
+
+```cpp
+// my_synth/synth.hh
+
+class Synth {
+public:
+    void process(umi::ProcessContext& ctx) {
+        for (const auto& ev : ctx.events()) {
+            if (ev.is_note_on()) note_on(ev);
+        }
+        
+        auto* out = ctx.output(0);
+        for (uint32_t i = 0; i < ctx.frames(); ++i) {
+            out[i] = generate();
+        }
+    }
+    
+    void handle_event(const umi::Event& ev) {
+        if (ev.type == umi::EventType::ParamChange) {
+            set_param(ev.param.id, ev.param.value);
+        }
+    }
+
+private:
+    // ...
+};
+```
+
+## ビルド
+
+```lua
+-- xmake.lua
+
+-- 共通コード
+target("my_synth_common")
+    set_kind("object")
+    add_files("my_synth/*.cc")
+
+-- 組込み版
+target("my_synth_app")
+    set_kind("binary")
+    add_deps("my_synth_common", "umi_app_embedded")
+    set_extension(".umiapp")
+    set_toolchains("arm-none-eabi")
+
+-- Web版
+target("my_synth_wasm")
+    set_kind("binary")
+    add_deps("my_synth_common", "umi_app_wasm")
+    set_extension(".umim")
+    set_toolchains("emscripten")
+    add_ldflags("-sASYNCIFY")
+```
+
+## リアルタイム制約
+
+`process()` 内での禁止事項:
+
+- メモリ確保（malloc, new）
+- ファイルI/O
+- ロック取得（mutex）
+- 例外送出
+
+## ライセンス
+
+CC0 1.0 Universal (パブリックドメイン)
     float volume = 1.0f;
 
     void process(AudioContext& ctx) {

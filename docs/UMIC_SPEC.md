@@ -1,203 +1,234 @@
 # UMI-Controller (UMIC) 仕様書
 
-**バージョン:** 2.0.0-draft
+**バージョン:** 3.0.0-draft
 **ステータス:** ドラフト
 
 ## 概要
 
-UMI-Controller (UMIC) は、UIロジック/インタラクション状態を管理するControllerの仕様です。
+UMI-Controller (UMIC) は、アプリケーションのControl Task（`main()` で実行されるUIロジック）の仕様です。
 
-- **オプション** - モードを持たないモジュールでは不要
-- **ハードウェア非依存** - 実I/Oはアダプタ/カーネル層が担当
+- **統一モデル** - 組込み/Web共通の `main()` エントリポイント
+- **イベント駆動** - `wait_event()` で非同期イベント待機
+- **Processor連携** - Processor Task との共有メモリ通信
+
+## 統一アプリケーションモデル
+
+```
++-------------------------------------------------------------+
+|                    Application                              |
+|  +----------------------------------------------------------+
+|  |  main() - Control Task (UMIC)                           ||
+|  |    +-- register_processor(synth)                        ||
+|  |    +-- while (wait_event()) { handle... }               ||
+|  |    +-- shutdown                                         ||
+|  +----------------------------------------------------------+
+|                           |                                 |
+|                    共有メモリ                                |
+|                           |                                 |
+|  +----------------------------------------------------------+
+|  |  Processor::process() - Processor Task (UMIP)           ||
+|  |    +-- オーディオ生成                                    ||
+|  |    +-- MIDI/イベント処理                                 ||
+|  +----------------------------------------------------------+
++-------------------------------------------------------------+
+```
 
 ## いつ必要か
 
-**モジュールがUI状態（モード）を持つ場合**に必要。
+**単純なエフェクト/シンセ** では UMIC は不要（main が最小限でOK）。
+**UI状態を持つアプリケーション** では main() 内で Control Task として実装。
 
-| 機能 | UMIC必要 | 備考 |
-|------|----------|------|
-| パラメータ選択/ページ切替 | ✓ | UI状態 |
-| MIDI Learn（モジュール内管理） | ✓ | マッピング状態 |
-| プリセット管理（モジュール内） | ✓ | 一覧/選択状態 |
+| 機能 | Control Task で実装 | 備考 |
+|------|---------------------|------|
+| パラメータ選択/ページ切替 | ✓ | UI状態管理 |
+| MIDI Learn | ✓ | マッピング状態 |
+| プリセット管理 | ✓ | 一覧/選択状態 |
 | 専用ハードウェアUI | ✓ | モード遷移 |
-| DSP処理のみ | ✗ | UMIP単体でOK |
-| 汎用UI（ホスト/カーネル提供） | ✗ | モジュールは関与しない |
-
-### ホスト/カーネルが管理する場合
-
-DAWやヘッドレス対応カーネルでは:
-
-```
-┌─────────────────────────────────────────────┐
-│  ホスト / カーネル                            │
-│  - 汎用UI（パラメータ選択）                   │
-│  - MIDI Learn                               │
-│  - プリセット管理                            │
-│  - params[] を読んで自動生成                 │
-└─────────────────────────────────────────────┘
-                    │
-                    ▼
-         ┌──────────────────┐
-         │  UMIP (ヘッドレス) │
-         │  params[] 公開    │
-         │  UMIC不要         │
-         └──────────────────┘
-```
+| DSP処理のみ | ✗ | 最小 main() でOK |
 
 ## MVCにおける位置づけ
 
-UMICは**Controller**に相当。
-
 ```
-┌─────────────────────────────────────────────┐
-│  アプリケーション層                           │
-│  ┌─────────────────┐  ┌─────────────────┐   │
-│  │  UMIP (Model)   │←─│  UMIC (Ctrl)    │   │
-│  │  DSP処理        │  │  UIロジック      │   │
-│  │  パラメータ値    │  │  UI状態         │   │
-│  └─────────────────┘  └─────────────────┘   │
-└─────────────────────────────────────────────┘
++-------------------------------------------------------------+
+|  Controller (main)       |  Model (Processor)               |
+|  +-- UI状態管理          |  +-- DSP処理                     |
+|  +-- イベントハンドリング |  +-- パラメータ値                |
+|  +-- Processor制御       |  +-- オーディオ生成              |
+|         |                          ^                        |
+|         +--------共有メモリ---------+                        |
++-------------------------------------------------------------+
 ```
 
-## Controllerインターフェース
+## プラットフォーム抽象化
 
-### 最小
+| 操作 | 組込み | Web (WASM) |
+|------|--------|------------|
+| `wait_event()` | syscall + ブロック | Asyncify |
+| `send_event()` | syscall | JS import |
+| `log()` | syscall → UART | console.log |
+| スレッド | 別タスク | AudioWorklet |
+
+## 最小実装
+
+### DSP専用（Control不要）
 
 ```cpp
-struct Controller {
-    Processor& proc;
+// main.cc
+#include <umi/app.hh>
+#include "volume.hh"
 
-    explicit Controller(Processor& p) : proc(p) {}
-};
-```
-
-Processorのパラメータ（メンバ変数）には `proc.` で直接アクセス。
-
-### オプションメソッド
-
-```cpp
-struct Controller {
-    Processor& proc;
-    explicit Controller(Processor& p) : proc(p) {}
-
-    // イベント処理（SysEx, Program Change等）
-    void on_events(std::span<const Event> events);
-
-    // UI入力
-    void on_encoder(int id, int delta);
-    void on_button(int id, bool pressed);
-
-    // 定期更新（メーター、スムージング等）
-    void update(float delta_time);
-
-    // 状態保存
-    size_t save_state(std::span<uint8_t> buffer);
-    bool load_state(std::span<const uint8_t> data);
-};
-```
-
-すべてのメソッドはオプション。必要なものだけ実装。
-
-## パラメータアクセス
-
-ControllerはProcessorのメンバ変数に直接アクセス。
-
-```cpp
-void on_encoder(int id, int delta) {
-    proc.volume += delta * 0.01f;  // 直接アクセス
+int main() {
+    static Volume vol;
+    umi::register_processor(vol);
+    
+    // イベントを待つだけ（処理は不要）
+    while (umi::wait_event().type != umi::EventType::Shutdown) {}
+    return 0;
 }
-```
-
-## イベント処理
-
-### 処理順序
-
-```
-MIDI IN → on_events() → process()
-              │              │
-           SysEx等       Note/CC
-```
-
-同じイベントリストがUMIC→UMIPの順で渡される。各層は必要なイベントのみ処理。
-
-### 実装例
-
-```cpp
-void SynthController::on_events(std::span<const Event> events) {
-    for (const auto& e : events) {
-        if (e.type != EventType::Midi) continue;
-
-        if (e.midi.is_sysex()) {
-            handle_sysex(e);
-        } else if (e.midi.is_program_change()) {
-            load_preset(e.midi.program());
-        } else if (midi_learn_active && e.midi.is_cc()) {
-            cc_mapping[e.midi.cc_number()] = selected_param;
-            midi_learn_active = false;
-        }
-        // Note, CC等はUMIPで処理
-    }
-}
-```
-
-## UI入力
-
-ハードウェア入力を抽象化。
-
-```cpp
-void SynthController::on_encoder(int id, int delta) {
-    // selected_param に応じてメンバに直接アクセス
-    switch (selected_param) {
-        case 0: proc.cutoff += delta * 10.0f; break;
-        case 1: proc.resonance += delta * 0.01f; break;
-    }
-}
-
-void SynthController::on_button(int id, bool pressed) {
-    if (id == LEARN_BUTTON && pressed) {
-        midi_learn_active = true;
-    }
-}
-```
-
-## 実装例
-
-### 最小のController
-
-```cpp
-struct VolumeController {
-    Volume& proc;
-
-    explicit VolumeController(Volume& p) : proc(p) {}
-};
 ```
 
 ### UI状態を持つController
 
 ```cpp
-struct SynthController {
-    Synth& proc;
+// main.cc
+#include <umi/app.hh>
+#include "synth.hh"
 
+int main() {
+    static Synth synth;
+    umi::register_processor(synth);
+    
     // UI状態
     int page = 0;
     int selected_param = 0;
     bool midi_learn_active = false;
-    std::array<int, 128> cc_mapping{};
-
-    explicit SynthController(Synth& p) : proc(p) {
-        cc_mapping[74] = 0;  // CC74 → Cutoff
+    
+    while (true) {
+        auto ev = umi::wait_event();
+        
+        switch (ev.type) {
+        case umi::EventType::Shutdown:
+            return 0;
+            
+        case umi::EventType::EncoderRotate:
+            synth.adjust_param(selected_param, ev.encoder.delta);
+            break;
+            
+        case umi::EventType::ButtonPress:
+            if (ev.button.id == BTN_LEARN) {
+                midi_learn_active = true;
+            }
+            break;
+            
+        case umi::EventType::MidiCC:
+            if (midi_learn_active) {
+                // CCマッピング
+                midi_learn_active = false;
+            }
+            break;
+        }
     }
+}
+```
 
-    void on_events(std::span<const Event> events);
-    void on_encoder(int id, int delta);
-    void on_button(int id, bool pressed);
+## コルーチンによる実装（推奨）
+
+C++20コルーチンを使用した、より読みやすい実装:
+
+```cpp
+// main.cc
+#include <umi/app.hh>
+#include <umi/coro.hh>
+#include "synth.hh"
+
+umi::Task<void> controller_task(Synth& synth) {
+    while (true) {
+        auto ev = co_await umi::wait_event_async();
+        if (ev.type == umi::EventType::Shutdown) co_return;
+        synth.handle_event(ev);
+    }
+}
+
+umi::Task<void> display_task(Synth& synth) {
+    while (true) {
+        co_await umi::sleep(33ms);  // 30fps
+        update_display(synth);
+    }
+}
+
+int main() {
+    static Synth synth;
+    umi::register_processor(synth);
+    
+    umi::Scheduler<4> sched;
+    sched.spawn(controller_task(synth));
+    sched.spawn(display_task(synth));
+    sched.run();
+    
+    return 0;
+}
+```
+
+## Processorとの通信
+
+### パラメータ変更
+
+```cpp
+// Control Task側
+void adjust_volume(float delta) {
+    float current = umi::get_param(PARAM_VOLUME);
+    umi::set_param(PARAM_VOLUME, current + delta);
+}
+
+// Processor側（process()内）
+void process(ProcessContext& ctx) {
+    float vol = params[PARAM_VOLUME];  // atomic load
+    // ...
+}
+```
+
+### イベント送信
+
+```cpp
+// Control -> Processor
+umi::send_to_processor(Event::param_change(PARAM_CUTOFF, value));
+
+// Processor -> Control
+ctx.send_to_control(Event::meter(channel, level));
+```
+
+## イベント処理
+
+### イベントタイプ
+
+```cpp
+namespace umi {
+enum class EventType {
+    Shutdown,
+    MidiNoteOn, MidiNoteOff, MidiCC, MidiPitchBend,
+    ParamChange,
+    EncoderRotate, ButtonPress, ButtonRelease,
+    DisplayUpdate, Meter,
 };
+}
+```
+
+### 処理フロー
+
+```
+ハードウェア入力
+       |
+       v
+カーネル/ホスト
+       |
+       +---> Processor (MIDI, Audio)
+       |
+       +---> Control (UI, パラメータ変更)
+                    |
+                    v
+              共有メモリ経由で Processor に反映
 ```
 
 ## ライセンス
 
 CC0 1.0 Universal (パブリックドメイン)
-
----
-
-**UMI-OS プロジェクト**
