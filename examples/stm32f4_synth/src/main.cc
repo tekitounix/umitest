@@ -333,11 +333,15 @@ constexpr uint32_t STEREO_BUF_SIZE = 128;
 int16_t stereo_buf[STEREO_BUF_SIZE];
 
 // Ring buffers for async timing between I2S DMA (~1.33ms/64samples) and USB SOF (1ms/48samples)
-// Size: 512 samples = ~10.6ms buffer at 48kHz
-constexpr uint32_t AUDIO_RING_SIZE = 512;
-constexpr uint32_t AUDIO_RING_TARGET = 256;  // Target level (middle)
-constexpr uint32_t AUDIO_RING_HIGH = 384;    // Above this: skip samples
-constexpr uint32_t AUDIO_RING_LOW = 128;     // Below this: duplicate samples
+// Optimized for low latency while maintaining stability:
+// - I2S DMA: 64 samples × 2 (double buffer) = 128 samples worst case
+// - USB SOF: 48 samples per frame
+// - Safety margin: ~32 samples
+// Size: 192 samples = 4ms buffer at 48kHz (was 512 = 10.6ms)
+constexpr uint32_t AUDIO_RING_SIZE = 192;
+constexpr uint32_t AUDIO_RING_TARGET = 96;   // Target level (2ms) - was 256 (5.3ms)
+constexpr uint32_t AUDIO_RING_HIGH = 144;    // Above this: skip samples (3ms)
+constexpr uint32_t AUDIO_RING_LOW = 48;      // Below this: duplicate samples (1ms)
 
 // Mic ring buffer
 int16_t mic_ring_buf[AUDIO_RING_SIZE];
@@ -356,6 +360,20 @@ int16_t synth_last_sample = 0;
 volatile uint32_t synth_underrun_count = 0;
 volatile uint32_t synth_skip_count = 0;  // Drift correction: samples skipped
 volatile uint32_t synth_dup_count = 0;   // Drift correction: samples duplicated
+
+// ============================================================================
+// Latency Measurement
+// ============================================================================
+// Buffer levels at each stage (in samples @ 48kHz)
+volatile uint32_t dbg_mic_ring_level = 0;     // mic_ring_buf level
+volatile uint32_t dbg_synth_ring_level = 0;   // synth_ring_buf level
+volatile uint32_t dbg_usb_in_level = 0;       // USB library in_ring_buffer_ level
+volatile uint32_t dbg_total_latency_us = 0;   // Calculated total latency in microseconds
+
+// Latency calculation:
+// - Each sample at 48kHz = 20.83us
+// - Total latency = (mic_ring_level + usb_in_level) * 20.83us
+// - For synth: synth_ring_level + usb_in_level
 
 // ============================================================================
 // USB Descriptors
@@ -531,7 +549,7 @@ void init_pdm_mic() {
     resampler_mic.reset();
 
     // Pre-fill ring buffers to target level for drift correction headroom
-    // Target = 256 samples (~5.3ms at 48kHz)
+    // Target = 96 samples (2ms at 48kHz) - optimized for low latency
     for (uint32_t i = 0; i < AUDIO_RING_TARGET; ++i) {
         mic_ring_buf[i] = 0;
         synth_ring_buf[i] = 0;
@@ -664,7 +682,7 @@ void process_pdm_buffer(uint16_t* pdm_data) {
 
 }  // namespace
 
-// Called from SysTick (1ms) - matches USB SOF timing
+// Called from USB SOF (1ms) - synchronized with USB host timing
 void send_audio_in_from_rings() {
     if (!usb_audio.is_audio_in_streaming()) {
         return;
@@ -677,6 +695,14 @@ void send_audio_in_from_rings() {
     uint32_t synth_level = (synth_ring_write >= synth_ring_read)
         ? (synth_ring_write - synth_ring_read)
         : (AUDIO_RING_SIZE - synth_ring_read + synth_ring_write);
+    
+    // Update debug latency measurements
+    dbg_mic_ring_level = mic_level;
+    dbg_synth_ring_level = synth_level;
+    dbg_usb_in_level = usb_audio.in_buffered_frames();
+    // Total latency in microseconds: (app_ring + usb_ring) * 1000000 / 48000
+    // Simplified: samples * 20.83us ≈ samples * 21
+    dbg_total_latency_us = (synth_level + dbg_usb_in_level) * 21;
     
     // Adaptive drift correction:
     // If buffer is filling up (producer faster), skip extra samples
