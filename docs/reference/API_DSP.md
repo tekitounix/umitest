@@ -141,19 +141,19 @@ float val = env();
 ```cpp
 void MyProcessor::process(umi::AudioContext& ctx) {
     // パラメータ変更があれば係数を再計算
-    if (param_changed_) {
-        filter_.set_params(cutoff_, resonance_, ctx.dt);
-        env_.set_params(a_, d_, s_, r_, ctx.dt);
-        param_changed_ = false;
+    if (param_changed) {
+        filter.set_params(cutoff, resonance, ctx.dt);
+        env.set_params(a, d, s, r, ctx.dt);
+        param_changed = false;
     }
     
     auto* out = ctx.output(0);
     for (uint32_t i = 0; i < ctx.buffer_size; ++i) {
         // operator() で簡潔に記述
-        float osc_out = osc_(freq_norm_);
-        float env_out = env_();
-        float flt_out = filter_(osc_out * env_out);
-        out[i] = flt_out * gain_;
+        float osc_out = osc(freq_norm);
+        float env_out = env();
+        float flt_out = filter(osc_out * env_out);
+        out[i] = flt_out * gain;
     }
 }
 ```

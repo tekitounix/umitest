@@ -41,7 +41,7 @@ void long_function(
 
 // AllowShortFunctionsOnASingleLine: Inline
 // 短い関数はインライン可
-int get() const { return value_; }
+int get() const { return value; }
 ```
 
 ### テンプレート・Concepts
@@ -135,7 +135,7 @@ public:
     void method();  // EmptyLineAfterAccessModifier: Never
     
 private:            // EmptyLineBeforeAccessModifier: LogicalBlock
-    int member_;
+    int member;
 };
 ```
 
@@ -149,7 +149,7 @@ private:            // EmptyLineBeforeAccessModifier: LogicalBlock
 |------|----------|-----|
 | 関数・メソッド | `lower_case` | `process_audio()`, `get_value()` |
 | 変数・パラメータ | `lower_case` | `sample_rate`, `buffer_size` |
-| メンバ変数 | `lower_case` | `gain_`, `cutoff` |
+| メンバ変数 | `lower_case` | `gain`, `cutoff`, `phase` |
 | グローバル変数 | `lower_case` | `g_instance` |
 | 静的変数 | `lower_case` | `s_counter` |
 | 定数 (constexpr) | `lower_case` | `max_voices`, `default_gain` |
@@ -161,6 +161,47 @@ private:            // EmptyLineBeforeAccessModifier: LogicalBlock
 | 列挙値 | `UPPER_CASE` | `NOTE_ON`, `CONTROL_CHANGE` |
 | スコープ付き列挙値 | `UPPER_CASE` | `WaveType::SINE` |
 | 名前空間 | `lower_case` | `umi::dsp`, `umi::kernel` |
+
+### メンバ変数の命名
+
+**プレフィックス/サフィックスは使用しない**:
+
+```cpp
+// ✅ 正しい
+class Filter {
+private:
+    float cutoff = 1000.0f;
+    float resonance = 0.5f;
+};
+
+// ❌ 間違い（アンダースコアサフィックス）
+class Filter {
+private:
+    float cutoff_ = 1000.0f;
+    float resonance_ = 0.5f;
+};
+
+// ❌ 間違い（m_ プレフィックス）
+class Filter {
+private:
+    float m_cutoff = 1000.0f;
+    float m_resonance = 0.5f;
+};
+```
+
+**パラメータとの名前衝突時は `this->` を使用**:
+
+```cpp
+class Oscillator {
+public:
+    void set_frequency(float frequency) {
+        this->frequency = frequency;  // ✅ this-> で解決
+    }
+    
+private:
+    float frequency = 440.0f;
+};
+```
 
 ### コード例
 
@@ -175,8 +216,8 @@ public:
     void reset();
     
 private:
-    // メンバ: lower_case
-    float phase_ = 0.0f;
+    // メンバ: lower_case（サフィックスなし）
+    float phase = 0.0f;
 };
 
 // 列挙型: CamelCase, 列挙値: UPPER_CASE

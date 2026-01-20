@@ -459,11 +459,11 @@ public:
     
     // Controller から呼ばれる（パラメータ変更）
     void set_cutoff(float value) {
-        cutoff_.store(value, std::memory_order_relaxed);
+        cutoff.store(value, std::memory_order_relaxed);
     }
 
 private:
-    std::atomic<float> cutoff_{1000.0f};
+    std::atomic<float> cutoff{1000.0f};
 };
 ```
 

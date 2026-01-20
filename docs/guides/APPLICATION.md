@@ -74,22 +74,22 @@ struct Delay {
         if (!in || !out) return;
 
         size_t delay_samples = static_cast<size_t>(time * ctx.sample_rate);
-        delay_samples = std::min(delay_samples, buffer_.size() - 1);
+        delay_samples = std::min(delay_samples, buffer.size() - 1);
 
         for (uint32_t i = 0; i < ctx.buffer_size; ++i) {
-            float delayed = buffer_[read_pos_];
-            buffer_[write_pos_] = in[i] + delayed * feedback;
+            float delayed = buffer[read_pos];
+            buffer[write_pos] = in[i] + delayed * feedback;
             out[i] = in[i] * (1.0f - mix) + delayed * mix;
 
-            write_pos_ = (write_pos_ + 1) % buffer_.size();
-            read_pos_ = (write_pos_ + buffer_.size() - delay_samples) % buffer_.size();
+            write_pos = (write_pos + 1) % buffer.size();
+            read_pos = (write_pos + buffer.size() - delay_samples) % buffer.size();
         }
     }
 
 private:
-    std::array<float, 96000> buffer_{};  // 最大2秒@48kHz
-    size_t write_pos_ = 0;
-    size_t read_pos_ = 0;
+    std::array<float, 96000> buffer{};  // 最大2秒@48kHz
+    size_t write_pos = 0;
+    size_t read_pos = 0;
 };
 
 int main() {
@@ -124,25 +124,25 @@ struct Synth {
         // MIDIイベント処理
         for (const auto& e : ctx.input_events) {
             if (e.is_note_on()) {
-                freq_ = umi::dsp::midi_to_freq(e.note());
-                env_.trigger();
+                freq = umi::dsp::midi_to_freq(e.note());
+                env.trigger();
             } else if (e.is_note_off()) {
-                env_.release();
+                env.release();
             }
         }
 
         // オーディオ生成
-        float freq_norm = freq_ * ctx.dt;
+        float freq_norm = freq * ctx.dt;
         
         for (uint32_t i = 0; i < ctx.buffer_size; ++i) {
-            out[i] = osc_.tick(freq_norm) * env_.tick(ctx.dt);
+            out[i] = osc.tick(freq_norm) * env.tick(ctx.dt);
         }
     }
 
 private:
-    umi::dsp::SawBL osc_;
-    umi::dsp::ADSR env_;
-    float freq_ = 440.0f;
+    umi::dsp::SawBL osc;
+    umi::dsp::ADSR env;
+    float freq = 440.0f;
 };
 
 int main() {
@@ -277,12 +277,12 @@ struct VCO {
             float freq = frequency * std::pow(2.0f, pitch_mod + fm_mod);
             float freq_norm = freq * ctx.dt;
 
-            out[i] = osc_.tick(freq_norm);
+            out[i] = osc.tick(freq_norm);
         }
     }
 
 private:
-    umi::dsp::SawBL osc_;
+    umi::dsp::SawBL osc;
 };
 ```
 
@@ -305,14 +305,14 @@ struct VCF {
             float freq = cutoff * std::pow(2.0f, mod);
             float freq_norm = freq * ctx.dt;
             
-            svf_.set_params(freq_norm, resonance);
-            svf_.tick(in[i]);
-            out[i] = svf_.lp();
+            svf.set_params(freq_norm, resonance);
+            svf.tick(in[i]);
+            out[i] = svf.lp();
         }
     }
 
 private:
-    umi::dsp::SVF svf_;
+    umi::dsp::SVF svf;
 };
 ```
 
