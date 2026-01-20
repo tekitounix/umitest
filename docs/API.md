@@ -1229,6 +1229,407 @@ umi::set_motor(MOTOR_CH0, 0.75f);   // 正転75%
 umi::set_motor(MOTOR_CH0, -0.5f);   // 逆転50%
 ```
 
+---
+
+## ハードウェア出力の実装詳細
+
+アプリのAPI呼び出しがどのように共有メモリを経由してハードウェアに反映されるかを解説します。
+
+### 出力方式の分類
+
+| 方式 | 特徴 | 用途 | 例 |
+|------|------|------|-----|
+| **即時syscall** | 即座にHW反映 | 低レイテンシ | LED, GPIO |
+| **共有メモリ + flush** | バッファリング | 大量データ | Display |
+| **共有メモリ + 定期転送** | カーネルがポーリング | 連続更新 | RGB Strip |
+
+### 即時syscall方式（LED, GPIO）
+
+`set_led()` はsyscallを発行し、カーネルが即座にGPIOを操作します。
+
+```cpp
+// ===== アプリ側 (lib/umi/hw_output.cc) =====
+
+void umi::set_led(uint8_t id, bool on) {
+    // syscall #20: SET_LED
+    syscall(SYS_SET_LED, id, on ? 1 : 0);
+}
+
+void umi::toggle_led(uint8_t id) {
+    syscall(SYS_TOGGLE_LED, id);
+}
+
+void umi::set_gpio(uint8_t pin, bool value) {
+    syscall(SYS_SET_GPIO, pin, value ? 1 : 0);
+}
+```
+
+```cpp
+// ===== カーネル側 (lib/umios/kernel/syscall_handler.cc) =====
+
+uint32_t handle_syscall(uint32_t num, uint32_t r0, uint32_t r1, uint32_t r2) {
+    switch (num) {
+    case SYS_SET_LED: {
+        uint8_t id = r0;
+        bool on = r1 != 0;
+        
+        // BSPのLED設定を取得
+        auto& led = bsp::get_led(id);
+        if (on) {
+            led.port->BSRR = led.pin;      // Set
+        } else {
+            led.port->BSRR = led.pin << 16; // Reset
+        }
+        return 0;
+    }
+    
+    case SYS_TOGGLE_LED: {
+        uint8_t id = r0;
+        auto& led = bsp::get_led(id);
+        led.port->ODR ^= led.pin;
+        return 0;
+    }
+    // ...
+    }
+}
+```
+
+```cpp
+// ===== BSP側 (lib/bsp/my_board/leds.cc) =====
+
+namespace bsp {
+
+struct LedConfig {
+    GPIO_TypeDef* port;
+    uint16_t pin;
+};
+
+// ボード固有のLED配置
+static constexpr LedConfig leds[] = {
+    { GPIOA, GPIO_PIN_5 },   // LED0: PA5
+    { GPIOB, GPIO_PIN_0 },   // LED1: PB0
+    { GPIOB, GPIO_PIN_1 },   // LED2: PB1
+};
+
+const LedConfig& get_led(uint8_t id) {
+    return leds[id % std::size(leds)];
+}
+
+}
+```
+
+### 呼び出しフロー（set_led）
+
+```
+Application                 Kernel                      Hardware
+    │                          │                           │
+    │  umi::set_led(0, true)   │                           │
+    │─────────────────────────>│                           │
+    │  SVC #0 (syscall)        │                           │
+    │         ┌────────────────┤                           │
+    │         │ SVC_Handler    │                           │
+    │         │ switch(SYS_SET_LED)                        │
+    │         │ bsp::get_led(0)│                           │
+    │         │ GPIOA->BSRR = PIN_5                        │
+    │         │                │──────────────────────────>│
+    │         │                │  GPIO PA5 = HIGH          │
+    │         └────────────────┤                           │
+    │<─────────────────────────│                           │
+    │  return                  │                           │
+```
+
+### RGB LED（PWM方式）
+
+```cpp
+// ===== アプリ側 =====
+
+void umi::set_rgb(uint8_t id, uint8_t r, uint8_t g, uint8_t b) {
+    // 3つのPWMチャンネルを設定
+    syscall(SYS_SET_RGB, id, (r << 16) | (g << 8) | b);
+}
+
+void umi::set_hsv(uint8_t id, uint8_t h, uint8_t s, uint8_t v) {
+    auto [r, g, b] = hsv_to_rgb(h, s, v);
+    set_rgb(id, r, g, b);
+}
+```
+
+```cpp
+// ===== カーネル側 =====
+
+case SYS_SET_RGB: {
+    uint8_t id = r0;
+    uint8_t r = (r1 >> 16) & 0xFF;
+    uint8_t g = (r1 >> 8) & 0xFF;
+    uint8_t b = r1 & 0xFF;
+    
+    auto& rgb = bsp::get_rgb_led(id);
+    rgb.tim->CCR1 = r;  // Red PWM
+    rgb.tim->CCR2 = g;  // Green PWM
+    rgb.tim->CCR3 = b;  // Blue PWM
+    return 0;
+}
+```
+
+### RGB Strip（WS2812 - 共有メモリ + DMA）
+
+WS2812はタイミングがシビアなのでDMA転送を使用。
+
+```cpp
+// ===== 共有メモリ構造 =====
+
+struct SharedRegion {
+    // ...
+    struct {
+        uint8_t data[MAX_LEDS * 3];   // GRB順
+        uint16_t num_leds;
+        std::atomic<bool> dirty;
+    } rgb_strip;
+};
+```
+
+```cpp
+// ===== アプリ側 =====
+
+class RgbStrip {
+    uint8_t* data_;      // → shared.rgb_strip.data
+    uint16_t num_leds_;
+    
+public:
+    void set(int index, Color c) {
+        // 共有メモリに直接書き込み（GRB順）
+        data_[index * 3 + 0] = c.g;
+        data_[index * 3 + 1] = c.r;
+        data_[index * 3 + 2] = c.b;
+    }
+    
+    void show() {
+        // dirtyフラグを立てて転送を依頼
+        g_shared->rgb_strip.dirty.store(true, std::memory_order_release);
+        syscall(SYS_RGB_STRIP_SHOW);
+    }
+};
+```
+
+```cpp
+// ===== カーネル側 =====
+
+case SYS_RGB_STRIP_SHOW: {
+    if (g_shared.rgb_strip.dirty.load(std::memory_order_acquire)) {
+        // GRBデータ → PWMタイミングデータに変換
+        convert_to_ws2812_timing(
+            g_shared.rgb_strip.data,
+            g_shared.rgb_strip.num_leds,
+            dma_buffer
+        );
+        
+        // DMA転送開始
+        start_ws2812_dma(dma_buffer, dma_buffer_size);
+        
+        g_shared.rgb_strip.dirty.store(false);
+    }
+    return 0;
+}
+
+// WS2812タイミング: 0=T0H(0.4us)+T0L(0.85us), 1=T1H(0.8us)+T1L(0.45us)
+void convert_to_ws2812_timing(const uint8_t* grb, uint16_t num_leds, uint16_t* out) {
+    for (int i = 0; i < num_leds * 3; ++i) {
+        uint8_t byte = grb[i];
+        for (int bit = 7; bit >= 0; --bit) {
+            *out++ = (byte & (1 << bit)) ? PWM_ONE : PWM_ZERO;
+        }
+    }
+}
+```
+
+### ディスプレイ（共有メモリ + flush）
+
+ディスプレイはフレームバッファを共有メモリに持ち、flush()でDMA転送。
+
+```cpp
+// ===== 共有メモリ構造 =====
+
+struct SharedRegion {
+    // ...
+    struct {
+        uint8_t buffer[2][128 * 64 / 8];  // ダブルバッファ
+        std::atomic<int> front;            // 表示中バッファ
+        std::atomic<int> back;             // 描画中バッファ
+        std::atomic<uint32_t> dirty_rect;  // 更新領域
+    } oled;
+};
+```
+
+```cpp
+// ===== アプリ側 =====
+
+class OledDisplay {
+    uint8_t* buffer_;  // → shared.oled.buffer[back]
+    
+public:
+    void draw_pixel(int x, int y, bool on) {
+        int byte_idx = x + (y / 8) * 128;
+        int bit = y % 8;
+        if (on) {
+            buffer_[byte_idx] |= (1 << bit);
+        } else {
+            buffer_[byte_idx] &= ~(1 << bit);
+        }
+    }
+    
+    void draw_text(int x, int y, const char* text) {
+        // フォントを使って描画...
+    }
+    
+    void flush() {
+        // 全画面dirty
+        g_shared->oled.dirty_rect.store(0xFFFFFFFF);
+        syscall(SYS_DISPLAY_FLUSH, DISPLAY_OLED);
+    }
+    
+    void swap() {
+        // バッファ切り替え + 転送
+        int old_back = g_shared->oled.back.load();
+        g_shared->oled.back.store(g_shared->oled.front.load());
+        g_shared->oled.front.store(old_back);
+        syscall(SYS_DISPLAY_FLUSH, DISPLAY_OLED);
+    }
+};
+```
+
+```cpp
+// ===== カーネル側 =====
+
+case SYS_DISPLAY_FLUSH: {
+    DisplayType type = static_cast<DisplayType>(r0);
+    
+    switch (type) {
+    case DISPLAY_OLED: {
+        int front = g_shared.oled.front.load();
+        uint8_t* data = g_shared.oled.buffer[front];
+        
+        // I2C/SPI DMA転送
+        oled_driver.send_buffer_async(data, 128 * 64 / 8);
+        break;
+    }
+    case DISPLAY_LCD: {
+        // SPI DMA転送（RGB565）
+        lcd_driver.send_buffer_async(
+            g_shared.lcd.buffer,
+            320 * 240 * 2
+        );
+        break;
+    }
+    }
+    return 0;
+}
+```
+
+### 呼び出しフロー（ディスプレイ）
+
+```
+Application                 Shared Memory              Kernel                 Hardware
+    │                           │                         │                       │
+    │  disp.draw_text(...)      │                         │                       │
+    │────────────────────────>  │                         │                       │
+    │  buffer[back]に書き込み   │                         │                       │
+    │                           │                         │                       │
+    │  disp.flush()             │                         │                       │
+    │  dirty_rect = 0xFFFF      │                         │                       │
+    │────────────────────────>  │                         │                       │
+    │  syscall(DISPLAY_FLUSH)   │                         │                       │
+    │───────────────────────────────────────────────────> │                       │
+    │                           │  buffer[front]を読み取り│                       │
+    │                           │<────────────────────────│                       │
+    │                           │                         │ SPI DMA転送開始       │
+    │                           │                         │──────────────────────>│
+    │<──────────────────────────────────────────────────  │                       │
+    │  return（DMA完了を待たない）                        │       非同期転送中    │
+    │                           │                         │                       │
+    │  次の描画開始             │                         │                       │
+    │  buffer[back]に書き込み   │                         │                       │
+    │────────────────────────>  │                         │                       │
+```
+
+### 定期転送方式（オプション）
+
+syscallを呼ばずに、カーネルが定期的に共有メモリをチェックして転送する方式。
+
+```cpp
+// カーネルの定期タスク（1ms周期）
+void Kernel::periodic_hw_update() {
+    // RGB Stripのdirtyチェック
+    if (g_shared.rgb_strip.dirty.load(std::memory_order_acquire)) {
+        // DMA転送開始（前回の転送完了を待つ）
+        if (!ws2812_dma_busy()) {
+            start_ws2812_dma(...);
+            g_shared.rgb_strip.dirty.store(false);
+        }
+    }
+    
+    // OLEDのdirtyチェック（30fps制限）
+    if (g_shared.oled.dirty_rect.load() && oled_refresh_due()) {
+        start_oled_dma(...);
+        g_shared.oled.dirty_rect.store(0);
+    }
+}
+```
+
+### プラットフォーム別実装
+
+```cpp
+// ===== Web (WASM) =====
+
+// set_led → JavaScriptコールバック
+void umi::set_led(uint8_t id, bool on) {
+    // WASMからJSを呼び出し
+    EM_ASM({
+        window.umiHardware.setLed($0, $1);
+    }, id, on);
+}
+
+// JavaScript側
+class UmiHardwareEmulator {
+    setLed(id, on) {
+        const led = document.querySelector(`#led-${id}`);
+        led.classList.toggle('on', on);
+    }
+    
+    setRgb(id, r, g, b) {
+        const led = document.querySelector(`#rgb-led-${id}`);
+        led.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+    }
+}
+```
+
+```cpp
+// ===== Desktop =====
+
+// set_led → 何もしない（またはログ）
+void umi::set_led(uint8_t id, bool on) {
+    #ifdef DEBUG_HW
+    printf("LED[%d] = %s\n", id, on ? "ON" : "OFF");
+    #endif
+}
+
+// ディスプレイ → Windowに描画
+void OledDisplay::flush() {
+    // SDL/OpenGLウィンドウにテクスチャとして転送
+    desktop_window.update_texture(buffer_, 128, 64);
+}
+```
+
+### 実装選択ガイド
+
+| 出力タイプ | 推奨方式 | 理由 |
+|------------|----------|------|
+| LED ON/OFF | 即時syscall | 低レイテンシが必要 |
+| RGB LED単体 | 即時syscall (PWM) | 簡単、即座に反映 |
+| RGB Strip | 共有メモリ + syscall | DMA転送が必要 |
+| 7セグ | 即時syscall | 即座に反映 |
+| OLED/LCD | 共有メモリ + flush | フレームバッファが必要 |
+| PWM/サーボ | 即時syscall | 即座に反映 |
+
 ### process() 内でのハードウェアアクセス
 
 **禁止**: process() 内でsyscallは使用できません。
