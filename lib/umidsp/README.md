@@ -1,19 +1,38 @@
-# umidsp - Dependency-free DSP building blocks
+# umidsp - Audio DSP Library
 
-Audio synthesis and processing components for embedded and real-time use.
+Audio synthesis, processing, and sample rate conversion for embedded and real-time use.
 
 ## Features
 
 - No external dependencies (pure C++ standard library)
 - Inlinable `tick()` methods for hot path optimization
 - No virtual functions or heap allocations
+- Production-quality ASRC with PI rate control
+
+## Structure
+
+```
+include/
+├── umidsp.hh              # Main header (includes everything)
+├── core/                  # Primitives
+│   ├── constants.hh       # Pi, TwoPi
+│   ├── interpolate.hh     # Linear, Cubic, Sinc4
+│   ├── phase.hh           # Phase accumulators
+│   └── pi_controller.hh   # PI rate controller
+├── synth/                 # Synthesis
+│   ├── oscillator.hh      # Sine, Saw, Pulse, etc.
+│   ├── filter.hh          # OnePole, Biquad
+│   └── envelope.hh        # ADSR
+└── rate/                  # Sample rate conversion
+    └── asrc.hh            # ASRC processor
+```
 
 ## Quick Start
 
 ```cpp
-#include <dsp.hh>
+#include <umidsp/umidsp.hh>
 
-using namespace umi::dsp;
+using namespace umidsp;
 
 SawBL osc;
 ADSR env;

@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <dsp.hh>
+#include <umidsp/umidsp.hh>
 #include <cstdint>
 #include <cstddef>
 

@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <span>
 #include <array>
-#include <asrc.hh>  // umidsp ASRC components
+#include <umidsp/audio/rate/asrc.hh>
 
 namespace umiusb {
 

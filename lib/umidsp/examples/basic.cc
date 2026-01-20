@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Basic umidsp example - Simple synth voice
 
-#include <dsp.hh>
+#include <umidsp/umidsp.hh>
 #include <cstdio>
 
 using namespace umi::dsp;

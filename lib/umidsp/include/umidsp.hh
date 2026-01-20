@@ -1,8 +1,17 @@
 // SPDX-License-Identifier: MIT
-// UMI-OS - DSP Module
+// UMI-DSP: Digital Signal Processing Library
 //
-// This header includes all DSP building blocks.
+// This header includes all DSP components.
 // All components are dependency-free and can be used in any C++ project.
+//
+// Structure:
+//   core/        - Primitive building blocks (domain-independent)
+//   filter/      - Filter implementations (shared by audio/video)
+//   audio/       - Audio-specific DSP
+//     synth/     - Synthesis (oscillator, envelope)
+//     fx/        - Effects (delay, reverb, etc.)
+//     rate/      - Sample rate conversion (ASRC)
+//   video/       - Video/image processing (future)
 //
 // Design principles:
 // - No UMI-OS dependencies (pure C++ standard)
@@ -10,15 +19,25 @@
 // - Inlinable tick() methods
 // - Concrete classes (no virtual functions)
 // - Template-based polymorphism when needed
-
 #pragma once
 
-#include "constants.hh"
-#include "oscillator.hh"
-#include "filter.hh"
-#include "envelope.hh"
+// Core primitives (domain-independent)
+#include "core/constants.hh"
+#include "core/interpolate.hh"
+#include "core/phase.hh"
 
-namespace umi::dsp {
+// Filters (shared)
+#include "filter/filter.hh"
+
+// Audio: Synthesis
+#include "audio/synth/oscillator.hh"
+#include "audio/synth/envelope.hh"
+
+// Audio: Sample rate conversion
+#include "audio/rate/pi_controller.hh"
+#include "audio/rate/asrc.hh"
+
+namespace umidsp {
 
 // ============================================================================
 // Utility Functions
@@ -49,19 +68,9 @@ namespace umi::dsp {
     return x;
 }
 
-/// Linear interpolation
-[[nodiscard]] inline constexpr float lerp(float a, float b, float t) noexcept {
-    return a + t * (b - a);
-}
+}  // namespace umidsp
 
-/// Convert decibels to linear gain
-[[nodiscard]] inline float db_to_gain(float db) noexcept {
-    return std::pow(10.0f, db / 20.0f);
+// Legacy namespace alias for backward compatibility
+namespace umi::dsp {
+using namespace umidsp;
 }
-
-/// Convert linear gain to decibels
-[[nodiscard]] inline float gain_to_db(float gain) noexcept {
-    return 20.0f * std::log10(gain);
-}
-
-} // namespace umi::dsp

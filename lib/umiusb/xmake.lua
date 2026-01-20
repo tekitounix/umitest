@@ -7,8 +7,8 @@ target("umiusb")
 
     add_includedirs("include", {public = true})
 
-    -- Depend on umidsp for ASRC components
-    add_deps("umidsp")
+    -- Depend on umi.dsp for ASRC components
+    add_deps("umi.dsp")
 
     -- Require C++23 for concepts and constexpr features
     set_languages("c++23")

@@ -7,7 +7,7 @@
 #pragma once
 
 #include <cmath>
-#include "constants.hh"
+#include "../../core/constants.hh"
 
 namespace umi::dsp {
 
