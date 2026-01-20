@@ -181,7 +181,7 @@ void adjust_volume(float delta) {
 }
 
 // Processor側（process()内）
-void process(ProcessContext& ctx) {
+void process(AudioContext& ctx) {
     float vol = params[PARAM_VOLUME];  // atomic load
     // ...
 }

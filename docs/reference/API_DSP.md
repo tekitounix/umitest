@@ -139,16 +139,16 @@ float val = env();
 ## 使用例
 
 ```cpp
-void MyProcessor::process(umi::ProcessContext& ctx) {
+void MyProcessor::process(umi::AudioContext& ctx) {
     // パラメータ変更があれば係数を再計算
     if (param_changed_) {
-        filter_.set_params(cutoff_, resonance_, ctx.dt());
-        env_.set_params(a_, d_, s_, r_, ctx.dt());
+        filter_.set_params(cutoff_, resonance_, ctx.dt);
+        env_.set_params(a_, d_, s_, r_, ctx.dt);
         param_changed_ = false;
     }
     
     auto* out = ctx.output(0);
-    for (uint32_t i = 0; i < ctx.frames(); ++i) {
+    for (uint32_t i = 0; i < ctx.buffer_size; ++i) {
         // operator() で簡潔に記述
         float osc_out = osc_(freq_norm_);
         float env_out = env_();

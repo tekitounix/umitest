@@ -155,13 +155,13 @@ int main() {
 
 class Synth {
 public:
-    void process(umi::ProcessContext& ctx) {
-        for (const auto& ev : ctx.events()) {
+    void process(umi::AudioContext& ctx) {
+        for (const auto& ev : ctx.input_events) {
             if (ev.is_note_on()) note_on(ev);
         }
         
         auto* out = ctx.output(0);
-        for (uint32_t i = 0; i < ctx.frames(); ++i) {
+        for (uint32_t i = 0; i < ctx.buffer_size; ++i) {
             out[i] = generate();
         }
     }
