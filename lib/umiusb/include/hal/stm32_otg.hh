@@ -246,7 +246,7 @@ public:
 
 public:
     void init() {
-        // Select FS embedded PHY
+        // Select FS embedded PHY (must be set before core reset for proper PHY selection)
         Regs::reg(Regs::GUSBCFG) |= otg::GUSBCFG_PHYSEL;
 
         // Core soft reset
@@ -258,8 +258,8 @@ public:
         // Activate transceiver
         Regs::reg(Regs::GCCFG) |= otg::GCCFG_PWRDWN;
 
-        // Force device mode
-        Regs::reg(Regs::GUSBCFG) |= otg::GUSBCFG_FDMOD | otg::GUSBCFG_TRDT(6);
+        // Force device mode and re-select FS PHY (PHYSEL is cleared by core reset)
+        Regs::reg(Regs::GUSBCFG) |= otg::GUSBCFG_PHYSEL | otg::GUSBCFG_FDMOD | otg::GUSBCFG_TRDT(6);
         delay(50000);  // Wait for mode switch
 
         // Soft disconnect
