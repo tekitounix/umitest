@@ -631,6 +631,107 @@ EMSCRIPTEN_KEEPALIVE void umi_push_event(uint32_t type, const uint8_t* data, uin
 | イベント待ち | syscall（ブロック） | Asyncify（yield） |
 | ビルド | arm-none-eabi-gcc | emscripten |
 
+#### コルーチンサポート
+
+Control Task（main）内でC++20コルーチンが使用可能。`lib/umios/kernel/coro.hh` に実装済み。
+
+```cpp
+// アプリでのコルーチン使用例
+#include <umi/app.hh>
+#include <umi/coro.hh>
+
+using namespace umi::coro;
+using namespace umi::coro::literals;
+
+// LEDブリンクをコルーチンで
+Task<void> led_task(SchedulerContext<8>& ctx) {
+    while (true) {
+        led_toggle();
+        co_await ctx.sleep(500ms);
+    }
+}
+
+// MIDIハンドラをコルーチンで
+Task<void> midi_task(SchedulerContext<8>& ctx) {
+    while (true) {
+        co_await ctx.wait_for(KernelEvent::MidiReady);
+        process_midi();
+    }
+}
+
+int main() {
+    static MySynth synth;
+    umi::register_processor(synth);
+    
+    // コルーチンスケジューラ
+    Scheduler<8> sched(umi::syscall::wait, umi::syscall::get_time);
+    SchedulerContext ctx(sched);
+    
+    sched.spawn(led_task(ctx));
+    sched.spawn(midi_task(ctx));
+    
+    sched.run();  // [[noreturn]]
+}
+```
+
+**コルーチン機能**:
+- `Task<T>`: コルーチン戻り値型
+- `co_await ctx.sleep(duration)`: 非ブロッキングスリープ
+- `co_await ctx.wait_for(mask)`: イベント待ち
+- `co_await 100ms`: chrono literalsで直接待機
+
+#### カーネルによるアプリロード
+
+```cpp
+// kernel/app_loader.cc
+
+struct AppHeader {
+    uint32_t magic;         // 0x414D4955 ("UMIA")
+    uint32_t version;
+    uint32_t entry_offset;  // _start のオフセット
+    uint32_t text_size;
+    uint32_t data_size;
+    uint32_t bss_size;
+    uint32_t stack_size;
+    uint32_t crc32;
+    uint8_t signature[64];  // Ed25519（製品アプリのみ）
+};
+
+TaskId load_and_start_app(const uint8_t* image, size_t size) {
+    auto* header = reinterpret_cast<const AppHeader*>(image);
+    
+    // 1. 検証（magic, CRC, 署名）
+    if (!validate_app_header(header, size)) return {};
+    
+    // 2. メモリ確保・コピー
+    void* code = allocate_app_code(header->text_size);
+    void* data = allocate_app_data(header->data_size + header->bss_size);
+    void* stack = allocate_app_stack(header->stack_size);
+    
+    load_sections(image, header, code, data);
+    
+    // 3. MPU設定
+    mpu::configure_app_regions(code, data, stack, header);
+    
+    // 4. Control Task として起動
+    auto _start = reinterpret_cast<void(*)(void)>(
+        reinterpret_cast<uintptr_t>(code) + header->entry_offset
+    );
+    
+    TaskConfig cfg{
+        .entry = [](void* arg) {
+            reinterpret_cast<void(*)(void)>(arg)();
+        },
+        .arg = reinterpret_cast<void*>(_start),
+        .prio = Priority::User,
+        .uses_fpu = true,
+        .name = "app",
+    };
+    
+    return kernel.create_task(cfg);
+}
+```
+
 ### 4.3 ドライバ（開発版のみ）
 
 ドライバはハードウェアアクセスが必要なためネイティブコード + MPU。
