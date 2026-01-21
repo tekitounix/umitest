@@ -64,6 +64,18 @@ target("umi.embedded")
 target_end()
 
 -- =====================================================================
+-- UMI-OS Kernel Components
+-- =====================================================================
+
+target("umi.kernel")
+    set_kind("headeronly")
+    set_group("umi")
+    add_deps("umi.core")
+
+    add_includedirs(path.join(lib_dir, "umios/kernel"), {public = true})
+target_end()
+
+-- =====================================================================
 -- UMI DSP Library
 -- =====================================================================
 
@@ -98,6 +110,18 @@ target("umi.boot")
 target_end()
 
 -- =====================================================================
+-- UMI USB Library
+-- =====================================================================
+
+target("umi.usb")
+    set_kind("headeronly")
+    set_group("umi")
+    add_deps("umi.dsp")  -- ASRC components
+
+    add_includedirs(path.join(lib_dir, "umiusb/include"), {public = true})
+target_end()
+
+-- =====================================================================
 -- Convenience Targets (bundles)
 -- =====================================================================
 
@@ -112,7 +136,7 @@ target_end()
 target("umi.embedded.full")
     set_kind("headeronly")
     set_group("umi")
-    add_deps("umi.embedded", "umi.dsp", "umi.midi", "umi.boot")
+    add_deps("umi.embedded", "umi.dsp", "umi.midi", "umi.boot", "umi.usb")
 target_end()
 
 -- All UMI libraries (for tests)

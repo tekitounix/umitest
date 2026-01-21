@@ -104,6 +104,7 @@ for _, test in ipairs({
     {"test_midi", "tests/test_midi.cc"},
     {"test_midi_lib", "tests/test_midi_lib.cc"},
     {"test_umidi_comprehensive", "tests/test_umidi_comprehensive.cc"},
+    {"test_concepts", "tests/test_concepts.cc"},
 }) do
     target(test[1])
         add_rules("host.test")
@@ -258,6 +259,13 @@ end  -- if has_emscripten
 -- =====================================================================
 
 includes("examples/stm32f4_synth")
+
+-- =====================================================================
+-- STM32F4 Kernel + Application (Separated Architecture)
+-- =====================================================================
+
+includes("examples/stm32f4_kernel")
+includes("examples/synth_app")
 
 -- =====================================================================
 -- Tasks
