@@ -182,7 +182,8 @@ private:
     int32_t prev_error_ = 0;
 };
 
-// Default USB Audio configuration
-using UsbAudioPiController = PiRateControllerT<128, 8, 1000, 2, 1, 1, 50, 25000>;
+// Default USB Audio configuration (balanced: moderate jitter, reasonable settling)
+// Parameters: TargetLevel=128, Hysteresis=8, MaxPpm=500, Kp=1/1, Ki=1/75, IntegralMax=40000
+using UsbAudioPiController = PiRateControllerT<128, 8, 500, 1, 1, 1, 75, 40000>;
 
 }  // namespace umidsp

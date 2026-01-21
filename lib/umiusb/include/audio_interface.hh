@@ -797,9 +797,10 @@ private:
     uint8_t pending_set_ctrl_ = 0;
     uint8_t pending_set_len_ = 0;
 
-    // Audio processing
-    AudioRingBuffer<256, HAS_AUDIO_OUT ? AudioOut::CHANNELS : 2> out_ring_buffer_;
-    AudioRingBuffer<256, HAS_AUDIO_IN ? AudioIn::CHANNELS : 2> in_ring_buffer_;
+    // Audio processing - smaller ring buffers for lower latency
+    // 128 frames = ~2.67ms at 48kHz
+    AudioRingBuffer<128, HAS_AUDIO_OUT ? AudioOut::CHANNELS : 2> out_ring_buffer_;
+    AudioRingBuffer<128, HAS_AUDIO_IN ? AudioIn::CHANNELS : 2> in_ring_buffer_;
     FeedbackCalculator<Version> feedback_calc_;
     PllRateController pll_controller_;
     PllRateController in_pll_controller_;  // ASRC for Audio IN

@@ -245,7 +245,8 @@ class AudioRingBuffer {
 public:
     static_assert((Frames & (Frames - 1)) == 0, "Frames must be power of 2");
     static constexpr uint32_t MASK = Frames - 1;
-    static constexpr uint32_t PREBUFFER_FRAMES = Frames / 2;
+    // Lower prebuffer for reduced latency (was Frames/2, now Frames/4)
+    static constexpr uint32_t PREBUFFER_FRAMES = Frames / 4;
     static constexpr uint32_t SAMPLES_PER_FRAME = Channels;
     static constexpr uint32_t BYTES_PER_FRAME = Channels * sizeof(int16_t);
 
@@ -456,6 +457,13 @@ public:
     }
     [[nodiscard]] uint32_t underrun_count() const { return underrun_count_; }
     [[nodiscard]] uint32_t overrun_count() const { return overrun_count_; }
+    
+    // Debug: get raw sample at buffer index
+    [[nodiscard]] int16_t dbg_sample_at(uint32_t idx) const {
+        return buffer_[idx];
+    }
+    [[nodiscard]] uint32_t dbg_write_pos() const { return write_pos_; }
+    [[nodiscard]] uint32_t dbg_read_pos() const { return read_pos_; }
 
 private:
     alignas(32) int16_t buffer_[Frames * Channels]{};
