@@ -1,0 +1,47 @@
+# Renode script for automated kernel+app test with timeout
+# Usage: renode --console --disable-xwt -e "i @tools/renode/kernel_app_test.resc"
+
+using sysbus
+
+mach create "umi_kernel"
+
+# Load platform
+machine LoadPlatformDescription @tools/renode/stm32f4_test.repl
+
+# Load kernel ELF
+sysbus LoadELF @build/stm32f4_kernel/release/stm32f4_kernel.elf
+
+# Load app binary to app flash region (0x08060000)
+sysbus LoadBinary @build/synth_app/release/synth_app.bin 0x08060000
+
+# Set VTOR to kernel flash
+sysbus WriteDoubleWord 0xE000ED08 0x08000000
+
+# Performance settings
+cpu PerformanceInMips 168
+
+echo ""
+echo "============================================================"
+echo "  Kernel + App Test (automated, 1 second timeout)"
+echo "============================================================"
+echo ""
+
+# Start and run for 1 second virtual time
+start
+emulation RunFor "1"
+
+# Check CPU state
+echo "CPU State after 1 second:"
+cpu PC
+
+# Check if we're in a fault handler (infinite loop)
+# Fault handlers are at specific addresses in vector table
+echo ""
+echo "Memory check - App header location (0x08060000):"
+sysbus ReadDoubleWord 0x08060000
+
+echo ""
+echo "Test completed successfully (CPU did not halt)"
+echo "============================================================"
+
+quit

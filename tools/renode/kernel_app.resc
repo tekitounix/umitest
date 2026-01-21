@@ -1,0 +1,72 @@
+# Renode script for UMI-OS Kernel + App separation testing
+#
+# This script loads both:
+#   - Kernel binary at 0x08000000 (flash)
+#   - Application binary at 0x08060000 (app flash region)
+#
+# Usage:
+#   cd /path/to/umi && renode --console --disable-xwt -e "i @tools/renode/kernel_app.resc"
+
+using sysbus
+
+mach create "umi_kernel"
+
+# Load STM32F4 platform with audio peripherals
+machine LoadPlatformDescription @tools/renode/stm32f4_test.repl
+
+# ============================================================
+# Load Kernel ELF (contains vector table at 0x08000000)
+# ============================================================
+sysbus LoadELF @build/stm32f4_kernel/release/stm32f4_kernel.elf
+
+# ============================================================
+# Load Application binary to app flash region (0x08060000)
+# Note: We load the raw .bin file since it doesn't have ELF headers
+# ============================================================
+sysbus LoadBinary @build/synth_app/release/synth_app.bin 0x08060000
+
+# ============================================================
+# CPU Configuration
+# ============================================================
+
+# Set VTOR to point to kernel flash (where vector table is)
+sysbus WriteDoubleWord 0xE000ED08 0x08000000
+
+# Performance settings
+cpu PerformanceInMips 168
+emulation SetGlobalQuantum "0.0001"
+
+# ============================================================
+# UART Logging
+# ============================================================
+usart2 CreateFileBackend @build/kernel_uart.log true
+
+# ============================================================
+# Debug Logging (optional)
+# ============================================================
+# Uncomment to see memory access logs:
+# sysbus LogAllPeripheralsAccess true
+# logLevel -1 sysbus
+
+echo ""
+echo "============================================================"
+echo "  UMI-OS Kernel + App Test"
+echo "============================================================"
+echo ""
+echo "  Kernel:  build/stm32f4_kernel/release/stm32f4_kernel.elf"
+echo "  App:     build/synth_app/release/synth_app.bin @ 0x08060000"
+echo ""
+echo "  Memory Layout:"
+echo "    Kernel Flash: 0x08000000 - 0x0805FFFF (384KB)"
+echo "    App Flash:    0x08060000 - 0x0807FFFF (128KB)"
+echo "    Kernel RAM:   0x20000000 - 0x2000BFFF (48KB)"
+echo "    App RAM:      0x2000C000 - 0x20017FFF (48KB)"
+echo "    Shared RAM:   0x20018000 - 0x2001BFFF (16KB)"
+echo ""
+echo "  UART output: build/kernel_uart.log"
+echo ""
+echo "============================================================"
+echo ""
+
+# Start emulation
+start
