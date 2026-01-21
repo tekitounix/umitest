@@ -268,8 +268,12 @@ struct SharedMemory {
     static constexpr size_t AUDIO_BUFFER_FRAMES = 256;
     static constexpr size_t AUDIO_CHANNELS = 2;
     
+    // USB Audio OUT -> app input (host playback)
     float audio_input[AUDIO_BUFFER_FRAMES * AUDIO_CHANNELS];
+    // App synth output -> USB Audio IN Right channel
     float audio_output[AUDIO_BUFFER_FRAMES * AUDIO_CHANNELS];
+    // PDM Mic -> USB Audio IN Left channel
+    float mic_input[AUDIO_BUFFER_FRAMES];
     
     // Audio context info
     uint32_t sample_rate = 48000;

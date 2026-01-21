@@ -217,6 +217,12 @@ public:
     uint32_t dbg_sof_count_ = 0;
     uint32_t dbg_ep1_out_count_ = 0;       // Audio OUT packet count
     uint32_t dbg_ep1_out_bytes_ = 0;       // Audio OUT total bytes
+    int16_t dbg_ep1_rx_sample0_ = 0;       // First sample in Audio OUT packet
+    int16_t dbg_ep1_rx_sample1_ = 0;       // Second sample in Audio OUT packet
+    uint32_t dbg_ep1_fifo_word_ = 0;       // First word from EP1 packet
+    uint32_t dbg_ep2_fb_count_ = 0;        // Feedback EP write count
+    uint32_t dbg_ep2_fb_xfrc_ = 0;         // Feedback EP XFRC count
+    uint32_t dbg_ep2_last_fb_ = 0;         // Last feedback value sent
     uint32_t dbg_ep3_in_count_ = 0;        // Audio IN packet count (EP3)
     uint32_t dbg_ep3_xfrc_count_ = 0;      // Audio IN XFRC count (EP3)
     uint32_t dbg_ep3_epena_busy_ = 0;      // Audio IN EPENA still set count (EP3)
@@ -240,6 +246,7 @@ public:
     uint32_t dbg_iisoixfr_count_ = 0;     // Incomplete isochronous IN transfer count
     uint32_t dbg_ep1_first_word_ = 0;     // First word written to EP1 FIFO
     uint32_t dbg_ep1_second_word_ = 0;    // Second word written to EP1 FIFO
+    uint32_t dbg_fifo_first_word_ = 0;    // First word read from RX FIFO
     uint8_t dbg_last_brequest_ = 0;
     uint16_t dbg_last_wvalue_ = 0;
     uint16_t dbg_last_wlength_ = 0;
@@ -463,6 +470,13 @@ public:
                     dbg_ep1_fifo_after_ = Regs::reg(Regs::DTXFSTS(ep)) & 0xFFFF;
                     dbg_ep1_diepctl_ = Regs::reg(Regs::DIEPCTL(1));
                     dbg_ep1_diepint_ |= Regs::reg(Regs::DIEPINT(1));
+                }
+                if (ep == 2) {
+                    ++dbg_ep2_fb_count_;
+                    // Record feedback value (3 bytes packed into uint32)
+                    if (len >= 3 && data != nullptr) {
+                        dbg_ep2_last_fb_ = data[0] | (data[1] << 8) | (data[2] << 16);
+                    }
                 }
                 if (ep == 3) ++dbg_ep3_in_count_;
             } else {
@@ -696,6 +710,13 @@ private:
                 if (ep == 1) {
                     ++dbg_ep1_out_count_;
                     dbg_ep1_out_bytes_ += bcnt;
+                    // Capture first two samples from received audio data
+                    if (bcnt >= 4) {
+                        dbg_ep1_rx_sample0_ = static_cast<int16_t>(buf[0] | (buf[1] << 8));
+                        dbg_ep1_rx_sample1_ = static_cast<int16_t>(buf[2] | (buf[3] << 8));
+                        // Also capture raw first word
+                        dbg_ep1_fifo_word_ = *reinterpret_cast<uint32_t*>(buf);
+                    }
                 }
                 Base::notify_rx(ep, buf, bcnt);
             }
@@ -827,7 +848,10 @@ private:
         uint32_t* dst = reinterpret_cast<uint32_t*>(buf);
 
         for (uint32_t i = 0; i < words; ++i) {
-            dst[i] = fifo_reg;
+            uint32_t word = fifo_reg;
+            dst[i] = word;
+            // Save first word for debugging
+            if (i == 0) dbg_fifo_first_word_ = word;
         }
 
         uint16_t remaining = len % 4;

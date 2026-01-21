@@ -17,8 +17,8 @@ class CicDecimator {
     static constexpr int CIC_STAGES = 4;
     static constexpr uint32_t CIC_DECIMATION = 64;
     // CIC gain = R^N = 64^4 = 2^24
-    // With 64x decimation: 2.048MHz PDM / 64 = 32kHz PCM output
-    // Then need 32kHz -> 48kHz resampling (3:2)
+    // With 64x decimation: 3.0714MHz PDM / 64 = 47,991Hz PCM output
+    // This matches I2S3 DAC sample rate exactly - no resampling needed!
     // Lower shift = finer resolution but needs lower gain to avoid clipping
     // Shift 6: output range ~±2^18, need gain ~0.125 (1/8)
     static constexpr int32_t OUTPUT_SHIFT = 6;
@@ -321,19 +321,20 @@ struct PdmMic {
             I2SCFGR_DATLEN_16 |
             I2SCFGR_CHLEN_16;
 
-        // I2S prescaler calculation for ~2.048MHz PDM clock (32kHz output)
+        // I2S prescaler calculation for 3.0714MHz PDM clock (47,991Hz output)
         // PLLI2S clock = 86MHz (from main.cc init_plli2s: N=258, R=3)
         //
         // STM32F4 I2S bit clock formula (no MCLK for PDM):
         //   I2S_CK = PLLI2SCLK / (2 * I2SDIV + ODD)
         //
-        // For 2.048MHz PDM clock (32kHz x 64 decimation):
-        //   With I2SDIV=21, ODD=0: 2*21 + 0 = 42
-        //   86MHz / 42 = 2.048MHz ✓
+        // For 3.0714MHz PDM clock (47,991Hz x 64 decimation):
+        //   With I2SDIV=14, ODD=0: 2*14 + 0 = 28
+        //   86MHz / 28 = 3.0714MHz ✓
         //
-        // CIC 64x decimation: 2.048MHz / 64 = 32kHz PCM output
-        // Then resample 32kHz -> 48kHz for USB Audio
-        reg(I2SPR) = 21;  // 2.048MHz PDM clock for 32kHz output
+        // CIC 64x decimation: 3.0714MHz / 64 = 47,991Hz PCM output
+        // This matches I2S3 DAC sample rate exactly (86MHz / 1792 = 47,991Hz)
+        // No resampling needed - PDM and DAC are perfectly synchronized!
+        reg(I2SPR) = 14;  // 3.0714MHz PDM clock for 47,991Hz output
     }
 
     void enable() {

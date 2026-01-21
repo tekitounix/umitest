@@ -543,9 +543,9 @@ private:
                     // Feedback Endpoint (Async mode)
                     w(9, bDescriptorType::Endpoint);
                     w(0x80 | EP_FEEDBACK);  // IN endpoint
-                    w(0x01);  // bmAttributes: Isochronous (TinyUSB uses 0x01, not 0x11)
+                    w(0x01);  // bmAttributes: Isochronous (TinyUSB uses 0x01)
                     w16(3);   // wMaxPacketSize: 3 bytes for UAC1 (10.14 format)
-                    w(1);     // bInterval
+                    w(1);     // bInterval (Full-speed: 1ms)
                     w(4);     // bRefresh = 2^4 = 16 SOF frames (16ms)
                     w(0);     // bSynchAddress
                 }
@@ -1186,6 +1186,7 @@ public:
                 feedback_calc_.on_sof();
                 auto fb = feedback_calc_.get_feedback_bytes();
                 hal.ep_write(EP_FEEDBACK, fb.data(), static_cast<uint16_t>(fb.size()));
+                ++dbg_fb_sent_count_;
                 if (on_feedback_sent) on_feedback_sent();
             }
         }
@@ -1492,6 +1493,16 @@ public:
 
     [[nodiscard]] static constexpr AudioSyncMode sync_mode() { return AudioSyncMode::Async; }
 
+    // Debug: get raw sample from ring buffer at index 0
+    [[nodiscard]] int16_t dbg_ring_sample0() const {
+        if constexpr (HAS_AUDIO_OUT) return out_ring_buffer_.dbg_sample_at(0);
+        return 0;
+    }
+    [[nodiscard]] int16_t dbg_ring_sample1() const {
+        if constexpr (HAS_AUDIO_OUT) return out_ring_buffer_.dbg_sample_at(1);
+        return 0;
+    }
+
     // Audio IN debug accessors
     [[nodiscard]] bool is_audio_in_pending() const { return audio_in_pending_; }
     [[nodiscard]] bool is_in_muted() const { return fu_in_mute_; }
@@ -1511,9 +1522,18 @@ public:
     mutable uint32_t dbg_sof_streaming_count_ = 0;  // SOF with audio_in_streaming_ true
     mutable uint32_t dbg_in_buffered_ = 0;          // Last seen buffered frames
     mutable uint32_t dbg_set_interface_count_ = 0;  // set_interface() calls
+    mutable uint32_t dbg_fb_sent_count_ = 0;        // Feedback packets sent
     mutable uint8_t dbg_last_set_iface_ = 0;        // Last interface number
     mutable uint8_t dbg_last_set_alt_ = 0;          // Last alt setting
     mutable uint32_t dbg_force_streaming_count_ = 0; // Force streaming attempts
+
+    // Debug getter for audio out interface number
+    uint8_t audio_out_interface_num() const {
+        if constexpr (HAS_AUDIO_OUT) {
+            return audio_out_iface_num_;
+        }
+        return 0xFF;
+    }
 
 };
 
