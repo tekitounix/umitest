@@ -30,12 +30,12 @@
 #include "filter/filter.hh"
 
 // Audio: Synthesis
-#include "audio/synth/oscillator.hh"
 #include "audio/synth/envelope.hh"
+#include "audio/synth/oscillator.hh"
 
 // Audio: Sample rate conversion
-#include "audio/rate/pi_controller.hh"
 #include "audio/rate/asrc.hh"
+#include "audio/rate/pi_controller.hh"
 
 namespace umidsp {
 
@@ -56,19 +56,27 @@ namespace umidsp {
 
 /// Soft clip function (tanh-like)
 [[nodiscard]] inline float soft_clip(float x) noexcept {
-    if (x > 1.0f) return 1.0f;
-    if (x < -1.0f) return -1.0f;
+    if (x > 1.0f)
+        return 1.0f;
+    if (x < -1.0f)
+        return -1.0f;
     return x * (1.5f - 0.5f * x * x);
 }
 
 /// Hard clip
 [[nodiscard]] inline constexpr float hard_clip(float x, float limit = 1.0f) noexcept {
-    if (x > limit) return limit;
-    if (x < -limit) return -limit;
+    if (x > limit)
+        return limit;
+    if (x < -limit)
+        return -limit;
     return x;
 }
 
-}  // namespace umidsp
+// Legacy filter aliases
+using SVF = Svf<SvfInlinePolicy>;
+using K35 = ::K35<K35InlinePolicy>;
+
+} // namespace umidsp
 
 // Legacy namespace alias for backward compatibility
 namespace umi::dsp {

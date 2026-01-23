@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Basic umidsp example - Simple synth voice
 
-#include <umidsp/umidsp.hh>
 #include <cstdio>
+#include <umidsp.hh>
 
 using namespace umi::dsp;
 
@@ -16,7 +16,7 @@ int main() {
     ADSR env;
 
     // Setup
-    float freq = midi_to_freq(60);  // C4
+    float freq = midi_to_freq(60); // C4
     float freq_norm = freq / sample_rate;
     filter.set_lowpass(0.1f, 2.0f);
     env.set_params(10, 100, 0.5f, 200);

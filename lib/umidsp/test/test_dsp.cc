@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 // UMI-OS DSP Module Tests
 
-#include <umidsp/umidsp.hh>
-#include <cstdio>
 #include <cmath>
+#include <cstdio>
+#include <umidsp.hh>
 
 // ============================================================================
 // Test utilities
@@ -36,7 +36,7 @@ static void test_phase() {
     check(near(phase.value(), 0.0f), "initial value is 0");
 
     // Advance phase
-    float freq_norm = 0.1f;  // 10% of sample rate
+    float freq_norm = 0.1f; // 10% of sample rate
     phase.tick(freq_norm);
     check(near(phase.value(), 0.1f), "phase advances correctly");
 
@@ -66,12 +66,14 @@ static void test_sine() {
 
     // Check output range over one period
     float min_val = 1.0f, max_val = -1.0f;
-    float freq_norm = 1.0f / 64.0f;  // Complete one cycle in 64 samples
+    float freq_norm = 1.0f / 64.0f; // Complete one cycle in 64 samples
 
     for (int i = 0; i < 64; ++i) {
         float sample = sine.tick(freq_norm);
-        if (sample < min_val) min_val = sample;
-        if (sample > max_val) max_val = sample;
+        if (sample < min_val)
+            min_val = sample;
+        if (sample > max_val)
+            max_val = sample;
     }
 
     check(max_val <= 1.0f, "sine max <= 1.0");
@@ -94,8 +96,10 @@ static void test_saw_naive() {
     float min_val = 1.0f, max_val = -1.0f;
     for (int i = 0; i < 32; ++i) {
         float sample = saw.tick(freq_norm);
-        if (sample < min_val) min_val = sample;
-        if (sample > max_val) max_val = sample;
+        if (sample < min_val)
+            min_val = sample;
+        if (sample > max_val)
+            max_val = sample;
     }
 
     check(max_val <= 1.0f, "saw max <= 1.0");
@@ -111,8 +115,10 @@ static void test_square_naive() {
     int high_count = 0, low_count = 0;
     for (int i = 0; i < 32; ++i) {
         float sample = square.tick(freq_norm);
-        if (sample > 0.5f) ++high_count;
-        else if (sample < -0.5f) ++low_count;
+        if (sample > 0.5f)
+            ++high_count;
+        else if (sample < -0.5f)
+            ++low_count;
     }
 
     // With 50% pulse width, should be roughly equal
@@ -123,7 +129,8 @@ static void test_square_naive() {
     int narrow_high = 0;
     for (int i = 0; i < 32; ++i) {
         float sample = square2.tick(freq_norm, 0.25f);
-        if (sample > 0.5f) ++narrow_high;
+        if (sample > 0.5f)
+            ++narrow_high;
     }
     check(narrow_high < high_count, "25% pulse width has fewer highs");
 }
@@ -137,8 +144,10 @@ static void test_triangle() {
     float min_val = 1.0f, max_val = -1.0f;
     for (int i = 0; i < 64; ++i) {
         float sample = tri.tick(freq_norm);
-        if (sample < min_val) min_val = sample;
-        if (sample > max_val) max_val = sample;
+        if (sample < min_val)
+            min_val = sample;
+        if (sample > max_val)
+            max_val = sample;
     }
 
     check(max_val <= 1.0f, "triangle max <= 1.0");
@@ -156,8 +165,10 @@ static void test_polyblep_saw() {
     float min_val = 1.0f, max_val = -1.0f;
     for (int i = 0; i < 32; ++i) {
         float sample = saw.tick(freq_norm);
-        if (sample < min_val) min_val = sample;
-        if (sample > max_val) max_val = sample;
+        if (sample < min_val)
+            min_val = sample;
+        if (sample > max_val)
+            max_val = sample;
     }
 
     check(max_val <= 1.1f, "sawBL max reasonable");
@@ -173,8 +184,10 @@ static void test_polyblep_square() {
     float min_val = 1.0f, max_val = -1.0f;
     for (int i = 0; i < 32; ++i) {
         float sample = square.tick(freq_norm);
-        if (sample < min_val) min_val = sample;
-        if (sample > max_val) max_val = sample;
+        if (sample < min_val)
+            min_val = sample;
+        if (sample > max_val)
+            max_val = sample;
     }
 
     // PolyBLEP can overshoot significantly due to correction, especially at high frequencies
@@ -192,7 +205,7 @@ static void test_onepole() {
 
     constexpr float dt = 1.0f / 48000.0f;
     umi::dsp::OnePole lp;
-    lp.set_cutoff(4800.0f, dt);  // 4800Hz at 48kHz = 0.1 normalized
+    lp.set_cutoff(4800.0f, dt); // 4800Hz at 48kHz = 0.1 normalized
 
     // DC response test: constant input should pass through
     float out = 0.0f;
@@ -212,7 +225,7 @@ static void test_biquad() {
 
     constexpr float dt = 1.0f / 48000.0f;
     umi::dsp::Biquad bq;
-    bq.set_lowpass(4800.0f, 0.707f, dt);  // 4800Hz at 48kHz
+    bq.set_lowpass(4800.0f, 0.707f, dt); // 4800Hz at 48kHz
 
     // DC response
     float out = 0.0f;
@@ -223,7 +236,7 @@ static void test_biquad() {
 
     // Highpass should block DC
     umi::dsp::Biquad hp;
-    hp.set_highpass(4800.0f, 0.707f, dt);  // 4800Hz at 48kHz
+    hp.set_highpass(4800.0f, 0.707f, dt); // 4800Hz at 48kHz
     for (int i = 0; i < 200; ++i) {
         out = hp.tick(1.0f);
     }
@@ -235,7 +248,7 @@ static void test_svf() {
 
     constexpr float dt = 1.0f / 48000.0f;
     umi::dsp::SVF svf;
-    svf.set_params(4800.0f, 0.0f, dt);  // 4800Hz at 48kHz
+    svf.set_params(4800.0f, 0.0f, dt); // 4800Hz at 48kHz
 
     // Process some samples
     for (int i = 0; i < 100; ++i) {
@@ -268,14 +281,14 @@ static void test_adsr() {
 
     // Run through attack (10ms = 480 samples at 48kHz, but uses tau so needs more)
     float dt = 1.0f / 48000.0f;
-    for (int i = 0; i < 2400; ++i) {  // ~50ms to fully complete attack
+    for (int i = 0; i < 2400; ++i) { // ~50ms to fully complete attack
         (void)env.tick(dt);
     }
-    check(env.state() == umi::dsp::ADSR::State::Decay ||
-          env.state() == umi::dsp::ADSR::State::Sustain, "enters Decay after Attack");
+    check(env.state() == umi::dsp::ADSR::State::Decay || env.state() == umi::dsp::ADSR::State::Sustain,
+          "enters Decay after Attack");
 
     // Run through decay
-    for (int i = 0; i < 4800; ++i) {  // ~100ms
+    for (int i = 0; i < 4800; ++i) { // ~100ms
         (void)env.tick(dt);
     }
     check(env.state() == umi::dsp::ADSR::State::Sustain, "enters Sustain after Decay");
@@ -285,7 +298,7 @@ static void test_adsr() {
     env.release();
     check(env.state() == umi::dsp::ADSR::State::Release, "release enters Release");
 
-    for (int i = 0; i < 12000; ++i) {  // ~250ms
+    for (int i = 0; i < 12000; ++i) { // ~250ms
         (void)env.tick(dt);
     }
     check(env.state() == umi::dsp::ADSR::State::Idle, "returns to Idle after Release");
@@ -296,7 +309,7 @@ static void test_ramp() {
 
     umi::dsp::Ramp ramp;
     // set_target(target_value, samples_to_reach)
-    ramp.set_target(1.0f, 100);  // Ramp to 1.0 over 100 samples
+    ramp.set_target(1.0f, 100); // Ramp to 1.0 over 100 samples
 
     for (int i = 0; i < 110; ++i) {
         (void)ramp.tick();
@@ -380,12 +393,12 @@ static void test_edge_cases_oscillators() {
 
     // Very high frequency (near Nyquist)
     umi::dsp::Sine sine;
-    float sample = sine.tick(0.49f);  // Near Nyquist
+    float sample = sine.tick(0.49f); // Near Nyquist
     check(std::isfinite(sample), "sine handles near-Nyquist freq");
 
     // Very low frequency
     umi::dsp::SawBL saw;
-    sample = saw.tick(0.0001f);  // ~4.8 Hz at 48kHz
+    sample = saw.tick(0.0001f); // ~4.8 Hz at 48kHz
     check(std::isfinite(sample), "saw handles very low freq");
 
     // Zero frequency
@@ -406,12 +419,12 @@ static void test_edge_cases_filters() {
 
     // Very high cutoff
     umi::dsp::OnePole lp;
-    lp.set_cutoff(23000.0f, dt);  // Near Nyquist
+    lp.set_cutoff(23000.0f, dt); // Near Nyquist
     float out = lp.tick(1.0f);
     check(std::isfinite(out), "onepole handles high cutoff");
 
     // Very low cutoff
-    lp.set_cutoff(1.0f, dt);  // 1Hz
+    lp.set_cutoff(1.0f, dt); // 1Hz
     out = lp.tick(1.0f);
     check(std::isfinite(out), "onepole handles very low cutoff");
 
@@ -423,7 +436,7 @@ static void test_edge_cases_filters() {
 
     // SVF with extreme resonance
     umi::dsp::SVF svf;
-    svf.set_params(4800.0f, 1.0f, dt);  // Max resonance
+    svf.set_params(4800.0f, 1.0f, dt); // Max resonance
     svf.tick(1.0f);
     check(std::isfinite(svf.lp()), "SVF handles max resonance");
     check(std::isfinite(svf.hp()), "SVF HP with max resonance");
@@ -431,7 +444,7 @@ static void test_edge_cases_filters() {
 
     // Biquad with extreme Q
     umi::dsp::Biquad bq;
-    bq.set_lowpass(4800.0f, 10.0f, dt);  // High Q
+    bq.set_lowpass(4800.0f, 10.0f, dt); // High Q
     out = bq.tick(1.0f);
     check(std::isfinite(out), "biquad handles high Q");
 }
@@ -441,14 +454,14 @@ static void test_edge_cases_envelope() {
 
     // Zero attack/decay/release times
     umi::dsp::ADSR env;
-    env.set_params(0.0f, 0.0f, 0.5f, 0.0f);  // All zero times
+    env.set_params(0.0f, 0.0f, 0.5f, 0.0f); // All zero times
     env.trigger();
     float dt = 1.0f / 48000.0f;
     float val = env.tick(dt);
     check(std::isfinite(val), "ADSR handles zero times");
 
     // Very long times
-    env.set_params(10000.0f, 10000.0f, 0.5f, 10000.0f);  // 10 seconds each
+    env.set_params(10000.0f, 10000.0f, 0.5f, 10000.0f); // 10 seconds each
     env.trigger();
     val = env.tick(dt);
     check(std::isfinite(val), "ADSR handles very long times");
@@ -456,14 +469,15 @@ static void test_edge_cases_envelope() {
     // Immediate re-trigger during attack
     env.set_params(100.0f, 100.0f, 0.5f, 100.0f);
     env.trigger();
-    for (int i = 0; i < 10; ++i) val = env.tick(dt);
-    env.trigger();  // Re-trigger
+    for (int i = 0; i < 10; ++i)
+        val = env.tick(dt);
+    env.trigger(); // Re-trigger
     val = env.tick(dt);
     check(std::isfinite(val), "ADSR handles re-trigger");
 
     // Ramp with zero samples
     umi::dsp::Ramp ramp;
-    ramp.set_target(1.0f, 0);  // Immediate
+    ramp.set_target(1.0f, 0); // Immediate
     check(near(ramp.value(), 1.0f), "ramp handles zero samples");
 }
 

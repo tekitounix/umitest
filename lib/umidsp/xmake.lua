@@ -15,8 +15,8 @@ add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
 target("umidsp")
     set_kind("headeronly")
     add_headerfiles("include/(**.hh)")
-    -- Include parent dir so users can: #include <umidsp/umidsp.hh>
-    add_includedirs("$(projectdir)/lib/umidsp", {public = true})
+    -- Include only the public header root
+    add_includedirs("$(projectdir)/lib/umidsp/include", {public = true})
 target_end()
 
 -- =============================================================================
@@ -27,7 +27,7 @@ target("umidsp_test")
     set_kind("binary")
     set_default(false)
     add_files("test/test_dsp.cc")
-    add_includedirs("$(projectdir)/lib/umidsp")
+    add_includedirs("$(projectdir)/lib/umidsp/include")
 target_end()
 
 -- =============================================================================

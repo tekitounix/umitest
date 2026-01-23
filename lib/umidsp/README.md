@@ -30,7 +30,7 @@ include/
 ## Quick Start
 
 ```cpp
-#include <umidsp/umidsp.hh>
+#include <umidsp.hh>
 
 using namespace umidsp;
 
