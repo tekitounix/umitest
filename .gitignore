@@ -38,3 +38,5 @@ archive/
 
 # Tools (xmake packages, toolchains)
 .tools/
+.refs/
+lib/umidsp/include/filter_ref/
