@@ -393,8 +393,6 @@ class AudioRingBuffer {
 public:
     static_assert((Frames & (Frames - 1)) == 0, "Frames must be power of 2");
     static constexpr uint32_t MASK = Frames - 1;
-    // Prebuffer half the ring buffer for stability at high rates
-    static constexpr uint32_t PREBUFFER_FRAMES = Frames / 2;
     static constexpr uint32_t SAMPLES_PER_FRAME = Channels;
     static constexpr uint32_t BYTES_PER_FRAME = Channels * sizeof(SampleT);
     
@@ -420,22 +418,9 @@ public:
     uint32_t write(const SampleT* samples, uint32_t frame_count) {
         uint32_t write = write_pos_.load(std::memory_order_relaxed);
         uint32_t read = read_pos_.load(std::memory_order_acquire);
-        bool started = playback_started_.load(std::memory_order_acquire);
 
         uint32_t available = (write - read) & MASK;
         uint32_t free_space = Frames - 1 - available;
-
-        // If playback hasn't started and we're about to overrun, advance read_pos
-        // to keep the most recent data (circular buffer behavior during prebuffer)
-        if (!started && frame_count > free_space) {
-            // Advance read_pos to make room, but keep at least PREBUFFER_FRAMES
-            uint32_t target_read = (write + frame_count - PREBUFFER_FRAMES) & MASK;
-            read_pos_.store(target_read, std::memory_order_release);
-            // Recalculate free_space with new read_pos
-            read = target_read;
-            available = (write - read) & MASK;
-            free_space = Frames - 1 - available;
-        }
 
         if (frame_count > free_space) {
             frame_count = free_space;
@@ -462,24 +447,11 @@ public:
         // Release semantics: ensure all writes to buffer are visible before updating write_pos_
         write_pos_.store((write + frame_count) & MASK, std::memory_order_release);
 
-        if (!started) {
-            uint32_t buffered = (write_pos_.load(std::memory_order_relaxed) -
-                                 read_pos_.load(std::memory_order_relaxed)) & MASK;
-            if (buffered >= PREBUFFER_FRAMES) {
-                playback_started_.store(true, std::memory_order_release);
-            }
-        }
-
         return frame_count;
     }
 
     /// Read frames for Audio DMA (consumer)
     uint32_t read(SampleT* dest, uint32_t frame_count) {
-        if (!playback_started_.load(std::memory_order_acquire)) {
-            __builtin_memset(dest, 0, static_cast<size_t>(frame_count) * BYTES_PER_FRAME);
-            return 0;
-        }
-
         // Acquire semantics: ensure we see all buffer updates before reading write_pos_
         uint32_t write = write_pos_.load(std::memory_order_acquire);
         uint32_t read = read_pos_.load(std::memory_order_relaxed);

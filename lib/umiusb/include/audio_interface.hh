@@ -2335,6 +2335,9 @@ public:
             // Direct read without ASRC (rate = 1.0, no interpolation)
             uint32_t read = in_ring_buffer_.read(in_read_buf_, frames_per_packet);
 
+            // Debug: track buffer level
+            dbg_in_buffered_ = in_ring_buffer_.buffered_frames();
+
             // For isochronous IN, we must send data every frame even if buffer is empty
             // Send silence if no data available
             if (read < frames_per_packet) {
