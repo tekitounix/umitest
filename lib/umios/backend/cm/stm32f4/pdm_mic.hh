@@ -33,17 +33,17 @@ class CicDecimator {
     // This is a simple first-order high-pass filter with cutoff ~10Hz at 32kHz
     // R = 0.995 = 32604/32768 in Q15 for fast response, or
     // R = 0.999 = 32735/32768 for slower response but less ripple
-    static constexpr int32_t kDcBlockerR = 32604;  // 0.995 * 32768, ~10Hz cutoff at 32kHz
-    int32_t dc_prev_in_ = 0;   // x[n-1]
-    int32_t dc_prev_out_ = 0;  // y[n-1]
+    static constexpr int32_t kDcBlockerR = 32604; // 0.995 * 32768, ~10Hz cutoff at 32kHz
+    int32_t dc_prev_in_ = 0;                      // x[n-1]
+    int32_t dc_prev_out_ = 0;                     // y[n-1]
 
-    int32_t gain_ = 2;  // Gain to compensate for OUTPUT_SHIFT=6
+    int32_t gain_ = 2; // Gain to compensate for OUTPUT_SHIFT=6
 
     // Warmup counter to allow DC filter to stabilize
     uint32_t warmup_samples_ = 0;
-    static constexpr uint32_t WARMUP_SAMPLES = 1600;  // ~50ms at 32kHz (faster with new filter)
+    static constexpr uint32_t WARMUP_SAMPLES = 1600; // ~50ms at 32kHz (faster with new filter)
 
-public:
+  public:
     void reset() {
         for (int i = 0; i < CIC_STAGES; ++i) {
             integrator_[i] = 0;
@@ -93,8 +93,7 @@ public:
                 // This removes DC while preserving AC components
                 // In Q15 fixed-point: y = x - x_prev + (R * y_prev) >> 15
                 // Use signed multiply for 32x32->64 result, then shift
-                int32_t feedback = static_cast<int32_t>(
-                    (static_cast<int64_t>(kDcBlockerR) * dc_prev_out_) >> 15);
+                int32_t feedback = static_cast<int32_t>((static_cast<int64_t>(kDcBlockerR) * dc_prev_out_) >> 15);
                 int32_t dc_removed = cic_pcm - dc_prev_in_ + feedback;
                 dc_prev_in_ = cic_pcm;
                 dc_prev_out_ = dc_removed;
@@ -102,13 +101,17 @@ public:
                 // Warmup period: allow DC filter to stabilize before outputting
                 if (warmup_samples_ < WARMUP_SAMPLES) {
                     ++warmup_samples_;
-                    out = 0;  // Output silence during warmup
+                    out = 0; // Output silence during warmup
                     sample_ready = true;
                 } else {
                     // Apply gain and saturate
                     int32_t gained = dc_removed * gain_;
-                    if (gained > 32767) { gained = 32767; }
-                    if (gained < -32768) { gained = -32768; }
+                    if (gained > 32767) {
+                        gained = 32767;
+                    }
+                    if (gained < -32768) {
+                        gained = -32768;
+                    }
 
                     out = static_cast<int16_t>(gained);
                     sample_ready = true;
@@ -120,8 +123,7 @@ public:
     }
 
     /// Process a buffer of PDM data and output PCM samples
-    uint32_t process_buffer(const uint16_t* pdm_buf, uint32_t pdm_count,
-                           int16_t* pcm_buf, uint32_t pcm_max) {
+    uint32_t process_buffer(const uint16_t* pdm_buf, uint32_t pdm_count, int16_t* pcm_buf, uint32_t pcm_max) {
         uint32_t pcm_out = 0;
         for (uint32_t i = 0; i < pdm_count && pcm_out < pcm_max; ++i) {
             int16_t sample;
@@ -138,10 +140,8 @@ public:
 class Resampler16to48 {
     int16_t prev_sample_ = 0;
 
-public:
-    void reset() {
-        prev_sample_ = 0;
-    }
+  public:
+    void reset() { prev_sample_ = 0; }
 
     /// Resample from 16kHz to 48kHz
     /// Input: N samples -> Output: N * 3 samples
@@ -157,9 +157,9 @@ public:
 
             // For 3:1 ratio, every input sample produces 3 output samples
             // Linear interpolation at 0/3, 1/3, 2/3 positions
-            out[out_count++] = prev_sample_;  // 0/3 position
-            out[out_count++] = static_cast<int16_t>((2 * prev_sample_ + curr) / 3);  // 1/3
-            out[out_count++] = static_cast<int16_t>((prev_sample_ + 2 * curr) / 3);  // 2/3
+            out[out_count++] = prev_sample_;                                        // 0/3 position
+            out[out_count++] = static_cast<int16_t>((2 * prev_sample_ + curr) / 3); // 1/3
+            out[out_count++] = static_cast<int16_t>((prev_sample_ + 2 * curr) / 3); // 2/3
 
             prev_sample_ = curr;
         }
@@ -176,11 +176,11 @@ class Resampler32to48 {
     int16_t curr_sample_ = 0;
     // Phase: 0-65535 represents position between prev and curr samples
     // Input step = 32/48 = 2/3, in Q16 = 43691
-    static constexpr uint32_t kInputStep = 43691;  // 2/3 in Q16
+    static constexpr uint32_t kInputStep = 43691; // 2/3 in Q16
     uint32_t phase_ = 0;
     bool has_samples_ = false;
 
-public:
+  public:
     void reset() {
         prev_sample_ = 0;
         curr_sample_ = 0;
@@ -275,27 +275,25 @@ struct PdmMic {
     static constexpr uint32_t CR1_CPHA = 1U << 0;     // Clock phase
 
     // I2SCFGR bits
-    static constexpr uint32_t I2SCFGR_I2SMOD = 1U << 11;  // I2S mode enable
-    static constexpr uint32_t I2SCFGR_I2SE = 1U << 10;    // I2S enable
-    static constexpr uint32_t I2SCFGR_I2SCFG_MASTER_RX = 3U << 8;  // Master receive
-    static constexpr uint32_t I2SCFGR_I2SSTD_LSB = 2U << 4;  // LSB justified
-    static constexpr uint32_t I2SCFGR_I2SSTD_PHILIPS = 0U << 4;  // I2S Philips standard
-    static constexpr uint32_t I2SCFGR_CKPOL = 1U << 3;  // Clock polarity (idle high)
+    static constexpr uint32_t I2SCFGR_I2SMOD = 1U << 11;          // I2S mode enable
+    static constexpr uint32_t I2SCFGR_I2SE = 1U << 10;            // I2S enable
+    static constexpr uint32_t I2SCFGR_I2SCFG_MASTER_RX = 3U << 8; // Master receive
+    static constexpr uint32_t I2SCFGR_I2SSTD_LSB = 2U << 4;       // LSB justified
+    static constexpr uint32_t I2SCFGR_I2SSTD_PHILIPS = 0U << 4;   // I2S Philips standard
+    static constexpr uint32_t I2SCFGR_CKPOL = 1U << 3;            // Clock polarity (idle high)
     static constexpr uint32_t I2SCFGR_DATLEN_16 = 0U << 1;
     static constexpr uint32_t I2SCFGR_CHLEN_16 = 0U << 0;
 
     // I2SPR bits
-    static constexpr uint32_t I2SPR_ODD = 1U << 8;    // Odd factor
+    static constexpr uint32_t I2SPR_ODD = 1U << 8; // Odd factor
 
     // CR2 bits
-    static constexpr uint32_t CR2_RXDMAEN = 1U << 0;  // RX DMA enable
+    static constexpr uint32_t CR2_RXDMAEN = 1U << 0; // RX DMA enable
 
     // SR bits
-    static constexpr uint32_t SR_RXNE = 1U << 0;  // RX not empty
+    static constexpr uint32_t SR_RXNE = 1U << 0; // RX not empty
 
-    static volatile uint32_t& reg(uint32_t offset) {
-        return *reinterpret_cast<volatile uint32_t*>(SPI2_BASE + offset);
-    }
+    static volatile uint32_t& reg(uint32_t offset) { return *reinterpret_cast<volatile uint32_t*>(SPI2_BASE + offset); }
 
     /// Initialize I2S2 for PDM microphone input (Master RX mode)
     /// STM32F4-Discovery: MP45DT02 MEMS microphone
@@ -308,18 +306,15 @@ struct PdmMic {
         reg(I2SCFGR) = 0;
 
         // Wait for disable
-        while ((reg(I2SCFGR) & I2SCFGR_I2SE) != 0) {}
+        while ((reg(I2SCFGR) & I2SCFGR_I2SE) != 0) {
+        }
 
         // Configure: I2S mode, Master RX, LSB justified, 16-bit
         // CKPOL=1: Clock idle high (I2S_CPOL_HIGH in HAL)
         // This matches STM32CubeF4 BSP configuration for MP45DT02
-        reg(I2SCFGR) =
-            I2SCFGR_I2SMOD |
-            I2SCFGR_I2SCFG_MASTER_RX |
-            I2SCFGR_I2SSTD_LSB |       // LSB justified (same as BSP)
-            I2SCFGR_CKPOL |            // Clock polarity: idle high (same as BSP)
-            I2SCFGR_DATLEN_16 |
-            I2SCFGR_CHLEN_16;
+        reg(I2SCFGR) = I2SCFGR_I2SMOD | I2SCFGR_I2SCFG_MASTER_RX | I2SCFGR_I2SSTD_LSB | // LSB justified (same as BSP)
+                       I2SCFGR_CKPOL | // Clock polarity: idle high (same as BSP)
+                       I2SCFGR_DATLEN_16 | I2SCFGR_CHLEN_16;
 
         // I2S prescaler calculation for 3.0714MHz PDM clock (47,991Hz output)
         // PLLI2S clock = 86MHz (from main.cc init_plli2s: N=258, R=3)
@@ -334,23 +329,18 @@ struct PdmMic {
         // CIC 64x decimation: 3.0714MHz / 64 = 47,991Hz PCM output
         // This matches I2S3 DAC sample rate exactly (86MHz / 1792 = 47,991Hz)
         // No resampling needed - PDM and DAC are perfectly synchronized!
-        reg(I2SPR) = 14;  // 3.0714MHz PDM clock for 47,991Hz output
+        reg(I2SPR) = 14; // 3.0714MHz PDM clock for 47,991Hz output
     }
 
-    void enable() {
-        reg(I2SCFGR) |= I2SCFGR_I2SE;
-    }
+    void enable() { reg(I2SCFGR) |= I2SCFGR_I2SE; }
 
-    void disable() {
-        reg(I2SCFGR) &= ~I2SCFGR_I2SE;
-    }
+    void disable() { reg(I2SCFGR) &= ~I2SCFGR_I2SE; }
 
-    void enable_dma() {
-        reg(CR2) |= CR2_RXDMAEN;
-    }
+    void enable_dma() { reg(CR2) |= CR2_RXDMAEN; }
 
     uint16_t read() {
-        while ((reg(SR) & SR_RXNE) == 0) {}
+        while ((reg(SR) & SR_RXNE) == 0) {
+        }
         return static_cast<uint16_t>(reg(DR));
     }
 
@@ -362,7 +352,7 @@ struct PdmMic {
 /// Reference: STM32CubeF4 BSP (stm32f4_discovery_audio.c)
 struct DmaPdm {
     static constexpr uint32_t DMA1_BASE = 0x40026000;
-    static constexpr uint32_t STREAM3_OFFSET = 0x10 + 0x18 * 3;  // Stream 3
+    static constexpr uint32_t STREAM3_OFFSET = 0x10 + 0x18 * 3; // Stream 3
 
     // DMA register offsets (from stream base)
     static constexpr uint32_t CR = 0x00;
@@ -419,7 +409,8 @@ struct DmaPdm {
     void init(uint16_t* buf0, uint16_t* buf1, uint32_t count, uint32_t peripheral_addr) {
         // Disable stream
         reg(CR) = 0;
-        while (reg(CR) & CR_EN) {}
+        while (reg(CR) & CR_EN) {
+        }
 
         // Clear all interrupt flags for stream 3
         dma_reg(LIFCR) = TCIF3 | HTIF3 | TEIF3 | DMEIF3 | FEIF3;
@@ -431,41 +422,23 @@ struct DmaPdm {
         reg(NDTR) = count;
 
         // CR: P2M, circular, memory increment, 16-bit, high priority, double buffer, channel 0
-        reg(CR) =
-            CR_CHSEL_0 |
-            CR_PL_HIGH |
-            CR_MSIZE_16 |
-            CR_PSIZE_16 |
-            CR_MINC |
-            CR_CIRC |
-            CR_DIR_P2M |
-            CR_DBM |
-            CR_TCIE;  // Transfer complete interrupt
+        reg(CR) = CR_CHSEL_0 | CR_PL_HIGH | CR_MSIZE_16 | CR_PSIZE_16 | CR_MINC | CR_CIRC | CR_DIR_P2M | CR_DBM |
+                  CR_TCIE; // Transfer complete interrupt
 
         // Disable FIFO (direct mode)
         reg(FCR) = 0;
     }
 
-    void enable() {
-        reg(CR) |= CR_EN;
-    }
+    void enable() { reg(CR) |= CR_EN; }
 
-    void disable() {
-        reg(CR) &= ~CR_EN;
-    }
+    void disable() { reg(CR) &= ~CR_EN; }
 
-    bool transfer_complete() const {
-        return (dma_reg(LISR) & TCIF3) != 0;
-    }
+    bool transfer_complete() const { return (dma_reg(LISR) & TCIF3) != 0; }
 
-    void clear_tc() {
-        dma_reg(LIFCR) = TCIF3;
-    }
+    void clear_tc() { dma_reg(LIFCR) = TCIF3; }
 
     /// Returns which buffer is currently being filled (0 or 1)
-    uint8_t current_buffer() const {
-        return (reg(CR) & CR_CT) ? 1 : 0;
-    }
+    uint8_t current_buffer() const { return (reg(CR) & CR_CT) ? 1 : 0; }
 };
 
-}  // namespace umi::stm32
+} // namespace umi::stm32
