@@ -3,8 +3,8 @@
 // Uses PolySynth from headless_webhost
 // Receives MIDI via kernel syscall, outputs audio via synth_process callback
 
+#include <synth.hh> // headless_webhost/src/synth.hh
 #include <umi_app.hh>
-#include <synth.hh>  // headless_webhost/src/synth.hh
 
 // ============================================================================
 // Synth Instance
@@ -37,7 +37,8 @@ struct SynthProcessor {
 
         auto* out_l = ctx.output(0);
         auto* out_r = ctx.output(1);
-        if (!out_l) return;
+        if (!out_l)
+            return;
 
         for (uint32_t i = 0; i < ctx.buffer_size; ++i) {
             float sample = g_synth.process_sample();
@@ -50,42 +51,17 @@ struct SynthProcessor {
 };
 
 static SynthProcessor g_processor;
-}  // namespace
+} // namespace
 
 // ============================================================================
 // Main
 // ============================================================================
 
-// Debug: toggle GPIO (if accessible from unprivileged mode...)
-// Actually we're running in privileged mode when kernel calls us
-namespace {
-struct GPIORegs {
-    volatile uint32_t MODER;
-    volatile uint32_t OTYPER;
-    volatile uint32_t OSPEEDR;
-    volatile uint32_t PUPDR;
-    volatile uint32_t IDR;
-    volatile uint32_t ODR;
-    volatile uint32_t BSRR;
-    volatile uint32_t LCKR;
-    volatile uint32_t AFRL;
-    volatile uint32_t AFRH;
-};
-static auto& debug_gpio = *reinterpret_cast<GPIORegs*>(0x40020C00);  // GPIOD
-}
-
 int main() {
-    // Debug: we're called by kernel in privileged mode
-    // Orange LED (PD13) shows we entered main
-    debug_gpio.BSRR = (1 << 13);  // Set PD13 (orange LED)
-    
     // Register processor with kernel (AudioContext-based)
     umi::register_processor(g_processor);
-    
-    // If we get here, syscall returned
-    // Blue LED + orange = both on = syscall completed
-    debug_gpio.BSRR = (1 << 15);  // Set PD15 (blue LED)
-    
+
     // Return to kernel - audio processing happens via callback
+    // crt0 will call yield() syscall after main() returns
     return 0;
 }

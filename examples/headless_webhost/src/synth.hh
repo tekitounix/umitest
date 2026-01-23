@@ -12,15 +12,14 @@
 
 #pragma once
 
-#include <umidsp/umidsp.hh>
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
+#include <umidsp.hh>
 
 // Forward declaration for AudioContext (optional dependency)
 namespace umi {
 struct AudioContext;
 }
-
 
 namespace umi::synth {
 
@@ -28,22 +27,13 @@ namespace umi::synth {
 // Configuration
 // =====================================================================
 
-constexpr int NUM_VOICES = 2;
+constexpr int NUM_VOICES = 1;
 
 // =====================================================================
 // Parameter IDs
 // =====================================================================
 
-enum class ParamId {
-    Attack = 0,
-    Decay,
-    Sustain,
-    Release,
-    Cutoff,
-    Resonance,
-    Volume,
-    Count
-};
+enum class ParamId { Attack = 0, Decay, Sustain, Release, Cutoff, Resonance, Volume, Count };
 
 constexpr int PARAM_COUNT = static_cast<int>(ParamId::Count);
 
@@ -60,7 +50,7 @@ constexpr uint32_t PORT_COUNT = 2;
 // =====================================================================
 
 class Voice {
-public:
+  public:
     Voice() = default;
 
     void init(float sample_rate) {
@@ -93,16 +83,14 @@ public:
         if (reset_osc) {
             osc.reset();
             filter.reset();
-            fade_samples = FADE_DURATION;  // Start fade-in to prevent click
+            fade_samples = FADE_DURATION; // Start fade-in to prevent click
         }
 
         env.trigger();
         active = true;
     }
 
-    void note_off() {
-        env.release();
-    }
+    void note_off() { env.release(); }
 
     bool is_active() const { return active; }
     uint8_t get_note() const { return note; }
@@ -112,18 +100,17 @@ public:
         env.set_params(attack_ms, decay_ms, sustain, release_ms);
     }
 
-    void set_filter(float cutoff_hz, float resonance) {
-        filter.set_params(cutoff_hz, resonance, dt);
-    }
+    void set_filter(float cutoff_hz, float resonance) { filter.set_params(cutoff_hz * dt, resonance); }
 
     float process() {
-        if (!active) return 0.0f;
+        if (!active)
+            return 0.0f;
 
         // Generate oscillator output
         float osc_out = osc(freq_norm);
 
         // Apply filter
-        float filtered = filter(osc_out);
+        float filtered = filter.process(osc_out);
 
         // Apply envelope
         float env_val = env(dt);
@@ -152,11 +139,11 @@ public:
         return out;
     }
 
-private:
-    static constexpr uint32_t FADE_DURATION = 32;  // ~0.7ms at 48kHz
+  private:
+    static constexpr uint32_t FADE_DURATION = 32; // ~0.7ms at 48kHz
 
     dsp::SawBL osc;
-    dsp::SVF filter;
+    dsp::K35 filter;
     dsp::ADSR env;
 
     float sample_rate = 48000.0f;
@@ -165,7 +152,7 @@ private:
     float velocity = 0.0f;
     uint8_t note = 0;
     bool active = false;
-    uint32_t fade_samples = 0;  // Fade-in counter after reset
+    uint32_t fade_samples = 0; // Fade-in counter after reset
 };
 
 // =====================================================================
@@ -173,7 +160,7 @@ private:
 // =====================================================================
 
 class PolySynth {
-public:
+  public:
     void init(float sr) {
         sample_rate = sr;
         for (int i = 0; i < NUM_VOICES; ++i) {
@@ -185,7 +172,8 @@ public:
     }
 
     void set_sample_rate(float sr) {
-        if (sr == sample_rate) return;
+        if (sr == sample_rate)
+            return;
         sample_rate = sr;
         for (int i = 0; i < NUM_VOICES; ++i) {
             voices[i].set_sample_rate(sr);
@@ -199,7 +187,8 @@ public:
 
     /// Handle MIDI bytes (3-byte message)
     void handle_midi(const uint8_t* data, uint8_t size) {
-        if (size < 2) return;
+        if (size < 2)
+            return;
 
         uint8_t status = data[0];
         uint8_t cmd = status & 0xF0;
@@ -223,7 +212,7 @@ public:
         // First check if this note is already playing (retrigger without reset)
         for (int i = 0; i < NUM_VOICES; ++i) {
             if (voices[i].is_active() && voices[i].get_note() == note) {
-                voices[i].note_on(note, vel, false);  // No reset on retrigger
+                voices[i].note_on(note, vel, false); // No reset on retrigger
                 return;
             }
         }
@@ -231,7 +220,7 @@ public:
         // Find free voice
         for (int i = 0; i < NUM_VOICES; ++i) {
             if (!voices[i].is_active()) {
-                voices[i].note_on(note, vel, false);  // No reset on fresh voice
+                voices[i].note_on(note, vel, false); // No reset on fresh voice
                 return;
             }
         }
@@ -240,7 +229,7 @@ public:
         // This avoids clicks completely, though may cause brief dissonance during transition
         static uint8_t steal_index = 0;
         steal_index = (steal_index + 1) % NUM_VOICES;
-        voices[steal_index].note_on(note, vel, false);  // No reset even on steal
+        voices[steal_index].note_on(note, vel, false); // No reset even on steal
     }
 
     void note_off(uint8_t note) {
@@ -255,48 +244,56 @@ public:
 
     void set_param(ParamId id, float value) {
         switch (id) {
-            case ParamId::Attack:
-                attack_ms = value;
-                update_adsr();
-                break;
-            case ParamId::Decay:
-                decay_ms = value;
-                update_adsr();
-                break;
-            case ParamId::Sustain:
-                sustain = value;
-                update_adsr();
-                break;
-            case ParamId::Release:
-                release_ms = value;
-                update_adsr();
-                break;
-            case ParamId::Cutoff:
-                cutoff_hz = value;
-                update_filter();
-                break;
-            case ParamId::Resonance:
-                resonance = value;
-                update_filter();
-                break;
-            case ParamId::Volume:
-                volume = value;
-                break;
-            default:
-                break;
+        case ParamId::Attack:
+            attack_ms = value;
+            update_adsr();
+            break;
+        case ParamId::Decay:
+            decay_ms = value;
+            update_adsr();
+            break;
+        case ParamId::Sustain:
+            sustain = value;
+            update_adsr();
+            break;
+        case ParamId::Release:
+            release_ms = value;
+            update_adsr();
+            break;
+        case ParamId::Cutoff:
+            cutoff_hz = value;
+            update_filter();
+            break;
+        case ParamId::Resonance:
+            resonance = value;
+            update_filter();
+            break;
+        case ParamId::Volume:
+            volume = value;
+            break;
+        default:
+            break;
         }
     }
 
     float get_param(ParamId id) const {
         switch (id) {
-            case ParamId::Attack:   return attack_ms;
-            case ParamId::Decay:    return decay_ms;
-            case ParamId::Sustain:  return sustain;
-            case ParamId::Release:  return release_ms;
-            case ParamId::Cutoff:   return cutoff_hz;
-            case ParamId::Resonance: return resonance;
-            case ParamId::Volume:   return volume;
-            default: return 0.0f;
+        case ParamId::Attack:
+            return attack_ms;
+        case ParamId::Decay:
+            return decay_ms;
+        case ParamId::Sustain:
+            return sustain;
+        case ParamId::Release:
+            return release_ms;
+        case ParamId::Cutoff:
+            return cutoff_hz;
+        case ParamId::Resonance:
+            return resonance;
+        case ParamId::Volume:
+            return volume;
+        default:
+            return 0.0f;
         }
     }
 
@@ -337,25 +334,41 @@ public:
         return count;
     }
 
-private:
+  private:
     static float lerp_cc(uint8_t cc_value, float min_value, float max_value) {
         const float t = static_cast<float>(cc_value) / 127.0f;
         return min_value + (max_value - min_value) * t;
     }
 
     void handle_cc(uint8_t cc, uint8_t value) {
-        if (cc < 21 || cc > 27) return;
+        if (cc < 21 || cc > 27)
+            return;
 
         const uint8_t index = static_cast<uint8_t>(cc - 21);
         switch (index) {
-            case 0: set_param(ParamId::Attack, lerp_cc(value, 1.0f, 2000.0f)); break;
-            case 1: set_param(ParamId::Decay, lerp_cc(value, 1.0f, 2000.0f)); break;
-            case 2: set_param(ParamId::Sustain, lerp_cc(value, 0.0f, 1.0f)); break;
-            case 3: set_param(ParamId::Release, lerp_cc(value, 5.0f, 4000.0f)); break;
-            case 4: set_param(ParamId::Cutoff, lerp_cc(value, 50.0f, 8000.0f)); break;
-            case 5: set_param(ParamId::Resonance, lerp_cc(value, 0.0f, 0.99f)); break;
-            case 6: set_param(ParamId::Volume, lerp_cc(value, 0.0f, 1.0f)); break;
-            default: break;
+        case 0:
+            set_param(ParamId::Attack, lerp_cc(value, 1.0f, 2000.0f));
+            break;
+        case 1:
+            set_param(ParamId::Decay, lerp_cc(value, 1.0f, 2000.0f));
+            break;
+        case 2:
+            set_param(ParamId::Sustain, lerp_cc(value, 0.0f, 1.0f));
+            break;
+        case 3:
+            set_param(ParamId::Release, lerp_cc(value, 5.0f, 4000.0f));
+            break;
+        case 4:
+            set_param(ParamId::Cutoff, lerp_cc(value, 50.0f, 8000.0f));
+            break;
+        case 5:
+            set_param(ParamId::Resonance, lerp_cc(value, 0.0f, 0.99f));
+            break;
+        case 6:
+            set_param(ParamId::Volume, lerp_cc(value, 0.0f, 1.0f));
+            break;
+        default:
+            break;
         }
     }
 
@@ -392,7 +405,7 @@ private:
 
 // Include AudioContext if available (outside namespace to avoid std:: conflicts)
 #if __has_include(<umios/core/audio_context.hh>)
-#include <umios/core/audio_context.hh>
+    #include <umios/core/audio_context.hh>
 
 namespace umi::synth {
 
@@ -409,7 +422,8 @@ inline void PolySynth::process(umi::AudioContext& ctx) {
 
     // Generate audio output
     auto* out = ctx.output(0);
-    if (!out) return;
+    if (!out)
+        return;
 
     for (uint32_t i = 0; i < ctx.buffer_size; ++i) {
         out[i] = process_sample();

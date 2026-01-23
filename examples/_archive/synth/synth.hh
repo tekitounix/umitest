@@ -8,9 +8,9 @@
 
 #pragma once
 
-#include <umidsp/umidsp.hh>
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
+#include <umidsp.hh>
 
 namespace umi::synth {
 
@@ -24,16 +24,7 @@ constexpr int NUM_VOICES = 4;
 // Parameter IDs
 // =====================================================================
 
-enum class ParamId {
-    Attack = 0,
-    Decay,
-    Sustain,
-    Release,
-    Cutoff,
-    Resonance,
-    Volume,
-    Count
-};
+enum class ParamId { Attack = 0, Decay, Sustain, Release, Cutoff, Resonance, Volume, Count };
 
 constexpr int PARAM_COUNT = static_cast<int>(ParamId::Count);
 
@@ -50,7 +41,7 @@ constexpr uint32_t PORT_COUNT = 2;
 // =====================================================================
 
 class Voice {
-public:
+  public:
     Voice() = default;
 
     void init(float sample_rate) {
@@ -76,9 +67,7 @@ public:
         active_ = true;
     }
 
-    void note_off() {
-        env_.release();
-    }
+    void note_off() { env_.release(); }
 
     bool is_active() const { return active_; }
     uint8_t note() const { return note_; }
@@ -88,12 +77,11 @@ public:
         env_.set_params(attack_ms, decay_ms, sustain, release_ms);
     }
 
-    void set_filter(float cutoff_hz, float resonance) {
-        filter_.set_params(cutoff_hz / sample_rate_, resonance);
-    }
+    void set_filter(float cutoff_hz, float resonance) { filter_.set_params(cutoff_hz / sample_rate_, resonance); }
 
     float process() {
-        if (!active_) return 0.0f;
+        if (!active_)
+            return 0.0f;
 
         // Generate oscillator output
         float osc_out = osc_.tick(freq_norm_);
@@ -114,7 +102,7 @@ public:
         return out;
     }
 
-private:
+  private:
     dsp::SawBL osc_;
     dsp::SVF filter_;
     dsp::ADSR env_;
@@ -132,7 +120,7 @@ private:
 // =====================================================================
 
 class PolySynth {
-public:
+  public:
     void init(float sample_rate) {
         sample_rate_ = sample_rate;
         for (int i = 0; i < NUM_VOICES; ++i) {
@@ -147,7 +135,8 @@ public:
 
     /// Handle MIDI bytes (3-byte message)
     void handle_midi(const uint8_t* data, uint8_t size) {
-        if (size < 2) return;
+        if (size < 2)
+            return;
 
         uint8_t status = data[0];
         uint8_t cmd = status & 0xF0;
@@ -198,48 +187,56 @@ public:
 
     void set_param(ParamId id, float value) {
         switch (id) {
-            case ParamId::Attack:
-                attack_ms_ = value;
-                update_adsr();
-                break;
-            case ParamId::Decay:
-                decay_ms_ = value;
-                update_adsr();
-                break;
-            case ParamId::Sustain:
-                sustain_ = value;
-                update_adsr();
-                break;
-            case ParamId::Release:
-                release_ms_ = value;
-                update_adsr();
-                break;
-            case ParamId::Cutoff:
-                cutoff_hz_ = value;
-                update_filter();
-                break;
-            case ParamId::Resonance:
-                resonance_ = value;
-                update_filter();
-                break;
-            case ParamId::Volume:
-                volume_ = value;
-                break;
-            default:
-                break;
+        case ParamId::Attack:
+            attack_ms_ = value;
+            update_adsr();
+            break;
+        case ParamId::Decay:
+            decay_ms_ = value;
+            update_adsr();
+            break;
+        case ParamId::Sustain:
+            sustain_ = value;
+            update_adsr();
+            break;
+        case ParamId::Release:
+            release_ms_ = value;
+            update_adsr();
+            break;
+        case ParamId::Cutoff:
+            cutoff_hz_ = value;
+            update_filter();
+            break;
+        case ParamId::Resonance:
+            resonance_ = value;
+            update_filter();
+            break;
+        case ParamId::Volume:
+            volume_ = value;
+            break;
+        default:
+            break;
         }
     }
 
     float get_param(ParamId id) const {
         switch (id) {
-            case ParamId::Attack:   return attack_ms_;
-            case ParamId::Decay:    return decay_ms_;
-            case ParamId::Sustain:  return sustain_;
-            case ParamId::Release:  return release_ms_;
-            case ParamId::Cutoff:   return cutoff_hz_;
-            case ParamId::Resonance: return resonance_;
-            case ParamId::Volume:   return volume_;
-            default: return 0.0f;
+        case ParamId::Attack:
+            return attack_ms_;
+        case ParamId::Decay:
+            return decay_ms_;
+        case ParamId::Sustain:
+            return sustain_;
+        case ParamId::Release:
+            return release_ms_;
+        case ParamId::Cutoff:
+            return cutoff_hz_;
+        case ParamId::Resonance:
+            return resonance_;
+        case ParamId::Volume:
+            return volume_;
+        default:
+            return 0.0f;
         }
     }
 
@@ -275,7 +272,7 @@ public:
         return count;
     }
 
-private:
+  private:
     void update_adsr() {
         for (int i = 0; i < NUM_VOICES; ++i) {
             voices_[i].set_adsr(attack_ms_, decay_ms_, sustain_, release_ms_);
