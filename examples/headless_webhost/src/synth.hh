@@ -188,8 +188,10 @@ public:
         } else if (cmd == 0x80 || (cmd == 0x90 && data[2] == 0)) {
             // Note Off
             note_off(data[1]);
+        } else if (cmd == 0xB0 && size >= 3) {
+            // Control Change
+            handle_cc(data[1], data[2]);
         }
-        // CC and other events can be handled here
     }
 
     // === Direct note interface ===
@@ -309,6 +311,27 @@ public:
     }
 
 private:
+    static float lerp_cc(uint8_t cc_value, float min_value, float max_value) {
+        const float t = static_cast<float>(cc_value) / 127.0f;
+        return min_value + (max_value - min_value) * t;
+    }
+
+    void handle_cc(uint8_t cc, uint8_t value) {
+        if (cc < 21 || cc > 27) return;
+
+        const uint8_t index = static_cast<uint8_t>(cc - 21);
+        switch (index) {
+            case 0: set_param(ParamId::Attack, lerp_cc(value, 1.0f, 2000.0f)); break;
+            case 1: set_param(ParamId::Decay, lerp_cc(value, 1.0f, 2000.0f)); break;
+            case 2: set_param(ParamId::Sustain, lerp_cc(value, 0.0f, 1.0f)); break;
+            case 3: set_param(ParamId::Release, lerp_cc(value, 5.0f, 4000.0f)); break;
+            case 4: set_param(ParamId::Cutoff, lerp_cc(value, 50.0f, 8000.0f)); break;
+            case 5: set_param(ParamId::Resonance, lerp_cc(value, 0.0f, 0.99f)); break;
+            case 6: set_param(ParamId::Volume, lerp_cc(value, 0.0f, 1.0f)); break;
+            default: break;
+        }
+    }
+
     void update_adsr() {
         for (int i = 0; i < NUM_VOICES; ++i) {
             voices[i].set_adsr(attack_ms, decay_ms, sustain, release_ms);

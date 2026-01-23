@@ -9,6 +9,7 @@
 // PDM and I2S are now perfectly synchronized - no resampling needed!
 
 #include <cstdint>
+#include <array>
 #include <cstring>
 #include <span>
 
@@ -109,7 +110,7 @@ CicDecimator cic_decimator;
 
 // USB stack instances (umiusb)
 umiusb::Stm32FsHal usb_hal;
-using UsbAudioDevice = umiusb::AudioOut96kMaxAsync;
+using UsbAudioDevice = umiusb::AudioFullDuplexMidi96kMaxAsync;
 UsbAudioDevice usb_audio;
 umiusb::Device<umiusb::Stm32FsHal, UsbAudioDevice> usb_device(
     usb_hal, usb_audio,
@@ -206,6 +207,8 @@ uint32_t dbg_overrun = 0;    // USB Audio OUT overrun count
 uint32_t dbg_missed = 0;     // Missed audio frames (processing too slow)
 uint32_t dbg_process_time = 0;  // fill_audio_buffer processing time (cycles)
 uint32_t dbg_usb_rx_count = 0;  // USB Audio OUT packets received
+uint32_t dbg_midi_rx_count = 0;   // Raw USB MIDI packets received
+uint32_t dbg_midi_note_on = 0;    // Note-on events forwarded to synth
 int32_t dbg_sample_l = 0;       // Debug: last sample L
 int32_t dbg_sample_r = 0;       // Debug: last sample R
 uint32_t dbg_set_iface_count = 0;  // USB set_interface calls
@@ -638,6 +641,7 @@ static void init_usb() {
     usb_audio.set_midi_callback([](uint8_t /*cable*/, const uint8_t* data, uint8_t len) {
         uint32_t next = (g_midi_write + 1) % MIDI_QUEUE_SIZE;
         if (next != g_midi_read) {  // Not full
+            ++dbg_midi_rx_count;
             g_midi_queue[g_midi_write].len = (len > 4) ? 4 : len;
             for (uint8_t i = 0; i < g_midi_queue[g_midi_write].len; ++i) {
                 g_midi_queue[g_midi_write].data[i] = data[i];
@@ -772,7 +776,12 @@ void svc_handler_impl(uint32_t* sp) {
             break;
             
         case RegisterProc:
-            g_loader.register_processor(reinterpret_cast<void*>(arg0));
+            if (arg1 != 0) {
+                g_loader.register_processor(reinterpret_cast<void*>(arg0),
+                                            reinterpret_cast<umi::kernel::ProcessFn>(arg1));
+            } else {
+                g_loader.register_processor(reinterpret_cast<void*>(arg0));
+            }
             result = 0;
             break;
             
@@ -855,15 +864,21 @@ extern "C" [[gnu::naked]] void SVC_Handler() {
 // USB Audio IN buffer (separate from I2S DMA buffer)
 int16_t usb_in_buf[BUFFER_SIZE * 2];
 
-// Float buffer for synth processing
-float synth_out_buf[BUFFER_SIZE * 2];
-float synth_in_buf[BUFFER_SIZE * 2];
+// Non-interleaved buffers for synth processing (AudioContext expects per-channel)
+__attribute__((section(".audio_ccm"))) float synth_out_l[BUFFER_SIZE];
+__attribute__((section(".audio_ccm"))) float synth_out_r[BUFFER_SIZE];
+__attribute__((section(".audio_ccm"))) float synth_in_l[BUFFER_SIZE];
+__attribute__((section(".audio_ccm"))) float synth_in_r[BUFFER_SIZE];
 
 // I2S work buffer (32-bit internal audio)
 int32_t i2s_work_buf[BUFFER_SIZE * 2];
 
-// Last synth output (for USB Audio IN)
-int16_t last_synth_out[BUFFER_SIZE * 2];
+// Last synth output (mono) for USB Audio IN
+__attribute__((section(".audio_ccm"))) int16_t last_synth_out[BUFFER_SIZE];
+
+// MIDI events passed into app synth processing (avoid large stack usage)
+__attribute__((section(".audio_ccm"))) umi::Event synth_input_events[umi::MAX_EVENTS_PER_BUFFER];
+__attribute__((section(".audio_ccm"))) umi::EventQueue<> synth_output_events;
 
 // Debug: track what fill_audio_buffer returns
 uint32_t dbg_fill_ret = 0;        // Return value from read_audio_asrc
@@ -989,39 +1004,60 @@ static void process_audio_frame(uint16_t* buf) {
     }
     // buf now contains packed 24-bit data -> goes to I2S DAC
     
-    // 2. Call app synth if registered
+    // 2. Call app synth if registered (AudioContext-based processor)
     if (g_loader.state() == umi::kernel::AppState::Running) {
-        // Clear output buffer
-        for (uint32_t i = 0; i < BUFFER_SIZE * 2; ++i) {
-            synth_out_buf[i] = 0.0f;
-            synth_in_buf[i] = 0.0f;  // No input to synth
+        for (uint32_t i = 0; i < BUFFER_SIZE; ++i) {
+            synth_out_l[i] = 0.0f;
+            synth_out_r[i] = 0.0f;
+            synth_in_l[i] = 0.0f;
+            synth_in_r[i] = 0.0f;
         }
-        
-        // Call synth process
-        g_loader.call_process(
-            std::span<float>(synth_out_buf, BUFFER_SIZE * 2),
-            std::span<const float>(synth_in_buf, BUFFER_SIZE * 2),
-            g_shared.sample_position,
-            BUFFER_SIZE,
-            dt
-        );
+
+        uint32_t event_count = 0;
+        while (g_midi_read != g_midi_write && event_count < umi::MAX_EVENTS_PER_BUFFER) {
+            const MidiMsg& msg = g_midi_queue[g_midi_read];
+            uint8_t status = msg.data[0];
+            uint8_t d1 = (msg.len >= 2) ? msg.data[1] : 0;
+            uint8_t d2 = (msg.len >= 3) ? msg.data[2] : 0;
+            if ((status & 0xF0) == 0x90 && d2 != 0) {
+                ++dbg_midi_note_on;
+            }
+            synth_input_events[event_count++] = umi::Event::make_midi(0, 0, status, d1, d2);
+            g_midi_read = (g_midi_read + 1) % MIDI_QUEUE_SIZE;
+        }
+
+        std::array<const umi::sample_t*, 2> inputs = {synth_in_l, synth_in_r};
+        std::array<umi::sample_t*, 2> outputs = {synth_out_l, synth_out_r};
+
+        umi::AudioContext ctx{
+            .inputs = std::span<const umi::sample_t* const>(inputs.data(), inputs.size()),
+            .outputs = std::span<umi::sample_t* const>(outputs.data(), outputs.size()),
+            .input_events = std::span<const umi::Event>(synth_input_events, event_count),
+            .output_events = synth_output_events,
+            .sample_rate = g_shared.sample_rate,
+            .buffer_size = BUFFER_SIZE,
+            .dt = dt,
+            .sample_position = g_shared.sample_position,
+        };
+
+        g_loader.call_process(ctx);
         g_shared.sample_position += BUFFER_SIZE;
         ++dbg_synth_called;
-        
-        // Save synth output for USB Audio IN (don't mix with I2S output)
-        for (uint32_t i = 0; i < BUFFER_SIZE * 2; ++i) {
-            float synth_val = synth_out_buf[i];
+
+        // Save synth output for USB Audio IN (mono mix of L/R)
+        for (uint32_t i = 0; i < BUFFER_SIZE; ++i) {
+            float synth_val = 0.5f * (synth_out_l[i] + synth_out_r[i]);
             if (synth_val > 1.0f) synth_val = 1.0f;
             if (synth_val < -1.0f) synth_val = -1.0f;
             last_synth_out[i] = static_cast<int16_t>(synth_val * 32767.0f);
         }
     }
-    
+
     // 3. Write to USB Audio IN (L=mic, R=synth) - directly, no extra buffering
     if (usb_audio.is_audio_in_streaming() && g_current_sample_rate < 96000) {
         for (uint32_t i = 0; i < BUFFER_SIZE; ++i) {
-            stereo_buf[i * 2] = pcm_buf[i];           // L = mic
-            stereo_buf[i * 2 + 1] = last_synth_out[i * 2];  // R = synth (mono from L)
+            stereo_buf[i * 2] = pcm_buf[i];      // L = mic
+            stereo_buf[i * 2 + 1] = last_synth_out[i];  // R = synth
         }
         usb_audio.write_audio_in(stereo_buf, BUFFER_SIZE);
         ++dbg_audio_in_write;
@@ -1115,7 +1151,7 @@ static void audio_loop() {
             uint16_t* pdm_data = const_cast<uint16_t*>(g_active_pdm_buf);
             cic_decimator.process_buffer(pdm_data, PDM_BUF_SIZE, pcm_buf, PCM_BUF_SIZE);
         }
-        
+
         // Process audio when I2S buffer ready
         uint32_t rate = g_current_sample_rate;
         if (rate != 0) {
@@ -1293,32 +1329,29 @@ int main() {
     g_shared.buffer_size = BUFFER_SIZE;
     g_shared.sample_position = 0;
     
+    // Initialize USB before app entry to keep enumeration even if app faults.
+    init_usb();
+
     // Configure app loader
     g_loader.set_app_memory(_app_ram_start, reinterpret_cast<uintptr_t>(&_app_ram_size));
     g_loader.set_shared_memory(&g_shared);
-    
-    // Direct XIP execution: skip header, treat flash as raw binary
-    // The app is linked to run directly from 0x08060000
-    // Entry point is at the start of the binary with Thumb bit set
+
+    // Direct XIP execution using .umiapp header entry point.
     using EntryFn = void (*)();
-    auto app_entry = reinterpret_cast<EntryFn>(
-        reinterpret_cast<uintptr_t>(_app_image_start) | 1  // Thumb bit
-    );
-    
-    // Check if app is valid (not erased flash = 0xFFFFFFFF)
-    uint32_t app_first_word = *reinterpret_cast<const volatile uint32_t*>(_app_image_start);
-    bool app_valid = (app_first_word != 0xFFFFFFFF);
-    
+    const auto* app_header =
+        reinterpret_cast<const umi::kernel::AppHeader*>(_app_image_start);
+    bool app_valid = app_header->valid_magic() && app_header->compatible_abi();
     if (app_valid) {
+        uintptr_t entry_addr =
+            reinterpret_cast<uintptr_t>(app_header->entry_point(_app_image_start)) | 1;
+        auto app_entry = reinterpret_cast<EntryFn>(entry_addr);
+
         // Mark app as running (needed for syscalls)
         g_loader.set_entry(app_entry);  // Store for debugging
-        
+
         // Call app entry point directly (runs _start -> main -> register_processor)
         app_entry();
     }
-    
-    // Initialize USB early (ensure enumeration even if audio init stalls)
-    init_usb();
 
     // Initialize SysTick
     init_systick();

@@ -2325,14 +2325,15 @@ public:
                 frames_per_packet = IN_MAX_PACKET_FRAMES;
             }
 
-            // ASRC: Use PI controller to track buffer level and adjust read rate
-            // For Audio IN, we invert polarity: if buffer is filling up, speed up read
-            int32_t level = in_ring_buffer_.buffer_level();
-            int32_t ppm = in_pll_controller_.update(level);
-            // Invert: positive level error = buffer filling = need to read faster
-            uint32_t rate = AudioRingBuffer<IN_BUFFER_FRAMES, AudioIn::CHANNELS, SampleT>::ppm_to_rate_q16(ppm);
+            // ASRC DISABLED FOR TESTING: Use direct read without interpolation/rate adjustment
+            // The ASRC PI controller may be causing 4Hz modulation - bypass to test
+            // int32_t level = in_ring_buffer_.buffer_level();
+            // int32_t ppm = in_pll_controller_.update(level);
+            // uint32_t rate = AudioRingBuffer<IN_BUFFER_FRAMES, AudioIn::CHANNELS, SampleT>::ppm_to_rate_q16(ppm);
+            // uint32_t read = in_ring_buffer_.read_interpolated(in_read_buf_, frames_per_packet, rate);
 
-            uint32_t read = in_ring_buffer_.read_interpolated(in_read_buf_, frames_per_packet, rate);
+            // Direct read without ASRC (rate = 1.0, no interpolation)
+            uint32_t read = in_ring_buffer_.read(in_read_buf_, frames_per_packet);
 
             // For isochronous IN, we must send data every frame even if buffer is empty
             // Send silence if no data available
