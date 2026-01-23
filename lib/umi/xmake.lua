@@ -83,8 +83,8 @@ target("umi.dsp")
     set_kind("headeronly")
     set_group("umi")
 
-    -- Include parent dir so users can: #include <umidsp/umidsp.hh>
-    add_includedirs(path.join(lib_dir, "umidsp"), {public = true})
+    -- Include only the public header root
+    add_includedirs(path.join(lib_dir, "umidsp/include"), {public = true})
 target_end()
 
 -- =====================================================================

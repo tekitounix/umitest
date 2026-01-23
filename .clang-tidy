@@ -6,7 +6,7 @@ Checks: >
   clang-analyzer-*,
   performance-*,
   modernize-*,-modernize-use-trailing-return-type,
-  readability-*,-readability-magic-numbers,
+  readability-*,-readability-magic-numbers,-readability-uppercase-literal-suffix,-readability-identifier-length,
   misc-*
 
 WarningsAsErrors: 'bugprone-*,clang-analyzer-*,performance-move-const-arg'

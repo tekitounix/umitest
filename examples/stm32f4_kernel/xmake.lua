@@ -17,14 +17,19 @@ target("stm32f4_kernel")
     add_files("$(projectdir)/lib/bsp/stm32f4-disco/syscalls.cc")
     add_files("$(projectdir)/lib/umios/kernel/loader.cc")
     add_files("$(projectdir)/lib/umios/backend/cm/common/irq.cc")
-    
+
+    -- Crypto library for signature verification
+    add_files("$(projectdir)/lib/umios/crypto/sha512.cc")
+    add_files("$(projectdir)/lib/umios/crypto/ed25519.cc")
+
     -- Dependencies
     add_deps("umi.embedded.full")
-    
+
     -- Include paths
     add_includedirs("src")
     add_includedirs("$(projectdir)/lib/umios/kernel")
-    
+    add_includedirs("$(projectdir)/lib/umios/crypto")
+
     -- Defines
     add_defines("UMIOS_KERNEL=1")
     add_defines("STM32F4", "BOARD_STM32F4")

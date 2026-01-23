@@ -71,9 +71,23 @@ option("coverage")
     set_description("Enable code coverage instrumentation")
 option_end()
 
+option("build_type")
+    set_default("dev")
+    set_showmenu(true)
+    set_description("Build type for kernel/app (dev=skip signature, release=require signature)")
+    set_values("dev", "release")
+option_end()
+
 if has_config("coverage") and is_mode("debug") then
     add_cxflags("--coverage", {force = true})
     add_ldflags("--coverage", {force = true})
+end
+
+-- Set UMIOS_BUILD_TYPE based on build_type option
+if is_config("build_type", "release") then
+    add_defines("UMIOS_BUILD_TYPE=umi::kernel::BuildType::Release", {public = true})
+else
+    add_defines("UMIOS_BUILD_TYPE=umi::kernel::BuildType::Development", {public = true})
 end
 
 -- =====================================================================
@@ -99,6 +113,7 @@ target_end()
 -- Main host tests (use umi.all for all library includes)
 for _, test in ipairs({
     {"test_dsp", "lib/umidsp/test/test_dsp.cc"},
+    {"test_loop_style", "tests/test_loop_style.cc"},
     {"test_kernel", "tests/test_kernel.cc"},
     {"test_audio", "tests/test_audio.cc"},
     {"test_midi", "tests/test_midi.cc"},
@@ -115,6 +130,19 @@ for _, test in ipairs({
         add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
     target_end()
 end
+
+-- Crypto/signature test (requires crypto source files)
+target("test_signature")
+    add_rules("host.test")
+    set_default(true)
+    add_deps("umi.all")
+    add_files("tests/test_signature.cc")
+    add_files("lib/umios/crypto/sha512.cc")
+    add_files("lib/umios/crypto/ed25519.cc")
+    add_includedirs("tests")
+    add_includedirs("lib/umios")
+    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
+target_end()
 
 -- umidi library tests
 for _, test in ipairs({
