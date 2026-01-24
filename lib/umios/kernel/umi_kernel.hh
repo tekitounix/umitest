@@ -673,7 +673,18 @@ public:
     
     /// @deprecated Use resume_task() instead
     void set_task_ready(TaskId id) { resume_task(id); }
-    
+
+    /// Yield CPU to next ready task.
+    /// For Server/User tasks: may block if no higher priority task ready.
+    /// For Realtime tasks: should use wait() instead.
+    ///
+    /// This triggers a context switch to allow other tasks to run.
+    /// Uses fast path (direct switch) in Thread mode, PendSV in ISR context.
+    void yield() {
+        // Simply request reschedule - actual switching done by scheduler
+        schedule();
+    }
+
     /// Get current task for this core (or specified core).
     std::optional<TaskId> current_task(std::uint8_t core = 0xFF) const {
         if (core == 0xFF) core = HW::current_core();
