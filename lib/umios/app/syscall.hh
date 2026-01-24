@@ -38,6 +38,28 @@ namespace nr {
     
     // Shared memory
     inline constexpr uint32_t GetShared     = 40;
+
+    // MIDI
+    inline constexpr uint32_t MidiSend      = 50;
+    inline constexpr uint32_t MidiRecv      = 51;
+
+    // LED/Button
+    inline constexpr uint32_t SetLed        = 60;
+    inline constexpr uint32_t GetLed        = 61;
+    inline constexpr uint32_t GetButton     = 62;
+}
+
+// ============================================================================
+// Event Bit Definitions
+// ============================================================================
+
+namespace event {
+    inline constexpr uint32_t Audio       = (1 << 0);  ///< Audio buffer ready
+    inline constexpr uint32_t Midi        = (1 << 1);  ///< MIDI data available
+    inline constexpr uint32_t VSync       = (1 << 2);  ///< Display refresh
+    inline constexpr uint32_t Timer       = (1 << 3);  ///< Timer tick
+    inline constexpr uint32_t Button      = (1 << 4);  ///< Button press
+    inline constexpr uint32_t Shutdown    = (1 << 31); ///< Shutdown requested
 }
 
 // ============================================================================
@@ -146,6 +168,49 @@ inline void set_param(uint32_t index, float value) noexcept {
     uint32_t bits;
     __builtin_memcpy(&bits, &value, sizeof(bits));
     call(nr::SetParam, index, bits);
+}
+
+// ============================================================================
+// LED/Button API
+// ============================================================================
+
+/// Set LED state
+/// @param index LED index (0-3)
+/// @param on true to turn on, false to turn off
+inline void led_set(uint8_t index, bool on) noexcept {
+    call(nr::SetLed, index, on ? 1 : 0);
+}
+
+/// Toggle LED state
+/// @param index LED index (0-3)
+inline void led_toggle(uint8_t index) noexcept {
+    call(nr::SetLed, index, 2);  // 2 = toggle
+}
+
+/// Get LED state bitmap
+/// @return Bitmap of LED states (bit0-3 = LED0-3)
+inline uint8_t led_get() noexcept {
+    return static_cast<uint8_t>(call(nr::GetLed));
+}
+
+/// Check if button was pressed (clears the flag)
+/// @return true if button was pressed since last call
+inline bool button_pressed() noexcept {
+    return call(nr::GetButton, 0) != 0;
+}
+
+/// Get current button state
+/// @return true if button is currently pressed
+inline bool button_state() noexcept {
+    return call(nr::GetButton, 1) != 0;
+}
+
+/// Wait for events with timeout
+/// @param mask Event mask to wait for
+/// @param timeout_usec Timeout in microseconds (0 = no timeout)
+/// @return Events that occurred
+inline uint32_t wait_event(uint32_t mask, uint32_t timeout_usec = 0) noexcept {
+    return static_cast<uint32_t>(call(nr::WaitEvent, mask, timeout_usec));
 }
 
 } // namespace umi::syscall
