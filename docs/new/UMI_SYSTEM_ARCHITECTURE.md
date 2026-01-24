@@ -89,14 +89,133 @@ CCM (64KB - DMAアクセス不可):
 
 ### 2.2 タスク構成
 
-| タスク | 優先度 | スタック | 役割 |
-|--------|--------|----------|------|
-| Audio Task | 0 (Realtime) | 4KB | DMA割り込み処理、オーディオバッファ処理、USB Audio IN送信 |
-| System Task | 1 (Server) | 2KB | SysEx受信、シェルコマンド処理、USB MIDIハンドリング |
-| Control Task | 2 (User) | 8KB | アプリケーション実行、Syscall処理、イベントディスパッチ |
-| Idle Task | 3 (Idle) | 256B | WFI（Wait For Interrupt）によるスリープ |
+| タスク | 優先度 | スタック | FPUポリシー | 役割 |
+|--------|--------|----------|-------------|------|
+| Audio Task | 0 (Realtime) | 4KB | Exclusive | DMA割り込み処理、オーディオバッファ処理、USB Audio IN送信 |
+| System Task | 1 (Server) | 2KB | Forbidden | SysEx受信、シェルコマンド処理、USB MIDIハンドリング |
+| Control Task | 2 (User) | 8KB | Forbidden | アプリケーション実行、Syscall処理、イベントディスパッチ |
+| Idle Task | 3 (Idle) | 256B | Forbidden | WFI（Wait For Interrupt）によるスリープ |
 
-### 2.3 割り込みハンドラ
+### 2.3 カーネル最適化
+
+#### 2.3.1 O(1) ビットマップスケジューラ
+
+従来のO(n)線形探索スケジューラから、O(1)ビットマップベースに最適化:
+
+```cpp
+// 優先度ビットマップ（4ビット = 4優先度レベル）
+std::atomic<uint8_t> ready_bitmap_ {0};
+
+// 各優先度のタスクキュー
+struct PriorityQueue {
+    uint8_t head {0xFF};   // 先頭タスク
+    uint8_t tail {0xFF};   // 末尾タスク
+    uint8_t count {0};     // キュー内タスク数
+};
+std::array<PriorityQueue, 4> priority_queues_ {};
+
+// O(1) タスク選択
+std::optional<uint16_t> get_next_task() {
+    uint8_t bitmap = ready_bitmap_.load(std::memory_order_acquire);
+    if (bitmap == 0) return std::nullopt;
+
+    // CTZ (Count Trailing Zeros) で最高優先度を1命令で取得
+    uint8_t priority = __builtin_ctz(bitmap);
+    return priority_queues_[priority].head;
+}
+```
+
+**効果**: スケジューラ選択 ~50サイクル → ~5サイクル
+
+#### 2.3.2 FPUポリシー
+
+FPUコンテキストスイッチの変動を排除:
+
+```cpp
+enum class FpuPolicy : uint8_t {
+    Forbidden = 0,  // FPU使用禁止（Shell, MIDI, UI）
+    Exclusive = 1,  // FPU独占（Audio DSPタスク）
+    LazyStack = 2,  // 従来の遅延保存（互換性用）
+};
+```
+
+| ポリシー | 用途 | コンテキストスイッチ時のFPU処理 |
+|---------|------|-------------------------------|
+| Forbidden | 非FPUタスク | なし（0サイクル） |
+| Exclusive | オーディオDSP | なし（独占所有） |
+| LazyStack | 複数FPUタスク | ハードウェア遅延保存 |
+
+**Exclusiveモード**: Audio Taskが FPU を独占所有。他タスクは Forbidden のため、コンテキストスイッチ時の FPU save/restore が完全に不要。
+
+**効果**: FPUスイッチ ~100サイクル → 0サイクル（Exclusiveモード）
+
+#### 2.3.3 Tickless電力管理
+
+アイドル時の消費電力を最小化:
+
+```cpp
+enum class SleepMode : uint8_t {
+    WFI,      // Wait For Interrupt (~1us wakeup)
+    Stop,     // Stop mode (~5us wakeup, 低消費電力)
+};
+
+// スリープモード自動選択
+SleepMode recommend_sleep_mode(uint64_t next_wakeup, uint64_t now, bool audio_active) {
+    if (audio_active) return SleepMode::WFI;  // オーディオ中は軽いスリープ
+    if (next_wakeup - now > 100) return SleepMode::Stop;  // 100us以上ならStop
+    return SleepMode::WFI;
+}
+```
+
+**効果**: アイドル時消費電力 ~50-80%削減（Stop mode使用時）
+
+#### 2.3.4 MPU抽象化レイヤー
+
+MPU有無に関わらず同一APIで動作:
+
+```cpp
+enum class ProtectionMode : uint8_t {
+    Full,            // MPU有効、非特権モード（本番）
+    Privileged,      // MPU無効、特権モード（MPUなしMCU）
+    PrivilegedWithMpu, // MPU有効、特権モード（デバッグ）
+};
+
+// コンパイル時選択
+template <class HW, ProtectionMode Mode = ProtectionMode::Full>
+class Protection {
+    static constexpr bool uses_mpu() { return Mode != ProtectionMode::Privileged; }
+    static constexpr bool needs_syscall() { return Mode == ProtectionMode::Full; }
+};
+```
+
+**効果**: MPUなしMCU（STM32F0等）でも同一アプリが動作
+
+#### 2.3.5 パフォーマンス計測
+
+DWT (Data Watchpoint and Trace) を使用したサイクル精度計測:
+
+```cpp
+#define UMI_ENABLE_METRICS
+
+struct KernelMetrics {
+    struct ContextSwitch {
+        uint32_t count;
+        uint32_t cycles_min, cycles_max;
+        uint64_t cycles_sum;
+    } context_switch;
+
+    struct Audio {
+        uint32_t cycles_last, cycles_max;
+        uint32_t overruns, underruns;
+    } audio;
+
+    // ...
+};
+```
+
+シェルコマンド `show cpu` で確認可能。
+
+### 2.4 割り込みハンドラ
 
 ```cpp
 // Audio DMA (優先度5 - 高)
@@ -120,7 +239,11 @@ extern "C" void PendSV_Handler();           // Context Switch
 優先度 FF: PendSV - 最低優先度（Context Switch用）
 ```
 
-### 2.4 Syscall一覧
+**クリティカルセクション:**
+- BASEPRI方式を採用（PRIMASK全禁止ではなく優先度ベース）
+- Audio DMA割り込みはクリティカルセクション中も実行可能
+
+### 2.5 Syscall一覧
 
 | Nr | 名前 | 引数 | 説明 |
 |----|------|------|------|
@@ -143,7 +266,7 @@ extern "C" void PendSV_Handler();           // Context Switch
 | 61 | GetLed | - | LED状態取得 |
 | 62 | GetButton | - | ボタン状態取得 |
 
-### 2.5 イベントフラグ
+### 2.6 イベントフラグ
 
 ```cpp
 namespace umi::syscall::event {
@@ -156,7 +279,7 @@ namespace umi::syscall::event {
 }
 ```
 
-### 2.6 初期化シーケンス
+### 2.7 初期化シーケンス
 
 ```
 Reset_Handler()
@@ -792,10 +915,14 @@ npm run dev
 |----------|------|
 | `examples/stm32f4_kernel/src/main.cc` | カーネルメイン |
 | `examples/stm32f4_kernel/kernel.ld` | リンカスクリプト |
-| `lib/umios/kernel/umi_kernel.hh` | カーネルコア |
+| `lib/umios/kernel/umi_kernel.hh` | カーネルコア（O(1)スケジューラ、FPUポリシー含む） |
 | `lib/umios/kernel/shared_memory.hh` | 共有メモリ |
 | `lib/umios/kernel/shell_commands.hh` | シェルコマンド |
 | `lib/umios/kernel/loader.hh` | アプリローダー |
+| `lib/umios/kernel/protection.hh` | MPU抽象化レイヤー |
+| `lib/umios/kernel/metrics.hh` | パフォーマンス計測（DWT） |
+| `lib/umios/kernel/port/cm4/switch.hh` | Cortex-M4 コンテキストスイッチ |
+| `lib/umios/kernel/port/cm4/context.hh` | Cortex-M4 コンテキスト管理 |
 
 ### 10.2 アプリケーション
 
@@ -822,9 +949,43 @@ npm run dev
 | `lib/umios/backend/cm/stm32f4/i2c.hh` | I2C |
 | `lib/umios/backend/cm/stm32f4/cs43l22.hh` | Audio Codec |
 | `lib/umios/backend/cm/stm32f4/pdm_mic.hh` | PDM Microphone |
+| `lib/umios/backend/cm/stm32f4/rcc.hh` | クロック制御 |
+| `lib/umios/backend/cm/stm32f4/power.hh` | 電力管理・Tickless |
 | `lib/umiusb/include/audio_interface.hh` | USB Audio |
 
 ---
 
-*Document Version: 1.0*
+## 11. ビルドサイズ
+
+### 11.1 stm32f4_kernel
+
+```
+Flash: 41,776 / 1,048,576 bytes (4.0%)
+RAM:   77,820 / 131,072 bytes (59.4%)
+```
+
+| セクション | サイズ | 説明 |
+|-----------|--------|------|
+| .text | 41,692 B | コード（Flash） |
+| .data | 84 B | 初期化済みデータ |
+| .bss | 77,736 B | 未初期化データ（RAM） |
+
+### 11.2 主要RAM消費
+
+| シンボル | サイズ | 説明 |
+|---------|--------|------|
+| usb_audio | 28,320 B | USB Audio Class バッファ |
+| g_shared | 6,824 B | 共有メモリ領域 |
+| g_app_event_queue | 6,152 B | アプリイベントキュー |
+| usb_hal | 3,032 B | USB HAL状態 |
+| タスクスタック | 14,336 B | CCM RAM（4K+2K+8K） |
+
+カーネル自体はヘッダーオンリー（テンプレート）でインライン展開されるため、
+独立したサイズは計測困難。主要関数：
+- PendSV_Handler: ~96 bytes
+- umi_cm4_switch_context: ~192 bytes
+
+---
+
+*Document Version: 1.1*
 *Last Updated: 2025-01-25*
