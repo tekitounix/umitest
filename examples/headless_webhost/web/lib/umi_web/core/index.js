@@ -22,10 +22,23 @@
 // Base types
 export { BackendInterface, BackendType } from './backend.js';
 
+// Protocol utilities (SysEx encoding/decoding)
+export {
+    UMI_SYSEX_ID,
+    Command,
+    encode7bit,
+    decode7bit,
+    calculateChecksum,
+    buildMessage,
+    parseMessage,
+    parseShellOutput
+} from './protocol.js';
+
 // Backend implementations
 export { UmimBackend, UmimGenericBackend, WasmBackend } from './backends/umim.js';
 export { UmiosBackend, UmiosGenericBackend } from './backends/umios.js';
 export { RenodeBackend, CortexMBackend } from './backends/renode.js';
+export { HardwareBackend } from './backends/hardware.js';
 
 // Manager
 export { BackendManager, backendManager } from './manager.js';

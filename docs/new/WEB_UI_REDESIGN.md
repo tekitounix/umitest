@@ -37,6 +37,7 @@ js/
 | MIDIアクティビティLED | I/O Bar (`midiRxActivityIO`) | Monitor Panel (`midiRxActivity`) | 4つのLEDが同時点滅 |
 | Audio状態表示 | I/O Bar (`audioIOIndicator`) | System Panel (`audioIndicator`) | 状態の二重表示 |
 | デバイス選択 | I/O Bar (select) | コンポーネント内 | 責務分散 |
+| **バックエンド/アプリ選択** | Backend Selector | App Select | 概念的に重複（後述） |
 
 #### B. 情報過多・階層の深さ
 
@@ -56,6 +57,35 @@ js/
 - 起動時に「Loading...」だけで何が起きているか不明
 - エラー発生時のフィードバック不足
 - 重要な操作（Start/Stop）と副次的設定の視覚的区別なし
+
+#### E. バックエンド/アプリ選択の概念的重複
+
+現在の実装では以下の2つの選択UIが存在:
+
+1. **Backend Selector**: UMIM / UMIOS / Renode / Hardware
+2. **App Select**: synth_sim など（apps.json から読み込み）
+
+**問題点:**
+- アプリには対応するバックエンドが決まっている（apps.json の `backend` フィールド）
+- ユーザーは「何を動かすか」を選びたいだけで、バックエンドの種類は実装詳細
+- Hardware の場合はアプリ選択不要（実機のファームウェアが決定）
+
+**解決策: ターゲット選択に統合**
+
+```
+現在:  [Backend: UMIOS ▾] [App: Synth ▾]  → 2つの選択が必要
+
+改善:  [Target ▾]
+       ├─ 🖥️ Synth Simulator (WASM)     ← アプリ + バックエンド自動選択
+       ├─ 🖥️ Drum Machine (WASM)
+       ├─ 🔧 Renode Emulator             ← 特殊バックエンド
+       └─ 🔌 USB Device: UMI-Synth       ← 実機（検出時のみ表示）
+```
+
+**統合の利点:**
+- ユーザーは1クリックで目的のターゲットを選択
+- バックエンドは内部で自動決定
+- 実機接続時は自動検出してリストに追加
 
 ---
 
@@ -78,7 +108,7 @@ js/
 用    │ 🔴 Must Have    │ 🟡 Should Have  │ 🟢 Nice to Have │
 頻    ├─────────────────┼─────────────────┼─────────────────┤
 度    │ • Start/Stop    │ • パラメータ    │ • Sequencer     │
-高    │ • バックエンド  │ • 波形表示      │ • MIDI Learn    │
+高    │ • ターゲット選択│ • 波形表示      │ • MIDI Learn    │
       │ • キーボード    │ • DSP負荷       │ • Auto Play     │
       ├─────────────────┼─────────────────┼─────────────────┤
       │ • Audio設定     │ • Shell         │ • HW Config     │
@@ -98,7 +128,7 @@ js/
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│ [Backend▾] [App▾]  ▶Start  ■Stop      [🔊 Audio] [🎹 MIDI]  │ Header
+│ [Target ▾]  ▶Start  ■Stop             [🔊 Audio] [🎹 MIDI]  │ Header
 ├──────────────────────────────────────────────────────────────┤
 │                                                              │
 │  ┌─────────────────────────────────────────────┐            │
@@ -124,7 +154,7 @@ js/
 ### 3.2 情報の階層化
 
 #### Tier 1: 常時表示（ヘッダー/フッター）
-- バックエンド/アプリ選択
+- ターゲット選択（統合セレクタ）
 - Start/Stop
 - 接続状態インジケータ（Audio/MIDI）
 - DSP負荷、バッファ状態
@@ -252,6 +282,7 @@ app.on('audio:start', () => console.log('Audio started'));
 
 | 現状 | 改善案 |
 |------|--------|
+| Backend Selector + App Select | **TargetSelector** に統合 |
 | Audio I/O Bar + System/Audio | **StatusBar** 1つに統合 |
 | MIDI I/O Bar + MIDI Monitor | **MidiPanel** に統合、詳細はexpand |
 | 複数のインジケータ | **ConnectionStatus** コンポーネント |
@@ -261,9 +292,11 @@ app.on('audio:start', () => console.log('Audio started'));
 ```
 components/
 ├── layout/
-│   ├── Header.js          # バックエンド選択、コントロール
+│   ├── Header.js          # ターゲット選択、コントロール
 │   ├── Main.js             # 波形、キーボード、パラメータ
 │   └── Footer.js           # ステータス、ナビゲーション
+├── target/
+│   └── TargetSelector.js   # 統合ターゲット選択（下記詳細）
 ├── audio/
 │   ├── Waveform.js         # 既存を改善
 │   ├── ParamSlider.js      # 単一スライダー
@@ -281,6 +314,72 @@ components/
     ├── ShellDialog.js      # Shell（モーダル化）
     └── DebugDialog.js      # デバッグ情報
 ```
+
+### 5.3 TargetSelector 詳細設計
+
+**データ構造:**
+```javascript
+// apps.json を拡張、または動的に構築
+const targets = [
+  // シミュレータ（WASMアプリ）
+  {
+    id: 'synth-sim',
+    name: 'Synth Simulator',
+    icon: '🖥️',
+    type: 'simulator',
+    backend: 'umios',           // 自動選択
+    wasmUrl: './apps/synth.wasm',
+    description: 'Polyphonic synthesizer'
+  },
+  {
+    id: 'drum-machine',
+    name: 'Drum Machine',
+    icon: '🥁',
+    type: 'simulator',
+    backend: 'umim',
+    wasmUrl: './apps/drum.wasm'
+  },
+  // エミュレータ
+  {
+    id: 'renode',
+    name: 'Renode Emulator',
+    icon: '🔧',
+    type: 'emulator',
+    backend: 'renode',
+    description: 'Cycle-accurate STM32F4 emulation'
+  },
+  // ハードウェア（動的追加）
+  {
+    id: 'hw-umi-synth',
+    name: 'USB: UMI-Synth',
+    icon: '🔌',
+    type: 'hardware',
+    backend: 'hardware',
+    deviceName: 'UMI-Synth',    // Web MIDI から検出
+    connected: true
+  }
+];
+```
+
+**UI表示:**
+```
+┌─────────────────────────────────┐
+│ Target ▾                        │
+├─────────────────────────────────┤
+│ 🖥️ Synth Simulator        [●]  │  ← 選択中
+│ 🥁 Drum Machine                 │
+│ ─────────────────────────────── │
+│ 🔧 Renode Emulator        [!]  │  ← 要サーバー
+│ ─────────────────────────────── │
+│ 🔌 USB: UMI-Synth         [✓]  │  ← 接続済み
+└─────────────────────────────────┘
+```
+
+**動作:**
+1. ページロード時に `apps.json` からシミュレータ一覧を読み込み
+2. Web MIDI API で接続中のUMIデバイスを検出→リストに追加
+3. ターゲット選択時、対応するバックエンドを自動でインスタンス化
+4. Hardware選択時はデバイス名で `HardwareBackend.connectDevice()` を呼び出し
 
 ---
 
@@ -319,8 +418,9 @@ components/
     <!-- Header -->
     <header class="app-header">
       <div class="app-controls">
-        <select id="backend-select"></select>
-        <select id="app-select"></select>
+        <select id="target-select">
+          <!-- 動的に構築 -->
+        </select>
         <button id="start-btn" class="btn primary">Start</button>
         <button id="stop-btn" class="btn danger" hidden>Stop</button>
       </div>

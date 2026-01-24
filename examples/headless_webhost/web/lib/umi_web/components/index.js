@@ -40,3 +40,6 @@ export {
     decode7bit,
     encode7bit
 } from './shell/index.js';
+
+// Backend Selector
+export { BackendSelector } from './backend-selector/index.js';

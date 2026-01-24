@@ -19,7 +19,20 @@
         }
         .container { max-width: 1800px; margin: 0 auto; }
         h1 { color: var(--umi-accent, #4ecca3); margin-bottom: 8px; }
-        .subtitle { color: var(--umi-text-muted, #888); margin-bottom: 24px; }
+        .subtitle { color: var(--umi-text-muted, #888); margin-bottom: 0; }
+
+        /* Header row with backend selector */
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            gap: 16px;
+        }
+        .header-title { flex: 1; }
+        @media (max-width: 600px) {
+            .header-row { flex-direction: column; }
+        }
 
         /* Three-column layout */
         .main-grid.three-col {
@@ -1055,8 +1068,13 @@
 </head>
 <body>
     <div class="container">
-        <h1>UMI-OS Synth Simulator</h1>
-        <p class="subtitle">Embedded synthesizer running in browser via WebAssembly + AudioWorklet</p>
+        <div class="header-row">
+            <div class="header-title">
+                <h1>UMI-OS Synth Simulator</h1>
+                <p class="subtitle">Embedded synthesizer running in browser via WebAssembly + AudioWorklet</p>
+            </div>
+            <div id="backend-selector"></div>
+        </div>
 
         <!-- Audio I/O Bar -->
         <div class="io-bar" id="audioIOBar">
@@ -1511,6 +1529,7 @@
             DEFAULT_KEY_MAP,
             MidiMonitor,
             ParamControl,
+            BackendSelector,
             // Theme
             darkTheme,
             lightTheme,
@@ -2588,9 +2607,9 @@
 
         function stopAudio() {
             // Stop the current backend
-            const backend = window.currentBackend;
-            if (backend) {
-                backend.stop();
+            const currentBe = window.currentBackend;
+            if (currentBe) {
+                currentBe.stop();
                 window.currentBackend = null;
             }
 
@@ -2610,26 +2629,33 @@
             document.getElementById('audioIndicator').className = 'indicator';
             document.getElementById('shellIndicator').className = 'indicator';
             shellInput.disabled = true;
+
+            // Reset backend selector status
+            if (typeof backendSelector !== 'undefined' && backendSelector) {
+                backendSelector.setStatus('disconnected');
+            }
+
             log('Audio stopped');
         }
 
         // Shell functions
         function sendShellCommand(cmd) {
             console.log('[Shell] sendShellCommand called:', cmd);
-            const backend = window.currentBackend;
-            console.log('[Shell] backend=', backend, 'isReady=', isReady, 'backendType=', currentBackendType);
-            if (!backend || !isReady) return;
+            const be = window.currentBackend;
+            console.log('[Shell] backend=', be, 'isReady=', isReady, 'backendType=', currentBackendType);
+            if (!be || !isReady) return;
 
-            // Shell is only available for UMI-OS backend
-            if (currentBackendType !== BackendType.UMIOS && currentBackendType !== 'umios') {
+            // Shell is available for UMI-OS and Hardware backends
+            const shellBackends = [BackendType.UMIOS, 'umios', BackendType.HARDWARE, 'hardware'];
+            if (!shellBackends.includes(currentBackendType)) {
                 appendShellResponse('Shell not available in ' + currentBackendType + ' mode\n');
                 return;
             }
             shellHistory.push(cmd);
             historyIndex = shellHistory.length;
-            if (backend.sendShellCommand) {
+            if (be.sendShellCommand) {
                 console.log('[Shell] Calling backend.sendShellCommand');
-                backend.sendShellCommand(cmd);
+                be.sendShellCommand(cmd);
             } else {
                 console.warn('[Shell] backend.sendShellCommand not available');
             }
@@ -2900,6 +2926,78 @@
         loadApplications().then(() => {
             checkWasm();
         });
+
+        // Initialize Backend Selector
+        const backendSelectorContainer = document.getElementById('backend-selector');
+        const backendSelector = new BackendSelector({
+            container: backendSelectorContainer,
+            onBackendChange: async ({ type, deviceName, isSimulator }) => {
+                log(`Switching to ${isSimulator ? 'simulator' : 'hardware'}: ${deviceName || type}`);
+
+                if (isPlaying) {
+                    stopAudio();
+                }
+
+                if (isSimulator) {
+                    // Use existing simulator backend switching
+                    await switchBackend(type);
+                    backendSelector.setStatus('connected');
+                } else {
+                    // Hardware device selected - connect immediately (no Start button needed)
+                    try {
+                        const hwBackend = backendManager.createBackend('hardware');
+                        const success = await hwBackend.connectDevice(deviceName);
+                        if (success) {
+                            backend = hwBackend;
+                            window.currentBackend = hwBackend;
+                            currentBackendType = BackendType.HARDWARE;
+                            isPlaying = true;
+                            isReady = true;  // Enable shell input
+                            backendSelector.setStatus('connected');
+                            setStatus(`Playing (${deviceName})`, 'playing');
+                            startBtn.disabled = true;
+                            stopBtn.disabled = false;
+                            resetBtn.disabled = false;
+
+                            // Enable shell input
+                            shellInput.disabled = false;
+                            document.getElementById('shellIndicator').className = 'indicator active';
+                            document.getElementById('kernelIndicator').className = 'indicator active';
+                            document.getElementById('audioIndicator').className = 'indicator active';
+                            document.getElementById('engineState').textContent = 'Hardware';
+
+                            log(`Connected to hardware: ${deviceName}`);
+
+                            // Set up shell output handler
+                            hwBackend.onShellOutput = (text, stream) => {
+                                if (stream === 'stderr') {
+                                    appendShellLine('<span class="error">' + escapeHtml(text) + '</span>');
+                                } else {
+                                    appendShellResponse(text);
+                                }
+                            };
+
+                            // Set up MIDI message handler for hardware
+                            hwBackend.onMessage = (msg) => {
+                                if (msg.type === 'midi' && msg.data) {
+                                    flashMidiActivity('rx');
+                                    midiRxCount++;
+                                    updateMidiCounters();
+                                }
+                            };
+                        } else {
+                            backendSelector.setStatus('error');
+                            setStatus('Connection failed', 'error');
+                        }
+                    } catch (err) {
+                        backendSelector.setStatus('error');
+                        setStatus('Hardware error', 'error');
+                        log('Hardware connection error: ' + err.message, 'error');
+                    }
+                }
+            }
+        });
+        backendSelector.init();
 
         initWebMIDI();
         initAudioDevices();

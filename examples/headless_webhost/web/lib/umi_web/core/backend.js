@@ -15,6 +15,7 @@ export const BackendType = {
     UMIOS: 'umios',         // Full UMI-OS kernel simulation
     RENODE: 'renode',       // Renode hardware simulation
     CORTEXM: 'cortexm',     // Pure JS Cortex-M emulator
+    HARDWARE: 'hardware',   // Real USB MIDI hardware
     // Legacy alias
     WASM: 'umios',
 };

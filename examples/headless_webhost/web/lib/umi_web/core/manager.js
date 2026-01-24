@@ -11,6 +11,7 @@ import { BackendType } from './backend.js';
 import { UmimBackend, UmimGenericBackend } from './backends/umim.js';
 import { UmiosBackend, UmiosGenericBackend } from './backends/umios.js';
 import { RenodeBackend, CortexMBackend } from './backends/renode.js';
+import { HardwareBackend } from './backends/hardware.js';
 
 /**
  * Backend Manager - Factory and coordinator
@@ -88,30 +89,53 @@ export class BackendManager {
                 name: 'UMIM (DSP)',
                 description: 'DSP layer only, fast real-time audio',
                 available: true,
+                isSimulator: true,
             },
             {
                 type: BackendType.UMIOS,
                 name: 'UMI-OS (Kernel)',
                 description: 'Full UMI-OS kernel simulation with task scheduler',
                 available: true,
+                isSimulator: true,
             },
             {
                 type: BackendType.RENODE,
                 name: 'Renode (HW)',
                 description: 'Cycle-accurate hardware simulation, requires Renode server',
                 available: false,
+                isSimulator: true,
+            },
+            {
+                type: 'hardware',
+                name: 'USB Hardware',
+                description: 'Connect to real UMI device via USB MIDI',
+                available: false,
+                isSimulator: false,
             },
         ];
 
-        // Check Renode availability
+        // Check Renode availability (doesn't require permission)
         backends[2].available = await RenodeBackend.isAvailable();
+
+        // Hardware availability is checked on-demand via getHardwareDevices()
+        // to avoid triggering MIDI permission dialog on page load
+        backends[3].available = HardwareBackend.isSupported();
 
         return backends;
     }
 
     /**
+     * Get available hardware devices
+     * @returns {Promise<Array<{name: string}>>}
+     */
+    async getHardwareDevices() {
+        const backend = new HardwareBackend();
+        return backend.getDevices();
+    }
+
+    /**
      * Create backend of specified type
-     * @param {string} type - Backend type (umim, umios, renode, etc.)
+     * @param {string} type - Backend type (umim, umios, renode, hardware, etc.)
      * @param {object} [options={}]
      * @returns {BackendInterface}
      */
@@ -129,6 +153,8 @@ export class BackendManager {
                 return new RenodeBackend(options);
             case 'cortexm':
                 return new CortexMBackend(options);
+            case 'hardware':
+                return new HardwareBackend(options);
             default:
                 throw new Error(`Unknown backend type: ${type}`);
         }
