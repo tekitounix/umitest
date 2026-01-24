@@ -2445,6 +2445,69 @@ class AudioInterface {
         send_midi(hal, cable, 0xB0 | (ch & 0x0F), cc & 0x7F, val & 0x7F);
     }
 
+    /// Send SysEx message (with F0 and F7 framing)
+    /// @param hal USB HAL instance
+    /// @param data SysEx data (including F0 at start and F7 at end)
+    /// @param len Length of data
+    /// @param cable MIDI cable number (0-15)
+    ///
+    /// USB MIDI SysEx uses Code Index Numbers (CIN):
+    /// - 0x04: SysEx start/continue (3 bytes)
+    /// - 0x05: SysEx ends with 1 byte (single-byte system common)
+    /// - 0x06: SysEx ends with 2 bytes
+    /// - 0x07: SysEx ends with 3 bytes
+    template <typename HalT>
+    void send_sysex(HalT& hal, const uint8_t* data, uint16_t len, uint8_t cable = 0) {
+        if constexpr (!HAS_MIDI_IN) {
+            (void)hal;
+            (void)data;
+            (void)len;
+            (void)cable;
+            return;
+        } else {
+            if (len == 0) return;
+
+            uint16_t pos = 0;
+            std::array<uint8_t, 4> packet{};
+
+            // Send complete 3-byte packets (CIN = 0x04)
+            while (pos + 3 <= len && (pos + 3 < len || data[len - 1] != 0xF7)) {
+                // Still have 3+ bytes and not the final packet
+                packet[0] = static_cast<uint8_t>((cable << 4) | 0x04);  // CIN = SysEx start/continue
+                packet[1] = data[pos];
+                packet[2] = data[pos + 1];
+                packet[3] = data[pos + 2];
+                hal.ep_write(EP_MIDI_IN, packet.data(), 4);
+                pos += 3;
+            }
+
+            // Send final packet based on remaining bytes
+            uint16_t remaining = len - pos;
+            if (remaining > 0) {
+                if (remaining == 1) {
+                    // CIN = 0x05: SysEx ends with 1 byte
+                    packet[0] = static_cast<uint8_t>((cable << 4) | 0x05);
+                    packet[1] = data[pos];
+                    packet[2] = 0;
+                    packet[3] = 0;
+                } else if (remaining == 2) {
+                    // CIN = 0x06: SysEx ends with 2 bytes
+                    packet[0] = static_cast<uint8_t>((cable << 4) | 0x06);
+                    packet[1] = data[pos];
+                    packet[2] = data[pos + 1];
+                    packet[3] = 0;
+                } else {  // remaining == 3
+                    // CIN = 0x07: SysEx ends with 3 bytes
+                    packet[0] = static_cast<uint8_t>((cable << 4) | 0x07);
+                    packet[1] = data[pos];
+                    packet[2] = data[pos + 1];
+                    packet[3] = data[pos + 2];
+                }
+                hal.ep_write(EP_MIDI_IN, packet.data(), 4);
+            }
+        }
+    }
+
     // ========================================================================
     // Status
     // ========================================================================
