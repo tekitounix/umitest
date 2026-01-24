@@ -168,8 +168,22 @@
     </div>
 
     <div style="margin-block-end: var(--space-md);">
+      <h4 style="margin: 0 0 var(--space-sm); font-size: var(--text-sm);">Audio Input</h4>
+      <select class="select" id="audio-input-select" style="width: 100%;">
+        <option value="">None</option>
+      </select>
+    </div>
+
+    <div style="margin-block-end: var(--space-md);">
       <h4 style="margin: 0 0 var(--space-sm); font-size: var(--text-sm);">MIDI Input</h4>
-      <div id="midi-input-list" style="background: var(--color-bg); padding: var(--space-sm); border-radius: var(--radius-sm); font-size: var(--text-sm);">
+      <div id="midi-input-list" style="background: var(--color-bg); padding: var(--space-sm); border-radius: var(--radius-sm); font-size: var(--text-sm); max-height: 120px; overflow-y: auto;">
+        No MIDI devices
+      </div>
+    </div>
+
+    <div style="margin-block-end: var(--space-md);">
+      <h4 style="margin: 0 0 var(--space-sm); font-size: var(--text-sm);">MIDI Output</h4>
+      <div id="midi-output-list" style="background: var(--color-bg); padding: var(--space-sm); border-radius: var(--radius-sm); font-size: var(--text-sm); max-height: 120px; overflow-y: auto;">
         No MIDI devices
       </div>
     </div>
