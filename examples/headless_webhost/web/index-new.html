@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UMI Synth</title>
+  <link rel="stylesheet" href="styles/main.css">
+  <style id="theme-vars">/* Theme variables injected by JS */</style>
+</head>
+<body>
+  <div class="app" id="app">
+    <!-- ========== Header ========== -->
+    <header class="app-header">
+      <div class="controls">
+        <select class="select" id="target-select" aria-label="Target">
+          <option value="">Loading...</option>
+        </select>
+        <button class="btn primary" id="start-btn" disabled>Start</button>
+        <button class="btn danger" id="stop-btn" hidden>Stop</button>
+        <span class="badge loading" id="status-badge">Loading</span>
+      </div>
+      <div class="status-group">
+        <span class="flex items-center gap-sm" title="Audio">
+          <span class="indicator" id="audio-indicator"></span>
+          <span>Audio</span>
+        </span>
+        <span class="flex items-center gap-sm" title="MIDI">
+          <span class="indicator" id="midi-indicator"></span>
+          <span>MIDI</span>
+        </span>
+        <button class="btn ghost sm" id="theme-toggle" aria-label="Toggle theme">
+          <span id="theme-icon">🌙</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ========== Main ========== -->
+    <main class="app-main">
+      <div class="main-content">
+        <!-- Waveform -->
+        <section class="panel">
+          <h2>Waveform</h2>
+          <div class="waveform">
+            <canvas id="waveform-canvas"></canvas>
+          </div>
+        </section>
+
+        <!-- Keyboard -->
+        <section class="panel">
+          <h2>Keyboard</h2>
+          <div class="keyboard" id="keyboard"></div>
+        </section>
+
+        <!-- Parameters -->
+        <section class="panel">
+          <h2>
+            Parameters
+            <button class="btn ghost sm" id="midi-learn-btn" style="margin-inline-start: auto;">MIDI Learn</button>
+          </h2>
+          <div class="param-grid" id="param-grid">
+            <p class="text-muted">Start audio to load parameters...</p>
+          </div>
+        </section>
+      </div>
+
+      <aside class="sidebar">
+        <!-- System Status -->
+        <section class="panel compact">
+          <h2>
+            <span class="indicator" id="system-indicator"></span>
+            System
+          </h2>
+          <div class="status-grid">
+            <div class="status-row">
+              <span class="status-label">DSP Load</span>
+              <span class="status-value" id="dsp-load">--%</span>
+            </div>
+            <div class="load-bar">
+              <div class="load-bar-fill" id="dsp-load-bar" style="width: 0%"></div>
+            </div>
+            <div class="status-row">
+              <span class="status-label">Sample Rate</span>
+              <span class="status-value" id="sample-rate">--</span>
+            </div>
+            <div class="status-row">
+              <span class="status-label">Buffer</span>
+              <span class="status-value" id="buffer-size">--</span>
+            </div>
+            <div class="status-row">
+              <span class="status-label">Drops</span>
+              <span class="status-value" id="drop-count">0</span>
+            </div>
+          </div>
+          <details style="margin-block-start: var(--space-sm);">
+            <summary style="cursor: pointer; font-size: var(--text-xs); color: var(--color-accent);">More...</summary>
+            <div class="status-grid" style="margin-block-start: var(--space-sm);">
+              <div class="status-row">
+                <span class="status-label">Uptime</span>
+                <span class="status-value" id="uptime">--</span>
+              </div>
+              <div class="status-row">
+                <span class="status-label">Kernel</span>
+                <span class="status-value" id="kernel-state">--</span>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <!-- MIDI Monitor -->
+        <section class="panel compact">
+          <h2>
+            <span class="indicator" id="midi-monitor-indicator"></span>
+            MIDI
+            <span class="flex items-center gap-sm" style="margin-inline-start: auto; font-size: var(--text-xs); font-weight: normal;">
+              RX: <output id="midi-rx-count">0</output>
+            </span>
+          </h2>
+          <div class="midi-monitor" id="midi-monitor">
+            <div class="midi-msg other"><span class="time">--:--</span> Waiting for MIDI...</div>
+          </div>
+        </section>
+
+        <!-- Shell (collapsed by default) -->
+        <details class="panel compact">
+          <summary style="cursor: pointer; display: flex; align-items: center; gap: var(--space-sm);">
+            <span class="indicator" id="shell-indicator"></span>
+            <span style="font-size: var(--text-base); font-weight: 600; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.5px;">Shell</span>
+          </summary>
+          <div class="shell" style="margin-block-start: var(--space-sm);">
+            <div class="shell-output" id="shell-output">
+              <span class="response">UMI-OS Shell v1.0</span><br>
+              <span class="response">Type 'help' for commands.</span><br>
+            </div>
+            <div class="shell-input-line">
+              <span class="shell-prompt">umi$</span>
+              <input type="text" class="shell-input" id="shell-input" placeholder="Enter command..." disabled>
+            </div>
+          </div>
+        </details>
+      </aside>
+    </main>
+
+    <!-- ========== Footer ========== -->
+    <footer class="app-footer">
+      <div class="status-info">
+        <span>DSP: <output id="footer-dsp">0%</output></span>
+        <span>Buf: <output id="footer-buf">0</output></span>
+        <span>Pos: <output id="footer-pos">0</output></span>
+      </div>
+      <nav class="nav-buttons">
+        <button class="btn ghost sm" popovertarget="settings-popover">Settings</button>
+        <button class="btn ghost sm" popovertarget="debug-popover">Debug</button>
+      </nav>
+    </footer>
+  </div>
+
+  <!-- ========== Popovers / Dialogs ========== -->
+
+  <!-- Settings Popover -->
+  <div id="settings-popover" popover>
+    <h3 style="margin: 0 0 var(--space-md); color: var(--color-accent);">Settings</h3>
+
+    <div style="margin-block-end: var(--space-md);">
+      <h4 style="margin: 0 0 var(--space-sm); font-size: var(--text-sm);">Audio Output</h4>
+      <select class="select" id="audio-output-select" style="width: 100%;">
+        <option value="">Default</option>
+      </select>
+    </div>
+
+    <div style="margin-block-end: var(--space-md);">
+      <h4 style="margin: 0 0 var(--space-sm); font-size: var(--text-sm);">MIDI Input</h4>
+      <div id="midi-input-list" style="background: var(--color-bg); padding: var(--space-sm); border-radius: var(--radius-sm); font-size: var(--text-sm);">
+        No MIDI devices
+      </div>
+    </div>
+
+    <div style="text-align: end;">
+      <button class="btn secondary" popovertarget="settings-popover" popovertargetaction="hide">Close</button>
+    </div>
+  </div>
+
+  <!-- Debug Popover -->
+  <div id="debug-popover" popover>
+    <h3 style="margin: 0 0 var(--space-md); color: var(--color-accent);">Debug Info</h3>
+
+    <div style="margin-block-end: var(--space-md);">
+      <h4 style="margin: 0 0 var(--space-sm); font-size: var(--text-sm);">Memory</h4>
+      <div class="status-grid">
+        <div class="status-row">
+          <span class="status-label">Heap</span>
+          <span class="status-value" id="debug-heap">--</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">Stack</span>
+          <span class="status-value" id="debug-stack">--</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">Free</span>
+          <span class="status-value" id="debug-free">--</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-block-end: var(--space-md);">
+      <h4 style="margin: 0 0 var(--space-sm); font-size: var(--text-sm);">Kernel</h4>
+      <div class="status-grid">
+        <div class="status-row">
+          <span class="status-label">Scheduler</span>
+          <span class="status-value" id="debug-scheduler">--</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">Tasks</span>
+          <span class="status-value" id="debug-tasks">--</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">Context Switches</span>
+          <span class="status-value" id="debug-ctx">--</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-block-end: var(--space-md);">
+      <h4 style="margin: 0 0 var(--space-sm); font-size: var(--text-sm);">Log</h4>
+      <div id="debug-log" style="background: var(--color-bg); padding: var(--space-sm); border-radius: var(--radius-sm); font-family: monospace; font-size: var(--text-xs); height: 150px; overflow-y: auto;">
+        [System] Initialized
+      </div>
+    </div>
+
+    <div style="text-align: end;">
+      <button class="btn secondary" popovertarget="debug-popover" popovertargetaction="hide">Close</button>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
