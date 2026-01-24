@@ -736,6 +736,32 @@ public:
         return fpu_owner_;
     }
 
+    // -----------------------------------------------------------------
+    // User Application API: Tickless Power Management
+    // -----------------------------------------------------------------
+
+    /// Set audio activity status for power management.
+    /// When audio is active, only light sleep (WFI) is used.
+    /// When audio is inactive, deeper sleep modes are allowed.
+    void set_audio_active(bool active) {
+        audio_active_ = active;
+    }
+
+    /// Check if audio is currently active.
+    bool is_audio_active() const {
+        return audio_active_;
+    }
+
+    /// Get next timer expiry time (for tickless idle).
+    /// Returns UINT64_MAX if no timers pending.
+    usec get_next_wakeup() const {
+        auto now = time_us;
+        if (auto t = timers.next_expiry(now)) {
+            return *t;
+        }
+        return UINT64_MAX;
+    }
+
     /// Get current task for this core (or specified core).
     std::optional<TaskId> current_task(std::uint8_t core = 0xFF) const {
         if (core == 0xFF) core = HW::current_core();
@@ -1110,6 +1136,9 @@ private:
 
     // FPU exclusive owner (for Exclusive policy)
     std::optional<TaskId> fpu_owner_ {};
+
+    // Tickless power management state
+    bool audio_active_ {false};  // True when audio DMA is running
 
     bool valid_task(TaskId id) const { 
         return id.valid() && id.value < tasks.size() && 
