@@ -63,10 +63,33 @@ export class Shell {
      * @param {string} [type='stdout'] - 'stdout', 'stderr', 'system'
      */
     write(text, type = 'stdout') {
-        const entry = document.createElement('div');
-        entry.className = `shell-entry ${type}`;
-        entry.textContent = text;
-        this.outputEl.appendChild(entry);
+        // For stdout/stderr, append to current pending entry if same type
+        // Only flush when we see a newline at the end
+        if (type === 'stdout' || type === 'stderr') {
+            if (!this._pendingEntry || this._pendingType !== type) {
+                // Create new entry
+                this._flushPending();
+                this._pendingEntry = document.createElement('pre');
+                this._pendingEntry.className = `shell-entry ${type}`;
+                this._pendingEntry.style.margin = '0';
+                this._pendingEntry.style.whiteSpace = 'pre-wrap';
+                this._pendingType = type;
+                this.outputEl.appendChild(this._pendingEntry);
+            }
+            this._pendingEntry.textContent += text;
+
+            // If text ends with newline, flush
+            if (text.endsWith('\n')) {
+                this._flushPending();
+            }
+        } else {
+            // System/command messages: flush pending and write immediately
+            this._flushPending();
+            const entry = document.createElement('div');
+            entry.className = `shell-entry ${type}`;
+            entry.textContent = text;
+            this.outputEl.appendChild(entry);
+        }
 
         // Trim old entries
         while (this.outputEl.children.length > this.maxOutput) {
@@ -75,6 +98,15 @@ export class Shell {
 
         // Auto-scroll
         this.outputEl.scrollTop = this.outputEl.scrollHeight;
+    }
+
+    /**
+     * Flush pending output entry
+     * @private
+     */
+    _flushPending() {
+        this._pendingEntry = null;
+        this._pendingType = null;
     }
 
     /**
@@ -202,75 +234,10 @@ export class Shell {
     }
 }
 
-/**
- * Parse UMI-OS shell output from SysEx
- * @param {Uint8Array|number[]} data - SysEx data
- * @returns {object|null} { type: 'stdout'|'stderr', text: string }
- */
-export function parseShellSysex(data) {
-    // UMI-OS shell SysEx format: F0 00 21 27 [cmd] [7-bit encoded text] F7
-    // cmd: 0x01 = stdout, 0x02 = stderr
-
-    if (data.length < 6) return null;
-    if (data[0] !== 0xF0 || data[data.length - 1] !== 0xF7) return null;
-
-    // Check UMI manufacturer ID (example)
-    if (data[1] !== 0x00 || data[2] !== 0x21 || data[3] !== 0x27) return null;
-
-    const cmd = data[4];
-    const payload = data.slice(5, -1);
-
-    // Decode 7-bit to 8-bit
-    const decoded = decode7bit(payload);
-    const text = new TextDecoder().decode(new Uint8Array(decoded));
-
-    if (cmd === 0x01) {
-        return { type: 'stdout', text };
-    } else if (cmd === 0x02) {
-        return { type: 'stderr', text };
-    }
-
-    return null;
-}
-
-/**
- * Decode 7-bit MIDI-safe encoding to 8-bit
- * @param {Uint8Array|number[]} data
- * @returns {number[]}
- */
-export function decode7bit(data) {
-    const result = [];
-    let i = 0;
-    while (i < data.length) {
-        const highBits = data[i++];
-        for (let j = 0; j < 7 && i < data.length; j++) {
-            const lowBits = data[i++];
-            const byte = lowBits | ((highBits >> j) & 1) << 7;
-            result.push(byte);
-        }
-    }
-    return result;
-}
-
-/**
- * Encode 8-bit data to 7-bit MIDI-safe encoding
- * @param {Uint8Array|number[]} data
- * @returns {number[]}
- */
-export function encode7bit(data) {
-    const result = [];
-    let i = 0;
-    while (i < data.length) {
-        let highBits = 0;
-        const chunk = [];
-        for (let j = 0; j < 7 && i < data.length; j++) {
-            const byte = data[i++];
-            highBits |= ((byte >> 7) & 1) << j;
-            chunk.push(byte & 0x7F);
-        }
-        result.push(highBits);
-        result.push(...chunk);
-    }
-    return result;
-}
+// Re-export protocol utilities for backwards compatibility
+export {
+    encode7bit,
+    decode7bit,
+    parseShellOutput as parseShellSysex
+} from '../../core/protocol.js';
 
