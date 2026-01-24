@@ -109,3 +109,35 @@ void __cxa_guard_abort(int64_t* guard) {
 }
 
 } // extern "C"
+
+// ============================================================================
+// Minimal Allocator for Coroutines
+// ============================================================================
+
+// Simple bump allocator for coroutine frames
+// Note: This is a very basic implementation; production code should use
+// a proper heap or arena allocator
+namespace {
+    alignas(8) char g_heap[4096];  // 4KB heap for coroutine frames
+    char* g_heap_ptr = g_heap;
+}
+
+void* operator new(decltype(sizeof(0)) size) {
+    // Align to 8 bytes
+    size = (size + 7) & ~static_cast<decltype(size)>(7);
+    if (g_heap_ptr + size > g_heap + sizeof(g_heap)) {
+        umi::syscall::panic("out of heap memory");
+    }
+    void* ptr = g_heap_ptr;
+    g_heap_ptr += size;
+    return ptr;
+}
+
+void operator delete(void* ptr, decltype(sizeof(0)) /*size*/) noexcept {
+    // Bump allocator doesn't support free
+    (void)ptr;
+}
+
+void operator delete(void* ptr) noexcept {
+    (void)ptr;
+}

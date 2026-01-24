@@ -110,6 +110,18 @@ target("umi.boot")
 target_end()
 
 -- =====================================================================
+-- UMI Synth Library (common synthesizer implementation)
+-- =====================================================================
+
+target("umi.synth")
+    set_kind("headeronly")
+    set_group("umi")
+    add_deps("umi.dsp")
+
+    add_includedirs(path.join(lib_dir, "umisynth/include"), {public = true})
+target_end()
+
+-- =====================================================================
 -- UMI USB Library
 -- =====================================================================
 
