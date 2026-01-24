@@ -89,12 +89,14 @@ private:
     size_t write_stream(Command cmd, const uint8_t* data, size_t len,
                         SendFn send_fn) {
         if (tx_paused_) return 0;
-        constexpr size_t MAX_CHUNK = 48;
+        // Large chunk for shell output - send entire response in one SysEx if possible
+        // USB SysEx can span multiple USB packets (64 bytes each)
+        constexpr size_t MAX_CHUNK = 1024;
 
         size_t sent = 0;
         while (sent < len) {
             size_t chunk = (len - sent > MAX_CHUNK) ? MAX_CHUNK : (len - sent);
-            MessageBuilder<64> builder;
+            MessageBuilder<1280> builder;  // Enough for 1024-byte chunks after 7-bit encoding (~8/7 ratio + overhead)
             builder.begin(cmd, tx_seq_);
             builder.add_data(data + sent, chunk);
             send_fn(builder.data(), builder.finalize());
