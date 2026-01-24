@@ -38,6 +38,10 @@
 #include <hal/stm32_otg.hh>
 #include <umiusb.hh>
 
+// SysEx shell protocol
+#include <protocol/standard_io.hh>
+#include <umios/kernel/shell_commands.hh>
+
 using namespace umi::stm32;
 using namespace umi::port::arm;
 
@@ -189,31 +193,47 @@ __attribute__((section(".shared"))) umi::kernel::SharedMemory g_shared;
 // RTOS Task Management
 // ============================================================================
 
-// Task stacks (in app RAM or kernel RAM depending on configuration)
-// Control task: runs app's main() in a loop
-// Audio task: processes audio when notified by ISR
-constexpr uint32_t CONTROL_TASK_STACK_SIZE = 2048;  // words (8KB)
-constexpr uint32_t AUDIO_TASK_STACK_SIZE = 1024;    // words (4KB)
+// Task priorities (from umi_kernel.hh):
+//   Realtime (0): Audio processing, DMA callbacks - highest
+//   Server   (1): Drivers, I/O handlers (shell, USB SysEx)
+//   User     (2): Application tasks
+//   Idle     (3): Background, sleep management - lowest
 
 // Task stacks in CCM (fast memory, no DMA needed for stacks)
-__attribute__((section(".audio_ccm"))) uint32_t g_control_task_stack[CONTROL_TASK_STACK_SIZE];
+constexpr uint32_t AUDIO_TASK_STACK_SIZE = 1024;    // words (4KB) - Realtime
+constexpr uint32_t SYSTEM_TASK_STACK_SIZE = 512;    // words (2KB) - Server
+constexpr uint32_t CONTROL_TASK_STACK_SIZE = 2048;  // words (8KB) - User
+constexpr uint32_t IDLE_TASK_STACK_SIZE = 64;       // words (256B) - Idle
+
 __attribute__((section(".audio_ccm"))) uint32_t g_audio_task_stack[AUDIO_TASK_STACK_SIZE];
+__attribute__((section(".audio_ccm"))) uint32_t g_system_task_stack[SYSTEM_TASK_STACK_SIZE];
+__attribute__((section(".audio_ccm"))) uint32_t g_control_task_stack[CONTROL_TASK_STACK_SIZE];
+__attribute__((section(".audio_ccm"))) uint32_t g_idle_task_stack[IDLE_TASK_STACK_SIZE];
 
 // Task contexts (TCBs)
-umi::port::cm4::TaskContext g_control_tcb;
-umi::port::cm4::TaskContext g_audio_tcb;
+umi::port::cm4::TaskContext g_audio_tcb;    // Realtime priority
+umi::port::cm4::TaskContext g_system_tcb;   // Server priority
+umi::port::cm4::TaskContext g_control_tcb;  // User priority
+umi::port::cm4::TaskContext g_idle_tcb;     // Idle priority
 umi::port::cm4::TaskContext* g_current_tcb = nullptr;
 
 // Task notification flags
 constexpr uint32_t NOTIFY_AUDIO_READY = (1 << 0);
+constexpr uint32_t NOTIFY_SYSEX_READY = (1 << 1);
 constexpr uint32_t NOTIFY_SHUTDOWN = (1 << 31);
 volatile uint32_t g_audio_task_notify = 0;
+volatile uint32_t g_system_task_notify = 0;
 volatile uint32_t g_control_task_notify = 0;
 
 // Task state for scheduler
 enum class TaskState : uint8_t { Ready, Running, Blocked };
-volatile TaskState g_control_task_state = TaskState::Blocked;
 volatile TaskState g_audio_task_state = TaskState::Blocked;
+volatile TaskState g_system_task_state = TaskState::Blocked;
+volatile TaskState g_control_task_state = TaskState::Blocked;
+volatile TaskState g_idle_task_state = TaskState::Ready;  // Idle always ready
+
+// RTOS started flag - prevents SysTick from touching tasks before RTOS init
+volatile bool g_rtos_started = false;
 
 // Audio buffer pending for audio task
 volatile uint16_t* g_pending_audio_buf = nullptr;
@@ -367,7 +387,7 @@ struct OutRxLogEntry {
     int32_t dr;
 };
 
-static constexpr uint32_t OUT_RX_LOG_SIZE = 128;
+static constexpr uint32_t OUT_RX_LOG_SIZE = 64;  // Reduced from 128 to save SRAM
 OutRxLogEntry dbg_out_rx_log[OUT_RX_LOG_SIZE] = {};
 
 void on_audio_out_packet(const UsbAudioDevice::OutPacketStats& stats) {
@@ -429,6 +449,96 @@ constexpr uint32_t MIDI_QUEUE_SIZE = 64;
 MidiMsg g_midi_queue[MIDI_QUEUE_SIZE];
 volatile uint32_t g_midi_write = 0;
 volatile uint32_t g_midi_read = 0;
+
+// ============================================================================
+// SysEx Shell (USB MIDI <-> Shell via System Task)
+// ============================================================================
+
+// Forward declarations
+void shell_write(const char* str);
+extern volatile uint32_t g_tick_us;
+
+// StateProvider implementation for ShellCommands
+// Provides: state(), config(), error_log(), system_mode(), reset_system(), feed_watchdog(), enable_watchdog()
+class Stm32StateProvider {
+public:
+    Stm32StateProvider() {
+        // Initialize config
+        config_.platform_name = "STM32F4-Discovery";
+        std::strcpy(config_.serial_number, "STM32-00000001");
+        config_.sample_rate = SAMPLE_RATE;
+    }
+
+    umi::os::KernelStateView& state() {
+        // Update dynamic state before returning
+        state_.uptime_us = g_tick_us;
+        state_.audio_running = true;
+        state_.audio_buffer_count = dbg_fill_audio_count;
+        state_.audio_drop_count = dbg_underrun;
+        state_.midi_rx_count = dbg_midi_rx_count;
+        state_.usb_connected = true;
+        state_.task_count = 4;  // audio, system, control, idle
+        state_.task_ready = 1;
+        state_.task_blocked = 2;
+        state_.context_switches = 0;  // Not tracked currently
+        state_.sram_total = 128 * 1024;  // 128KB SRAM
+        state_.flash_total = 1024 * 1024; // 1MB Flash
+        return state_;
+    }
+
+    umi::os::ShellConfig& config() {
+        return config_;
+    }
+
+    umi::os::ErrorLog<16>& error_log() {
+        return error_log_;
+    }
+
+    umi::os::SystemMode& system_mode() {
+        return mode_;
+    }
+
+    void reset_system() {
+        constexpr uint32_t AIRCR = 0xE000ED0C;
+        constexpr uint32_t VECTKEY = 0x05FA0000;
+        constexpr uint32_t SYSRESETREQ = 0x00000004;
+        *reinterpret_cast<volatile uint32_t*>(AIRCR) = VECTKEY | SYSRESETREQ;
+        while (true) {}
+    }
+
+    void feed_watchdog() {
+        // IWDG feed (not implemented - just placeholder)
+    }
+
+    void enable_watchdog(bool enable) {
+        state_.watchdog_enabled = enable;
+    }
+
+private:
+    umi::os::KernelStateView state_{};
+    umi::os::ShellConfig config_{};
+    umi::os::ErrorLog<16> error_log_{};
+    umi::os::SystemMode mode_ = umi::os::SystemMode::Normal;
+};
+
+Stm32StateProvider g_state_provider;
+// Use 1024-byte output buffer to save SRAM (default is 2048)
+umi::os::ShellCommands<Stm32StateProvider, 1024>* g_shell = nullptr;
+
+// SysEx Standard IO for shell output
+umidi::protocol::StandardIO<256, 128> g_stdio;
+
+// SysEx receive buffer (from USB ISR -> System Task)
+constexpr size_t SYSEX_BUF_SIZE = 256;
+uint8_t g_sysex_buf[SYSEX_BUF_SIZE];
+volatile size_t g_sysex_len = 0;
+volatile bool g_sysex_ready = false;
+
+// Debug counters for SysEx/shell (for GDB inspection)
+uint32_t dbg_sysex_rx_count = 0;
+uint32_t dbg_sysex_dropped = 0;
+uint32_t dbg_sysex_processed = 0;
+uint32_t dbg_sysex_wakeup = 0;
 
 // Tick counter for GetTime syscall
 volatile uint32_t g_tick_us = 0;
@@ -696,6 +806,26 @@ static void init_usb() {
         }
     });
 
+    // SysEx callback for shell (ISR context - notify System Task)
+    usb_audio.set_sysex_callback([](const uint8_t* data, uint16_t len) {
+        gpio_d.toggle(14);  // Red LED toggle on SysEx receive (debug)
+        ++dbg_sysex_rx_count;  // Count all SysEx receives
+        if (!g_sysex_ready && len <= SYSEX_BUF_SIZE) {
+            std::memcpy(g_sysex_buf, data, len);
+            g_sysex_len = len;
+            g_sysex_ready = true;
+            // Wake System Task (Server priority) to process SysEx
+            g_system_task_notify |= NOTIFY_SYSEX_READY;
+            ++dbg_sysex_wakeup;
+            if (g_system_task_state == TaskState::Blocked) {
+                g_system_task_state = TaskState::Ready;
+                SCB::trigger_pendsv();  // Request context switch
+            }
+        } else {
+            ++dbg_sysex_dropped;  // Dropped due to busy or size
+        }
+    });
+
     // Sample rate change callback (from USB ISR context)
     // Note: Actual hardware reconfiguration happens in main loop to avoid ISR complexity
     // Only set pending if not already pending and rate is actually different
@@ -726,6 +856,15 @@ static void init_usb() {
     // OTG_FS = IRQ 67, priority 6 (lower than audio DMA)
     NVIC::set_prio(67, 6);
     NVIC::enable(67);
+}
+
+// Shell output callback - sends via SysEx
+void shell_write(const char* str) {
+    auto len = std::strlen(str);
+    g_stdio.write_stdout(reinterpret_cast<const uint8_t*>(str), len,
+        [](const uint8_t* data, size_t len) {
+            usb_audio.send_sysex(usb_hal, data, static_cast<uint16_t>(len));
+        });
 }
 
 // ============================================================================
@@ -810,8 +949,21 @@ extern "C" void OTG_FS_IRQHandler() {
     usb_device.poll();
 }
 
+// Debug counters for task scheduling (not volatile - for GDB inspection only)
+uint32_t dbg_systick_wakeup = 0;
+uint32_t dbg_pendsv_count = 0;
+
 extern "C" void SysTick_Handler() {
     g_tick_us += 1000; // 1ms = 1000us
+
+    // Wake control task periodically (for WaitEvent timeout handling)
+    // This allows the scheduler in the app to check timeouts
+    // Only do this after RTOS has started to avoid touching uninitialized tasks
+    if (g_rtos_started && g_control_task_state == TaskState::Blocked) {
+        g_control_task_state = TaskState::Ready;
+        ++dbg_systick_wakeup;
+        SCB::trigger_pendsv();
+    }
 }
 
 // Actual syscall handler implementation
@@ -842,7 +994,11 @@ void svc_handler_impl(uint32_t* sp) {
         break;
 
     case WaitEvent:
-        // For now, just return immediately (non-blocking)
+        // Block control task and yield to allow other tasks to run
+        // This is critical for cooperative multitasking - without yielding,
+        // control_task would monopolize CPU and system_task (shell) can't run
+        g_control_task_state = TaskState::Blocked;
+        SCB::trigger_pendsv();
         result = 0;
         break;
 
@@ -935,43 +1091,52 @@ extern "C" umi::port::cm4::TaskContext* umi_cm4_current_tcb = nullptr;
 
 // Select next task to run (simple 2-task scheduler)
 // Audio task has higher priority than Control task
+// Select next task to run (4-task priority scheduler)
+// Priority: Realtime (Audio) > Server (System) > User (Control) > Idle
 static umi::port::cm4::TaskContext* select_next_task() {
-    // Audio task has highest priority (Realtime)
+    // Audio task: Realtime priority (highest)
     if (g_audio_task_state == TaskState::Ready) {
         return &g_audio_tcb;
     }
-    // Control task is lower priority (User)
+    // System task: Server priority (shell, SysEx, drivers)
+    if (g_system_task_state == TaskState::Ready) {
+        return &g_system_tcb;
+    }
+    // Control task: User priority (application)
     if (g_control_task_state == TaskState::Ready) {
         return &g_control_tcb;
     }
-    // No task ready - return to idle (kernel main loop)
-    return nullptr;
+    // Idle task: always ready (lowest priority)
+    return &g_idle_tcb;
 }
 
 // Context switch function called from PendSV handler
 // Updates umi_cm4_current_tcb to point to next task
 extern "C" void umi_cm4_switch_context() {
-    // Update current task state
+    // Update current task state (Running -> Ready, unless Blocked)
     if (g_current_tcb == &g_audio_tcb && g_audio_task_state == TaskState::Running) {
         g_audio_task_state = TaskState::Ready;
+    } else if (g_current_tcb == &g_system_tcb && g_system_task_state == TaskState::Running) {
+        g_system_task_state = TaskState::Ready;
     } else if (g_current_tcb == &g_control_tcb && g_control_task_state == TaskState::Running) {
         g_control_task_state = TaskState::Ready;
     }
+    // Idle task is always Ready
 
     // Select next task
     auto* next = select_next_task();
-    if (next != nullptr) {
-        g_current_tcb = next;
-        umi_cm4_current_tcb = next;
+    g_current_tcb = next;
+    umi_cm4_current_tcb = next;
 
-        // Update state to Running
-        if (next == &g_audio_tcb) {
-            g_audio_task_state = TaskState::Running;
-        } else if (next == &g_control_tcb) {
-            g_control_task_state = TaskState::Running;
-        }
+    // Update state to Running
+    if (next == &g_audio_tcb) {
+        g_audio_task_state = TaskState::Running;
+    } else if (next == &g_system_tcb) {
+        g_system_task_state = TaskState::Running;
+    } else if (next == &g_control_tcb) {
+        g_control_task_state = TaskState::Running;
     }
-    // If no task ready, current_tcb remains unchanged (will return to current or idle)
+    // Idle task doesn't need Running state tracking
 }
 
 // PendSV handler for context switching
@@ -1343,6 +1508,73 @@ static void audio_task_entry(void* arg) {
         // Process audio buffer
         // Note: dwt_cycle() cannot be used in unprivileged mode (DWT is privileged-only)
         process_audio_frame(buf);
+    }
+}
+
+// System task entry: handles shell, SysEx, kernel services
+// This task runs at Server priority (higher than User, lower than Realtime)
+static void system_task_entry(void* arg) {
+    (void)arg;
+
+    // Initialize shell using ShellCommands (same as simulator)
+    // Use 512-byte output buffer to save SRAM
+    static umi::os::ShellCommands<Stm32StateProvider, 1024> shell(g_state_provider);
+    g_shell = &shell;
+
+    // Line buffer for command input (64 bytes is enough for shell commands)
+    static umi::shell::LineBuffer<64> line_buffer;
+
+    // Set up stdin callback for SysEx shell
+    g_stdio.set_stdin_callback([](const uint8_t* data, size_t len, void*) {
+        for (size_t i = 0; i < len; ++i) {
+            char c = static_cast<char>(data[i]);
+            if (line_buffer.process_char(c)) {
+                // Line complete - execute command
+                const char* line = line_buffer.get_line();
+                if (line && line[0] != '\0') {
+                    const char* result = g_shell->execute(line);
+                    if (result && result[0] != '\0') {
+                        shell_write(result);
+                        shell_write("\n");
+                    }
+                }
+                line_buffer.clear();
+            }
+        }
+    }, nullptr);
+
+    while (true) {
+        // Process pending SysEx shell input (from USB ISR)
+        if (g_sysex_ready) {
+            gpio_d.set(13);  // Orange LED ON: processing SysEx
+            ++dbg_sysex_processed;
+            g_stdio.process_message(g_sysex_buf, g_sysex_len);
+            gpio_d.reset(13);  // Orange LED OFF: done
+            g_sysex_ready = false;
+        }
+
+        // Block until SysEx ready or shutdown
+        g_system_task_notify &= ~NOTIFY_SYSEX_READY;
+        g_system_task_state = TaskState::Blocked;
+        task_yield();
+
+        // Check for shutdown
+        if (g_system_task_notify & NOTIFY_SHUTDOWN) {
+            break;
+        }
+    }
+}
+
+// Idle task entry: runs when no other task is ready
+// Implements WFI (Wait For Interrupt) for power saving
+static void idle_task_entry(void* arg) {
+    (void)arg;
+
+    while (true) {
+        // Wait for interrupt - CPU sleeps until next interrupt
+        __asm__ volatile("wfi");
+        // After WFI, an interrupt has occurred
+        // PendSV will switch to a higher priority task if one became ready
     }
 }
 
@@ -1788,8 +2020,10 @@ int main() {
     gpio_d.reset(15); // Turn off blue
     gpio_d.reset(12); // Green LED off
 
-    // Initialize RTOS task contexts
-    // Audio task: high priority (Realtime), processes audio when notified
+    // Initialize RTOS task contexts (4 tasks)
+    // Priority order: Realtime (Audio) > Server (System) > User (Control) > Idle
+
+    // Audio task: Realtime priority, processes audio when notified by DMA ISR
     umi::port::cm4::init_task_context(
         g_audio_tcb,
         g_audio_task_stack,
@@ -1799,7 +2033,17 @@ int main() {
         true  // uses FPU
     );
 
-    // Control task: lower priority (User), runs app's _start() -> main()
+    // System task: Server priority, handles shell/SysEx/drivers
+    umi::port::cm4::init_task_context(
+        g_system_tcb,
+        g_system_task_stack,
+        SYSTEM_TASK_STACK_SIZE,
+        system_task_entry,
+        nullptr,
+        false  // no FPU needed for shell
+    );
+
+    // Control task: User priority, runs app's _start() -> main()
     // Pass app_entry as argument so control_task_entry can call it
     void* app_entry_arg = app_valid ? reinterpret_cast<void*>(app_entry) : nullptr;
     umi::port::cm4::init_task_context(
@@ -1811,32 +2055,46 @@ int main() {
         true  // May use FPU if app uses it
     );
 
-    // Set initial task states
-    g_audio_task_state = TaskState::Blocked;  // Wait for first DMA interrupt
-    g_control_task_state = TaskState::Ready;  // Ready to run
+    // Idle task: lowest priority, runs WFI when no other task is ready
+    umi::port::cm4::init_task_context(
+        g_idle_tcb,
+        g_idle_task_stack,
+        IDLE_TASK_STACK_SIZE,
+        idle_task_entry,
+        nullptr,
+        false  // no FPU needed
+    );
 
-    // Start with control task
+    // Set initial task states
+    g_audio_task_state = TaskState::Blocked;   // Wait for first DMA interrupt
+    g_system_task_state = TaskState::Blocked;  // Wait for first SysEx
+    g_control_task_state = TaskState::Ready;   // Ready to run app
+    g_idle_task_state = TaskState::Ready;      // Always ready
+
+    // Initial context is Control task (highest priority ready task)
     g_current_tcb = &g_control_tcb;
     umi_cm4_current_tcb = &g_control_tcb;
     g_control_task_state = TaskState::Running;
 
-    // Set up PSP and switch to unprivileged thread mode
-    // The first PendSV will switch to the control task
+    // Mark RTOS as started - allows SysTick to manage task wakeups
+    g_rtos_started = true;
+
+    // Set up PSP for control task and switch to thread mode
     __asm__ volatile("msr psp, %0" :: "r"(g_control_tcb.stack_ptr));
     __asm__ volatile("isb");
 
-    // Enable PSP usage in thread mode, switch to unprivileged
-    // CONTROL[1] = 1 (use PSP), CONTROL[0] = 1 (unprivileged)
-    // MPU is configured to allow peripheral access from unprivileged mode
+    // Enable PSP usage in thread mode
+    // CONTROL[1] = 1 (use PSP), CONTROL[0] = 0 (privileged for kernel tasks)
+    // Note: App task runs with MPU restrictions
     __asm__ volatile(
-        "mov r0, #3\n"
+        "mov r0, #2\n"
         "msr control, r0\n"
         "isb\n"
         ::: "r0"
     );
 
-    // Now running in unprivileged thread mode with PSP
-    // Jump to control task entry with app entry as argument (never returns)
+    // Jump to control task - this never returns
+    // When control task blocks, PendSV switches to other tasks
     control_task_entry(app_entry_arg);
 
     // Should never reach here
