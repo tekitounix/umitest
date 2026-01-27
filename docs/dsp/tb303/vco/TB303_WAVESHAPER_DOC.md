@@ -1,84 +1,85 @@
-# TB-303 Wave Shaper - Technical Documentation
+# TB-303 Wave Shaper - 技術ドキュメント
 
-## Overview
+## 概要
 
-This is a SPICE-accurate implementation of the Roland TB-303 bass synthesizer's wave shaper circuit. The implementation uses Newton-Raphson nodal analysis with a full Ebers-Moll PNP transistor model, matching the behavior of Falstad circuit simulator.
+これはRoland TB-303ベースシンセサイザーのウェーブシェイパー回路のSPICE精度実装です。本実装は完全なEbers-Moll PNPトランジスタモデルを用いたNewton-Raphson節点解析を使用し、Falstad回路シミュレータの動作と一致します。
 
-## Circuit Topology
+## 回路トポロジー
 
 ```
-                      v_in (12V → 5.5V sawtooth)
+                      v_in (12V → 5.5V ノコギリ波)
                         │
             ┌───────────┼───────────┐
             │           │           │
-           R1          R2          C1
-          10kΩ        100kΩ        10nF
+           R34         R35         C10
+          10kΩ        100kΩ       0.01µF
             │           │           │
-           GND      v_base ◄───────R3 (10kΩ)───── v_cap
+           GND      v_base ◄───────R34' (10kΩ)───── v_cap
                        │
-                    [PNP B]
+                    [Q8 PNP B]
                        │
-    V_CC (+12V)───R4 (22kΩ)───[E]      [C]───R5 (10kΩ)───V_COLL (+5.33V)
-                              │         │
-                             C2       v_out
-                             1µF
-                              │
-                             GND
+    V_CC (+12V)───R45 (22kΩ)───[E]      [C]───R36 (10kΩ)───V_BIAS (+5.33V)
+                               │         │
+                              C11      v_out
+                              1µF
+                               │
+                              GND
 ```
 
-### Component Values
+### コンポーネント値（TB-303回路図準拠）
 
-| Component | Value | Function |
-|-----------|-------|----------|
-| R1 | 10kΩ | Input load to GND |
-| R2 | 100kΩ | Direct path: input → base |
-| R3 | 10kΩ | Capacitor path: C1 → base |
-| R4 | 22kΩ | Emitter resistor to +12V |
-| R5 | 10kΩ | Collector resistor to +5.33V |
-| C1 | 10nF | Memory capacitor (high-shelf filter) |
-| C2 | 1µF | Emitter bypass capacitor |
+| コンポーネント | 値 | 機能 |
+|---------------|-----|------|
+| R34 | 10kΩ | GNDへの入力負荷 |
+| R35 | 100kΩ | 直接パス: 入力 → ベース |
+| R34' | 10kΩ | コンデンサパス: C10 → ベース (※回路図ではR34と同一記号) |
+| R45 | 22kΩ | +12Vへのエミッタ抵抗 |
+| R36 | 10kΩ | +5.33Vへのコレクタ抵抗 |
+| C10 | 0.01µF (10nF) | 入力カップリングコンデンサ |
+| C11 | 1µF | エミッタバイパスコンデンサ |
+| Q8 | 2SA733P | PNPトランジスタ (Pランク) |
 
-### Power Supplies
+### 電源電圧
 
-- **V_CC**: +12V (emitter supply)
-- **V_COLL**: +5.33V (collector supply)
+- **V_CC**: +12V（エミッタ電源）
+- **V_BIAS**: +5.33V（コレクタバイアス電源）
 
-## Operating Principle
+## 動作原理
 
-### Input Signal
-- Falling sawtooth wave: 12V → 5.5V
-- Frequency range: typically 40Hz - 400Hz
+### 入力信号
+- 下降ノコギリ波: 12V → 5.5V
+- 周波数範囲: 通常40Hz - 400Hz
 
-### Wave Shaping Mechanism
+### 波形整形メカニズム
 
-1. **High-Shelf Filter (C1, R2, R3)**
-   - C1 creates a differentiating network
-   - Sharp transitions at sawtooth reset
-   - Adds "edge" to the waveform
+1. **ハイシェルフフィルタ (C10, R35, R34')**
+   - C10が微分回路を形成
+   - ノコギリ波リセット時のシャープな過渡応答
+   - 波形に「エッジ」を付加
 
-2. **PNP Transistor Switching**
-   - When v_base < v_emitter - 0.6V: transistor ON
-   - When v_base ≈ v_emitter: transistor OFF
-   - Creates asymmetric duty cycle
+2. **PNPトランジスタスイッチング (Q8)**
+   - v_base < v_emitter - 0.6V の場合: トランジスタON
+   - v_base ≈ v_emitter の場合: トランジスタOFF
+   - 非対称なデューティサイクルを生成
 
-3. **Emitter Capacitor (C2)**
-   - 1µF provides slow voltage changes
-   - Smooths emitter voltage transitions
-   - Creates exponential decay curves
+3. **エミッタコンデンサ (C11)**
+   - 1µFが緩やかな電圧変化を提供
+   - エミッタ電圧の遷移を平滑化
+   - 指数関数的な減衰カーブを生成
 
-### Output Characteristics
+### 出力特性
 
-| Frequency | V_min | V_max |
-|-----------|-------|-------|
+| 周波数 | V_min | V_max |
+|--------|-------|-------|
 | 40Hz | 5.33V | ~8.8V |
 | 80Hz | 5.33V | ~8.9V |
 | 160Hz | 5.33V | ~8.8V |
 
-## Mathematical Model
+## 数学モデル
 
-### Ebers-Moll PNP Transistor
+### Ebers-Moll PNPトランジスタ
 
-Terminal currents (defined as flowing INTO terminal):
+端子電流（端子に流入する方向を正と定義）:
 
 ```
 I_E = I_EF - α_R × I_CR
@@ -86,47 +87,47 @@ I_C = α_F × I_EF - I_CR
 I_B = I_E - I_C
 ```
 
-Where:
-- `I_EF = I_S × (exp(V_EB/V_T) - 1)` (E-B junction current)
-- `I_CR = I_S × (exp(V_CB/V_T) - 1)` (C-B junction current)
-- `α_F = β_F / (β_F + 1) ≈ 0.99` (forward alpha)
-- `α_R = β_R / (β_R + 1) ≈ 0.33` (reverse alpha)
+ここで:
+- `I_EF = I_S × (exp(V_EB/V_T) - 1)` (E-B接合電流)
+- `I_CR = I_S × (exp(V_CB/V_T) - 1)` (C-B接合電流)
+- `α_F = β_F / (β_F + 1) ≈ 0.99` (順方向α)
+- `α_R = β_R / (β_R + 1) ≈ 0.33` (逆方向α)
 
-### Transistor Parameters
+### トランジスタパラメータ (Q8: 2SA733P)
 
-| Parameter | Value | Description |
-|-----------|-------|-------------|
-| V_T | 25.865mV | Thermal voltage (kT/q at 300K) |
-| I_S | 1×10⁻¹³ A | Saturation current |
-| β_F | 100 | Forward current gain |
-| β_R | 0.5 | Reverse current gain |
+| パラメータ | 値 | 説明 |
+|-----------|-----|------|
+| V_T | 25.865mV | 熱電圧 (kT/q at 25℃) |
+| I_S | 5×10⁻¹⁴ A | 飽和電流 (SPICEモデル中央値) |
+| β_F | 300 | 順方向電流利得 (Pランク: 200-400) |
+| β_R | 0.1 | 逆方向電流利得 (MACOM実測)
 
-### KCL Equations
+### KCL方程式
 
-Four node equations solved simultaneously:
+4つの節点方程式を同時に解く:
 
-1. **v_cap node**: `i_C1 = i_R3`
-2. **v_base node**: `i_R2 + i_R3 + i_B = 0`
-3. **v_emitter node**: `i_R4 - i_E - i_C2 = 0`
-4. **v_collector node**: `i_R5 + i_C = 0`
+1. **v_cap節点**: `i_C10 = i_R34'`
+2. **v_base節点**: `i_R35 + i_R34' + i_B = 0`
+3. **v_emitter節点**: `i_R45 - i_E - i_C11 = 0`
+4. **v_collector節点**: `i_R36 + i_C = 0`
 
-### Capacitor Companion Model (Backward Euler)
+### コンデンサコンパニオンモデル（後退オイラー法）
 
 ```
 i_C = G_eq × (v - v_prev)
 G_eq = C / Δt
 ```
 
-## Implementation Details
+## 実装詳細
 
-### Newton-Raphson Solver
+### Newton-Raphsonソルバー
 
-1. **Initial guess**: Use previous timestep values
-2. **Iterate**: Compute Jacobian, solve 4×4 linear system
-3. **Damping**: Limit step size to 0.1V for stability
-4. **Convergence**: |f₁| + |f₂| + |f₃| + |f₄| < 10⁻¹²
+1. **初期推定**: 前タイムステップの値を使用
+2. **反復**: ヤコビアン計算、4×4線形システムを解く
+3. **ダンピング**: 安定性のためステップサイズを0.1Vに制限
+4. **収束判定**: |f₁| + |f₂| + |f₃| + |f₄| < 10⁻¹²
 
-### Jacobian Matrix
+### ヤコビアン行列
 
 ```
 J = [∂f₁/∂v_cap  ∂f₁/∂v_b   ∂f₁/∂v_e   ∂f₁/∂v_c ]
@@ -135,7 +136,7 @@ J = [∂f₁/∂v_cap  ∂f₁/∂v_b   ∂f₁/∂v_e   ∂f₁/∂v_c ]
     [∂f₄/∂v_cap  ∂f₄/∂v_b   ∂f₄/∂v_e   ∂f₄/∂v_c ]
 ```
 
-Transistor current derivatives:
+トランジスタ電流の導関数:
 
 ```
 ∂i_E/∂v_E = g_ef
@@ -147,24 +148,24 @@ Transistor current derivatives:
 ∂i_C/∂v_C = -g_cr
 ```
 
-Where:
-- `g_ef = (I_S/V_T) × exp(V_EB/V_T)` (E-B diode conductance)
-- `g_cr = (I_S/V_T) × exp(V_CB/V_T)` (C-B diode conductance)
+ここで:
+- `g_ef = (I_S/V_T) × exp(V_EB/V_T)` (E-Bダイオードコンダクタンス)
+- `g_cr = (I_S/V_T) × exp(V_CB/V_T)` (C-Bダイオードコンダクタンス)
 
-### Numerical Protection
+### 数値保護
 
-**Diode Current Limiting:**
-- For V > 40×V_T (~1V): Linear extrapolation
-- For V < -10×V_T: Return -I_S
-- Prevents exp() overflow
+**ダイオード電流制限:**
+- V > 40×V_T (~1V)の場合: 線形外挿
+- V < -10×V_Tの場合: -I_Sを返す
+- exp()オーバーフローを防止
 
-**Conductance Floor:**
-- Minimum conductance: 10⁻¹² S
-- Prevents division by zero in Jacobian
+**コンダクタンスフロア:**
+- 最小コンダクタンス: 10⁻¹² S
+- ヤコビアンでのゼロ除算を防止
 
-## Usage
+## 使用方法
 
-### Basic Example
+### 基本例
 
 ```cpp
 #include "tb303_waveshaper.hpp"
@@ -174,7 +175,7 @@ constexpr double DT = 1.0 / SAMPLE_RATE;
 
 tb303::WaveShaper waveshaper;
 
-// Generate falling sawtooth 12V → 5.5V
+// 下降ノコギリ波 12V → 5.5V を生成
 double phase = 0.0;
 double freq = 80.0;  // Hz
 
@@ -182,48 +183,87 @@ for (int i = 0; i < num_samples; ++i) {
     double v_in = 12.0 - phase * (12.0 - 5.5);
     double v_out = waveshaper.process(v_in, DT);
 
-    // Use v_out...
+    // v_outを使用...
 
     phase += freq / SAMPLE_RATE;
     if (phase >= 1.0) phase -= 1.0;
 }
 ```
 
-### Debugging
+### デバッグ
 
 ```cpp
-// Access internal node voltages
+// 内部節点電圧にアクセス
 double v_cap = waveshaper.getCapNodeVoltage();
 double v_base = waveshaper.getBaseVoltage();
 double v_emitter = waveshaper.getEmitterVoltage();
 double v_collector = waveshaper.getCollectorVoltage();
 ```
 
-## Performance Considerations
+## パラメータ可変性
 
-- **Iterations**: Typically 3-10 per sample (more during transitions)
-- **Operations per iteration**: ~100 floating-point operations
-- **Memory**: 8 double state variables (64 bytes)
+### 可変パラメータ
 
-### Optimization Opportunities
+本実装では以下の2パラメータのみを可変としています。
 
-1. Use `float` instead of `double` (with adjusted tolerances)
-2. Pre-compute constant conductances
-3. Use SIMD for 4×4 matrix operations
-4. Reduce iterations with better initial guesses
+| パラメータ | 値 (デフォルト) | 可変範囲 | 音色への影響 |
+|-----------|----------------|---------|-------------|
+| **C11** | 1µF (エミッタバイパス) | 0.1µF - 10µF | パルス幅（コンパレータ閾値の変化による） |
+| **R36** | 10kΩ (コレクタ抵抗) | 1kΩ - 100kΩ | 出力振幅、飽和特性、歪み量 |
 
-## References
+### 固定パラメータ
 
-1. Falstad Circuit Simulator: http://www.falstad.com/circuit/
-2. Roland TB-303 Service Manual
+以下のパラメータは固定値を使用します。変更しても音色への影響は限定的であるか、回路動作の安定性を損なう可能性があります。
+
+| パラメータ | 値 | 固定の理由 |
+|-----------|-----|-----------|
+| R34 | 10kΩ | 入力インピーダンス。変更しても音色変化は微小 |
+| R35 | 100kΩ | ベースバイアス。変更するとバイアス点がずれ動作不安定に |
+| R45 | 22kΩ | エミッタ抵抗。C11との組み合わせで時定数が決まるが、C11側で調整可能 |
+| C10 | 0.01µF | 入力カップリング。可聴帯域への影響は限定的 |
+| V_BIAS | 5.33V | コレクタバイアス電圧。変更すると動作点がずれる |
+| トランジスタパラメータ | - | 個体差はあるが、知覚困難なレベル |
+
+### 設計根拠
+
+1. **C11 (エミッタバイパス容量)**
+   - エミッタ電圧の追従速度を決定（時定数 τ = R45 × C11）
+   - エミッタ電圧がコンパレータ閾値として機能するため、パルス幅が変化
+   - 小さい値: エミッタ追従が速い → パルス幅狭い
+   - 大きい値: エミッタ追従が遅い → パルス幅広い
+
+2. **R36 (コレクタ負荷抵抗)**
+   - 出力振幅とサチュレーション特性を制御
+   - 小さい値: 出力振幅大、クリーンな音
+   - 大きい値: 出力振幅小、歪み増加
+
+これ以上パラメータを増やしても、回路の動作点が崩れるリスクが高く、音色改善よりも不安定化の原因になりやすいため、2パラメータに限定しています。
+
+## パフォーマンス考慮事項
+
+- **反復回数**: サンプルあたり通常3-10回（遷移時はさらに多い）
+- **反復あたりの演算**: ~100浮動小数点演算
+- **メモリ**: 8つのdouble状態変数（64バイト）
+
+### 最適化の機会
+
+1. `double`の代わりに`float`を使用（許容誤差の調整が必要）
+2. 定数コンダクタンスの事前計算
+3. 4×4行列演算にSIMDを使用
+4. より良い初期推定で反復回数を削減
+
+## 参考文献
+
+1. Falstad回路シミュレータ: http://www.falstad.com/circuit/
+2. Roland TB-303サービスマニュアル
 3. "The Art of VA Filter Design" - Vadim Zavalishin
 
-## Falstad Circuit URL
+## Falstad回路URL
 
 ```
 http://www.falstad.com/circuit/circuitjs.html?cct=$+1+0.000005+16.817414165184545+50+5+43+R+336+96+400+96+0+4+33+-3+8+0+0.5+r+336+96+336+176+0+10000+g+336+176+336+192+0+r+288+192+240+192+0+100000+r+240+256+288+256+0+10000+c+288+192+288+256+0+1e-8+-1.0098888049016868+w+336+96+288+96+0+w+288+96+288+192+0+t+240+256+192+256+0+-1+-0.4751313109046924+-0.5422257203342431+100+w+240+192+240+256+0+c+144+240+144+304+0+0.000001+7.8184554689121715+g+144+304+144+320+0+w+192+240+144+240+0+w+192+272+192+288+0+w+192+288+224+288+0+w+224+288+416+288+0+r+224+288+224+352+0+10000+r+192+240+192+192+0+22000+R+64+192+32+192+0+0+40+5.33+0+0+0.5+w+224+352+64+352+0+w+64+192+64+352+0+R+192+192+192+160+0+0+40+12+0+0+0.5+o+15+64+0+551+9.353610478917778+9.765625e-55+0+-1+o+0+64+0+34+20+0.00078125+1+-1
 ```
 
-## License
+## ライセンス
 
 MIT License
