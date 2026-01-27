@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PNP Waveshaper Synth (WASM)</title>
+  <title>TB-303 Square Shaper Emulator</title>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -15,9 +15,11 @@
     .title { font-size: 20px; font-weight: 600; }
     .subtitle { font-size: 14px; color: #d4d4d4; margin-top: 4px; }
     .btn-row { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
-    .btn { padding: 8px 16px; border-radius: 12px; border: none; cursor: pointer; font-size: 14px; }
-    .btn-primary { background: #f5f5f5; color: #0a0a0a; }
+    .btn { padding: 8px 16px; border-radius: 12px; border: none; cursor: pointer; font-size: 14px; min-width: 72px; }
+    .btn-primary { background: #f5f5f5; color: #0a0a0a; border: 1px solid #f5f5f5; }
+    .btn-primary:disabled { background: #666; color: #999; border-color: #666; cursor: not-allowed; }
     .btn-secondary { background: #262626; color: #f5f5f5; border: 1px solid #404040; }
+    select.btn-secondary { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23f5f5f5' d='M2 4l4 4 4-4'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; padding-right: 28px; }
     .status { margin-top: 12px; font-size: 14px; color: #d4d4d4; }
     .scope-box { margin-top: 16px; background: rgba(10,10,10,0.6); border: 1px solid #262626; border-radius: 16px; padding: 12px; }
     .scope-label { font-size: 12px; color: #a3a3a3; margin-bottom: 8px; }
@@ -38,12 +40,15 @@
   <script type="text/babel">
 const { useState, useEffect, useRef, useMemo } = React;
 
-// WASM binary embedded as base64 (WaveShaper3Var 2-iter)
-const WASM_BASE64 = "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";
+// WASM binary will be loaded from file (WaveShaperTurbo with oversampling)
+// Placeholder - actual WASM will be loaded via fetch
+let WASM_BASE64 = null;
 
-const workletCode = `
+// Worklet code will be generated after WASM is loaded
+function generateWorkletCode(wasmBase64) {
+  return `
 // WASM embedded
-const WASM_BASE64 = "${WASM_BASE64}";
+const WASM_BASE64 = "${wasmBase64}";
 
 // Base64 decoder for AudioWorklet (atob is not available)
 function base64ToArrayBuffer(base64) {
@@ -75,8 +80,9 @@ function base64ToArrayBuffer(base64) {
 class WaveShaperProcessor extends AudioWorkletProcessor {
   static get parameterDescriptors() {
     return [
-      { name: "c2_uF", defaultValue: 1.0, minValue: 0.1, maxValue: 10.0, automationRate: "k-rate" },
-      { name: "outGain", defaultValue: 0.25, minValue: 0.0, maxValue: 1.0, automationRate: "k-rate" },
+      { name: "c11_uF", defaultValue: 1.0, minValue: 0.1, maxValue: 10.0, automationRate: "k-rate" },
+      { name: "r36_kohm", defaultValue: 10.0, minValue: 1.0, maxValue: 100.0, automationRate: "k-rate" },
+      { name: "outGain", defaultValue: 1.0, minValue: 0.0, maxValue: 1.0, automationRate: "k-rate" },
       { name: "freq", defaultValue: 18.165, minValue: 18.165, maxValue: 440.0, automationRate: "k-rate" },
     ];
   }
@@ -97,6 +103,10 @@ class WaveShaperProcessor extends AudioWorkletProcessor {
         if (!this.gate && this.ws_reset) {
           this.ws_reset();
         }
+      } else if (e.data.type === "oversampling") {
+        if (this.ws_set_oversampling) {
+          this.ws_set_oversampling(e.data.factor);
+        }
       }
     };
   }
@@ -112,16 +122,22 @@ class WaveShaperProcessor extends AudioWorkletProcessor {
       this.ws_init = this.wasm.ws_init;
       this.ws_reset = this.wasm.ws_reset;
       this.ws_set_sample_rate = this.wasm.ws_set_sample_rate;
-      this.ws_set_c2 = this.wasm.ws_set_c2;
+      this.ws_set_c11 = this.wasm.ws_set_c2;  // WASM API名はws_set_c2のまま
+      this.ws_set_r36 = this.wasm.ws_set_r36;
+      this.ws_set_oversampling = this.wasm.ws_set_oversampling;
       this.ws_process_block = this.wasm.ws_process_block;
       this.ws_get_input_ptr = this.wasm.ws_get_input_ptr;
       this.ws_get_output_ptr = this.wasm.ws_get_output_ptr;
 
       this.ws_init();
       this.ws_set_sample_rate(sampleRate);
-      this.ws_set_c2(1.0);
+      this.ws_set_c11(1.0);
+      if (this.ws_set_r36) {
+        this.ws_set_r36(10.0);
+      }
 
-      this.lastC2 = 1.0;
+      this.lastC11 = 1.0;
+      this.lastR36 = 10.0;
 
       this.inputPtr = this.ws_get_input_ptr();
       this.outputPtr = this.ws_get_output_ptr();
@@ -144,12 +160,18 @@ class WaveShaperProcessor extends AudioWorkletProcessor {
 
     const freq = parameters.freq[0];
     const outGain = parameters.outGain[0];
-    const c2 = parameters.c2_uF[0];
+    const c11 = parameters.c11_uF[0];
+    const r36 = parameters.r36_kohm[0];
     const phaseInc = freq / sampleRate;
 
-    if (c2 !== this.lastC2) {
-      this.ws_set_c2(c2);
-      this.lastC2 = c2;
+    if (c11 !== this.lastC11) {
+      this.ws_set_c11(c11);
+      this.lastC11 = c11;
+    }
+
+    if (r36 !== this.lastR36 && this.ws_set_r36) {
+      this.ws_set_r36(r36);
+      this.lastR36 = r36;
     }
 
     const inputArray = new Float32Array(this.memory.buffer, this.inputPtr, 128);
@@ -183,6 +205,7 @@ class WaveShaperProcessor extends AudioWorkletProcessor {
 }
 registerProcessor("waveshaper-wasm", WaveShaperProcessor);
 `;
+}
 
 function midiNoteToHz(note) {
   return 440 * Math.pow(2, (note - 69) / 12);
@@ -215,9 +238,13 @@ function App() {
   const [midiState, setMidiState] = useState("MIDI: not connected");
   const [wasmStatus, setWasmStatus] = useState("Ready");
 
-  const [c2Norm, setC2Norm] = useState(logToNorm(1.0, 0.1, 10.0));
-  const [c2uF, setC2uF] = useState(1.0);
-  const [outGain, setOutGain] = useState(0.25);
+  const [c11Norm, setC11Norm] = useState(logToNorm(1.0, 0.1, 10.0));
+  const [c11uF, setC11uF] = useState(1.0);
+  const [r36Norm, setR36Norm] = useState(logToNorm(10.0, 1.0, 100.0));
+  const [r36kohm, setR36kohm] = useState(10.0);
+  const [outGain, setOutGain] = useState(1.0);
+  const [oversampling, setOversampling] = useState(1);
+  const [wasmLoaded, setWasmLoaded] = useState(false);
 
   const ctxRef = useRef(null);
   const nodeRef = useRef(null);
@@ -228,18 +255,77 @@ function App() {
   const rafRef = useRef(0);
   const midiRef = useRef(null);
   const canvasRef = useRef(null);
+  const wasRunningRef = useRef(false);  // start()で明示的に開始された場合のみtrue
+  const workletUrlRef = useRef(null);
 
-  const workletUrl = useMemo(() => {
-    const blob = new Blob([workletCode], { type: "application/javascript" });
-    return URL.createObjectURL(blob);
+  // Load WASM and create worklet URL
+  useEffect(() => {
+    async function loadWasm() {
+      try {
+        const response = await fetch("waveshaper.wasm");
+        const buffer = await response.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+
+        // Convert to base64
+        let binary = "";
+        for (let i = 0; i < bytes.length; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        const base64 = btoa(binary);
+
+        // Generate worklet code with embedded WASM
+        const code = generateWorkletCode(base64);
+        const blob = new Blob([code], { type: "application/javascript" });
+        workletUrlRef.current = URL.createObjectURL(blob);
+        setWasmLoaded(true);
+        setWasmStatus("WASM loaded");
+      } catch (err) {
+        setWasmStatus("WASM load error: " + err.message);
+      }
+    }
+    loadWasm();
+
+    return () => {
+      if (workletUrlRef.current) {
+        URL.revokeObjectURL(workletUrlRef.current);
+      }
+    };
   }, []);
 
+  // resume試行（wasRunning かつ suspended なら復帰を試みる）
+  const tryResume = async () => {
+    const ctx = ctxRef.current;
+    const node = nodeRef.current;
+    if (!wasRunningRef.current) return;
+    if (!ctx || ctx.state !== 'suspended') return;
+    try {
+      await ctx.resume();
+      if (node) node.port.postMessage({ type: "gate", on: true });
+      setRunning(true);
+    } catch {}
+  };
+
   useEffect(() => {
-    return () => {
-      try { URL.revokeObjectURL(workletUrl); } catch {}
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    // バックグラウンドタブからの復帰時
+    // wasRunning かつ suspended なら resume を試みる（ユーザー停止後は再開しない）
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        tryResume();
+      }
     };
-  }, [workletUrl]);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      // クリーンアップ: グローバル参照から削除
+      const ctx = ctxRef.current;
+      if (ctx && window.__audioContexts) {
+        const idx = window.__audioContexts.indexOf(ctx);
+        if (idx !== -1) window.__audioContexts.splice(idx, 1);
+      }
+    };
+  }, []);
 
   function drawScope() {
     const canvas = canvasRef.current;
@@ -329,24 +415,40 @@ function App() {
 
   async function ensureAudio() {
     if (ctxRef.current && nodeRef.current) return;
+    if (!workletUrlRef.current) {
+      setWasmStatus("WASM not loaded yet");
+      return;
+    }
 
     const ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 48000 });
     srRef.current = ctx.sampleRate;
 
-    // GC防止: windowオブジェクトに参照を保持
-    ctx.onstatechange = () => {};
-    window.__audioCtx = ctx;
+    // GC防止: グローバル配列に参照を保持（実務上の保険）
+    if (!window.__audioContexts) window.__audioContexts = [];
+    window.__audioContexts.push(ctx);
 
-    await ctx.audioWorklet.addModule(workletUrl);
+    // state変更の監視
+    // interrupted (iOS Safari) からの復帰や、その他の suspended 状態からの復帰を試みる
+    ctx.onstatechange = () => {
+      if (ctx.state === 'running' && wasRunningRef.current) {
+        // running状態に復帰したらgateをONに
+        const n = nodeRef.current;
+        if (n) n.port.postMessage({ type: "gate", on: true });
+        setRunning(true);
+      } else if (ctx.state === 'suspended' && wasRunningRef.current) {
+        // suspended になったが wasRunning なら復帰を試みる
+        // ただしポリシーで拒否される場合もあるので、visibilitychange やUI操作時にも再試行
+        tryResume();
+      }
+    };
+
+    await ctx.audioWorklet.addModule(workletUrlRef.current);
 
     const node = new AudioWorkletNode(ctx, "waveshaper-wasm", {
       numberOfInputs: 0,
       numberOfOutputs: 1,
       outputChannelCount: [1],
     });
-
-    // GC防止
-    window.__audioNode = node;
 
     node.port.onmessage = (e) => {
       if (e.data.type === "ready") {
@@ -371,7 +473,8 @@ function App() {
 
     setReady(true);
 
-    node.parameters.get("c2_uF").setValueAtTime(c2uF, ctx.currentTime);
+    node.parameters.get("c11_uF").setValueAtTime(c11uF, ctx.currentTime);
+    node.parameters.get("r36_kohm").setValueAtTime(r36kohm, ctx.currentTime);
     node.parameters.get("outGain").setValueAtTime(outGain, ctx.currentTime);
     node.parameters.get("freq").setValueAtTime(18.165, ctx.currentTime);
 
@@ -395,6 +498,7 @@ function App() {
     if (!ctx || !node) return;
     await ctx.resume();
     node.port.postMessage({ type: "gate", on: true });
+    wasRunningRef.current = true;
     setRunning(true);
   }
 
@@ -402,6 +506,7 @@ function App() {
     const node = nodeRef.current;
     if (!node) return;
     node.port.postMessage({ type: "gate", on: false });
+    wasRunningRef.current = false;  // ユーザーによる停止
     setRunning(false);
   }
 
@@ -466,40 +571,72 @@ function App() {
       if (noteOrCc === 21) {
         const norm = value / 127;
         const v = normToLog(norm, 0.1, 10.0);
-        setC2Norm(norm);
-        setC2uF(v);
-        setParam("c2_uF", v);
+        setC11Norm(norm);
+        setC11uF(v);
+        setParam("c11_uF", v);
       } else if (noteOrCc === 22) {
         const v = ccToRange(value, 0.0, 1.0);
         setOutGain(v);
         setParam("outGain", v);
+      } else if (noteOrCc === 23) {
+        const norm = value / 127;
+        const v = normToLog(norm, 1.0, 100.0);
+        setR36Norm(norm);
+        setR36kohm(v);
+        setParam("r36_kohm", v);
       }
     }
   }
 
   useEffect(() => {
     if (!ready) return;
-    setParam("c2_uF", c2uF);
-  }, [c2uF, ready]);
+    setParam("c11_uF", c11uF);
+  }, [c11uF, ready]);
+
+  useEffect(() => {
+    if (!ready) return;
+    setParam("r36_kohm", r36kohm);
+  }, [r36kohm, ready]);
 
   useEffect(() => {
     if (!ready) return;
     setParam("outGain", outGain);
   }, [outGain, ready]);
 
+  // オーバーサンプリング設定をWorkletに送信
+  useEffect(() => {
+    const node = nodeRef.current;
+    if (!node) return;
+    node.port.postMessage({ type: "oversampling", factor: oversampling });
+  }, [oversampling, ready]);
+
+  // MIDI自動接続
+  useEffect(() => {
+    connectMidi();
+  }, []);
+
   return (
     <div className="container">
       <div className="card">
-        <div className="title">PNP Waveshaper Synth (WASM)</div>
-        <div className="subtitle">WaveShaper3Var (2-iter) + AudioWorklet + Web MIDI</div>
+        <div className="title">TB-303 Square Shaper Emulator</div>
+        <div className="subtitle">Turbo Solver (3 exp calls) + Oversampling + AudioWorklet + Web MIDI</div>
 
         <div className="btn-row">
           {!running ? (
-            <button className="btn btn-primary" onClick={start}>Start</button>
+            <button className="btn btn-primary" onClick={start} disabled={!wasmLoaded}>Start</button>
           ) : (
             <button className="btn btn-secondary" onClick={stop}>Stop</button>
           )}
-          <button className="btn btn-secondary" onClick={connectMidi}>Connect MIDI</button>
+          <select
+            className="btn btn-secondary"
+            value={oversampling}
+            onChange={(e) => setOversampling(Number(e.target.value))}
+            style={{ minWidth: "80px" }}
+          >
+            <option value={1}>1x OS</option>
+            <option value={2}>2x OS</option>
+            <option value={4}>4x OS</option>
+          </select>
         </div>
 
         <div className="status">{midiState}</div>
@@ -512,22 +649,41 @@ function App() {
 
         <div className="controls">
           <div>
-            <div className="control-label">C2 (uF) CC21: {c2uF.toFixed(3)}</div>
+            <div className="control-label">C11 (uF) CC21: {c11uF.toFixed(3)}</div>
             <input
               type="range"
               className="control-range"
               min={0}
               max={1}
               step={0.0005}
-              value={c2Norm}
+              value={c11Norm}
               onChange={(e) => {
                 const n = clamp01(Number(e.target.value));
                 const v = normToLog(n, 0.1, 10.0);
-                setC2Norm(n);
-                setC2uF(v);
+                setC11Norm(n);
+                setC11uF(v);
               }}
             />
             <div className="control-hint">range 0.1 to 10 uF log</div>
+          </div>
+
+          <div>
+            <div className="control-label">R36 (kΩ) CC23: {r36kohm.toFixed(2)}</div>
+            <input
+              type="range"
+              className="control-range"
+              min={0}
+              max={1}
+              step={0.0005}
+              value={r36Norm}
+              onChange={(e) => {
+                const n = clamp01(Number(e.target.value));
+                const v = normToLog(n, 1.0, 100.0);
+                setR36Norm(n);
+                setR36kohm(v);
+              }}
+            />
+            <div className="control-hint">range 1 to 100 kΩ log</div>
           </div>
 
           <div>
@@ -545,16 +701,15 @@ function App() {
         </div>
 
         <div className="midi-help">
-          MIDI: Note On で発音。Note Off で停止。CC21 C2。CC22 出力ゲイン。
+          MIDI: Note On to play. Note Off to stop. CC21 for C11. CC22 for output gain. CC23 for R36.
         </div>
       </div>
 
       <div className="card help">
-        <div className="help-title">操作</div>
+        <div className="help-title">Instructions</div>
         <ol>
-          <li>Start を押す</li>
-          <li>Connect MIDI を押して許可</li>
-          <li>MIDI キーボードからノートを送る</li>
+          <li>Press Start or send a note from your MIDI keyboard</li>
+          <li>Adjust parameters with sliders or MIDI CC</li>
         </ol>
       </div>
     </div>
