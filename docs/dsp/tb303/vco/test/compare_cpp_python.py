@@ -1901,8 +1901,6 @@ def main():
                 'Schur (baseline)': (WaveShaperCppEquivalent, {'max_iter': 5}, 364, 'Schur', 'Ebers-Moll', '#cc4444'),
                 'OneIter': (WaveShaperOneIter, {}, 370, 'OneIter', 'Ebers-Moll', '#f39c12'),
                 'HybridAdaptive': (WaveShaperHybrid, {'veb_threshold': 0.3}, 396, 'HybridAdaptive', 'Ebers-Moll', '#2ecc71'),
-                'Pade [2,2]': (WaveShaperPade, {}, 350, 'Pade22', 'Ebers-Moll', '#8e44ad'),
-                'LUT (1024)': (WaveShaperLUT, {}, 340, 'LUT', 'Ebers-Moll', '#16a085'),
                 'VCCS': (WaveShaperVCCS, {}, 126, 'VCCS', 'Non-Ebers-Moll', '#3498db'),
                 'PWL': (WaveShaperPWL, {'n_iter': 1}, 259, 'PWL', 'Non-Ebers-Moll', '#1abc9c'),
                 'Schraudolph': (WaveShaperSchraudolph, {'n_iter': 5}, 1614, 'Schraudolph', 'Ebers-Moll', '#9b59b6'),
