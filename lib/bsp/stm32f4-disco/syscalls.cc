@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
-// UMI-OS STM32F4 Newlib Syscalls (Minimal)
+// UMI-OS STM32F4 Newlib/Picolibc Syscalls (Minimal)
 
 #include <stddef.h>
 #include <stdint.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <stdio.h>
 
 extern "C" {
 
