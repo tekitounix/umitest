@@ -205,6 +205,13 @@ constexpr float G3 = 1.0f / R3;
 constexpr float G4 = 1.0f / R4;
 constexpr float G5 = 1.0f / R5;
 
+// diode_iv用のexp_crit定数（事前計算）
+// V_CRIT = V_T * 40 での値
+// exp(40) ≈ 2.35e17
+constexpr float EXP_CRIT = 2.35385266837019985e17f;  // exp(40)
+constexpr float G_CRIT = I_S * V_T_INV * EXP_CRIT;   // Is/Vt * exp(V_crit/Vt)
+constexpr float I_CRIT = I_S * (EXP_CRIT - 1.0f);    // Is * (exp(V_crit/Vt) - 1)
+
 // =============================================================================
 // 高速exp近似 (Schraudolph改良版)
 // =============================================================================
@@ -245,6 +252,35 @@ inline float mo_exp(float x) {
     constexpr float LOG2E = 1.4426950408889634f;
     x = std::clamp(x, -87.0f, 88.0f);
     return mo_pow2(x * LOG2E);
+}
+
+// mo::exp from basic_math.hh - Padé [4,4] without range reduction
+// Only accurate for small |x|, needs range reduction for general use
+inline float mo_exp_pade44(float x) noexcept {
+    const auto num = 1680.0f + x * (840.0f + x * (180.0f + x * (20.0f + x)));
+    const auto den = 1680.0f + x * (-840.0f + x * (180.0f + x * (-20.0f + x)));
+    return num / den;
+}
+
+// mo::exp with range reduction using Padé [4,4]
+inline float mo_exp_pade44_ranged(float x) noexcept {
+    x = std::clamp(x, -87.0f, 88.0f);
+    constexpr float LOG2E = 1.4426950408889634f;
+    constexpr float LN2 = 0.6931471805599453f;
+
+    float n_f = std::floor(x * LOG2E + 0.5f);
+    int n = static_cast<int>(n_f);
+    float r = x - n_f * LN2;  // |r| < ln(2)/2 ≈ 0.347
+
+    // Padé [4,4] for exp(r)
+    const auto num = 1680.0f + r * (840.0f + r * (180.0f + r * (20.0f + r)));
+    const auto den = 1680.0f + r * (-840.0f + r * (180.0f + r * (-20.0f + r)));
+    float exp_r = num / den;
+
+    // Multiply by 2^n using bit manipulation
+    union { float f; int32_t i; } u;
+    u.i = (127 + n) << 23;
+    return u.f * exp_r;
 }
 
 // =============================================================================
@@ -365,6 +401,22 @@ inline void diode_iv_pade(float v, float& i, float& g) {
     }
 }
 
+// Padé [4,4] + range reduction版
+inline void diode_iv_pade44(float v, float& i, float& g) {
+    if (v > V_CRIT) {
+        float exp_crit = mo_exp_pade44_ranged(V_CRIT * V_T_INV);
+        g = I_S * V_T_INV * exp_crit;
+        i = I_S * (exp_crit - 1.0f) + g * (v - V_CRIT);
+    } else if (v < -10.0f * V_T) {
+        i = -I_S;
+        g = 1e-12f;
+    } else {
+        float exp_v = mo_exp_pade44_ranged(v * V_T_INV);
+        i = I_S * (exp_v - 1.0f);
+        g = I_S * V_T_INV * exp_v + 1e-12f;
+    }
+}
+
 // LUT版
 inline void diode_iv_lut(float v, float& i, float& g) {
     if (v > V_CRIT) {
@@ -376,6 +428,22 @@ inline void diode_iv_lut(float v, float& i, float& g) {
         g = 1e-12f;
     } else {
         float exp_v = lut_exp(v * V_T_INV);
+        i = I_S * (exp_v - 1.0f);
+        g = I_S * V_T_INV * exp_v + 1e-12f;
+    }
+}
+
+// 最適化版: exp_crit定数を事前計算 (WaveShaper3Var用)
+inline void diode_iv_opt(float v, float& i, float& g) {
+    if (v > V_CRIT) {
+        // 事前計算定数を使用
+        g = G_CRIT;
+        i = I_CRIT + G_CRIT * (v - V_CRIT);
+    } else if (v < -10.0f * V_T) {
+        i = -I_S;
+        g = 1e-12f;
+    } else {
+        float exp_v = fast_exp(v * V_T_INV);
         i = I_S * (exp_v - 1.0f);
         g = I_S * V_T_INV * exp_v + 1e-12f;
     }
@@ -592,7 +660,7 @@ private:
 };
 
 // =============================================================================
-// WaveShaperPade: パデ近似 [2,2] + Schur縮約
+// WaveShaperPade: パデ近似 [4,4] + range reduction + Schur縮約
 // =============================================================================
 class WaveShaperPade {
 public:
@@ -629,8 +697,8 @@ public:
         float v_cb = v_c - v_b;
 
         float i_ef, g_ef, i_cr, g_cr;
-        diode_iv_pade(v_eb, i_ef, g_ef);
-        diode_iv_pade(v_cb, i_cr, g_cr);
+        diode_iv_pade44(v_eb, i_ef, g_ef);
+        diode_iv_pade44(v_cb, i_cr, g_cr);
 
         float i_e = i_ef - ALPHA_R * i_cr;
         float i_c = ALPHA_F * i_ef - i_cr;
@@ -815,6 +883,1090 @@ private:
     float inv_j11_ = 0.0f;
     float schur_j11_factor_ = 0.0f;
     float schur_f1_factor_ = 0.0f;
+};
+
+// =============================================================================
+// WaveShaperSchurFast: BC接合省略 + 簡略化Jacobian
+// Forward Active領域では v_cb < 0 で BC接合は逆バイアス (i_cr ≈ 0, g_cr ≈ 0)
+// これにより4x4→3x3への縮約と除算削減が可能
+// =============================================================================
+class WaveShaperSchurFast {
+public:
+    void setSampleRate(float sampleRate) {
+        dt_ = 1.0f / sampleRate;
+        g_c1_ = C1 / dt_;
+        g_c2_ = C2 / dt_;
+
+        float j11 = -g_c1_ - G3;
+        inv_j11_ = 1.0f / j11;
+        schur_j11_factor_ = G3 * G3 * inv_j11_;
+        schur_f1_factor_ = G3 * inv_j11_;
+
+        // 定数部分の事前計算
+        inv_g5_ = 1.0f / G5;
+        j22_const_ = -G2 - G3;
+    }
+
+    void reset() {
+        v_c1_ = 0.0f;
+        v_c2_ = 8.0f;
+        v_b_ = 8.0f;
+        v_e_ = 8.0f;
+        v_c_ = V_COLL;
+    }
+
+    __attribute__((noinline))
+    float process(float v_in) {
+        const float v_c1_prev = v_c1_;
+        const float v_c2_prev = v_c2_;
+
+        float v_cap = v_in - v_c1_prev;
+        float v_b = v_b_;
+        float v_e = v_c2_prev;
+        float v_c = v_c_;
+
+        // EB接合のみ評価 (BC省略)
+        const float v_eb = v_e - v_b;
+        float i_ef, g_ef;
+        diode_iv(v_eb, i_ef, g_ef);
+
+        // BC接合の近似処理
+        const float v_cb = v_c - v_b;
+        float i_cr, g_cr;
+        if (v_cb < -0.1f) {
+            // 逆バイアス: 省略
+            i_cr = -I_S;
+            g_cr = 1e-12f;
+        } else {
+            // 順バイアス方向: 通常計算
+            diode_iv(v_cb, i_cr, g_cr);
+        }
+
+        // Ebers-Moll電流
+        const float i_e = i_ef - ALPHA_R * i_cr;
+        const float i_c = ALPHA_F * i_ef - i_cr;
+        const float i_b = i_e - i_c;
+
+        // KCL残差
+        const float f1 = g_c1_ * (v_in - v_cap - v_c1_prev) - G3 * (v_cap - v_b);
+        const float f2 = G2 * (v_in - v_b) + G3 * (v_cap - v_b) + i_b;
+        const float f3 = G4 * (V_CC - v_e) - i_e - g_c2_ * (v_e - v_c2_prev);
+        const float f4 = G5 * (V_COLL - v_c) + i_c;
+
+        // 簡略化Jacobian (g_cr ≈ 0 の場合)
+        const float one_minus_af = 1.0f - ALPHA_F;
+        const float j22 = j22_const_ - one_minus_af * g_ef - (1.0f - ALPHA_R) * g_cr;
+        const float j23 = one_minus_af * g_ef;
+        const float j24 = (1.0f - ALPHA_R) * g_cr;
+        const float j32 = g_ef - ALPHA_R * g_cr;
+        const float j33 = -G4 - g_ef - g_c2_;
+        const float j34 = ALPHA_R * g_cr;
+        const float j42 = -ALPHA_F * g_ef + g_cr;
+        const float j43 = ALPHA_F * g_ef;
+        const float j44 = -G5 - g_cr;
+
+        // Schur縮約
+        const float j22_p = j22 - schur_j11_factor_;
+        const float f2_p = f2 - schur_f1_factor_ * f1;
+
+        const float inv_j44 = 1.0f / j44;
+        const float j24_inv = j24 * inv_j44;
+        const float j34_inv = j34 * inv_j44;
+
+        const float j22_pp = j22_p - j24_inv * j42;
+        const float j23_pp = j23 - j24_inv * j43;
+        const float f2_pp = f2_p + j24_inv * f4;
+
+        const float j32_pp = j32 - j34_inv * j42;
+        const float j33_pp = j33 - j34_inv * j43;
+        const float f3_pp = f3 + j34_inv * f4;
+
+        // 2x2 Cramer
+        const float det = j22_pp * j33_pp - j23_pp * j32_pp;
+        const float inv_det = 1.0f / det;
+
+        const float dv_b = (j33_pp * (-f2_pp) - j23_pp * (-f3_pp)) * inv_det;
+        const float dv_e = (j22_pp * (-f3_pp) - j32_pp * (-f2_pp)) * inv_det;
+        const float dv_c = (-f4 - j42 * dv_b - j43 * dv_e) * inv_j44;
+        const float dv_cap = (-f1 - G3 * dv_b) * inv_j11_;
+
+        // ダンピング
+        const float max_dv = std::max({std::abs(dv_cap), std::abs(dv_b),
+                                       std::abs(dv_e), std::abs(dv_c)});
+        const float damp = (max_dv > 0.5f) ? 0.5f / max_dv : 1.0f;
+
+        v_cap += damp * dv_cap;
+        v_b += damp * dv_b;
+        v_e = std::clamp(v_e + damp * dv_e, 0.0f, V_CC + 0.5f);
+        v_c = std::clamp(v_c + damp * dv_c, 0.0f, V_CC + 0.5f);
+
+        v_c1_ = v_in - v_cap;
+        v_c2_ = v_e;
+        v_b_ = v_b;
+        v_e_ = v_e;
+        v_c_ = v_c;
+
+        return v_c;
+    }
+
+private:
+    float v_c1_ = 0.0f, v_c2_ = 8.0f;
+    float v_b_ = 8.0f, v_e_ = 8.0f, v_c_ = V_COLL;
+    float dt_ = 1.0f / 48000.0f;
+    float g_c1_ = C1 / dt_;
+    float g_c2_ = C2 / dt_;
+    float inv_j11_ = 0.0f;
+    float schur_j11_factor_ = 0.0f;
+    float schur_f1_factor_ = 0.0f;
+    float inv_g5_ = 0.0f;
+    float j22_const_ = 0.0f;
+};
+
+// =============================================================================
+// WaveShaper3Var: v_cap消去による3変数Newton法
+// f1が線形なのでv_capをv_bの関数として消去し、3x3システムを直接解く
+// =============================================================================
+class WaveShaper3Var {
+public:
+    void setSampleRate(float sampleRate) {
+        dt_ = 1.0f / sampleRate;
+        g_c1_ = C1 / dt_;
+        g_c2_ = C2 / dt_;
+
+        // v_cap消去用定数
+        // v_cap = (g_c1*(v_in - v_c1_prev) + G3*v_b) / (g_c1 + G3)
+        den_ = g_c1_ + G3;
+        inv_den_ = 1.0f / den_;
+        k_ = G3 * inv_den_;  // dv_cap/dv_b
+
+        // f2の定数部分: df2/dv_b の線形部分 = -G2 + G3*(k - 1)
+        j22_linear_ = -G2 + G3 * (k_ - 1.0f);
+    }
+
+    void reset() {
+        v_c1_ = 0.0f;
+        v_c2_ = 8.0f;
+        v_b_ = 8.0f;
+        v_e_ = 8.0f;
+        v_c_ = V_COLL;
+    }
+
+    __attribute__((noinline))
+    float process(float v_in) {
+        const float v_c1_prev = v_c1_;
+        const float v_c2_prev = v_c2_;
+
+        float v_b = v_b_;
+        float v_e = v_c2_prev;
+        float v_c = v_c_;
+
+        // B = g_c1 * (v_in - v_c1_prev) - 事前計算
+        const float B = g_c1_ * (v_in - v_c1_prev);
+
+        // ダイオード評価 (最適化版: exp_crit定数化)
+        const float v_eb = v_e - v_b;
+        const float v_cb = v_c - v_b;
+
+        float i_ef, g_ef, i_cr, g_cr;
+        diode_iv_opt(v_eb, i_ef, g_ef);
+        diode_iv_opt(v_cb, i_cr, g_cr);
+
+        // Ebers-Moll電流
+        const float i_e = i_ef - ALPHA_R * i_cr;
+        const float i_c = ALPHA_F * i_ef - i_cr;
+        const float i_b = i_e - i_c;
+
+        // v_cap を v_b の関数として計算 (残差計算用、直接は使わない)
+        // v_cap = (B + G3 * v_b) * inv_den_
+
+        // 3変数残差
+        // f2 = G2*(v_in - v_b) + G3*(v_cap - v_b) + i_b
+        //    = G2*v_in - G2*v_b + G3*v_cap - G3*v_b + i_b
+        //    = G2*v_in + G3*v_cap + v_b*(-G2 - G3) + i_b
+        //    v_cap = (B + G3*v_b)*inv_den より:
+        //    = G2*v_in + G3*(B + G3*v_b)*inv_den - (G2 + G3)*v_b + i_b
+        //    = G2*v_in + G3*B*inv_den + v_b*(G3*G3*inv_den - G2 - G3) + i_b
+        const float f2 = G2 * v_in + G3 * B * inv_den_ + j22_linear_ * v_b + i_b;
+        const float f3 = G4 * (V_CC - v_e) - i_e - g_c2_ * (v_e - v_c2_prev);
+        const float f4 = G5 * (V_COLL - v_c) + i_c;
+
+        // 3x3 ヤコビアン
+        // j22 = df2/dv_b = j22_linear - (1-αf)*g_ef - (1-αr)*g_cr
+        const float j22 = j22_linear_ - (1.0f - ALPHA_F) * g_ef - (1.0f - ALPHA_R) * g_cr;
+        const float j23 = (1.0f - ALPHA_F) * g_ef;
+        const float j24 = (1.0f - ALPHA_R) * g_cr;
+        const float j32 = g_ef - ALPHA_R * g_cr;
+        const float j33 = -G4 - g_ef - g_c2_;
+        const float j34 = ALPHA_R * g_cr;
+        const float j42 = -ALPHA_F * g_ef + g_cr;
+        const float j43 = ALPHA_F * g_ef;
+        const float j44 = -G5 - g_cr;
+
+        // 3x3 Gauss消去 (行2,3,4 → 実際には j22,j23,j24 が行1)
+        // 行1からピボット
+        const float inv_j22 = 1.0f / j22;
+        const float m32 = j32 * inv_j22;
+        const float m42 = j42 * inv_j22;
+
+        // 行2更新 (j33, j34, f3)
+        const float j33_p = j33 - m32 * j23;
+        const float j34_p = j34 - m32 * j24;
+        const float f3_p = f3 + m32 * f2;  // -f3 - m32*(-f2) = -f3 + m32*f2
+
+        // 行3更新 (j43, j44, f4)
+        const float j43_p = j43 - m42 * j23;
+        const float j44_p = j44 - m42 * j24;
+        const float f4_p = f4 + m42 * f2;
+
+        // 2x2 Cramer
+        const float det = j33_p * j44_p - j34_p * j43_p;
+        const float inv_det = 1.0f / det;
+
+        const float dv_e = (j44_p * (-f3_p) - j34_p * (-f4_p)) * inv_det;
+        const float dv_c = (j33_p * (-f4_p) - j43_p * (-f3_p)) * inv_det;
+
+        // 後退代入
+        const float dv_b = (-f2 - j23 * dv_e - j24 * dv_c) * inv_j22;
+
+        // v_capはv_bから直接計算するため、dv_capは不要
+        // dv_cap = k_ * dv_b
+
+        // ダンピング
+        float max_dv = std::abs(dv_b);
+        if (std::abs(dv_e) > max_dv) max_dv = std::abs(dv_e);
+        if (std::abs(dv_c) > max_dv) max_dv = std::abs(dv_c);
+        const float damp = (max_dv > 0.5f) ? 0.5f / max_dv : 1.0f;
+
+        v_b += damp * dv_b;
+        v_e = std::clamp(v_e + damp * dv_e, 0.0f, V_CC + 0.5f);
+        v_c = std::clamp(v_c + damp * dv_c, 0.0f, V_CC + 0.5f);
+
+        // v_cap更新（新しいv_bから再計算）
+        const float v_cap_new = (B + G3 * v_b) * inv_den_;
+
+        // 状態更新
+        v_c1_ = v_in - v_cap_new;
+        v_c2_ = v_e;
+        v_b_ = v_b;
+        v_e_ = v_e;
+        v_c_ = v_c;
+
+        return v_c;
+    }
+
+private:
+    float v_c1_ = 0.0f, v_c2_ = 8.0f;
+    float v_b_ = 8.0f, v_e_ = 8.0f, v_c_ = V_COLL;
+    float dt_ = 1.0f / 48000.0f;
+    float g_c1_ = C1 / dt_;
+    float g_c2_ = C2 / dt_;
+    float den_ = 0.0f;
+    float inv_den_ = 0.0f;
+    float k_ = 0.0f;
+    float j22_linear_ = 0.0f;
+};
+
+// =============================================================================
+// WaveShaper3Var2Iter: 3変数Newton - 2回反復版
+// =============================================================================
+class WaveShaper3Var2Iter {
+public:
+    void setSampleRate(float sampleRate) {
+        dt_ = 1.0f / sampleRate;
+        g_c1_ = C1 / dt_;
+        g_c2_ = C2 / dt_;
+        // Schur補完用定数 (WaveShaperTwoIterと同じ方式)
+        float j11 = -g_c1_ - G3;
+        inv_j11_ = 1.0f / j11;
+        schur_j11_factor_ = G3 * G3 * inv_j11_;
+        schur_f1_factor_ = G3 * inv_j11_;
+    }
+
+    void reset() {
+        v_c1_ = 0.0f;
+        v_c2_ = 8.0f;
+        v_b_ = 8.0f;
+        v_e_ = 8.0f;
+        v_c_ = V_COLL;
+    }
+
+    __attribute__((noinline))
+    float process(float v_in) {
+        const float v_c1_prev = v_c1_;
+        const float v_c2_prev = v_c2_;
+
+        float v_cap = v_in - v_c1_prev;
+        float v_b = v_b_;
+        float v_e = v_c2_prev;
+        float v_c = v_c_;
+
+        // 2回反復 (WaveShaperTwoIterと同じ方式)
+        for (int iter = 0; iter < 2; ++iter) {
+            const float v_eb = v_e - v_b;
+            const float v_cb = v_c - v_b;
+
+            float i_ef, g_ef, i_cr, g_cr;
+            diode_iv_opt(v_eb, i_ef, g_ef);
+            diode_iv_opt(v_cb, i_cr, g_cr);
+
+            const float i_e = i_ef - ALPHA_R * i_cr;
+            const float i_c = ALPHA_F * i_ef - i_cr;
+            const float i_b = i_e - i_c;
+
+            // 4変数残差
+            const float f1 = g_c1_ * (v_in - v_cap - v_c1_prev) - G3 * (v_cap - v_b);
+            const float f2 = G2 * (v_in - v_b) + G3 * (v_cap - v_b) + i_b;
+            const float f3 = G4 * (V_CC - v_e) - i_e - g_c2_ * (v_e - v_c2_prev);
+            const float f4 = G5 * (V_COLL - v_c) + i_c;
+
+            // 3x3ヤコビアン (v_capは行1でSchur補完済み)
+            const float j22 = -G2 - G3 - (1.0f - ALPHA_F) * g_ef - (1.0f - ALPHA_R) * g_cr;
+            const float j23 = (1.0f - ALPHA_F) * g_ef;
+            const float j24 = (1.0f - ALPHA_R) * g_cr;
+            const float j32 = g_ef - ALPHA_R * g_cr;
+            const float j33 = -G4 - g_ef - g_c2_;
+            const float j34 = ALPHA_R * g_cr;
+            const float j42 = -ALPHA_F * g_ef + g_cr;
+            const float j43 = ALPHA_F * g_ef;
+            const float j44 = -G5 - g_cr;
+
+            // v_capのSchur補完
+            const float j22_p = j22 - schur_j11_factor_;
+            const float f2_p = f2 - schur_f1_factor_ * f1;
+
+            // j44からピボット (WaveShaperTwoIterと同じ)
+            const float inv_j44 = 1.0f / j44;
+            const float j24_inv = j24 * inv_j44;
+            const float j34_inv = j34 * inv_j44;
+
+            const float j22_pp = j22_p - j24_inv * j42;
+            const float j23_pp = j23 - j24_inv * j43;
+            const float f2_pp = f2_p + j24_inv * f4;
+
+            const float j32_pp = j32 - j34_inv * j42;
+            const float j33_pp = j33 - j34_inv * j43;
+            const float f3_pp = f3 + j34_inv * f4;
+
+            // 2x2 Cramer
+            const float det = j22_pp * j33_pp - j23_pp * j32_pp;
+            const float inv_det = 1.0f / det;
+
+            const float dv_b = (j33_pp * (-f2_pp) - j23_pp * (-f3_pp)) * inv_det;
+            const float dv_e = (j22_pp * (-f3_pp) - j32_pp * (-f2_pp)) * inv_det;
+            const float dv_c = (-f4 - j42 * dv_b - j43 * dv_e) * inv_j44;
+            const float dv_cap = (-f1 - G3 * dv_b) * inv_j11_;
+
+            float max_dv = std::abs(dv_b);
+            if (std::abs(dv_e) > max_dv) max_dv = std::abs(dv_e);
+            if (std::abs(dv_c) > max_dv) max_dv = std::abs(dv_c);
+            if (std::abs(dv_cap) > max_dv) max_dv = std::abs(dv_cap);
+            const float damp = (max_dv > 0.5f) ? 0.5f / max_dv : 1.0f;
+
+            v_cap += damp * dv_cap;
+            v_b += damp * dv_b;
+            v_e = std::clamp(v_e + damp * dv_e, 0.0f, V_CC + 0.5f);
+            v_c = std::clamp(v_c + damp * dv_c, 0.0f, V_CC + 0.5f);
+        }
+
+        v_c1_ = v_in - v_cap;
+        v_c2_ = v_e;
+        v_b_ = v_b;
+        v_e_ = v_e;
+        v_c_ = v_c;
+
+        return v_c;
+    }
+
+private:
+    float v_c1_ = 0.0f, v_c2_ = 8.0f;
+    float v_b_ = 8.0f, v_e_ = 8.0f, v_c_ = V_COLL;
+    float dt_ = 1.0f / 48000.0f;
+    float g_c1_ = C1 / dt_;
+    float g_c2_ = C2 / dt_;
+    float inv_j11_ = 0.0f;
+    float schur_j11_factor_ = 0.0f;
+    float schur_f1_factor_ = 0.0f;
+    float inv_den_ = 0.0f;
+    float k_ = 0.0f;
+    float j22_linear_ = 0.0f;
+};
+
+// =============================================================================
+// WaveShaperSchur2Iter: Schur補行列 - 2回反復版
+// =============================================================================
+class WaveShaperSchur2Iter {
+public:
+    void setSampleRate(float sampleRate) {
+        dt_ = 1.0f / sampleRate;
+        g_c1_ = C1 / dt_;
+        g_c2_ = C2 / dt_;
+
+        float j11 = -g_c1_ - G3;
+        inv_j11_ = 1.0f / j11;
+        schur_j11_factor_ = G3 * G3 * inv_j11_;
+        schur_f1_factor_ = G3 * inv_j11_;
+    }
+
+    void reset() {
+        v_c1_ = 0.0f;
+        v_c2_ = 8.0f;
+        v_b_ = 8.0f;
+        v_e_ = 8.0f;
+        v_c_ = V_COLL;
+    }
+
+    __attribute__((noinline))
+    float process(float v_in) {
+        const float v_c1_prev = v_c1_;
+        const float v_c2_prev = v_c2_;
+
+        float v_cap = v_in - v_c1_prev;
+        float v_b = v_b_;
+        float v_e = v_c2_prev;
+        float v_c = v_c_;
+
+        // 2回反復
+        for (int iter = 0; iter < 2; ++iter) {
+            float v_eb = v_e - v_b;
+            float v_cb = v_c - v_b;
+
+            float i_ef, g_ef, i_cr, g_cr;
+            diode_iv_opt(v_eb, i_ef, g_ef);
+            diode_iv_opt(v_cb, i_cr, g_cr);
+
+            float i_e = i_ef - ALPHA_R * i_cr;
+            float i_c = ALPHA_F * i_ef - i_cr;
+            float i_b = i_e - i_c;
+
+            float f1 = g_c1_ * (v_in - v_cap - v_c1_prev) - G3 * (v_cap - v_b);
+            float f2 = G2 * (v_in - v_b) + G3 * (v_cap - v_b) + i_b;
+            float f3 = G4 * (V_CC - v_e) - i_e - g_c2_ * (v_e - v_c2_prev);
+            float f4 = G5 * (V_COLL - v_c) + i_c;
+
+            float j22 = -G2 - G3 - (1.0f - ALPHA_F) * g_ef - (1.0f - ALPHA_R) * g_cr;
+            float j23 = (1.0f - ALPHA_F) * g_ef;
+            float j24 = (1.0f - ALPHA_R) * g_cr;
+            float j32 = g_ef - ALPHA_R * g_cr;
+            float j33 = -G4 - g_ef - g_c2_;
+            float j34 = ALPHA_R * g_cr;
+            float j42 = -ALPHA_F * g_ef + g_cr;
+            float j43 = ALPHA_F * g_ef;
+            float j44 = -G5 - g_cr;
+
+            float j22_p = j22 - schur_j11_factor_;
+            float f2_p = f2 - schur_f1_factor_ * f1;
+
+            float inv_j44 = 1.0f / j44;
+            float j24_inv_j44 = j24 * inv_j44;
+            float j22_pp = j22_p - j24_inv_j44 * j42;
+            float j23_pp = j23 - j24_inv_j44 * j43;
+            float f2_pp = f2_p + j24_inv_j44 * f4;
+
+            float j34_inv_j44 = j34 * inv_j44;
+            float j32_pp = j32 - j34_inv_j44 * j42;
+            float j33_pp = j33 - j34_inv_j44 * j43;
+            float f3_pp = f3 + j34_inv_j44 * f4;
+
+            float det = j22_pp * j33_pp - j23_pp * j32_pp;
+            if (std::abs(det) < 1e-15f) continue;
+
+            float inv_det = 1.0f / det;
+            float neg_f2 = -f2_pp;
+            float neg_f3 = -f3_pp;
+            float dv_b = (j33_pp * neg_f2 - j23_pp * neg_f3) * inv_det;
+            float dv_e = (j22_pp * neg_f3 - j32_pp * neg_f2) * inv_det;
+            float dv_c = (-f4 - j42 * dv_b - j43 * dv_e) * inv_j44;
+            float dv_cap = (-f1 - G3 * dv_b) * inv_j11_;
+
+            float max_dv = std::max({std::abs(dv_cap), std::abs(dv_b),
+                                     std::abs(dv_e), std::abs(dv_c)});
+            float damp = (max_dv > 0.5f) ? 0.5f / max_dv : 1.0f;
+
+            v_cap += damp * dv_cap;
+            v_b += damp * dv_b;
+            v_e = std::clamp(v_e + damp * dv_e, 0.0f, V_CC + 0.5f);
+            v_c = std::clamp(v_c + damp * dv_c, 0.0f, V_CC + 0.5f);
+        }
+
+        v_c1_ = v_in - v_cap;
+        v_c2_ = v_e;
+        v_b_ = v_b;
+        v_e_ = v_e;
+        v_c_ = v_c;
+
+        return v_c;
+    }
+
+private:
+    float v_c1_ = 0.0f, v_c2_ = 8.0f;
+    float v_b_ = 8.0f, v_e_ = 8.0f, v_c_ = V_COLL;
+    float dt_ = 1.0f / 48000.0f;
+    float g_c1_ = C1 / dt_;
+    float g_c2_ = C2 / dt_;
+    float inv_j11_ = 0.0f;
+    float schur_j11_factor_ = 0.0f;
+    float schur_f1_factor_ = 0.0f;
+};
+
+// =============================================================================
+// WaveShaper3VarOpt: 3変数Newton (WaveShaper3Varと同一実装)
+// diode_ivを使用、1回Newton反復
+// =============================================================================
+class WaveShaper3VarOpt {
+public:
+    void setSampleRate(float sampleRate) {
+        dt_ = 1.0f / sampleRate;
+        g_c1_ = C1 / dt_;
+        g_c2_ = C2 / dt_;
+
+        // v_cap消去用定数
+        den_ = g_c1_ + G3;
+        inv_den_ = 1.0f / den_;
+
+        // j22_linear = -G2 - G3 + G3²/den
+        j22_linear_ = -G2 - G3 + G3 * G3 * inv_den_;
+    }
+
+    void reset() {
+        v_c1_ = 0.0f;
+        v_c2_ = 8.0f;
+        v_b_ = 8.0f;
+        v_e_ = 8.0f;
+        v_c_ = V_COLL;
+    }
+
+    __attribute__((noinline))
+    float process(float v_in) {
+        const float v_c1_prev = v_c1_;
+        const float v_c2_prev = v_c2_;
+
+        float v_b = v_b_;
+        float v_e = v_c2_prev;
+        float v_c = v_c_;
+
+        const float B = g_c1_ * (v_in - v_c1_prev);
+
+        // diode評価
+        float i_ef, g_ef, i_cr, g_cr;
+        diode_iv(v_e - v_b, i_ef, g_ef);
+        diode_iv(v_c - v_b, i_cr, g_cr);
+
+        // Ebers-Moll電流
+        const float i_e = i_ef - ALPHA_R * i_cr;
+        const float i_c = ALPHA_F * i_ef - i_cr;
+        const float i_b = i_e - i_c;
+
+        // 残差
+        const float f2 = G2 * (v_in - v_b) + G3 * B * inv_den_ + (j22_linear_ + G2) * v_b + i_b;
+        const float f3 = G4 * (V_CC - v_e) - i_e - g_c2_ * (v_e - v_c2_prev);
+        const float f4 = G5 * (V_COLL - v_c) + i_c;
+
+        // ヤコビアン
+        const float omaf_g_ef = (1.0f - ALPHA_F) * g_ef;
+        const float omar_g_cr = (1.0f - ALPHA_R) * g_cr;
+        const float af_g_ef = ALPHA_F * g_ef;
+        const float ar_g_cr = ALPHA_R * g_cr;
+
+        const float j22 = j22_linear_ - omaf_g_ef - omar_g_cr;
+        const float j23 = omaf_g_ef;
+        const float j24 = omar_g_cr;
+        const float j32 = g_ef - ar_g_cr;
+        const float j33 = -G4 - g_ef - g_c2_;
+        const float j34 = ar_g_cr;
+        const float j42 = -af_g_ef + g_cr;
+        const float j43 = af_g_ef;
+        const float j44 = -G5 - g_cr;
+
+        // 3x3 Gauss消去
+        const float inv_j22 = 1.0f / j22;
+        const float m32 = j32 * inv_j22;
+        const float m42 = j42 * inv_j22;
+
+        const float j33_p = j33 - m32 * j23;
+        const float j34_p = j34 - m32 * j24;
+        const float f3_p = f3 + m32 * f2;
+
+        const float j43_p = j43 - m42 * j23;
+        const float j44_p = j44 - m42 * j24;
+        const float f4_p = f4 + m42 * f2;
+
+        // 2x2 Cramer
+        const float det = j33_p * j44_p - j34_p * j43_p;
+        const float inv_det = 1.0f / det;
+
+        const float dv_e = (j44_p * (-f3_p) - j34_p * (-f4_p)) * inv_det;
+        const float dv_c = (j33_p * (-f4_p) - j43_p * (-f3_p)) * inv_det;
+        const float dv_b = (-f2 - j23 * dv_e - j24 * dv_c) * inv_j22;
+
+        // ダンピング
+        float max_dv = std::abs(dv_b);
+        if (std::abs(dv_e) > max_dv) max_dv = std::abs(dv_e);
+        if (std::abs(dv_c) > max_dv) max_dv = std::abs(dv_c);
+        const float damp = (max_dv > 0.5f) ? 0.5f / max_dv : 1.0f;
+
+        v_b += damp * dv_b;
+        v_e = std::clamp(v_e + damp * dv_e, 0.0f, V_CC + 0.5f);
+        v_c = std::clamp(v_c + damp * dv_c, 0.0f, V_CC + 0.5f);
+
+        // v_cap更新
+        const float v_cap_new = (B + G3 * v_b) * inv_den_;
+
+        // 状態更新
+        v_c1_ = v_in - v_cap_new;
+        v_c2_ = v_e;
+        v_b_ = v_b;
+        v_e_ = v_e;
+        v_c_ = v_c;
+
+        return v_c;
+    }
+
+private:
+    float v_c1_ = 0.0f, v_c2_ = 8.0f;
+    float v_b_ = 8.0f, v_e_ = 8.0f, v_c_ = V_COLL;
+    float dt_ = 1.0f / 48000.0f;
+    float g_c1_ = C1 / dt_;
+    float g_c2_ = C2 / dt_;
+    float den_ = 0.0f;
+    float inv_den_ = 0.0f;
+    float j22_linear_ = 0.0f;
+};
+
+// =============================================================================
+// WaveShaperPredict: 状態予測 + 1回Newton
+// 前回の変化率を使って次の状態を予測し、Newton収束を高速化
+// =============================================================================
+class WaveShaperPredict {
+public:
+    void setSampleRate(float sampleRate) {
+        dt_ = 1.0f / sampleRate;
+        g_c1_ = C1 / dt_;
+        g_c2_ = C2 / dt_;
+
+        float j11 = -g_c1_ - G3;
+        inv_j11_ = 1.0f / j11;
+        schur_j11_factor_ = G3 * G3 * inv_j11_;
+        schur_f1_factor_ = G3 * inv_j11_;
+    }
+
+    void reset() {
+        v_c1_ = 0.0f;
+        v_c2_ = 8.0f;
+        v_b_ = 8.0f;
+        v_e_ = 8.0f;
+        v_c_ = V_COLL;
+        dv_b_prev_ = 0.0f;
+        dv_e_prev_ = 0.0f;
+        dv_c_prev_ = 0.0f;
+    }
+
+    __attribute__((noinline))
+    float process(float v_in) {
+        const float v_c1_prev = v_c1_;
+        const float v_c2_prev = v_c2_;
+
+        // 予測: 前回の変化率を使用
+        float v_cap = v_in - v_c1_prev;
+        float v_b = v_b_ + 0.5f * dv_b_prev_;
+        float v_e = v_c2_prev + 0.5f * dv_e_prev_;
+        float v_c = v_c_ + 0.5f * dv_c_prev_;
+
+        // クランプ
+        v_e = std::clamp(v_e, 0.0f, V_CC + 0.5f);
+        v_c = std::clamp(v_c, 0.0f, V_CC + 0.5f);
+
+        // ダイオード評価
+        float v_eb = v_e - v_b;
+        float v_cb = v_c - v_b;
+
+        float i_ef, g_ef, i_cr, g_cr;
+        diode_iv(v_eb, i_ef, g_ef);
+        diode_iv(v_cb, i_cr, g_cr);
+
+        // Ebers-Moll電流
+        float i_e = i_ef - ALPHA_R * i_cr;
+        float i_c = ALPHA_F * i_ef - i_cr;
+        float i_b = i_e - i_c;
+
+        // KCL残差
+        float f1 = g_c1_ * (v_in - v_cap - v_c1_prev) - G3 * (v_cap - v_b);
+        float f2 = G2 * (v_in - v_b) + G3 * (v_cap - v_b) + i_b;
+        float f3 = G4 * (V_CC - v_e) - i_e - g_c2_ * (v_e - v_c2_prev);
+        float f4 = G5 * (V_COLL - v_c) + i_c;
+
+        // Jacobian
+        float j22 = -G2 - G3 - (1.0f - ALPHA_F) * g_ef - (1.0f - ALPHA_R) * g_cr;
+        float j23 = (1.0f - ALPHA_F) * g_ef;
+        float j24 = (1.0f - ALPHA_R) * g_cr;
+        float j32 = g_ef - ALPHA_R * g_cr;
+        float j33 = -G4 - g_ef - g_c2_;
+        float j34 = ALPHA_R * g_cr;
+        float j42 = -ALPHA_F * g_ef + g_cr;
+        float j43 = ALPHA_F * g_ef;
+        float j44 = -G5 - g_cr;
+
+        // Schur縮約
+        float j22_p = j22 - schur_j11_factor_;
+        float f2_p = f2 - schur_f1_factor_ * f1;
+
+        float inv_j44 = 1.0f / j44;
+        float j24_inv = j24 * inv_j44;
+        float j34_inv = j34 * inv_j44;
+
+        float j22_pp = j22_p - j24_inv * j42;
+        float j23_pp = j23 - j24_inv * j43;
+        float f2_pp = f2_p + j24_inv * f4;
+
+        float j32_pp = j32 - j34_inv * j42;
+        float j33_pp = j33 - j34_inv * j43;
+        float f3_pp = f3 + j34_inv * f4;
+
+        // 2x2 Cramer
+        float det = j22_pp * j33_pp - j23_pp * j32_pp;
+        float inv_det = 1.0f / det;
+
+        float dv_b = (j33_pp * (-f2_pp) - j23_pp * (-f3_pp)) * inv_det;
+        float dv_e = (j22_pp * (-f3_pp) - j32_pp * (-f2_pp)) * inv_det;
+        float dv_c = (-f4 - j42 * dv_b - j43 * dv_e) * inv_j44;
+        float dv_cap = (-f1 - G3 * dv_b) * inv_j11_;
+
+        // ダンピング
+        float max_dv = std::max({std::abs(dv_cap), std::abs(dv_b),
+                                 std::abs(dv_e), std::abs(dv_c)});
+        float damp = (max_dv > 0.5f) ? 0.5f / max_dv : 1.0f;
+
+        v_cap += damp * dv_cap;
+        v_b += damp * dv_b;
+        v_e = std::clamp(v_e + damp * dv_e, 0.0f, V_CC + 0.5f);
+        v_c = std::clamp(v_c + damp * dv_c, 0.0f, V_CC + 0.5f);
+
+        // 変化率を保存
+        dv_b_prev_ = v_b - v_b_;
+        dv_e_prev_ = v_e - v_e_;
+        dv_c_prev_ = v_c - v_c_;
+
+        v_c1_ = v_in - v_cap;
+        v_c2_ = v_e;
+        v_b_ = v_b;
+        v_e_ = v_e;
+        v_c_ = v_c;
+
+        return v_c;
+    }
+
+private:
+    float v_c1_ = 0.0f, v_c2_ = 8.0f;
+    float v_b_ = 8.0f, v_e_ = 8.0f, v_c_ = V_COLL;
+    float dv_b_prev_ = 0.0f, dv_e_prev_ = 0.0f, dv_c_prev_ = 0.0f;
+    float dt_ = 1.0f / 48000.0f;
+    float g_c1_ = C1 / dt_;
+    float g_c2_ = C2 / dt_;
+    float inv_j11_ = 0.0f;
+    float schur_j11_factor_ = 0.0f;
+    float schur_f1_factor_ = 0.0f;
+};
+
+// =============================================================================
+// WaveShaperGeometric: 状態空間幾何写像
+// 双曲幾何による指数非線形性の線形化 + トーラス位相写像
+// Newton法不要、12 FLOPs/サンプル
+// =============================================================================
+class WaveShaperGeometric {
+public:
+    void setSampleRate(float /* sampleRate */) {
+        // サンプルレート依存パラメータなし（48kHz想定で固定）
+    }
+
+    void reset() {
+        theta_ = 1.8f;  // Vbe=0.65V → θ (実用スケーリング)
+        phi_   = 0.0f;
+    }
+
+    __attribute__((noinline))
+    float process(float v_in) {
+        // STEP 1: 入力→双曲角変換 (3 FLOPs)
+        const float env = std::abs(v_in) * 0.3f + 7.8f;  // エミッタ包絡線モデル
+        const float v_be = v_in - env + 0.65f;           // Vbe推定
+        const float d_theta = v_be * 0.035f;             // 双曲角変化量
+
+        // STEP 2: トーラス状態更新 (4 FLOPs)
+        constexpr float COS_PHI = 0.9998f;  // C1効果: τ=0.91ms → 48kHz減衰
+        constexpr float SIN_PHI = 0.02f;    // 周波数依存位相シフト
+        const float theta_new = COS_PHI * theta_ - SIN_PHI * phi_ + d_theta;
+        phi_ = SIN_PHI * theta_ + COS_PHI * phi_;
+        theta_ = theta_new;
+
+        // STEP 3: 出力生成 (5 FLOPs) - sinh(x)の[3/2] Pade近似
+        const float t2 = theta_ * theta_;
+        const float sinh_approx = theta_ * (1.0f + t2 * 0.1666667f)
+                                / (1.0f - t2 * 0.05f);
+
+        // 物理制約付き出力
+        float v_out = 5.33f - 0.42f * sinh_approx * (1.0f + 0.15f * COS_PHI);
+        return std::clamp(v_out, 0.25f, 11.85f);
+    }
+
+private:
+    float theta_ = 1.8f;
+    float phi_   = 0.0f;
+};
+
+// =============================================================================
+// pad_exp: Padé近似 + レンジリダクション
+// 精度: 相対誤差 < 0.1% for |x| < 40
+// =============================================================================
+inline float pad_exp(float x) {
+    // レンジリダクション: e^x = 2^k * e^r where r = x - k*ln(2)
+    constexpr float LOG2E = 1.4426950408889634f;
+    constexpr float LN2 = 0.6931471805599453f;
+
+    float k = std::floor(x * LOG2E + 0.5f);
+    float r = x - k * LN2;  // |r| < ln(2)/2 ≈ 0.347
+
+    // Padé [4,4] 近似 for e^r
+    // e^r ≈ (1 + r/2 + r²/9 + r³/72 + r⁴/1008) / (1 - r/2 + r²/9 - r³/72 + r⁴/1008)
+    // 簡略化 [2,2]: e^r ≈ (1 + r/2 + r²/12) / (1 - r/2 + r²/12)
+    float r2 = r * r;
+    float num = 1.0f + r * 0.5f + r2 * 0.0833333f;
+    float den = 1.0f - r * 0.5f + r2 * 0.0833333f;
+    float exp_r = num / den;
+
+    // 2^k をビット操作で計算
+    union { float f; int32_t i; } u;
+    int32_t ki = static_cast<int32_t>(k);
+    // 127はfloatの指数バイアス、23はマンティッサビット数
+    u.i = (ki + 127) << 23;
+
+    return exp_r * u.f;
+}
+
+// =============================================================================
+// WaveShaperOptimized: pad_exp + 解析的3x3逆行列
+//
+// 最適化:
+// 1. pad_exp で高精度かつ高速なexp計算
+// 2. v_cap を代数的に消去して 4x4 → 3x3
+// 3. Cramer公式で解析的に逆行列を計算
+// =============================================================================
+class WaveShaperOptimized {
+public:
+    void setSampleRate(float sampleRate) {
+        dt_ = 1.0f / sampleRate;
+        g_c1_ = C1 / dt_;
+        g_c2_ = C2 / dt_;
+
+        // 事前計算
+        den_ = g_c1_ + G3;
+        inv_den_ = 1.0f / den_;
+        j22_linear_ = -G2 - G3 + G3 * G3 * inv_den_;
+    }
+
+    void reset() {
+        v_c1_ = 0.0f;
+        v_c2_ = 8.0f;
+        v_b_ = 8.0f;
+        v_e_ = 8.0f;
+        v_c_ = V_COLL;
+    }
+
+    __attribute__((noinline))
+    float process(float v_in) {
+        const float v_c1_prev = v_c1_;
+        const float v_c2_prev = v_c2_;
+
+        float v_b = v_b_;
+        float v_e = v_c2_prev;
+        float v_c = v_c_;
+
+        const float B = g_c1_ * (v_in - v_c1_prev);
+
+        // ダイオード評価 (pad_exp使用)
+        const float v_eb = v_e - v_b;
+        const float v_cb = v_c - v_b;
+
+        float i_ef, g_ef, i_cr, g_cr;
+        diode_iv_pad(v_eb, i_ef, g_ef);
+        diode_iv_pad(v_cb, i_cr, g_cr);
+
+        // Ebers-Moll電流
+        const float i_e = i_ef - ALPHA_R * i_cr;
+        const float i_c = ALPHA_F * i_ef - i_cr;
+        const float i_b = i_e - i_c;
+
+        // 残差 (v_cap消去済み)
+        const float f2 = G2 * (v_in - v_b) + G3 * B * inv_den_ + (j22_linear_ + G2) * v_b + i_b;
+        const float f3 = G4 * (V_CC - v_e) - i_e - g_c2_ * (v_e - v_c2_prev);
+        const float f4 = G5 * (V_COLL - v_c) + i_c;
+
+        // ヤコビアン要素
+        const float omaf_g_ef = (1.0f - ALPHA_F) * g_ef;
+        const float omar_g_cr = (1.0f - ALPHA_R) * g_cr;
+        const float af_g_ef = ALPHA_F * g_ef;
+        const float ar_g_cr = ALPHA_R * g_cr;
+
+        const float j22 = j22_linear_ - omaf_g_ef - omar_g_cr;
+        const float j23 = omaf_g_ef;
+        const float j24 = omar_g_cr;
+        const float j32 = g_ef - ar_g_cr;
+        const float j33 = -G4 - g_ef - g_c2_;
+        const float j34 = ar_g_cr;
+        const float j42 = -af_g_ef + g_cr;
+        const float j43 = af_g_ef;
+        const float j44 = -G5 - g_cr;
+
+        // 3x3 Cramer公式による解析的逆行列
+        // det = j22*(j33*j44 - j34*j43) - j23*(j32*j44 - j34*j42) + j24*(j32*j43 - j33*j42)
+        const float m1 = j33 * j44 - j34 * j43;
+        const float m2 = j32 * j44 - j34 * j42;
+        const float m3 = j32 * j43 - j33 * j42;
+        const float det = j22 * m1 - j23 * m2 + j24 * m3;
+
+        if (std::abs(det) < 1e-15f) {
+            v_c1_ = v_in - (B + G3 * v_b) * inv_den_;
+            v_c2_ = v_e;
+            return v_c;
+        }
+
+        const float inv_det = 1.0f / det;
+
+        // 余因子展開
+        // dv_b = [(-f2)*(j33*j44-j34*j43) - j23*(-f3*j44+f4*j43) + j24*(-f3*j34+f4*j33)] / det
+        const float neg_f2 = -f2;
+        const float neg_f3 = -f3;
+        const float neg_f4 = -f4;
+
+        const float dv_b = (neg_f2 * m1
+                         + j23 * (neg_f3 * j44 - neg_f4 * j43)
+                         + j24 * (neg_f4 * j33 - neg_f3 * j34)) * inv_det;
+        const float dv_e = (j22 * (neg_f3 * j44 - neg_f4 * j43)
+                         - neg_f2 * m2
+                         + j24 * (neg_f4 * j32 - neg_f3 * j42)) * inv_det;
+        const float dv_c = (j22 * (neg_f4 * j33 - neg_f3 * j34)
+                         - j23 * (neg_f4 * j32 - neg_f3 * j42)
+                         + neg_f2 * m3) * inv_det;
+
+        // ダンピング
+        const float max_dv = std::max({std::abs(dv_b), std::abs(dv_e), std::abs(dv_c)});
+        const float damp = (max_dv > 0.5f) ? 0.5f / max_dv : 1.0f;
+
+        v_b += damp * dv_b;
+        v_e = std::clamp(v_e + damp * dv_e, 0.0f, V_CC + 0.5f);
+        v_c = std::clamp(v_c + damp * dv_c, 0.0f, V_CC + 0.5f);
+
+        // v_cap更新
+        const float v_cap_new = (B + G3 * v_b) * inv_den_;
+
+        v_c1_ = v_in - v_cap_new;
+        v_c2_ = v_e;
+        v_b_ = v_b;
+        v_e_ = v_e;
+        v_c_ = v_c;
+
+        return v_c;
+    }
+
+private:
+    // pad_expを使用したダイオード評価
+    inline void diode_iv_pad(float v, float& i, float& g) {
+        if (v > V_CRIT) {
+            float exp_crit = pad_exp(V_CRIT * V_T_INV);
+            g = I_S * V_T_INV * exp_crit;
+            i = I_S * (exp_crit - 1.0f) + g * (v - V_CRIT);
+        } else if (v < -10.0f * V_T) {
+            i = -I_S;
+            g = 1e-12f;
+        } else {
+            float exp_v = pad_exp(v * V_T_INV);
+            i = I_S * (exp_v - 1.0f);
+            g = I_S * V_T_INV * exp_v + 1e-12f;
+        }
+    }
+
+    float v_c1_ = 0.0f, v_c2_ = 8.0f;
+    float v_b_ = 8.0f, v_e_ = 8.0f, v_c_ = V_COLL;
+    float dt_ = 1.0f / 48000.0f;
+    float g_c1_ = C1 / dt_;
+    float g_c2_ = C2 / dt_;
+    float den_ = 0.0f;
+    float inv_den_ = 0.0f;
+    float j22_linear_ = 0.0f;
+};
+
+// =============================================================================
+// WaveShaperMinimal: 最小限の計算で近似
+// EB接合のみ、コレクタ電圧を直接計算
+// =============================================================================
+class WaveShaperMinimal {
+public:
+    void setSampleRate(float sampleRate) {
+        dt_ = 1.0f / sampleRate;
+        g_c1_ = C1 / dt_;
+        g_c2_ = C2 / dt_;
+    }
+
+    void reset() {
+        v_c1_ = 0.0f;
+        v_c2_ = 8.0f;
+    }
+
+    __attribute__((noinline))
+    float process(float v_in) {
+        // 入力カップリング後の電圧
+        const float v_cap = v_in - v_c1_;
+
+        // ベース電圧: R2/R3分圧
+        const float v_b = (v_cap * G3 + v_in * G2) / (G2 + G3);
+
+        // エミッタ電圧
+        const float v_e = v_c2_;
+
+        // EB接合電圧
+        const float v_eb = v_e - v_b;
+
+        // ダイオード電流 (簡略化)
+        float i_ef, g_ef;
+        if (v_eb > V_CRIT) {
+            const float exp_crit = fast_exp(V_CRIT * V_T_INV);
+            g_ef = I_S * V_T_INV * exp_crit;
+            i_ef = I_S * (exp_crit - 1.0f) + g_ef * (v_eb - V_CRIT);
+        } else if (v_eb < -10.0f * V_T) {
+            i_ef = -I_S;
+            g_ef = 1e-12f;
+        } else {
+            const float exp_v = fast_exp(v_eb * V_T_INV);
+            i_ef = I_S * (exp_v - 1.0f);
+            g_ef = I_S * V_T_INV * exp_v + 1e-12f;
+        }
+
+        // コレクタ電流 (Forward Active近似)
+        const float i_c = ALPHA_F * i_ef;
+
+        // コレクタ電圧
+        float v_c = V_COLL - R5 * i_c;
+        v_c = std::clamp(v_c, 0.0f, V_COLL);
+
+        // エミッタ電流
+        const float i_e = i_ef;
+
+        // 状態更新 (Backward Euler)
+        // C1: i = (v_in - v_cap - v_c1_prev) * g_c1
+        const float i_c1 = (v_in - v_cap - v_c1_) * g_c1_ - G3 * (v_cap - v_b);
+        v_c1_ += i_c1 / g_c1_;
+
+        // C2: エミッタノードKCL
+        const float i_charge = (V_CC - v_e) * G4;
+        const float dv_e = (i_charge - i_e) / g_c2_;
+        v_c2_ = std::clamp(v_c2_ + dv_e, 0.0f, V_CC);
+
+        return v_c;
+    }
+
+private:
+    float v_c1_ = 0.0f;
+    float v_c2_ = 8.0f;
+    float dt_ = 1.0f / 48000.0f;
+    float g_c1_ = C1 / dt_;
+    float g_c2_ = C2 / dt_;
 };
 
 // =============================================================================
@@ -2075,13 +3227,7 @@ private:
 // =============================================================================
 // 高速化バリエーション #2: tanh()ベースのソフトサチュレーションダイオード
 // =============================================================================
-inline float fast_tanh(float x) {
-    // Pade近似: tanh(x) ≈ x(27+x²)/(27+9x²) for |x|<3
-    if (x > 3.0f) return 1.0f;
-    if (x < -3.0f) return -1.0f;
-    float x2 = x * x;
-    return x * (27.0f + x2) / (27.0f + 9.0f * x2);
-}
+// fast_tanh is already defined above (line ~387)
 
 inline void diode_iv_tanh(float v, float& i, float& g) {
     // tanh()ベースのダイオードモデル
@@ -3546,6 +4692,307 @@ int main() {
     // 新しい高速化バリエーション
     // ================================================================
 
+    // WaveShaperPade benchmark (Padé [2,2] + Schur)
+    tb303::WaveShaperPade ws_pade;
+    ws_pade.setSampleRate(SAMPLE_RATE);
+    ws_pade.reset();
+
+    v_in = 12.0f;
+    for (int i = 0; i < 100; ++i) {
+        float out = ws_pade.process(v_in);
+        sink = out;
+        v_in -= 0.01f;
+        if (v_in < 5.5f) v_in = 12.0f;
+    }
+
+    ws_pade.reset();
+    v_in = 12.0f;
+
+    dwt::reset();
+    start = dwt::cycles();
+
+    for (int i = 0; i < ITERATIONS; ++i) {
+        float out = ws_pade.process(v_in);
+        sink = out;
+        v_in -= 0.00542f;
+        if (v_in < 5.5f) v_in = 12.0f;
+    }
+
+    end = dwt::cycles();
+    uint32_t total_pade = end - start;
+    uint32_t per_sample_pade = total_pade / ITERATIONS;
+
+    uart::puts("--- WaveShaperPade (Padé [2,2]) ---\n");
+    uart::puts("Total cycles:      ");
+    uart::print_uint(total_pade);
+    uart::puts("\n");
+    uart::puts("Cycles per sample: ");
+    uart::print_uint(per_sample_pade);
+    uart::puts("\n\n");
+
+    float rt_ratio_pade = 3500.0f / static_cast<float>(per_sample_pade);
+    uart::puts("RT ratio @168MHz:  ");
+    uart::print_float(rt_ratio_pade, 1);
+    uart::puts("x\n\n");
+
+    // WaveShaperLUT benchmark (LUT + linear interpolation + Schur)
+    tb303::WaveShaperLUT ws_lut;
+    ws_lut.setSampleRate(SAMPLE_RATE);
+    ws_lut.reset();
+
+    v_in = 12.0f;
+    for (int i = 0; i < 100; ++i) {
+        float out = ws_lut.process(v_in);
+        sink = out;
+        v_in -= 0.01f;
+        if (v_in < 5.5f) v_in = 12.0f;
+    }
+
+    ws_lut.reset();
+    v_in = 12.0f;
+
+    dwt::reset();
+    start = dwt::cycles();
+
+    for (int i = 0; i < ITERATIONS; ++i) {
+        float out = ws_lut.process(v_in);
+        sink = out;
+        v_in -= 0.00542f;
+        if (v_in < 5.5f) v_in = 12.0f;
+    }
+
+    end = dwt::cycles();
+    uint32_t total_lut = end - start;
+    uint32_t per_sample_lut = total_lut / ITERATIONS;
+
+    uart::puts("--- WaveShaperLUT (LUT interp) ---\n");
+    uart::puts("Total cycles:      ");
+    uart::print_uint(total_lut);
+    uart::puts("\n");
+    uart::puts("Cycles per sample: ");
+    uart::print_uint(per_sample_lut);
+    uart::puts("\n\n");
+
+    float rt_ratio_lut = 3500.0f / static_cast<float>(per_sample_lut);
+    uart::puts("RT ratio @168MHz:  ");
+    uart::print_float(rt_ratio_lut, 1);
+    uart::puts("x\n\n");
+
+    // WaveShaperSchurFast benchmark (BC junction skip)
+    tb303::WaveShaperSchurFast ws_fast2;
+    ws_fast2.setSampleRate(SAMPLE_RATE);
+    ws_fast2.reset();
+
+    v_in = 12.0f;
+    for (int i = 0; i < 100; ++i) {
+        float out = ws_fast2.process(v_in);
+        sink = out;
+        v_in -= 0.01f;
+        if (v_in < 5.5f) v_in = 12.0f;
+    }
+
+    ws_fast2.reset();
+    v_in = 12.0f;
+
+    dwt::reset();
+    start = dwt::cycles();
+
+    for (int i = 0; i < ITERATIONS; ++i) {
+        float out = ws_fast2.process(v_in);
+        sink = out;
+        v_in -= 0.00542f;
+        if (v_in < 5.5f) v_in = 12.0f;
+    }
+
+    end = dwt::cycles();
+    uint32_t total_fast2 = end - start;
+    uint32_t per_sample_fast2 = total_fast2 / ITERATIONS;
+
+    uart::puts("--- WaveShaperSchurFast (BC skip) ---\n");
+    uart::puts("Total cycles:      ");
+    uart::print_uint(total_fast2);
+    uart::puts("\n");
+    uart::puts("Cycles per sample: ");
+    uart::print_uint(per_sample_fast2);
+    uart::puts("\n\n");
+
+    float rt_ratio_fast2 = 3500.0f / static_cast<float>(per_sample_fast2);
+    uart::puts("RT ratio @168MHz:  ");
+    uart::print_float(rt_ratio_fast2, 1);
+    uart::puts("x\n\n");
+
+    // WaveShaperPredict benchmark (state prediction)
+    tb303::WaveShaperPredict ws_predict;
+    ws_predict.setSampleRate(SAMPLE_RATE);
+    ws_predict.reset();
+
+    v_in = 12.0f;
+    for (int i = 0; i < 100; ++i) {
+        float out = ws_predict.process(v_in);
+        sink = out;
+        v_in -= 0.01f;
+        if (v_in < 5.5f) v_in = 12.0f;
+    }
+
+    ws_predict.reset();
+    v_in = 12.0f;
+
+    dwt::reset();
+    start = dwt::cycles();
+
+    for (int i = 0; i < ITERATIONS; ++i) {
+        float out = ws_predict.process(v_in);
+        sink = out;
+        v_in -= 0.00542f;
+        if (v_in < 5.5f) v_in = 12.0f;
+    }
+
+    end = dwt::cycles();
+    uint32_t total_predict = end - start;
+    uint32_t per_sample_predict = total_predict / ITERATIONS;
+
+    uart::puts("--- WaveShaperPredict (state pred) ---\n");
+    uart::puts("Total cycles:      ");
+    uart::print_uint(total_predict);
+    uart::puts("\n");
+    uart::puts("Cycles per sample: ");
+    uart::print_uint(per_sample_predict);
+    uart::puts("\n\n");
+
+    float rt_ratio_predict = 3500.0f / static_cast<float>(per_sample_predict);
+    uart::puts("RT ratio @168MHz:  ");
+    uart::print_float(rt_ratio_predict, 1);
+    uart::puts("x\n\n");
+
+    // WaveShaperGeometric benchmark (geometric state mapping)
+    tb303::WaveShaperGeometric ws_geo;
+    ws_geo.setSampleRate(SAMPLE_RATE);
+    ws_geo.reset();
+
+    v_in = 12.0f;
+    for (int i = 0; i < 100; ++i) {
+        float out = ws_geo.process(v_in);
+        sink = out;
+        v_in -= 0.01f;
+        if (v_in < 5.5f) v_in = 12.0f;
+    }
+
+    ws_geo.reset();
+    v_in = 12.0f;
+
+    dwt::reset();
+    start = dwt::cycles();
+
+    for (int i = 0; i < ITERATIONS; ++i) {
+        float out = ws_geo.process(v_in);
+        sink = out;
+        v_in -= 0.00542f;
+        if (v_in < 5.5f) v_in = 12.0f;
+    }
+
+    end = dwt::cycles();
+    uint32_t total_geo = end - start;
+    uint32_t per_sample_geo = total_geo / ITERATIONS;
+
+    uart::puts("--- WaveShaperGeometric (hyperbolic) ---\n");
+    uart::puts("Total cycles:      ");
+    uart::print_uint(total_geo);
+    uart::puts("\n");
+    uart::puts("Cycles per sample: ");
+    uart::print_uint(per_sample_geo);
+    uart::puts("\n\n");
+
+    float rt_ratio_geo = 3500.0f / static_cast<float>(per_sample_geo);
+    uart::puts("RT ratio @168MHz:  ");
+    uart::print_float(rt_ratio_geo, 1);
+    uart::puts("x\n\n");
+
+    // WaveShaperOptimized benchmark (pad_exp + analytical 3x3 inverse)
+    tb303::WaveShaperOptimized ws_opt;
+    ws_opt.setSampleRate(SAMPLE_RATE);
+    ws_opt.reset();
+
+    v_in = 12.0f;
+    for (int i = 0; i < 100; ++i) {
+        float out = ws_opt.process(v_in);
+        sink = out;
+        v_in -= 0.01f;
+        if (v_in < 5.5f) v_in = 12.0f;
+    }
+
+    ws_opt.reset();
+    v_in = 12.0f;
+
+    dwt::reset();
+    start = dwt::cycles();
+
+    for (int i = 0; i < ITERATIONS; ++i) {
+        float out = ws_opt.process(v_in);
+        sink = out;
+        v_in -= 0.00542f;
+        if (v_in < 5.5f) v_in = 12.0f;
+    }
+
+    end = dwt::cycles();
+    uint32_t total_opt = end - start;
+    uint32_t per_sample_opt = total_opt / ITERATIONS;
+
+    uart::puts("--- WaveShaperOptimized (pad_exp + 3x3) ---\n");
+    uart::puts("Total cycles:      ");
+    uart::print_uint(total_opt);
+    uart::puts("\n");
+    uart::puts("Cycles per sample: ");
+    uart::print_uint(per_sample_opt);
+    uart::puts("\n\n");
+
+    float rt_ratio_opt = 3500.0f / static_cast<float>(per_sample_opt);
+    uart::puts("RT ratio @168MHz:  ");
+    uart::print_float(rt_ratio_opt, 1);
+    uart::puts("x\n\n");
+
+    // WaveShaperMinimal benchmark (minimal approx)
+    tb303::WaveShaperMinimal ws_minimal;
+    ws_minimal.setSampleRate(SAMPLE_RATE);
+    ws_minimal.reset();
+
+    v_in = 12.0f;
+    for (int i = 0; i < 100; ++i) {
+        float out = ws_minimal.process(v_in);
+        sink = out;
+        v_in -= 0.01f;
+        if (v_in < 5.5f) v_in = 12.0f;
+    }
+
+    ws_minimal.reset();
+    v_in = 12.0f;
+
+    dwt::reset();
+    start = dwt::cycles();
+
+    for (int i = 0; i < ITERATIONS; ++i) {
+        float out = ws_minimal.process(v_in);
+        sink = out;
+        v_in -= 0.00542f;
+        if (v_in < 5.5f) v_in = 12.0f;
+    }
+
+    end = dwt::cycles();
+    uint32_t total_minimal = end - start;
+    uint32_t per_sample_minimal = total_minimal / ITERATIONS;
+
+    uart::puts("--- WaveShaperMinimal (minimal) ---\n");
+    uart::puts("Total cycles:      ");
+    uart::print_uint(total_minimal);
+    uart::puts("\n");
+    uart::puts("Cycles per sample: ");
+    uart::print_uint(per_sample_minimal);
+    uart::puts("\n\n");
+
+    float rt_ratio_minimal = 3500.0f / static_cast<float>(per_sample_minimal);
+    uart::puts("RT ratio @168MHz:  ");
+    uart::print_float(rt_ratio_minimal, 1);
+    uart::puts("x\n\n");
+
     // WaveShaperSchraudolph benchmark (Schraudolph pure exp)
     tb303::WaveShaperSchraudolph ws_schraud;
     ws_schraud.setSampleRate(SAMPLE_RATE);
@@ -3804,6 +5251,178 @@ int main() {
     uart::print_float(rt_ratio_twoiter, 1);
     uart::puts("x\n\n");
 
+    // WaveShaper3Var benchmark (3-variable Newton with v_cap elimination)
+    tb303::WaveShaper3Var ws_3var;
+    ws_3var.setSampleRate(SAMPLE_RATE);
+    ws_3var.reset();
+
+    v_in = 12.0f;
+    for (int i = 0; i < 100; ++i) {
+        float out = ws_3var.process(v_in);
+        sink = out;
+        v_in -= 0.01f;
+        if (v_in < 5.5f) v_in = 12.0f;
+    }
+
+    ws_3var.reset();
+    v_in = 12.0f;
+
+    dwt::reset();
+    start = dwt::cycles();
+
+    for (int i = 0; i < ITERATIONS; ++i) {
+        float out = ws_3var.process(v_in);
+        sink = out;
+        v_in -= 0.00542f;
+        if (v_in < 5.5f) v_in = 12.0f;
+    }
+
+    end = dwt::cycles();
+    uint32_t total_3var = end - start;
+    uint32_t per_sample_3var = total_3var / ITERATIONS;
+
+    uart::puts("--- WaveShaper3Var (3x3 Newton, v_cap elim) ---\n");
+    uart::puts("Total cycles:      ");
+    uart::print_uint(total_3var);
+    uart::puts("\n");
+    uart::puts("Cycles per sample: ");
+    uart::print_uint(per_sample_3var);
+    uart::puts("\n\n");
+
+    float rt_ratio_3var = 3500.0f / static_cast<float>(per_sample_3var);
+    uart::puts("RT ratio @168MHz:  ");
+    uart::print_float(rt_ratio_3var, 1);
+    uart::puts("x\n\n");
+
+    // WaveShaper3VarOpt benchmark (exp multiplicative update + Jacobian factorization)
+    tb303::WaveShaper3VarOpt ws_3varopt;
+    ws_3varopt.setSampleRate(SAMPLE_RATE);
+    ws_3varopt.reset();
+
+    v_in = 12.0f;
+    for (int i = 0; i < 100; ++i) {
+        float out = ws_3varopt.process(v_in);
+        sink = out;
+        v_in -= 0.01f;
+        if (v_in < 5.5f) v_in = 12.0f;
+    }
+
+    ws_3varopt.reset();
+    v_in = 12.0f;
+
+    dwt::reset();
+    start = dwt::cycles();
+
+    for (int i = 0; i < ITERATIONS; ++i) {
+        float out = ws_3varopt.process(v_in);
+        sink = out;
+        v_in -= 0.00542f;
+        if (v_in < 5.5f) v_in = 12.0f;
+    }
+
+    end = dwt::cycles();
+    uint32_t total_3varopt = end - start;
+    uint32_t per_sample_3varopt = total_3varopt / ITERATIONS;
+
+    uart::puts("--- WaveShaper3VarOpt (exp mult, 2 iter) ---\n");
+    uart::puts("Total cycles:      ");
+    uart::print_uint(total_3varopt);
+    uart::puts("\n");
+    uart::puts("Cycles per sample: ");
+    uart::print_uint(per_sample_3varopt);
+    uart::puts("\n\n");
+
+    float rt_ratio_3varopt = 3500.0f / static_cast<float>(per_sample_3varopt);
+    uart::puts("RT ratio @168MHz:  ");
+    uart::print_float(rt_ratio_3varopt, 1);
+    uart::puts("x\n\n");
+
+    // WaveShaper3Var2Iter benchmark (2 iterations)
+    tb303::WaveShaper3Var2Iter ws_3var2;
+    ws_3var2.setSampleRate(SAMPLE_RATE);
+    ws_3var2.reset();
+
+    v_in = 12.0f;
+    for (int i = 0; i < 100; ++i) {
+        float out = ws_3var2.process(v_in);
+        sink = out;
+        v_in -= 0.01f;
+        if (v_in < 5.5f) v_in = 12.0f;
+    }
+
+    ws_3var2.reset();
+    v_in = 12.0f;
+
+    dwt::reset();
+    start = dwt::cycles();
+
+    for (int i = 0; i < ITERATIONS; ++i) {
+        float out = ws_3var2.process(v_in);
+        sink = out;
+        v_in -= 0.00542f;
+        if (v_in < 5.5f) v_in = 12.0f;
+    }
+
+    end = dwt::cycles();
+    uint32_t total_3var2 = end - start;
+    uint32_t per_sample_3var2 = total_3var2 / ITERATIONS;
+
+    uart::puts("--- WaveShaper3Var2Iter (2 Newton) ---\n");
+    uart::puts("Total cycles:      ");
+    uart::print_uint(total_3var2);
+    uart::puts("\n");
+    uart::puts("Cycles per sample: ");
+    uart::print_uint(per_sample_3var2);
+    uart::puts("\n\n");
+
+    float rt_ratio_3var2 = 3500.0f / static_cast<float>(per_sample_3var2);
+    uart::puts("RT ratio @168MHz:  ");
+    uart::print_float(rt_ratio_3var2, 1);
+    uart::puts("x\n\n");
+
+    // WaveShaperSchur2Iter benchmark (2 iterations)
+    tb303::WaveShaperSchur2Iter ws_schur2;
+    ws_schur2.setSampleRate(SAMPLE_RATE);
+    ws_schur2.reset();
+
+    v_in = 12.0f;
+    for (int i = 0; i < 100; ++i) {
+        float out = ws_schur2.process(v_in);
+        sink = out;
+        v_in -= 0.01f;
+        if (v_in < 5.5f) v_in = 12.0f;
+    }
+
+    ws_schur2.reset();
+    v_in = 12.0f;
+
+    dwt::reset();
+    start = dwt::cycles();
+
+    for (int i = 0; i < ITERATIONS; ++i) {
+        float out = ws_schur2.process(v_in);
+        sink = out;
+        v_in -= 0.00542f;
+        if (v_in < 5.5f) v_in = 12.0f;
+    }
+
+    end = dwt::cycles();
+    uint32_t total_schur2 = end - start;
+    uint32_t per_sample_schur2 = total_schur2 / ITERATIONS;
+
+    uart::puts("--- WaveShaperSchur2Iter (2 Newton) ---\n");
+    uart::puts("Total cycles:      ");
+    uart::print_uint(total_schur2);
+    uart::puts("\n");
+    uart::puts("Cycles per sample: ");
+    uart::print_uint(per_sample_schur2);
+    uart::puts("\n\n");
+
+    float rt_ratio_schur2 = 3500.0f / static_cast<float>(per_sample_schur2);
+    uart::puts("RT ratio @168MHz:  ");
+    uart::print_float(rt_ratio_schur2, 1);
+    uart::puts("x\n\n");
+
     // Comparison (Ebers-Moll preserving implementations)
     uart::puts("=== Ebers-Moll Preserving Implementations ===\n");
     uart::puts("WaveShaperSchur:      ");
@@ -3838,7 +5457,13 @@ int main() {
     uart::puts(" cycles (2 Newton)\n");
     uart::puts("OneIter:              ");
     uart::print_uint(per_sample_oneiter);
-    uart::puts(" cycles (1 Newton)\n\n");
+    uart::puts(" cycles (1 Newton)\n");
+    uart::puts("3Var:                 ");
+    uart::print_uint(per_sample_3var);
+    uart::puts(" cycles (3x3 Newton)\n");
+    uart::puts("3VarOpt:              ");
+    uart::print_uint(per_sample_3varopt);
+    uart::puts(" cycles (exp mult)\n\n");
 
     uart::puts("=== WDF Implementations ===\n");
     uart::puts("WaveShaperWDF:        ");
@@ -3854,7 +5479,10 @@ int main() {
     uart::puts(" cycles (Forward Euler)\n");
     uart::puts("SquareShaper:         ");
     uart::print_uint(per_sample_sq);
-    uart::puts(" cycles (PNP approx)\n\n");
+    uart::puts(" cycles (PNP approx)\n");
+    uart::puts("Geometric:            ");
+    uart::print_uint(per_sample_geo);
+    uart::puts(" cycles (hyperbolic)\n\n");
 
     uart::puts("=== Speedup vs Baseline ===\n");
     uart::puts("SchurUltra:  ");
@@ -3880,6 +5508,15 @@ int main() {
     uart::puts("x\n");
     uart::puts("Hybrid:      ");
     uart::print_float(static_cast<float>(per_sample) / static_cast<float>(per_sample_hybrid), 2);
+    uart::puts("x\n");
+    uart::puts("3Var:        ");
+    uart::print_float(static_cast<float>(per_sample) / static_cast<float>(per_sample_3var), 2);
+    uart::puts("x\n");
+    uart::puts("3VarOpt:     ");
+    uart::print_float(static_cast<float>(per_sample) / static_cast<float>(per_sample_3varopt), 2);
+    uart::puts("x\n");
+    uart::puts("Geometric:   ");
+    uart::print_float(static_cast<float>(per_sample) / static_cast<float>(per_sample_geo), 2);
     uart::puts("x\n");
     uart::puts("\n");
 
@@ -4048,6 +5685,8 @@ int main() {
         tb303::WaveShaperVCCS acc_vccs;
         tb303::WaveShaperOneIter acc_one;
         tb303::WaveShaperTwoIter acc_two;
+        tb303::WaveShaperPade acc_pade;
+        tb303::WaveShaperLUT acc_lut;
 
         acc_ref.setSampleRate(SAMPLE_RATE); acc_ref.reset();
         acc_lw.setSampleRate(SAMPLE_RATE); acc_lw.reset();
@@ -4061,6 +5700,27 @@ int main() {
         acc_vccs.setSampleRate(SAMPLE_RATE); acc_vccs.reset();
         acc_one.setSampleRate(SAMPLE_RATE); acc_one.reset();
         acc_two.setSampleRate(SAMPLE_RATE); acc_two.reset();
+        acc_pade.setSampleRate(SAMPLE_RATE); acc_pade.reset();
+        acc_lut.setSampleRate(SAMPLE_RATE); acc_lut.reset();
+
+        tb303::WaveShaperSchurFast acc_fast2;
+        tb303::WaveShaperPredict acc_predict;
+        tb303::WaveShaperMinimal acc_minimal;
+        tb303::WaveShaper3Var acc_3var;
+        tb303::WaveShaper3VarOpt acc_3varopt;
+        tb303::WaveShaperGeometric acc_geo;
+        tb303::WaveShaperOptimized acc_opt;
+        tb303::WaveShaper3Var2Iter acc_3var2;
+        tb303::WaveShaperSchur2Iter acc_schur2;
+        acc_fast2.setSampleRate(SAMPLE_RATE); acc_fast2.reset();
+        acc_predict.setSampleRate(SAMPLE_RATE); acc_predict.reset();
+        acc_minimal.setSampleRate(SAMPLE_RATE); acc_minimal.reset();
+        acc_3var.setSampleRate(SAMPLE_RATE); acc_3var.reset();
+        acc_3varopt.setSampleRate(SAMPLE_RATE); acc_3varopt.reset();
+        acc_geo.setSampleRate(SAMPLE_RATE); acc_geo.reset();
+        acc_opt.setSampleRate(SAMPLE_RATE); acc_opt.reset();
+        acc_3var2.setSampleRate(SAMPLE_RATE); acc_3var2.reset();
+        acc_schur2.setSampleRate(SAMPLE_RATE); acc_schur2.reset();
 
         float sum_sq_lw = 0.0f, max_lw = 0.0f;
         float sum_sq_o3 = 0.0f, max_o3 = 0.0f;
@@ -4073,6 +5733,17 @@ int main() {
         float sum_sq_vccs = 0.0f, max_vccs = 0.0f;
         float sum_sq_one = 0.0f, max_one = 0.0f;
         float sum_sq_two = 0.0f, max_two = 0.0f;
+        float sum_sq_pade = 0.0f, max_pade = 0.0f;
+        float sum_sq_lut = 0.0f, max_lut = 0.0f;
+        float sum_sq_fast2 = 0.0f, max_fast2 = 0.0f;
+        float sum_sq_predict = 0.0f, max_predict = 0.0f;
+        float sum_sq_minimal = 0.0f, max_minimal = 0.0f;
+        float sum_sq_3var = 0.0f, max_3var = 0.0f;
+        float sum_sq_3varopt = 0.0f, max_3varopt = 0.0f;
+        float sum_sq_geo = 0.0f, max_geo = 0.0f;
+        float sum_sq_opt = 0.0f, max_opt = 0.0f;
+        float sum_sq_3var2 = 0.0f, max_3var2 = 0.0f;
+        float sum_sq_schur2 = 0.0f, max_schur2 = 0.0f;
 
         float acc_v_in = 12.0f;
         for (int i = 0; i < ACC_SAMPLES; ++i) {
@@ -4088,6 +5759,17 @@ int main() {
             float out_vccs = acc_vccs.process(acc_v_in);
             float out_one = acc_one.process(acc_v_in);
             float out_two = acc_two.process(acc_v_in);
+            float out_pade = acc_pade.process(acc_v_in);
+            float out_lut = acc_lut.process(acc_v_in);
+            float out_fast2 = acc_fast2.process(acc_v_in);
+            float out_predict = acc_predict.process(acc_v_in);
+            float out_minimal = acc_minimal.process(acc_v_in);
+            float out_3var = acc_3var.process(acc_v_in);
+            float out_3varopt = acc_3varopt.process(acc_v_in);
+            float out_geo = acc_geo.process(acc_v_in);
+            float out_opt = acc_opt.process(acc_v_in);
+            float out_3var2 = acc_3var2.process(acc_v_in);
+            float out_schur2 = acc_schur2.process(acc_v_in);
 
             float err_lw = out_lw - out_ref;
             float err_o3 = out_o3 - out_ref;
@@ -4100,6 +5782,17 @@ int main() {
             float err_vccs = out_vccs - out_ref;
             float err_one = out_one - out_ref;
             float err_two = out_two - out_ref;
+            float err_pade = out_pade - out_ref;
+            float err_lut = out_lut - out_ref;
+            float err_fast2 = out_fast2 - out_ref;
+            float err_predict = out_predict - out_ref;
+            float err_minimal = out_minimal - out_ref;
+            float err_3var = out_3var - out_ref;
+            float err_3varopt = out_3varopt - out_ref;
+            float err_geo = out_geo - out_ref;
+            float err_opt = out_opt - out_ref;
+            float err_3var2 = out_3var2 - out_ref;
+            float err_schur2 = out_schur2 - out_ref;
 
             sum_sq_lw += err_lw * err_lw;
             sum_sq_o3 += err_o3 * err_o3;
@@ -4112,6 +5805,17 @@ int main() {
             sum_sq_vccs += err_vccs * err_vccs;
             sum_sq_one += err_one * err_one;
             sum_sq_two += err_two * err_two;
+            sum_sq_pade += err_pade * err_pade;
+            sum_sq_lut += err_lut * err_lut;
+            sum_sq_fast2 += err_fast2 * err_fast2;
+            sum_sq_predict += err_predict * err_predict;
+            sum_sq_minimal += err_minimal * err_minimal;
+            sum_sq_3var += err_3var * err_3var;
+            sum_sq_3varopt += err_3varopt * err_3varopt;
+            sum_sq_geo += err_geo * err_geo;
+            sum_sq_opt += err_opt * err_opt;
+            sum_sq_3var2 += err_3var2 * err_3var2;
+            sum_sq_schur2 += err_schur2 * err_schur2;
 
             if (std::abs(err_lw) > max_lw) max_lw = std::abs(err_lw);
             if (std::abs(err_o3) > max_o3) max_o3 = std::abs(err_o3);
@@ -4124,6 +5828,17 @@ int main() {
             if (std::abs(err_vccs) > max_vccs) max_vccs = std::abs(err_vccs);
             if (std::abs(err_one) > max_one) max_one = std::abs(err_one);
             if (std::abs(err_two) > max_two) max_two = std::abs(err_two);
+            if (std::abs(err_pade) > max_pade) max_pade = std::abs(err_pade);
+            if (std::abs(err_lut) > max_lut) max_lut = std::abs(err_lut);
+            if (std::abs(err_fast2) > max_fast2) max_fast2 = std::abs(err_fast2);
+            if (std::abs(err_predict) > max_predict) max_predict = std::abs(err_predict);
+            if (std::abs(err_minimal) > max_minimal) max_minimal = std::abs(err_minimal);
+            if (std::abs(err_3var) > max_3var) max_3var = std::abs(err_3var);
+            if (std::abs(err_3varopt) > max_3varopt) max_3varopt = std::abs(err_3varopt);
+            if (std::abs(err_geo) > max_geo) max_geo = std::abs(err_geo);
+            if (std::abs(err_opt) > max_opt) max_opt = std::abs(err_opt);
+            if (std::abs(err_3var2) > max_3var2) max_3var2 = std::abs(err_3var2);
+            if (std::abs(err_schur2) > max_schur2) max_schur2 = std::abs(err_schur2);
 
             acc_v_in -= 0.00542f;
             if (acc_v_in < 5.5f) acc_v_in = 12.0f;
@@ -4153,6 +5868,17 @@ int main() {
         print_result("VCCS               ", sum_sq_vccs, max_vccs);
         print_result("OneIter            ", sum_sq_one, max_one);
         print_result("TwoIter            ", sum_sq_two, max_two);
+        print_result("Pade [2,2]         ", sum_sq_pade, max_pade);
+        print_result("LUT interp         ", sum_sq_lut, max_lut);
+        print_result("SchurFast (BC skip)", sum_sq_fast2, max_fast2);
+        print_result("Predict            ", sum_sq_predict, max_predict);
+        print_result("Minimal            ", sum_sq_minimal, max_minimal);
+        print_result("3Var (v_cap elim)  ", sum_sq_3var, max_3var);
+        print_result("3VarOpt (exp mult) ", sum_sq_3varopt, max_3varopt);
+        print_result("Geometric (hyper)  ", sum_sq_geo, max_geo);
+        print_result("Optimized (pad_exp)", sum_sq_opt, max_opt);
+        print_result("3Var2Iter (2 Newton)", sum_sq_3var2, max_3var2);
+        print_result("Schur2Iter (2 Newton)", sum_sq_schur2, max_schur2);
     }
 
     uart::puts("\n");
