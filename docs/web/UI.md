@@ -530,67 +530,70 @@ const stream = await navigator.mediaDevices.getUserMedia({
 | 状況 | 原因 | 対策 |
 |------|------|------|
 | 長時間アイドル | 一部ブラウザでGC対象になる | グローバル参照を保持 |
-| `interrupted` 状態 | iOS/Safari で電話着信時などに発生 | `onstatechange` で検知し復帰 |
-| バックグラウンドタブ | ブラウザがリソース節約のため suspend | `visibilitychange` で復帰 |
+| `interrupted` 状態 | iOS/Safari で電話着信時などに発生 | `onstatechange` で復帰試行 |
+| バックグラウンドタブ | ブラウザがリソース節約のため suspend | `visibilitychange` で復帰試行 |
 
 ```javascript
 const ctx = new AudioContext();
 
-// 1. グローバル配列に参照を保持（GC防止）
+// 1. グローバル配列に参照を保持（GC防止、実務上の保険）
 if (!window.__audioContexts) window.__audioContexts = [];
 window.__audioContexts.push(ctx);
 
 // 2. 状態管理フラグ
-let wasRunning = false;           // start()で明示的に開始された場合のみtrue
-let wasSuspendedBySystem = false; // システム（ブラウザ/OS）による中断
+let wasRunning = false;  // start()で明示的に開始された場合のみtrue
 
-// 3. state変更の監視（interrupted状態の検知）
+// 3. resume試行（wasRunning かつ suspended なら復帰を試みる）
+async function tryResume() {
+  if (!wasRunning) return;
+  if (ctx.state !== 'suspended') return;
+  try { await ctx.resume(); } catch {}
+}
+
+// 4. state変更の監視
+// interrupted (iOS Safari) やその他の suspended 状態からの復帰を試みる
 ctx.onstatechange = () => {
-  if (ctx.state === 'interrupted') {
-    // iOS/Safariで電話着信時などに発生（システムによる中断）
-    wasSuspendedBySystem = true;
-  } else if (ctx.state === 'running' && wasSuspendedBySystem) {
-    // システム中断からの復帰完了
-    wasSuspendedBySystem = false;
+  if (ctx.state === 'suspended' && wasRunning) {
+    // suspended になったが wasRunning なら復帰を試みる
+    // ただしポリシーで拒否される場合もあるので、visibilitychange やUI操作時にも再試行
+    tryResume();
   }
 };
 
-// 4. バックグラウンドタブからの復帰時
-// 注意: 自動resumeはシステム中断からの復帰時のみ（ユーザー停止後は再開しない）
-const handleVisibilityChange = () => {
-  if (document.visibilityState === 'visible' &&
-      wasRunning &&
-      wasSuspendedBySystem &&
-      ctx.state === 'suspended') {
-    ctx.resume().catch(() => {});
+// 5. バックグラウンドタブからの復帰時
+// wasRunning かつ suspended なら resume を試みる（ユーザー停止後は再開しない）
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    tryResume();
   }
-};
-document.addEventListener('visibilitychange', handleVisibilityChange);
+});
 
-// 5. 明示的な開始/停止
-function start() {
-  ctx.resume();
+// 6. 明示的な開始/停止
+async function start() {
   wasRunning = true;
+  await tryResume();
 }
 
-function stop() {
+async function stop() {
   wasRunning = false;  // ユーザーによる停止
-  ctx.suspend();
+  try { await ctx.suspend(); } catch {}
 }
 
-// 6. 完全終了時はクリーンアップ
-function destroy() {
-  document.removeEventListener('visibilitychange', handleVisibilityChange);
-  ctx.close();
-  const idx = window.__audioContexts.indexOf(ctx);
+// 7. 完全終了時はクリーンアップ
+async function destroy() {
+  ctx.onstatechange = null;
+  try { await ctx.close(); } catch {}
+  const idx = window.__audioContexts?.indexOf(ctx) ?? -1;
   if (idx !== -1) window.__audioContexts.splice(idx, 1);
 }
 ```
 
 **重要な設計判断:**
+- フラグは `wasRunning` だけで十分（`wasSuspendedBySystem` は不要）
 - `wasRunning` はユーザーが `start()` を呼んだ場合のみ `true`
 - `stop()` でユーザーが明示的に停止した場合、タブ復帰時に自動再開しない
-- 電話着信などシステム中断からの復帰時のみ自動 `resume()` を試みる
+- `suspended` を検知したら復帰を試みる（`interrupted` だけに依存しない）
+- iOS Safari では状況によりユーザー操作なしで `resume()` が拒否される場合があるため、UI側で「タップして再開」導線を用意しておくとより堅牢
 
 ---
 
