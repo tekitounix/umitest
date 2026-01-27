@@ -161,17 +161,22 @@
     <h3 style="margin: 0 0 var(--space-md); color: var(--color-accent);">Settings</h3>
 
     <div style="margin-block-end: var(--space-md);">
-      <h4 style="margin: 0 0 var(--space-sm); font-size: var(--text-sm);">Audio Output</h4>
-      <select class="select" id="audio-output-select" style="width: 100%;">
-        <option value="">Default</option>
-      </select>
-    </div>
-
-    <div style="margin-block-end: var(--space-md);">
-      <h4 style="margin: 0 0 var(--space-sm); font-size: var(--text-sm);">Audio Input</h4>
-      <select class="select" id="audio-input-select" style="width: 100%;">
-        <option value="">None</option>
-      </select>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-block-end: var(--space-sm);">
+        <h4 style="margin: 0; font-size: var(--text-sm);">Audio Devices</h4>
+        <button class="btn ghost sm" id="refresh-audio-btn">Refresh</button>
+      </div>
+      <div style="margin-block-end: var(--space-sm);">
+        <label style="font-size: var(--text-xs); color: var(--color-text-secondary);">Input</label>
+        <select class="select" id="audio-input-select" style="width: 100%;">
+          <option value="">None</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size: var(--text-xs); color: var(--color-text-secondary);">Output</label>
+        <select class="select" id="audio-output-select" style="width: 100%;">
+          <option value="">Default</option>
+        </select>
+      </div>
     </div>
 
     <div style="margin-block-end: var(--space-md);">

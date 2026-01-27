@@ -170,8 +170,18 @@ async function startAudio() {
         case 'shell-output':
           handleShellOutput(msg.text, 'stdout');
           break;
+        case 'shell':
+          // Hardware backend sends shell output with this type
+          handleShellOutput(msg.text, msg.stream || 'stdout');
+          break;
         case 'midi':
           handleMidiMessage(msg.data);
+          break;
+        case 'pong':
+          console.log('[App] Pong received');
+          break;
+        case 'version':
+          console.log('[App] Device version:', msg.version);
           break;
         case 'error':
           console.error('[App] Backend error:', msg.message);
@@ -316,6 +326,7 @@ function handleMidiMessage(data) {
 
 function addMidiToMonitor(data) {
   if (!els.midiMonitor) return;
+  if (!data || data.length === 0) return;
 
   const time = new Date().toLocaleTimeString('en-US', { hour12: false }).slice(3, 8);
   const status = data[0] & 0xf0;
@@ -333,9 +344,40 @@ function addMidiToMonitor(data) {
       msgClass = 'note-off';
       text = `Note Off ch${channel} n${data[1]}`;
       break;
+    case 0xa0:
+      msgClass = 'other';
+      text = `Aftertouch ch${channel} n${data[1]} v${data[2]}`;
+      break;
     case 0xb0:
       msgClass = 'cc';
       text = `CC ch${channel} cc${data[1]}=${data[2]}`;
+      break;
+    case 0xc0:
+      msgClass = 'other';
+      text = `Program ch${channel} p${data[1]}`;
+      break;
+    case 0xd0:
+      msgClass = 'other';
+      text = `Ch Pressure ch${channel} v${data[1]}`;
+      break;
+    case 0xe0:
+      msgClass = 'other';
+      const pitchBend = ((data[2] << 7) | data[1]) - 8192;
+      text = `Pitch Bend ch${channel} ${pitchBend}`;
+      break;
+    case 0xf0:
+      // System messages - skip SysEx in monitor (handled separately)
+      if (data[0] === 0xf0) return;
+      // Other system messages
+      switch (data[0]) {
+        case 0xf8: return; // Clock - too frequent
+        case 0xfe: return; // Active Sensing - too frequent
+        case 0xfa: text = 'Start'; break;
+        case 0xfb: text = 'Continue'; break;
+        case 0xfc: text = 'Stop'; break;
+        default:
+          text = `Sys [${data[0].toString(16)}]`;
+      }
       break;
     default:
       text = `[${Array.from(data).map(b => b.toString(16).padStart(2, '0')).join(' ')}]`;
@@ -366,13 +408,15 @@ function handleShellOutput(text, type) {
 
 function handleKernelState(msg) {
   // Update UI based on kernel state
+  // dspLoad comes as x100 value (e.g., 5600 = 56.00%)
   if (msg.dspLoad !== undefined) {
-    const load = Math.round(msg.dspLoad * 100);
-    els.dspLoad.textContent = `${load}%`;
-    els.dspLoadBar.style.width = `${load}%`;
+    const loadPercent = (msg.dspLoad / 100).toFixed(1);
+    const loadForBar = Math.min(100, msg.dspLoad / 100);
+    els.dspLoad.textContent = `${loadPercent}%`;
+    els.dspLoadBar.style.width = `${loadForBar}%`;
     els.dspLoadBar.className = 'load-bar-fill' +
-      (load > 80 ? ' critical' : load > 50 ? ' warning' : '');
-    els.footerDsp.textContent = `${load}%`;
+      (msg.dspLoad > 8000 ? ' critical' : msg.dspLoad > 5000 ? ' warning' : '');
+    els.footerDsp.textContent = `${loadPercent}%`;
   }
 
   if (msg.sampleRate) {
@@ -474,11 +518,7 @@ async function initAudioDevices() {
   }
 
   try {
-    // Request permission to enumerate devices
-    await navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(stream => stream.getTracks().forEach(t => t.stop()))
-      .catch(() => {});
-
+    // First enumerate without permission to show device count
     await updateAudioDevices();
 
     // Listen for device changes
@@ -488,47 +528,75 @@ async function initAudioDevices() {
   }
 }
 
-async function updateAudioDevices() {
-  const devices = await navigator.mediaDevices.enumerateDevices();
-  const outputs = devices.filter(d => d.kind === 'audiooutput');
-  const inputs = devices.filter(d => d.kind === 'audioinput');
-
-  // Update output select
-  if (els.audioOutputSelect) {
-    const currentOutputId = els.audioOutputSelect.value;
-    els.audioOutputSelect.innerHTML = '<option value="">Default</option>';
-
-    for (const device of outputs) {
-      const opt = document.createElement('option');
-      opt.value = device.deviceId;
-      opt.textContent = device.label || `Speaker ${device.deviceId.slice(0, 8)}`;
-      if (device.deviceId === currentOutputId) opt.selected = true;
-      els.audioOutputSelect.appendChild(opt);
-    }
-
-    const savedOutput = localStorage.getItem('umi-audio-output');
-    if (savedOutput && !currentOutputId) {
-      els.audioOutputSelect.value = savedOutput;
-    }
+async function requestAudioPermission() {
+  try {
+    // Request permission to get full device labels
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.getTracks().forEach(t => t.stop());
+    // Re-enumerate to get actual device names
+    await updateAudioDevices();
+  } catch (err) {
+    console.warn('[App] Audio permission denied:', err);
   }
+}
 
-  // Update input select
-  if (els.audioInputSelect) {
-    const currentInputId = els.audioInputSelect.value;
-    els.audioInputSelect.innerHTML = '<option value="">None</option>';
+async function updateAudioDevices() {
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const outputs = devices.filter(d => d.kind === 'audiooutput');
+    const inputs = devices.filter(d => d.kind === 'audioinput');
+    console.log('[App] Audio devices found:', devices.length, 'total');
+    console.log('[App] All devices:', devices.map(d => ({ kind: d.kind, id: d.deviceId, label: d.label })));
 
-    for (const device of inputs) {
-      const opt = document.createElement('option');
-      opt.value = device.deviceId;
-      opt.textContent = device.label || `Mic ${device.deviceId.slice(0, 8)}`;
-      if (device.deviceId === currentInputId) opt.selected = true;
-      els.audioInputSelect.appendChild(opt);
+    // Update output select
+    if (els.audioOutputSelect) {
+      const currentOutputId = els.audioOutputSelect.value;
+      els.audioOutputSelect.innerHTML = '<option value="">Default</option>';
+
+      for (let i = 0; i < outputs.length; i++) {
+        const device = outputs[i];
+        console.log('[App] Adding output:', device.deviceId, device.label);
+        const opt = document.createElement('option');
+        opt.value = device.deviceId;
+        opt.textContent = device.label || `Output ${i + 1}`;
+        if (device.deviceId === currentOutputId) opt.selected = true;
+        els.audioOutputSelect.appendChild(opt);
+      }
+
+      console.log('[App] Output select options:', els.audioOutputSelect.options.length);
+      const savedOutput = localStorage.getItem('umi-audio-output');
+      if (savedOutput && !currentOutputId) {
+        els.audioOutputSelect.value = savedOutput;
+      }
+    } else {
+      console.warn('[App] audioOutputSelect is null!');
     }
 
-    const savedInput = localStorage.getItem('umi-audio-input');
-    if (savedInput && !currentInputId) {
-      els.audioInputSelect.value = savedInput;
+    // Update input select
+    if (els.audioInputSelect) {
+      const currentInputId = els.audioInputSelect.value;
+      els.audioInputSelect.innerHTML = '<option value="">None</option>';
+
+      for (let i = 0; i < inputs.length; i++) {
+        const device = inputs[i];
+        console.log('[App] Adding input:', device.deviceId, device.label);
+        const opt = document.createElement('option');
+        opt.value = device.deviceId;
+        opt.textContent = device.label || `Input ${i + 1}`;
+        if (device.deviceId === currentInputId) opt.selected = true;
+        els.audioInputSelect.appendChild(opt);
+      }
+
+      console.log('[App] Input select options:', els.audioInputSelect.options.length);
+      const savedInput = localStorage.getItem('umi-audio-input');
+      if (savedInput && !currentInputId) {
+        els.audioInputSelect.value = savedInput;
+      }
+    } else {
+      console.warn('[App] audioInputSelect is null!');
     }
+  } catch (err) {
+    console.warn('[App] Failed to enumerate audio devices:', err);
   }
 }
 
@@ -781,6 +849,28 @@ function setupEventListeners() {
   els.startBtn.addEventListener('click', startAudio);
   els.stopBtn.addEventListener('click', stopAudio);
   els.themeToggle.addEventListener('click', toggleTheme);
+
+  // Update device lists when settings popover is opened
+  const settingsPopover = document.getElementById('settings-popover');
+  if (settingsPopover) {
+    settingsPopover.addEventListener('toggle', (e) => {
+      if (e.newState === 'open') {
+        // Re-enumerate devices (labels may be available if permission was granted elsewhere)
+        updateAudioDevices();
+        updateMIDIDevices();
+      }
+    });
+  }
+
+  // Refresh audio devices button - requests permission to get full device list
+  const refreshAudioBtn = document.getElementById('refresh-audio-btn');
+  if (refreshAudioBtn) {
+    refreshAudioBtn.addEventListener('click', async () => {
+      refreshAudioBtn.textContent = '...';
+      await requestAudioPermission();
+      refreshAudioBtn.textContent = 'Refresh';
+    });
+  }
 
   // Audio output change
   els.audioOutputSelect?.addEventListener('change', (e) => {
