@@ -618,6 +618,281 @@ class WaveShaperPWL:
 
 
 # =============================================================================
+# WaveShaperLUT3D: 回路全体の3D LUT化 (v_in, v_c1, v_c2) -> (v_c, new_v_c1, new_v_c2)
+# Ebers-Mollの完全な動作をテーブル化
+# =============================================================================
+class WaveShaperLUT3D:
+    """
+    3D LUT: (v_in, v_c1, v_c2) -> (v_c, new_v_c1, new_v_c2)
+    Ebers-Mollリファレンスの1サンプル処理を完全にテーブル化
+    """
+    def __init__(self, n_vin=32, n_vc1=16, n_vc2=32):
+        self.n_vin = n_vin
+        self.n_vc1 = n_vc1
+        self.n_vc2 = n_vc2
+
+        # 入力範囲
+        self.vin_min, self.vin_max = 5.0, 12.5
+        self.vc1_min, self.vc1_max = -2.0, 4.0
+        self.vc2_min, self.vc2_max = 6.0, 10.0
+
+        # LUTを構築
+        self._build_lut()
+        self.reset()
+
+    def _build_lut(self):
+        """WaveShaperReferenceを使ってLUTを事前計算"""
+        vin_vals = np.linspace(self.vin_min, self.vin_max, self.n_vin)
+        vc1_vals = np.linspace(self.vc1_min, self.vc1_max, self.n_vc1)
+        vc2_vals = np.linspace(self.vc2_min, self.vc2_max, self.n_vc2)
+
+        # 出力テーブル
+        self.lut_vc = np.zeros((self.n_vin, self.n_vc1, self.n_vc2))
+        self.lut_new_vc1 = np.zeros((self.n_vin, self.n_vc1, self.n_vc2))
+        self.lut_new_vc2 = np.zeros((self.n_vin, self.n_vc1, self.n_vc2))
+
+        # WaveShaperCppEquivalentを使って各点を計算（5反復）
+        for i, v_in in enumerate(vin_vals):
+            for k, v_c1 in enumerate(vc1_vals):
+                for l, v_c2 in enumerate(vc2_vals):
+                    # 状態を設定して1サンプル処理
+                    ws = WaveShaperCppEquivalent(max_iter=5)
+                    ws.v_c1 = v_c1
+                    ws.v_c2 = v_c2
+                    ws.v_b = 8.0
+                    ws.v_e = v_c2
+                    ws.v_c = V_COLL
+
+                    v_c = ws.process(v_in)
+
+                    self.lut_vc[i, k, l] = v_c
+                    self.lut_new_vc1[i, k, l] = ws.v_c1
+                    self.lut_new_vc2[i, k, l] = ws.v_c2
+
+        # 補間用スケール
+        self.vin_scale = (self.n_vin - 1) / (self.vin_max - self.vin_min)
+        self.vc1_scale = (self.n_vc1 - 1) / (self.vc1_max - self.vc1_min)
+        self.vc2_scale = (self.n_vc2 - 1) / (self.vc2_max - self.vc2_min)
+
+    def reset(self):
+        self.v_c1 = 0.0
+        self.v_c2 = 8.0
+
+    def _interp3d(self, lut, v_in, v_c1, v_c2):
+        """三線形補間"""
+        fi = (v_in - self.vin_min) * self.vin_scale
+        fk = (v_c1 - self.vc1_min) * self.vc1_scale
+        fl = (v_c2 - self.vc2_min) * self.vc2_scale
+
+        i0 = int(np.clip(fi, 0, self.n_vin - 2))
+        k0 = int(np.clip(fk, 0, self.n_vc1 - 2))
+        l0 = int(np.clip(fl, 0, self.n_vc2 - 2))
+
+        di = np.clip(fi - i0, 0, 1)
+        dk = np.clip(fk - k0, 0, 1)
+        dl = np.clip(fl - l0, 0, 1)
+
+        # 三線形補間
+        c000 = lut[i0, k0, l0]
+        c001 = lut[i0, k0, l0+1]
+        c010 = lut[i0, k0+1, l0]
+        c011 = lut[i0, k0+1, l0+1]
+        c100 = lut[i0+1, k0, l0]
+        c101 = lut[i0+1, k0, l0+1]
+        c110 = lut[i0+1, k0+1, l0]
+        c111 = lut[i0+1, k0+1, l0+1]
+
+        c00 = c000 * (1 - dl) + c001 * dl
+        c01 = c010 * (1 - dl) + c011 * dl
+        c10 = c100 * (1 - dl) + c101 * dl
+        c11 = c110 * (1 - dl) + c111 * dl
+
+        c0 = c00 * (1 - dk) + c01 * dk
+        c1 = c10 * (1 - dk) + c11 * dk
+
+        return c0 * (1 - di) + c1 * di
+
+    def process(self, v_in):
+        v_in_c = np.clip(v_in, self.vin_min, self.vin_max)
+        v_c1_c = np.clip(self.v_c1, self.vc1_min, self.vc1_max)
+        v_c2_c = np.clip(self.v_c2, self.vc2_min, self.vc2_max)
+
+        v_c = self._interp3d(self.lut_vc, v_in_c, v_c1_c, v_c2_c)
+        new_v_c1 = self._interp3d(self.lut_new_vc1, v_in_c, v_c1_c, v_c2_c)
+        new_v_c2 = self._interp3d(self.lut_new_vc2, v_in_c, v_c1_c, v_c2_c)
+
+        self.v_c1 = new_v_c1
+        self.v_c2 = np.clip(new_v_c2, self.vc2_min, self.vc2_max)
+
+        return v_c
+
+
+# =============================================================================
+# WaveShaperLUT2D: 回路全体の2D LUT化
+# Ebers-Mollの入出力関係をテーブル化し、exp()とNewton反復を排除
+# =============================================================================
+class WaveShaperLUT2D:
+    """
+    2D LUT: (v_in, v_c2) -> (v_c, dv_c1, dv_c2)
+    Ebers-Mollリファレンスから事前計算したテーブルを使用
+    """
+    def __init__(self, n_vin=64, n_vc2=64):
+        self.n_vin = n_vin
+        self.n_vc2 = n_vc2
+
+        # 入力範囲
+        self.vin_min, self.vin_max = 5.0, 12.5
+        self.vc2_min, self.vc2_max = 6.0, 10.0
+
+        # LUTを構築
+        self._build_lut()
+
+        self.reset()
+
+    def _build_lut(self):
+        """Ebers-Mollリファレンスを使ってLUTを事前計算"""
+        from copy import deepcopy
+
+        # グリッド
+        vin_vals = np.linspace(self.vin_min, self.vin_max, self.n_vin)
+        vc2_vals = np.linspace(self.vc2_min, self.vc2_max, self.n_vc2)
+
+        # 出力テーブル
+        self.lut_vc = np.zeros((self.n_vin, self.n_vc2))
+        self.lut_dvc1 = np.zeros((self.n_vin, self.n_vc2))
+        self.lut_dvc2 = np.zeros((self.n_vin, self.n_vc2))
+
+        # リファレンス実装で各点を計算
+        g2, g3, g4, g5 = 1/R2, 1/R3, 1/R4, 1/R5
+        g_c1, g_c2 = C1/DT, C2/DT
+
+        for i, v_in in enumerate(vin_vals):
+            for j, v_c2 in enumerate(vc2_vals):
+                # 初期状態を設定してリファレンス計算
+                # v_c1 ≈ 0 と仮定（定常状態に近い）
+                v_c1 = 0.0
+                v_cap = v_in - v_c1
+                v_b = 8.0  # 初期推定
+                v_e = v_c2
+                v_c = V_COLL
+
+                # Newton反復（5回）
+                for _ in range(5):
+                    v_eb, v_cb = v_e - v_b, v_c - v_b
+                    v_crit = V_T * 40.0
+
+                    # EB接合
+                    if v_eb > v_crit:
+                        exp_crit = np.exp(v_crit / V_T)
+                        i_ef = I_S * (exp_crit - 1) + I_S/V_T * exp_crit * (v_eb - v_crit)
+                        g_ef = I_S / V_T * exp_crit
+                    elif v_eb < -10 * V_T:
+                        i_ef, g_ef = -I_S, 1e-12
+                    else:
+                        exp_veb = np.exp(v_eb / V_T)
+                        i_ef = I_S * (exp_veb - 1)
+                        g_ef = I_S / V_T * exp_veb + 1e-12
+
+                    # CB接合
+                    if v_cb > v_crit:
+                        exp_crit = np.exp(v_crit / V_T)
+                        i_cr = I_S * (exp_crit - 1) + I_S/V_T * exp_crit * (v_cb - v_crit)
+                        g_cr = I_S / V_T * exp_crit
+                    elif v_cb < -10 * V_T:
+                        i_cr, g_cr = -I_S, 1e-12
+                    else:
+                        exp_vcb = np.exp(v_cb / V_T)
+                        i_cr = I_S * (exp_vcb - 1)
+                        g_cr = I_S / V_T * exp_vcb + 1e-12
+
+                    i_e = i_ef - ALPHA_R * i_cr
+                    i_c = ALPHA_F * i_ef - i_cr
+                    i_b = i_e - i_c
+
+                    f1 = g_c1*(v_in - v_cap - v_c1) - g3*(v_cap - v_b)
+                    f2 = g2*(v_in - v_b) + g3*(v_cap - v_b) + i_b
+                    f3 = g4*(V_CC - v_e) - i_e - g_c2*(v_e - v_c2)
+                    f4 = g5*(V_COLL - v_c) + i_c
+
+                    # Jacobian (簡略化: 対角優位)
+                    j11 = -g_c1 - g3
+                    j22 = -g2 - g3 - (1-ALPHA_F)*g_ef - (1-ALPHA_R)*g_cr
+                    j33 = -g4 - g_ef - g_c2
+                    j44 = -g5 - g_cr
+
+                    # 簡易更新
+                    dv_cap = -f1 / j11 if abs(j11) > 1e-12 else 0
+                    dv_b = -f2 / j22 if abs(j22) > 1e-12 else 0
+                    dv_e = -f3 / j33 if abs(j33) > 1e-12 else 0
+                    dv_c = -f4 / j44 if abs(j44) > 1e-12 else 0
+
+                    # ダンピング
+                    max_dv = max(abs(dv_cap), abs(dv_b), abs(dv_e), abs(dv_c))
+                    damp = min(1.0, 0.5/max_dv) if max_dv > 0.5 else 1.0
+
+                    v_cap += damp * dv_cap
+                    v_b += damp * dv_b
+                    v_e = np.clip(v_e + damp * dv_e, 0, V_CC + 0.5)
+                    v_c = np.clip(v_c + damp * dv_c, 0, V_CC + 0.5)
+
+                # 結果を保存
+                self.lut_vc[i, j] = v_c
+                self.lut_dvc1[i, j] = v_in - v_cap - v_c1  # dv_c1 = i_c1 / g_c1
+                self.lut_dvc2[i, j] = v_e - v_c2  # dv_c2
+
+        # 補間用スケール
+        self.vin_scale = (self.n_vin - 1) / (self.vin_max - self.vin_min)
+        self.vc2_scale = (self.n_vc2 - 1) / (self.vc2_max - self.vc2_min)
+
+    def reset(self):
+        self.v_c1 = 0.0
+        self.v_c2 = 8.0
+
+    def _interp2d(self, lut, v_in, v_c2):
+        """双線形補間"""
+        # インデックス計算
+        fi = (v_in - self.vin_min) * self.vin_scale
+        fj = (v_c2 - self.vc2_min) * self.vc2_scale
+
+        i0 = int(np.clip(fi, 0, self.n_vin - 2))
+        j0 = int(np.clip(fj, 0, self.n_vc2 - 2))
+        i1, j1 = i0 + 1, j0 + 1
+
+        di = fi - i0
+        dj = fj - j0
+        di = np.clip(di, 0, 1)
+        dj = np.clip(dj, 0, 1)
+
+        # 双線形補間
+        v00 = lut[i0, j0]
+        v01 = lut[i0, j1]
+        v10 = lut[i1, j0]
+        v11 = lut[i1, j1]
+
+        v0 = v00 * (1 - dj) + v01 * dj
+        v1 = v10 * (1 - dj) + v11 * dj
+
+        return v0 * (1 - di) + v1 * di
+
+    def process(self, v_in):
+        # クランプ
+        v_in_c = np.clip(v_in, self.vin_min, self.vin_max)
+        v_c2_c = np.clip(self.v_c2, self.vc2_min, self.vc2_max)
+
+        # LUT補間
+        v_c = self._interp2d(self.lut_vc, v_in_c, v_c2_c)
+        dv_c1 = self._interp2d(self.lut_dvc1, v_in_c, v_c2_c)
+        dv_c2 = self._interp2d(self.lut_dvc2, v_in_c, v_c2_c)
+
+        # 状態更新
+        self.v_c1 += dv_c1 * 0.1  # スケーリング調整
+        self.v_c2 += dv_c2
+        self.v_c2 = np.clip(self.v_c2, self.vc2_min, self.vc2_max)
+
+        return v_c
+
+
+# =============================================================================
 # VCCS (電圧制御電流源) 簡略モデル
 # =============================================================================
 class WaveShaperVCCS:
@@ -654,6 +929,292 @@ class WaveShaperVCCS:
         self.v_c2 = np.clip(self.v_c2, 0, V_CC)
         v_c = V_COLL - R5 * i_c
         return np.clip(v_c, 0, V_CC)
+
+
+# =============================================================================
+# WaveShaperMinimal: 最小限の計算で近似 (C++ WaveShaperMinimal相当)
+# EB接合のみ、コレクタ電圧を直接計算
+# =============================================================================
+class WaveShaperMinimal:
+    """最小限の計算で近似 - Forward Active仮定でBC接合省略"""
+    def __init__(self):
+        self.reset()
+        self.g_c1 = C1 / DT
+        self.g_c2 = C2 / DT
+        self.g2, self.g3, self.g4 = 1/R2, 1/R3, 1/R4
+
+    def reset(self):
+        self.v_c1, self.v_c2 = 0.0, 8.0
+
+    def process(self, v_in):
+        # 入力カップリング後の電圧
+        v_cap = v_in - self.v_c1
+
+        # ベース電圧: R2/R3分圧
+        v_b = (v_cap * self.g3 + v_in * self.g2) / (self.g2 + self.g3)
+
+        # エミッタ電圧
+        v_e = self.v_c2
+
+        # EB接合電圧
+        v_eb = v_e - v_b
+
+        # ダイオード電流 (簡略化)
+        v_crit = V_T * 40.0
+        if v_eb > v_crit:
+            exp_crit = np.exp(v_crit / V_T)
+            g_ef = I_S / V_T * exp_crit
+            i_ef = I_S * (exp_crit - 1) + g_ef * (v_eb - v_crit)
+        elif v_eb < -10 * V_T:
+            i_ef = -I_S
+            g_ef = 1e-12
+        else:
+            exp_v = np.exp(v_eb / V_T)
+            i_ef = I_S * (exp_v - 1)
+            g_ef = I_S / V_T * exp_v + 1e-12
+
+        # コレクタ電流 (Forward Active近似)
+        i_c = ALPHA_F * i_ef
+
+        # コレクタ電圧
+        v_c = V_COLL - R5 * i_c
+        v_c = np.clip(v_c, 0, V_COLL)
+
+        # エミッタ電流
+        i_e = i_ef
+
+        # 状態更新
+        i_c1 = (v_in - v_cap - self.v_c1) * self.g_c1 - self.g3 * (v_cap - v_b)
+        self.v_c1 += i_c1 / self.g_c1
+
+        i_charge = (V_CC - v_e) * self.g4
+        dv_e = (i_charge - i_e) / self.g_c2
+        self.v_c2 = np.clip(self.v_c2 + dv_e, 0, V_CC)
+
+        return v_c
+
+
+# =============================================================================
+# WaveShaper3Var: 3変数Newton法 (v_cap消去)
+# =============================================================================
+class WaveShaper3Var:
+    """3変数Newton法 (v_cap消去) - C++ WaveShaper3Varと同等"""
+    V_T_INV = 1.0 / V_T
+
+    def __init__(self):
+        self.reset()
+        g_c1 = C1 / DT
+        self.g_c1 = g_c1
+        self.g_c2 = C2 / DT
+        g3 = 1 / R3
+        self.g2, self.g3, self.g4, self.g5 = 1/R2, g3, 1/R4, 1/R5
+        self.den = g_c1 + g3
+        self.inv_den = 1.0 / self.den
+        self.j22_linear = -self.g2 - g3 + g3 * g3 * self.inv_den
+
+    def reset(self):
+        self.v_c1, self.v_c2 = 0.0, 8.0
+        self.v_b, self.v_e, self.v_c = 8.0, 8.0, V_COLL
+
+    def diode_iv(self, v):
+        v_crit = V_T * 40.0
+        if v > v_crit:
+            exp_crit = np.exp(v_crit / V_T)
+            i = I_S * (exp_crit - 1) + I_S * self.V_T_INV * exp_crit * (v - v_crit)
+            g = I_S * self.V_T_INV * exp_crit
+        elif v < -10 * V_T:
+            i, g = -I_S, 1e-12
+        else:
+            exp_v = np.exp(v / V_T)
+            i = I_S * (exp_v - 1)
+            g = I_S * self.V_T_INV * exp_v + 1e-12
+        return i, g
+
+    def process(self, v_in):
+        v_c1_prev, v_c2_prev = self.v_c1, self.v_c2
+        v_b, v_e, v_c = self.v_b, v_c2_prev, self.v_c
+        B = self.g_c1 * (v_in - v_c1_prev)
+
+        # 1回Newton反復
+        i_ef, g_ef = self.diode_iv(v_e - v_b)
+        i_cr, g_cr = self.diode_iv(v_c - v_b)
+
+        i_e = i_ef - ALPHA_R * i_cr
+        i_c = ALPHA_F * i_ef - i_cr
+        i_b = i_e - i_c
+
+        # 残差
+        f2 = self.g2 * (v_in - v_b) + self.g3 * B * self.inv_den + (self.j22_linear + self.g2) * v_b + i_b
+        f3 = self.g4 * (V_CC - v_e) - i_e - self.g_c2 * (v_e - v_c2_prev)
+        f4 = self.g5 * (V_COLL - v_c) + i_c
+
+        # ヤコビアン
+        omaf_g_ef = (1 - ALPHA_F) * g_ef
+        omar_g_cr = (1 - ALPHA_R) * g_cr
+        af_g_ef = ALPHA_F * g_ef
+        ar_g_cr = ALPHA_R * g_cr
+
+        j22 = self.j22_linear - omaf_g_ef - omar_g_cr
+        j23 = omaf_g_ef
+        j24 = omar_g_cr
+        j32 = g_ef - ar_g_cr
+        j33 = -self.g4 - g_ef - self.g_c2
+        j34 = ar_g_cr
+        j42 = -af_g_ef + g_cr
+        j43 = af_g_ef
+        j44 = -self.g5 - g_cr
+
+        # 3x3 Gauss消去
+        inv_j22 = 1.0 / j22
+        m32 = j32 * inv_j22
+        m42 = j42 * inv_j22
+
+        j33_p = j33 - m32 * j23
+        j34_p = j34 - m32 * j24
+        f3_p = f3 + m32 * f2
+
+        j43_p = j43 - m42 * j23
+        j44_p = j44 - m42 * j24
+        f4_p = f4 + m42 * f2
+
+        # 2x2 Cramer
+        det = j33_p * j44_p - j34_p * j43_p
+        inv_det = 1.0 / det
+
+        dv_e = (j44_p * (-f3_p) - j34_p * (-f4_p)) * inv_det
+        dv_c = (j33_p * (-f4_p) - j43_p * (-f3_p)) * inv_det
+        dv_b = (-f2 - j23 * dv_e - j24 * dv_c) * inv_j22
+
+        # ダンピング
+        max_dv = max(abs(dv_b), abs(dv_e), abs(dv_c))
+        damp = 0.5 / max_dv if max_dv > 0.5 else 1.0
+
+        v_b += damp * dv_b
+        v_e = np.clip(v_e + damp * dv_e, 0, V_CC + 0.5)
+        v_c = np.clip(v_c + damp * dv_c, 0, V_CC + 0.5)
+
+        # v_cap更新
+        v_cap_new = (B + self.g3 * v_b) * self.inv_den
+
+        self.v_c1 = v_in - v_cap_new
+        self.v_c2 = v_e
+        self.v_b, self.v_e, self.v_c = v_b, v_e, v_c
+        return v_c
+
+
+# =============================================================================
+# WaveShaper3Var2Iter: 4変数Newton法 2回反復 (Schur補完で3x3に縮約)
+# =============================================================================
+class WaveShaper3Var2Iter:
+    """4変数Newton法 2回反復 (WaveShaperTwoIterと同等) - j44ピボット"""
+    V_T_INV = 1.0 / V_T
+
+    def __init__(self):
+        self.reset()
+        g_c1 = C1 / DT
+        self.g_c1 = g_c1
+        self.g_c2 = C2 / DT
+        g3 = 1 / R3
+        self.g2, self.g3, self.g4, self.g5 = 1/R2, g3, 1/R4, 1/R5
+        # Schur補完用定数 (WaveShaperTwoIterと同じ)
+        j11 = -g_c1 - g3
+        self.inv_j11 = 1.0 / j11
+        self.schur_j11_factor = g3 * g3 * self.inv_j11
+        self.schur_f1_factor = g3 * self.inv_j11
+
+    def reset(self):
+        self.v_c1, self.v_c2 = 0.0, 8.0
+        self.v_b, self.v_e, self.v_c = 8.0, 8.0, V_COLL
+
+    def diode_iv(self, v):
+        v_crit = V_T * 40.0
+        if v > v_crit:
+            exp_crit = np.exp(v_crit / V_T)
+            i = I_S * (exp_crit - 1) + I_S * self.V_T_INV * exp_crit * (v - v_crit)
+            g = I_S * self.V_T_INV * exp_crit
+        elif v < -10 * V_T:
+            i, g = -I_S, 1e-12
+        else:
+            exp_v = np.exp(v / V_T)
+            i = I_S * (exp_v - 1)
+            g = I_S * self.V_T_INV * exp_v + 1e-12
+        return i, g
+
+    def process(self, v_in):
+        v_c1_prev, v_c2_prev = self.v_c1, self.v_c2
+        v_cap = v_in - v_c1_prev
+        v_b, v_e, v_c = self.v_b, v_c2_prev, self.v_c
+
+        # 2回Newton反復 (WaveShaperTwoIterと同じ方式)
+        for _ in range(2):
+            i_ef, g_ef = self.diode_iv(v_e - v_b)
+            i_cr, g_cr = self.diode_iv(v_c - v_b)
+
+            i_e = i_ef - ALPHA_R * i_cr
+            i_c = ALPHA_F * i_ef - i_cr
+            i_b = i_e - i_c
+
+            # 4変数残差
+            f1 = self.g_c1 * (v_in - v_cap - v_c1_prev) - self.g3 * (v_cap - v_b)
+            f2 = self.g2 * (v_in - v_b) + self.g3 * (v_cap - v_b) + i_b
+            f3 = self.g4 * (V_CC - v_e) - i_e - self.g_c2 * (v_e - v_c2_prev)
+            f4 = self.g5 * (V_COLL - v_c) + i_c
+
+            # 3x3ヤコビアン (Schur補完前)
+            omaf_g_ef = (1 - ALPHA_F) * g_ef
+            omar_g_cr = (1 - ALPHA_R) * g_cr
+            af_g_ef = ALPHA_F * g_ef
+            ar_g_cr = ALPHA_R * g_cr
+
+            j22 = -self.g2 - self.g3 - omaf_g_ef - omar_g_cr
+            j23 = omaf_g_ef
+            j24 = omar_g_cr
+            j32 = g_ef - ar_g_cr
+            j33 = -self.g4 - g_ef - self.g_c2
+            j34 = ar_g_cr
+            j42 = -af_g_ef + g_cr
+            j43 = af_g_ef
+            j44 = -self.g5 - g_cr
+
+            # v_capのSchur補完
+            j22_p = j22 - self.schur_j11_factor
+            f2_p = f2 - self.schur_f1_factor * f1
+
+            # j44からピボット (WaveShaperTwoIterと同じ)
+            inv_j44 = 1.0 / j44
+            j24_inv = j24 * inv_j44
+            j34_inv = j34 * inv_j44
+
+            j22_pp = j22_p - j24_inv * j42
+            j23_pp = j23 - j24_inv * j43
+            f2_pp = f2_p + j24_inv * f4
+
+            j32_pp = j32 - j34_inv * j42
+            j33_pp = j33 - j34_inv * j43
+            f3_pp = f3 + j34_inv * f4
+
+            # 2x2 Cramer
+            det = j22_pp * j33_pp - j23_pp * j32_pp
+            inv_det = 1.0 / det
+
+            dv_b = (j33_pp * (-f2_pp) - j23_pp * (-f3_pp)) * inv_det
+            dv_e = (j22_pp * (-f3_pp) - j32_pp * (-f2_pp)) * inv_det
+            dv_c = (-f4 - j42 * dv_b - j43 * dv_e) * inv_j44
+            dv_cap = (-f1 - self.g3 * dv_b) * self.inv_j11
+
+            # ダンピング
+            max_dv = max(abs(dv_b), abs(dv_e), abs(dv_c), abs(dv_cap))
+            damp = 0.5 / max_dv if max_dv > 0.5 else 1.0
+
+            v_cap += damp * dv_cap
+            v_b += damp * dv_b
+            v_e = np.clip(v_e + damp * dv_e, 0, V_CC + 0.5)
+            v_c = np.clip(v_c + damp * dv_c, 0, V_CC + 0.5)
+
+        self.v_c1 = v_in - v_cap
+        self.v_c2 = v_e
+        self.v_b, self.v_e, self.v_c = v_b, v_e, v_c
+        return v_c
 
 
 # =============================================================================
@@ -1833,6 +2394,10 @@ def main():
             'OneIter':            (370, 0.9, 11.5, 'Ebers-Moll', '1 Newton + prev g'),
             'TwoIter':            (686, 12.0, 134.1, 'Ebers-Moll', '2 Newton'),
             'Schraudolph':        (1614, 15.7, 168.8, 'Ebers-Moll', 'bitwise exp'),
+            # アルゴリズムレベル高速化 (2026-01-27追加)
+            'SchurFast':          (364, 0.0, 0.0, 'Ebers-Moll', 'BC junction skip'),
+            'Predict':            (371, 2318.3, 7826.1, 'Ebers-Moll', 'state prediction'),
+            'Minimal':            (121, 2531.3, 5520.9, 'Non-Ebers-Moll', 'minimal approx'),
         }
 
         # 色定義
@@ -1884,8 +2449,8 @@ def main():
         MAX_PLOT_POINTS = 1200  # グラフの最大ポイント数
 
         for freq in frequencies:
-            # 48kHzで1周期分のサンプル数
-            samples_per_cycle_freq = int(SAMPLE_RATE / freq)
+            # 48kHzで2周期分のサンプル数
+            samples_per_cycle_freq = int(SAMPLE_RATE / freq) * 2
 
             # 入力信号（指定周波数のノコギリ波）- 48kHzで生成
             v_in_freq = generate_sawtooth(freq, 0.1)
@@ -1898,14 +2463,11 @@ def main():
             # key: Python実装名, value: (class, init_args, C++サイクル数, C++名, カテゴリ, 色)
             # 2026-01-27 最新: サイクル数をC++ベンチマーク結果に合わせて更新
             impl_mapping = {
-                'Schur (baseline)': (WaveShaperCppEquivalent, {'max_iter': 5}, 364, 'Schur', 'Ebers-Moll', '#cc4444'),
+                'Schur (baseline)': (WaveShaperCppEquivalent, {'max_iter': 1}, 364, 'Schur', 'Ebers-Moll', '#cc4444'),
+                '3Var': (WaveShaper3Var, {}, 351, '3Var', 'Ebers-Moll', '#00bcd4'),
                 'OneIter': (WaveShaperOneIter, {}, 370, 'OneIter', 'Ebers-Moll', '#f39c12'),
-                'HybridAdaptive': (WaveShaperHybrid, {'veb_threshold': 0.3}, 396, 'HybridAdaptive', 'Ebers-Moll', '#2ecc71'),
-                'VCCS': (WaveShaperVCCS, {}, 126, 'VCCS', 'Non-Ebers-Moll', '#3498db'),
-                'PWL': (WaveShaperPWL, {'n_iter': 1}, 259, 'PWL', 'Non-Ebers-Moll', '#1abc9c'),
-                'Schraudolph': (WaveShaperSchraudolph, {'n_iter': 5}, 1614, 'Schraudolph', 'Ebers-Moll', '#9b59b6'),
-                'TwoIter': (WaveShaperTwoIter, {}, 686, 'TwoIter', 'Ebers-Moll', '#e74c3c'),
-                'SquareShaper': (SquareShaper, {'shape': 0.5}, 174, 'SquareShaper', 'Non-Ebers-Moll', '#e67e22'),
+                'Schur2Iter': (WaveShaperTwoIter, {}, 890, 'Schur2Iter', 'Ebers-Moll', '#9c27b0'),
+                '3Var2Iter': (WaveShaper3Var2Iter, {}, 746, '3Var2Iter', 'Ebers-Moll', '#4caf50'),
             }
 
             # 各実装での出力を計算
