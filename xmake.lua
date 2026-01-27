@@ -256,6 +256,18 @@ stm32f4_target("bench_midi_format", {
     renode_script = "bench_midi.resc"
 })
 
+stm32f4_target("bench_diode_ladder", {
+    source = "tests/bench_diode_ladder.cc",
+    optimize = "fast",
+    renode_script = "tools/renode/bench_diode_ladder.resc"
+})
+
+stm32f4_target("bench_waveshaper", {
+    source = "tests/bench_waveshaper.cc",
+    optimize = "fast",
+    renode_script = "tools/renode/bench_waveshaper.resc"
+})
+
 stm32f4_target("umidi_test_renode", {
     source = "lib/umidi/test/test_renode.cc",
     group = "tests/umidi",
