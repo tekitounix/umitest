@@ -12,9 +12,11 @@ namespace umi {
 
 /// Event type discriminator
 enum class EventType : uint8_t {
-    Midi,       ///< MIDI message
-    Param,      ///< Parameter change
-    Raw,        ///< Raw data
+    Midi,         ///< MIDI message
+    Param,        ///< Parameter change
+    Raw,          ///< Raw data
+    ButtonDown,   ///< Button pressed
+    ButtonUp,     ///< Button released
 };
 
 /// MIDI event data
@@ -64,6 +66,12 @@ struct RawData {
     uint8_t size = 0;
 };
 
+/// Button event data
+struct ButtonData {
+    uint8_t button_id = 0;   ///< Button index (0-7)
+    uint8_t _pad[3] = {};    ///< Padding for alignment
+};
+
 /// Sample-accurate event
 struct Event {
     port_id_t port_id = 0;          ///< Port this event belongs to
@@ -74,6 +82,7 @@ struct Event {
         MidiData midi;
         ParamData param;
         RawData raw;
+        ButtonData button;
     };
     
     Event() noexcept : midi{} {}
@@ -119,6 +128,26 @@ struct Event {
     static Event cc(port_id_t port, uint32_t pos,
                     uint8_t channel, uint8_t cc_num, uint8_t value) noexcept {
         return make_midi(port, pos, MidiData::CONTROL_CHANGE | (channel & 0x0F), cc_num, value);
+    }
+
+    /// Create button down event
+    static Event button_down(uint32_t pos, uint8_t button_id) noexcept {
+        Event e;
+        e.port_id = 0;
+        e.sample_pos = pos;
+        e.type = EventType::ButtonDown;
+        e.button.button_id = button_id;
+        return e;
+    }
+
+    /// Create button up event
+    static Event button_up(uint32_t pos, uint8_t button_id) noexcept {
+        Event e;
+        e.port_id = 0;
+        e.sample_pos = pos;
+        e.type = EventType::ButtonUp;
+        e.button.button_id = button_id;
+        return e;
     }
 };
 

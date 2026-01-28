@@ -306,6 +306,11 @@ struct SharedMemory {
     std::atomic<uint8_t> button_current{0};   ///< Current button state
     uint8_t _pad_io[1]{};                     ///< Padding for alignment
 
+    // Application heap memory region
+    // Set by kernel before starting app
+    void* heap_base = nullptr;    ///< Heap start address  // NOLINT(misc-non-private-member-variables-in-classes)
+    size_t heap_size = 0;         ///< Heap size in bytes  // NOLINT(misc-non-private-member-variables-in-classes)
+
     /// Push event to queue (kernel side)
     bool push_event(const Event& ev) noexcept {
         uint32_t write = event_write_idx.load(std::memory_order_relaxed);

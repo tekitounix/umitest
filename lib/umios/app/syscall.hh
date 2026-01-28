@@ -151,9 +151,8 @@ inline void yield() noexcept {
 
 /// Get shared memory pointer
 inline void* get_shared() noexcept {
-    void* ptr = nullptr;
-    call(nr::GetShared, reinterpret_cast<uint32_t>(&ptr));
-    return ptr;
+    // GetShared syscall returns the shared memory address directly in r0
+    return reinterpret_cast<void*>(call(nr::GetShared));
 }
 
 /// Get parameter value
@@ -212,5 +211,24 @@ inline bool button_state() noexcept {
 inline uint32_t wait_event(uint32_t mask, uint32_t timeout_usec = 0) noexcept {
     return static_cast<uint32_t>(call(nr::WaitEvent, mask, timeout_usec));
 }
+
+// ============================================================================
+// Coroutine Scheduler Adapters
+// ============================================================================
+// Adapters to connect syscalls with umi::coro::Scheduler
+
+namespace coro_adapter {
+
+/// Wait function for Scheduler (WaitFn signature)
+inline uint32_t wait(uint32_t mask, uint64_t timeout_us) noexcept {
+    return wait_event(mask, static_cast<uint32_t>(timeout_us));
+}
+
+/// Time function for Scheduler (TimeFn signature)
+inline uint64_t get_time() noexcept {
+    return static_cast<uint64_t>(get_time_usec());
+}
+
+} // namespace coro_adapter
 
 } // namespace umi::syscall

@@ -518,11 +518,20 @@ target("tb303_waveshaper_py")
         end
 
         -- Get pybind11 include path (installed via pip)
-        local pybind_inc = os.iorun(python .. " -c \"import pybind11; print(pybind11.get_include())\"")
-        if pybind_inc then
-            pybind_inc = pybind_inc:gsub("%s+", "")
-            target:add("includedirs", pybind_inc)
-        end
+        try {
+            function()
+                local pybind_inc = os.iorun(python .. " -c \"import pybind11; print(pybind11.get_include())\"")
+                if pybind_inc then
+                    pybind_inc = pybind_inc:gsub("%s+", "")
+                    target:add("includedirs", pybind_inc)
+                end
+            end,
+            catch {
+                function(e)
+                    -- pybind11 not installed, skip
+                end
+            }
+        }
     end)
 
     -- Don't add Python library linkage on macOS (undefined dynamic lookup)

@@ -211,24 +211,46 @@ inline Yield yield() { return {}; }
 /// Microseconds type (matches umi_kernel.hh)
 using usec = std::uint64_t;
 
+// =====================================================================
+// Global Scheduler Interface
+// =====================================================================
+// For co_await 16ms syntax without explicit context
+
+namespace detail {
+    /// Function pointer type for registering sleep
+    using RegisterSleepFn = void (*)(std::coroutine_handle<> h, usec duration_us);
+
+    /// Global sleep registration function (set by scheduler)
+    inline RegisterSleepFn g_register_sleep = nullptr;
+}
+
+/// Set global sleep registration function (called by scheduler)
+inline void set_global_scheduler(detail::RegisterSleepFn fn) {
+    detail::g_register_sleep = fn;
+}
+
 /// Sleep awaiter - suspends coroutine for specified duration
+/// Uses global scheduler when available (for co_await 16ms syntax)
 class SleepAwaiter {
 public:
     explicit SleepAwaiter(usec duration_us) : duration_us_(duration_us) {}
-    
+
     template <typename Rep, typename Period>
     explicit SleepAwaiter(std::chrono::duration<Rep, Period> duration)
         : duration_us_(std::chrono::duration_cast<std::chrono::microseconds>(duration).count()) {}
-    
+
     bool await_ready() const noexcept { return duration_us_ == 0; }
-    
+
     void await_suspend(std::coroutine_handle<> h) noexcept {
         handle_ = h;
-        // Scheduler will check deadline and resume when ready
+        // Use global scheduler if available
+        if (detail::g_register_sleep != nullptr) {
+            detail::g_register_sleep(h, duration_us_);
+        }
     }
-    
+
     void await_resume() noexcept {}
-    
+
     usec duration_us() const { return duration_us_; }
     std::coroutine_handle<> handle() const { return handle_; }
 
@@ -277,8 +299,18 @@ public:
     /// Get current time in microseconds
     using TimeFn = usec (*)();
     
-    Scheduler(WaitFn wait_fn, TimeFn time_fn) 
-        : wait_fn_(wait_fn), time_fn_(time_fn) {}
+    Scheduler(WaitFn wait_fn, TimeFn time_fn)
+        : wait_fn_(wait_fn), time_fn_(time_fn) {
+        // Register global sleep function for co_await 16ms syntax
+        set_global_scheduler([](std::coroutine_handle<> h, usec duration_us) {
+            // This lambda captures nothing - it uses the global instance
+            // The actual registration happens via the static instance pointer
+            if (s_instance != nullptr) {
+                s_instance->register_sleep(h, duration_us);
+            }
+        });
+        s_instance = this;
+    }
     
     /// Spawn a coroutine
     bool spawn(Task<void>&& task) {
@@ -383,6 +415,9 @@ public:
         }
     }
 
+    /// Static instance for global sleep registration
+    static inline Scheduler* s_instance = nullptr;
+
 private:
     struct Slot {
         void* handle{nullptr};
@@ -464,6 +499,12 @@ private:
 
 namespace literals {
     using namespace std::chrono_literals;
+
+    /// Enable: co_await 100ms; (operator co_await for chrono durations)
+    template <typename Rep, typename Period>
+    inline SleepAwaiter operator co_await(std::chrono::duration<Rep, Period> duration) {
+        return SleepAwaiter{duration};
+    }
 }
 
 } // namespace umi::coro

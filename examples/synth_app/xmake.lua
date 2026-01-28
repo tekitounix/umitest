@@ -22,6 +22,7 @@ target("synth_app")
     add_includedirs("$(projectdir)/lib/umios/kernel")  -- For shared types
     add_includedirs("$(projectdir)/lib/umios")         -- For umios/core/...
     add_includedirs("$(projectdir)/lib")               -- For lib-relative paths
+    add_includedirs("$(projectdir)/lib/umisynth/include")  -- For umisynth/synth.hh
     add_includedirs("$(projectdir)/examples/headless_webhost/src")  -- For synth.hh
     
     -- DSP library
@@ -62,14 +63,9 @@ target("synth_app")
 task("flash-synth-app")
     set_category("action")
     on_run(function ()
-        import("core.project.project")
-        local target = project.target("synth_app")
-        if not target then
-            raise("target synth_app not found")
-        end
         print("Building synth app...")
-        os.exec("xmake build " .. target:name())
-        local umiapp = path.join(target:targetdir(), target:name() .. ".umiapp")
+        os.exec("xmake build synth_app")
+        local umiapp = path.join(os.projectdir(), "build", "synth_app", "release", "synth_app.umiapp")
         if not os.isfile(umiapp) then
             raise(".umiapp not found: " .. umiapp)
         end
