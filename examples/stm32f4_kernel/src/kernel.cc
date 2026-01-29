@@ -36,10 +36,6 @@ struct Stm32F4Hw {
     static umi::usec monotonic_time_usecs() { return g_tick_us; }
 
     // PRIMASK-based nestable critical section.
-    // Disables all interrupts (including DMA) for the duration.
-    // Critical sections are short (~10-20 cycles for bitmap ops),
-    // so DMA latency is negligible.
-    // Nesting is safe: PRIMASK save/restore via nest count.
     static inline volatile uint32_t nest_count_ = 0;
     static inline volatile uint32_t saved_primask_ = 0;
 
@@ -61,29 +57,11 @@ struct Stm32F4Hw {
     static void trigger_ipi(std::uint8_t) {}
     static std::uint8_t current_core() { return 0; }
 
-    // IMPORTANT: schedule() inside Kernel calls this, but we rely on
-    // switch_context_callback (PendSV) for actual context switch.
-    // This is fine — PendSV is deferred and executes after ISR/critical section exit.
     static void request_context_switch() {
         arch::cm4::request_context_switch();
     }
 
-    static void save_fpu() {}
-    static void restore_fpu() {}
-    static void mute_audio_dma() { mcu::dma_i2s_disable(); }
-    static void write_backup_ram(const void*, std::size_t) {}
-    static void read_backup_ram(void*, std::size_t) {}
-    static void configure_mpu_region(std::size_t, const void*, std::size_t, bool, bool) {}
-    static void cache_clean(const void*, std::size_t) {}
-    static void cache_invalidate(void*, std::size_t) {}
-    static void cache_clean_invalidate(void*, std::size_t) {}
-    static void system_reset() { mcu::system_reset(); }
     static void enter_sleep() { __asm__ volatile("wfi"); }
-    [[noreturn]] static void start_first_task() {
-        while (true) { __asm__ volatile("wfi"); }
-    }
-    static void watchdog_init(std::uint32_t) {}
-    static void watchdog_feed() {}
     static std::uint32_t cycle_count() { return arch::cm4::dwt_cycle(); }
     static std::uint32_t cycles_per_usec() { return 168; }
 };
@@ -398,8 +376,6 @@ static void process_audio_frame(uint16_t* buf) {
 // Task Entries
 // ============================================================================
 
-static void process_server_work();
-
 static void audio_task_entry(void* arg) {
     (void)arg;
 
@@ -409,33 +385,10 @@ static void audio_task_entry(void* arg) {
         while (auto buf_opt = g_audio_ready_queue.try_pop()) {
             process_audio_frame(*buf_opt);
         }
-
-        // Run server-priority work inline to avoid starvation.
-        // audio_task never truly blocks (DMA notifications arrive faster
-        // than processing), so system_task never gets scheduled.
-        // Executing its work here after each audio drain keeps latency
-        // minimal while ensuring PDM, sample-rate, and SysEx processing.
-        process_server_work();
     }
 }
 
 static void handle_sample_rate_change();
-
-static void process_server_work() {
-    handle_sample_rate_change();
-
-    if (g_pdm_ready && g_current_sample_rate < 96000) {
-        g_pdm_ready = false;
-        uint16_t* pdm_data = const_cast<uint16_t*>(g_active_pdm_buf);
-        mcu::cic_decimator().process_buffer(
-            pdm_data, mcu::audio::pdm_buf_size, mcu::pcm_buf(), mcu::audio::pcm_buf_size);
-    }
-
-    if (g_sysex_ready) {
-        g_stdio.process_message(g_sysex_buf, g_sysex_len);
-        g_sysex_ready = false;
-    }
-}
 
 static void system_task_entry(void* arg) {
     (void)arg;
@@ -572,15 +525,14 @@ void on_pdm_buffer_ready(uint16_t* buf) {
 // Syscall Handler
 // ============================================================================
 
+// Syscall numbers — must match lib/umios/app/syscall.hh nr::*
 namespace app_syscall {
-inline constexpr uint32_t Exit         = 0;
-inline constexpr uint32_t RegisterProc = 1;
-inline constexpr uint32_t WaitEvent    = 2;
-inline constexpr uint32_t Yield        = 5;
-inline constexpr uint32_t GetTime      = 10;
-inline constexpr uint32_t GetShared    = 40;
-inline constexpr uint32_t MidiSend     = 50;
-inline constexpr uint32_t MidiRecv     = 51;
+inline constexpr uint32_t exit          = 0;
+inline constexpr uint32_t yield         = 1;
+inline constexpr uint32_t wait_event    = 2;
+inline constexpr uint32_t get_time      = 3;
+inline constexpr uint32_t get_shared    = 4;
+inline constexpr uint32_t register_proc = 5;
 }
 
 static void svc_handler_impl(uint32_t* sp) {
@@ -590,21 +542,17 @@ static void svc_handler_impl(uint32_t* sp) {
     int32_t result = 0;
 
     switch (syscall_nr) {
-    case app_syscall::Exit:
+    case app_syscall::exit:
         g_loader.terminate(static_cast<int>(arg0));
         result = 0;
         break;
 
-    case app_syscall::RegisterProc:
-        if (arg1 != 0) {
-            result =
-                g_loader.register_processor(reinterpret_cast<void*>(arg0), reinterpret_cast<ProcessFn>(arg1));
-        } else {
-            result = g_loader.register_processor(reinterpret_cast<void*>(arg0));
-        }
+    case app_syscall::yield:
+        arch::cm4::request_context_switch();
+        result = 0;
         break;
 
-    case app_syscall::WaitEvent: {
+    case app_syscall::wait_event: {
         uint64_t timeout_us = arg1;
         if (timeout_us > 0) {
             g_control_task_wakeup_us = g_tick_us + timeout_us;
@@ -616,41 +564,20 @@ static void svc_handler_impl(uint32_t* sp) {
         break;
     }
 
-    case app_syscall::Yield:
-        arch::cm4::request_context_switch();
-        result = 0;
-        break;
-
-    case app_syscall::GetTime:
+    case app_syscall::get_time:
         sp[0] = g_tick_us;
         return;
 
-    case app_syscall::GetShared:
+    case app_syscall::get_shared:
         sp[0] = reinterpret_cast<uint32_t>(&g_shared);
         return;
 
-    case app_syscall::MidiRecv: {
-        auto msg = g_midi_queue.try_pop();
-        if (msg) {
-            MidiMsg* out = reinterpret_cast<MidiMsg*>(arg0);
-            *out = *msg;
-            result = msg->len;
+    case app_syscall::register_proc:
+        if (arg1 != 0) {
+            result =
+                g_loader.register_processor(reinterpret_cast<void*>(arg0), reinterpret_cast<ProcessFn>(arg1));
         } else {
-            result = 0;
-        }
-        break;
-    }
-
-    case app_syscall::MidiSend:
-        if (arg1 >= 1 && arg1 <= 3) {
-            const uint8_t* data = reinterpret_cast<const uint8_t*>(arg0);
-            uint8_t status = data[0];
-            uint8_t d1 = (arg1 >= 2) ? data[1] : 0;
-            uint8_t d2 = (arg1 >= 3) ? data[2] : 0;
-            mcu::usb_audio().send_midi(mcu::usb_hal(), 0, status, d1, d2);
-            result = 0;
-        } else {
-            result = -1;
+            result = g_loader.register_processor(reinterpret_cast<void*>(arg0));
         }
         break;
 
@@ -768,6 +695,10 @@ static void tick_callback() {
 }
 
 static void switch_context_callback() {
+    // PendSV is lowest-priority ISR, but DMA ISR can preempt and
+    // modify kernel state (via notify). Use critical section to
+    // ensure get_next_task + prepare_switch are atomic.
+    Stm32F4Hw::enter_critical();
     auto next_opt = g_kernel.get_next_task();
     if (next_opt.has_value()) {
         g_kernel.prepare_switch(*next_opt);
@@ -775,6 +706,7 @@ static void switch_context_callback() {
         g_current_tcb = next_hw_tcb;
         arch::cm4::current_tcb = next_hw_tcb;
     }
+    Stm32F4Hw::exit_critical();
 }
 
 static void svc_callback(uint32_t* sp) {
@@ -836,10 +768,11 @@ void start_rtos(void* app_entry) {
     arch::cm4::init_task(
         g_idle_tcb, g_idle_task_stack, IDLE_TASK_STACK_SIZE, idle_task_entry, nullptr, false);
 
-    // Tasks start Ready from create_task(). Audio and system tasks will
-    // self-block on first iteration (wait_block / suspend_task respectively),
-    // so no explicit suspend is needed here. Suspending before wait_block()
-    // would leave wait_mask=0, preventing notify() from waking them.
+    // Match old behavior: audio and system tasks start Blocked.
+    // Audio task wakes on DMA notify, system task wakes on SysTick resume.
+    // This prevents audio_task from running before DMA buffers are ready.
+    g_kernel.suspend_task(g_audio_task_id);
+    g_kernel.suspend_task(g_system_task_id);
 
     // Control task starts as Running — set Kernel's current_per_core[0]
     g_kernel.prepare_switch(g_control_task_id.value);
