@@ -14,6 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | **NEVER finish on build success alone** | Firmware tasks require: build → flash → debugger verification → then complete |
 | **MUST read existing code first** | Before modifying, understand current implementation. Don't blindly rewrite. |
 | **MUST make incremental changes** | Large changes should be split into reviewable steps. |
+| **MUST NOT revert to older implementations** | Never “fix” by rolling back to old code; it only returns to a previously working state and discards recent changes, so it has no value as a fix. |
 | **MUST `git stash` before checkout** | Always stash before checking out past commits |
 | **MUST check `git status` first** | Check status and current branch before any commit |
 | **MUST ask before deleting files** | Confirm if commit is needed; use `trash` not `rm` |
