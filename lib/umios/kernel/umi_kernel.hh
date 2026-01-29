@@ -647,9 +647,20 @@ public:
     void resume_task(TaskId id) {
         MaskedCritical<HW> guard;
         if (!valid_task(id)) return;
-        if (tasks[id.value].state == State::Ready) return;  // Already ready
+        auto s = tasks[id.value].state;
+        if (s == State::Ready || s == State::Running) return;  // Already schedulable
         set_ready_with_bitmap(id);
         schedule();
+    }
+
+    /// Mark task as ready without triggering schedule.
+    /// Use when the caller manages context switch externally (e.g. ISR → PendSV).
+    void resume_task_no_schedule(TaskId id) {
+        MaskedCritical<HW> guard;
+        if (!valid_task(id)) return;
+        auto s = tasks[id.value].state;
+        if (s == State::Ready || s == State::Running) return;
+        set_ready_with_bitmap(id);
     }
 
     /// Suspend a task (force to blocked state).
@@ -663,6 +674,15 @@ public:
         if (cur.has_value() && cur->value == id.value) {
             schedule();
         }
+    }
+
+    /// Suspend a task without triggering schedule.
+    /// Use when the caller manages context switch externally (e.g. task → SVC → PendSV).
+    void suspend_task_no_schedule(TaskId id) {
+        MaskedCritical<HW> guard;
+        if (!valid_task(id)) return;
+        if (tasks[id.value].state == State::Blocked) return;
+        set_blocked_with_bitmap(id);
     }
 
     /// Delete a task and free its slot.
