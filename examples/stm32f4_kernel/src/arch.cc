@@ -154,7 +154,7 @@ extern "C" [[gnu::naked]] void PendSV_Handler() {
                      "str     r0, [r2]\n"
 
                      "1:\n"
-                     "mov     r0, #0x50\n"
+                     "mov     r0, #0x60\n"
                      "msr     basepri, r0\n"
                      "dsb\n"
                      "isb\n"

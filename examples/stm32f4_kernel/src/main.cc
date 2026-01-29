@@ -11,6 +11,7 @@
 
 #include <mpu_config.hh>
 #include <umios/backend/cm/common/irq.hh>
+#include <umios/backend/cm/common/nvic.hh>
 #include <umios/backend/cm/common/scb.hh>
 #include <umios/backend/cm/stm32f4/irq_num.hh>
 
@@ -239,6 +240,13 @@ extern "C" [[noreturn]] void Reset_Handler() {
     umi::irq::set_handler(exc::SVCall, SVC_Handler);
     umi::irq::set_handler(exc::PendSV, PendSV_Handler);
     umi::irq::set_handler(exc::SysTick, SysTick_Handler);
+
+    // Set exception priorities per architecture spec:
+    // SysTick = 0xF0 (priority 15) - below DMA, above PendSV
+    // PendSV  = 0xFF (priority 15, lowest) - context switch must be lowest
+    // This ensures DMA ISRs can preempt SysTick/PendSV.
+    umi::port::arm::NVIC::set_prio(-1, 0xF0);  // SysTick
+    umi::port::arm::NVIC::set_prio(-2, 0xFF);  // PendSV
     namespace irqn = umi::stm32f4::irq;
     umi::irq::set_handler(irqn::DMA1_Stream3, DMA1_Stream3_IRQHandler);
     umi::irq::set_handler(irqn::DMA1_Stream5, DMA1_Stream5_IRQHandler);
