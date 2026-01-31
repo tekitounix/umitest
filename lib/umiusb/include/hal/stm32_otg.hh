@@ -579,17 +579,17 @@ class Stm32OtgHal : public HalBase<Stm32OtgHal<BaseAddr, MaxEndpoints>> {
                 // Setup DIEPTSIZ: MULCNT=1, PKTCNT=1, XFRSIZ=len
                 Regs::reg(Regs::DIEPTSIZ(ep)) = (1U << 29) | (1U << 19) | len;
 
-                // TinyUSB-style: Set parity, CNAK, and EPENA in one write
-                // Current frame odd (FNSOF bit8=1) -> set_data0_iso_even (next frame is even)
-                // Current frame even (FNSOF bit8=0) -> set_data1_iso_odd (next frame is odd)
+                // Set parity to match CURRENT frame (packet sent in this frame).
+                // FNSOF reflects the current frame number at SOF callback time.
+                // Odd FNSOF -> set SODDFRM; Even FNSOF -> set SD0PID/SEVNFRM.
                 uint32_t diepctl = Regs::reg(Regs::DIEPCTL(ep));
                 diepctl |= otg::DEPCTL_CNAK | otg::DEPCTL_EPENA;
                 if ((Regs::reg(Regs::DSTS) & otg::DSTS_FNSOF_ODD) != 0) {
-                    // Current frame is odd -> next frame is even -> set SD0PID/SEVNFRM
-                    diepctl |= otg::DEPCTL_SD0PID;
-                } else {
-                    // Current frame is even -> next frame is odd -> set SODDFRM
+                    // Current frame is odd -> set SODDFRM
                     diepctl |= otg::DEPCTL_SODDFRM;
+                } else {
+                    // Current frame is even -> set SD0PID/SEVNFRM
+                    diepctl |= otg::DEPCTL_SD0PID;
                 }
                 Regs::reg(Regs::DIEPCTL(ep)) = diepctl;
 

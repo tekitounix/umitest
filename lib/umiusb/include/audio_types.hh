@@ -123,6 +123,7 @@ using PllRateController = umidsp::PiRateController;
 
 /// Calculates feedback value for Asynchronous mode.
 /// Full Speed uses 10.14 fixed-point format (3 bytes) per USB 2.0 §5.12.4.2.
+/// Note: UAC2 spec says 16.16 (4 bytes) but macOS xHCI babbles with wMaxPacketSize > 3 at FS.
 /// Algorithm based on STM32F401_USB_AUDIO_DAC reference (PID-style buffer tracking).
 ///
 /// The host adjusts its packet size based on the feedback value to keep the
@@ -130,9 +131,10 @@ using PllRateController = umidsp::PiRateController;
 template <UacVersion Version = UacVersion::Uac1>
 class FeedbackCalculator {
   public:
-    // FS feedback: 10.14 format, 3 bytes (USB 2.0 §5.12.4.2)
-    // Note: USB Audio 2.0 §5.2.3.2 specifies 16.16 (4 bytes) for UAC2,
-    // but macOS FS driver uses 10.14 regardless of UAC version.
+    // FS feedback: always 10.14 format, 3 bytes
+    // USB Audio 2.0 spec says 16.16 (4 bytes) for UAC2, but macOS xHCI
+    // generates babble errors on EP with wMaxPacketSize > 3 at Full Speed.
+    // macOS FS driver interprets feedback as 10.14 regardless of UAC version.
     static constexpr uint32_t FEEDBACK_SHIFT = 14;
     static constexpr uint32_t FEEDBACK_BYTES = 3;
 

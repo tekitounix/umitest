@@ -348,11 +348,6 @@ static volatile uint32_t g_dbg_send_audio_in_count = 0;
 static volatile uint32_t g_dbg_in_underrun = 0;
 static volatile uint32_t g_dbg_in_overrun = 0;
 
-// Audio IN data monitoring (detect anomalies)
-static volatile int16_t g_dbg_in_data_max = 0;         // Max sample value seen
-static volatile int16_t g_dbg_in_data_min = 0;         // Min sample value seen
-static volatile uint32_t g_dbg_in_spike_count = 0;     // Count of samples > 30000
-static volatile uint32_t g_dbg_in_zero_packet = 0;     // Count of all-zero packets
 static volatile uint32_t g_dbg_in_write_count = 0;     // write_audio_in call count
 static volatile uint32_t g_dbg_dma_callback_count = 0; // DMA callback count
 static volatile uint32_t g_dbg_out_mute = 0;
@@ -383,6 +378,9 @@ static volatile uint32_t g_dbg_ring_read_pos = 0;
 static volatile uint32_t g_dbg_ring_buffered = 0;
 static volatile uint32_t g_dbg_ring_overrun = 0;
 static volatile uint32_t g_dbg_ring_underrun = 0;
+static volatile uint32_t g_dbg_hal_iisoixfr = 0;         // HAL: IsoINIncomplete count
+static volatile uint32_t g_dbg_hal_ep3_in_count = 0;     // HAL: Audio IN EP3 packet count
+static volatile uint32_t g_dbg_hal_ep3_epena_busy = 0;   // HAL: Audio IN EP3 busy skip count
 
 // Event log for debugging USB sequence
 // Each entry: [event_type(8) | data(24)]
@@ -500,6 +498,9 @@ static void process_audio_frame(uint16_t* buf) {
     g_dbg_ring_buffered = mcu::usb_audio().buffered_frames();
     g_dbg_ring_overrun = mcu::usb_audio().out_ring_overrun();
     g_dbg_ring_underrun = mcu::usb_audio().out_ring_underrun();
+    g_dbg_hal_iisoixfr = mcu::usb_hal().dbg_iisoixfr_count_;
+    g_dbg_hal_ep3_in_count = mcu::usb_hal().dbg_ep3_in_count_;
+    g_dbg_hal_ep3_epena_busy = mcu::usb_hal().dbg_ep3_epena_busy_;
 
     uint32_t t2b = dwt_cyccnt();
 #if 0 // TEST TONE: bypass USB audio, output 440Hz sine via I2S
@@ -604,35 +605,21 @@ static void process_audio_frame(uint16_t* buf) {
 
     // --- Section 4: USB Audio IN write ---
     if (mcu::usb_audio().is_audio_in_streaming()) {
-        auto* stereo = mcu::stereo_buf();
+        // Write directly as int32_t to avoid i16→i32 conversion in write_audio_in_overwrite
+        static int32_t in_buf_i32[mcu::audio::buffer_size * 2];
         if (g_current_sample_rate >= 96000) {
-            __builtin_memset(stereo, 0, mcu::audio::buffer_size * 2 * sizeof(int16_t));
+            __builtin_memset(in_buf_i32, 0, sizeof(in_buf_i32));
         } else {
             for (uint32_t i = 0; i < mcu::audio::buffer_size; ++i) {
-                stereo[i * 2] = mcu::pcm_buf()[i];
-                stereo[i * 2 + 1] = last_synth_out[i * 2];
+                in_buf_i32[i * 2] = static_cast<int32_t>(mcu::pcm_buf()[i]) << 8;
+                in_buf_i32[i * 2 + 1] = static_cast<int32_t>(last_synth_out[i * 2]) << 8;
             }
         }
 
-        // Monitor data for anomalies
         g_dbg_in_write_count = g_dbg_in_write_count + 1;
-        bool all_zero = true;
-        for (uint32_t i = 0; i < mcu::audio::buffer_size * 2; ++i) {
-            int16_t s = stereo[i];
-            if (s != 0)
-                all_zero = false;
-            if (s > g_dbg_in_data_max)
-                g_dbg_in_data_max = s;
-            if (s < g_dbg_in_data_min)
-                g_dbg_in_data_min = s;
-            if (s > 30000 || s < -30000)
-                g_dbg_in_spike_count = g_dbg_in_spike_count + 1;
-        }
-        if (all_zero)
-            g_dbg_in_zero_packet = g_dbg_in_zero_packet + 1;
 
         // Write to ring buffer only; USB IN send is driven by SOF (1kHz)
-        mcu::usb_audio().write_audio_in_overwrite(stereo, mcu::audio::buffer_size);
+        mcu::usb_audio().write_audio_in(in_buf_i32, mcu::audio::buffer_size);
     }
     uint32_t t5 = dwt_cyccnt();
 

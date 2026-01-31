@@ -59,8 +59,10 @@ umiusb::Stm32FsHal usb_hal_inst;
 #if USB_AUDIO_UAC2
 using UsbAudioDevice =
     umiusb::AudioInterface<umiusb::UacVersion::Uac2,
-                           umiusb::AudioPort<2, 24, 48000, 1, 48000, umiusb::AudioRates<48000>>, // Audio OUT (EP1)
-                           umiusb::NoAudioPort,    // Audio IN disabled (macOS IOA1Engine issue)
+                           umiusb::AudioPort<2, 24, 48000, 1, 48000, umiusb::AudioRates<48000>>,                                    // Audio OUT (EP1) - 2048 frame buffer
+                           umiusb::AudioPort<2, 24, 48000, 3, 48000, umiusb::AudioRates<48000>,
+                                             umiusb::DefaultAltList<24, umiusb::AudioRates<48000>>,
+                                             umiusb::DefaultChannelConfig<2>::value, 256>, // Audio IN (EP3) - 256 frame buffer
                            umiusb::MidiPort<1, 2>, // MIDI OUT (EP2 OUT)
                            umiusb::MidiPort<1, 1>, // MIDI IN (EP1 IN)
                            2,
