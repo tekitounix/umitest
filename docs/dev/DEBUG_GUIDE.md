@@ -842,7 +842,7 @@ arm-none-eabi-nm build/stm32f4_kernel/release/stm32f4_kernel.elf | grep "dbg_"
 
 ```bash
 # デバイスを48kHzに設定
-python3 set_sample_rate.py 48000
+python3 tools/set_sample_rate.py 48000
 
 # カウンタをリセットして再生テスト
 pyocd cmd -c "write32 0x20000e0c 0" && say "test" & sleep 0.5 && pyocd cmd -c "read32 0x20000e0c; read32 0x20000e28"
@@ -854,7 +854,7 @@ pyocd cmd -c "write32 0x20000e0c 0" && say "test" & sleep 0.5 && pyocd cmd -c "r
 
 ```bash
 # デバイスを96kHzに設定
-python3 set_sample_rate.py 96000
+python3 tools/set_sample_rate.py 96000
 
 # 再生中にfeedbackとバッファを確認
 say "one two three four five" & sleep 0.5 && pyocd cmd -c "read32 0x20000e1c; read32 0x20000e28; read32 0x20000e0c"
@@ -867,9 +867,9 @@ say "one two three four five" & sleep 0.5 && pyocd cmd -c "read32 0x20000e1c; re
 
 ```bash
 # 48kHz → 96kHz → 48kHz と切り替え
-python3 set_sample_rate.py 48000 && sleep 3
-python3 set_sample_rate.py 96000 && sleep 3
-python3 set_sample_rate.py 48000
+python3 tools/set_sample_rate.py 48000 && sleep 3
+python3 tools/set_sample_rate.py 96000 && sleep 3
+python3 tools/set_sample_rate.py 48000
 
 # 変更回数を確認
 pyocd cmd -c "read32 0x20000e30"

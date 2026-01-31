@@ -99,3 +99,19 @@ OS非依存のレジスタ操作抽象化レイヤ。
 - device
   - audio_codec
     - cs43l22.hh
+
+目次
+application
+  .umia
+    header
+  abi
+  entry
+  
+kernel
+  service
+    loader
+    updater
+      relocator
+    
+  memory
+  port

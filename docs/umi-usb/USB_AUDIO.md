@@ -318,3 +318,10 @@ AudioDeviceConfig
 * **manual_switch:** GPIO等の物理スイッチで切替、PIDも切替
 * **auto_switch:** 切替条件を定義（OS判定は避け、ユーザー操作/設定を推奨）
 * **注意:** いずれも USB 再接続を伴う（再Enumerate）
+
+
+メモ
+市販のUAC1デバイスはAdaptiveが多いがその仕組みはハードウェア実装であることが多い
+ASRCで実装すれば良さそうだが安定した実装例がみつからない
+UAC1のAsyncはサンプルレート高速切り替え時にグリッチが発生し、収束するまで数秒かかる
+UAC1のAsyncでmacOSでLogic Pro使用時にAudio MIDI Setupの方でサンプルレート変更を行うと数秒間音がグリッチする問題がある
