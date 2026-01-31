@@ -769,11 +769,11 @@ class AudioInterface {
                     w(AudioIn::BIT_DEPTH);
 
                     // Audio Endpoint (IN) - UAC2
-                    // Use Synchronous mode (0x0D) for Audio IN
-                    // Synchronous: device provides data at SOF rate
+                    // Use Asynchronous mode (0x05) when OUT is Async (implicit feedback).
+                    // Otherwise Synchronous (0x0D).
                     w(7, bDescriptorType::Endpoint);
                     w(0x80 | EP_AUDIO_IN);
-                    w(0x0D); // Isochronous, Synchronous
+                    w((SYNC_MODE == AudioSyncMode::Async) ? 0x05 : 0x0D);
                     constexpr uint16_t in_packet_size =
                         static_cast<uint16_t>((((AudioIn::SAMPLE_RATE + 999) / 1000) + 1) * AudioIn::BYTES_PER_FRAME);
                     w16(in_packet_size);
