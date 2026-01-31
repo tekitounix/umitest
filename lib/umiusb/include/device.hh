@@ -139,9 +139,22 @@ public:
 private:
     void build_device_descriptor() {
         device_desc_.bcdUSB = 0x0200;  // USB 2.0
-        device_desc_.bDeviceClass = bDeviceClass::PerInterface;
-        device_desc_.bDeviceSubClass = 0;
-        device_desc_.bDeviceProtocol = 0;
+        // UAC2 with IAD requires Misc class (0xEF/0x02/0x01)
+        if constexpr (requires { ClassT::USES_IAD; }) {
+            if constexpr (ClassT::USES_IAD) {
+                device_desc_.bDeviceClass = bDeviceClass::Misc;
+                device_desc_.bDeviceSubClass = 0x02;  // Common Class
+                device_desc_.bDeviceProtocol = 0x01;  // IAD
+            } else {
+                device_desc_.bDeviceClass = bDeviceClass::PerInterface;
+                device_desc_.bDeviceSubClass = 0;
+                device_desc_.bDeviceProtocol = 0;
+            }
+        } else {
+            device_desc_.bDeviceClass = bDeviceClass::PerInterface;
+            device_desc_.bDeviceSubClass = 0;
+            device_desc_.bDeviceProtocol = 0;
+        }
         device_desc_.bMaxPacketSize0 = EP0_SIZE;
         device_desc_.idVendor = info_.vendor_id;
         device_desc_.idProduct = info_.product_id;

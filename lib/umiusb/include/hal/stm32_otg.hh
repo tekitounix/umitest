@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <cstring>
+
 #include "../hal.hh"
 
 namespace umiusb {
@@ -14,7 +15,7 @@ namespace umiusb {
 
 /// STM32 USB OTG FS/HS Register Map
 /// Template parameter allows different base addresses (FS=0x50000000, HS=0x40040000)
-template<uint32_t BaseAddr>
+template <uint32_t BaseAddr>
 struct OtgRegs {
     static constexpr uint32_t BASE = BaseAddr;
 
@@ -61,13 +62,9 @@ struct OtgRegs {
     static constexpr uint32_t FIFO(uint8_t ep) { return 0x1000 + ep * 0x1000; }
 
     // Register access
-    static volatile uint32_t& reg(uint32_t offset) {
-        return *reinterpret_cast<volatile uint32_t*>(BASE + offset);
-    }
+    static volatile uint32_t& reg(uint32_t offset) { return *reinterpret_cast<volatile uint32_t*>(BASE + offset); }
 
-    static volatile uint32_t& fifo(uint8_t ep) {
-        return *reinterpret_cast<volatile uint32_t*>(BASE + FIFO(ep));
-    }
+    static volatile uint32_t& fifo(uint8_t ep) { return *reinterpret_cast<volatile uint32_t*>(BASE + FIFO(ep)); }
 };
 
 // Register bit definitions (shared between FS/HS)
@@ -81,13 +78,17 @@ inline constexpr uint32_t GAHBCFG_TXFELVL = 1U << 7;
 inline constexpr uint32_t GUSBCFG_FDMOD = 1U << 30;
 inline constexpr uint32_t GUSBCFG_PHYSEL = 1U << 6;
 inline constexpr uint32_t GUSBCFG_TRDT_MASK = 0xFU << 10;
-inline constexpr uint32_t GUSBCFG_TRDT(uint32_t v) { return (v & 0xF) << 10; }
+inline constexpr uint32_t GUSBCFG_TRDT(uint32_t v) {
+    return (v & 0xF) << 10;
+}
 
 // GRSTCTL
 inline constexpr uint32_t GRSTCTL_CSRST = 1U << 0;
 inline constexpr uint32_t GRSTCTL_RXFFLSH = 1U << 4;
 inline constexpr uint32_t GRSTCTL_TXFFLSH = 1U << 5;
-inline constexpr uint32_t GRSTCTL_TXFNUM(uint8_t n) { return static_cast<uint32_t>(n) << 6; }
+inline constexpr uint32_t GRSTCTL_TXFNUM(uint8_t n) {
+    return static_cast<uint32_t>(n) << 6;
+}
 inline constexpr uint32_t GRSTCTL_AHBIDL = 1U << 31;
 
 // GINTSTS/GINTMSK
@@ -100,7 +101,7 @@ inline constexpr uint32_t GINTSTS_USBRST = 1U << 12;
 inline constexpr uint32_t GINTSTS_ENUMDNE = 1U << 13;
 inline constexpr uint32_t GINTSTS_IEPINT = 1U << 18;
 inline constexpr uint32_t GINTSTS_OEPINT = 1U << 19;
-inline constexpr uint32_t GINTSTS_IISOIXFR = 1U << 20;  // Incomplete isochronous IN transfer
+inline constexpr uint32_t GINTSTS_IISOIXFR = 1U << 20; // Incomplete isochronous IN transfer
 inline constexpr uint32_t GINTSTS_WKUPINT = 1U << 31;
 
 // GCCFG
@@ -116,10 +117,12 @@ inline constexpr uint32_t PCGCCTL_GATECLK = 1U << 1;
 // DCFG
 inline constexpr uint32_t DCFG_DSPD_FS = 3U << 0;
 inline constexpr uint32_t DCFG_DAD_MASK = 0x7FU << 4;
-inline constexpr uint32_t DCFG_DAD(uint8_t a) { return static_cast<uint32_t>(a) << 4; }
+inline constexpr uint32_t DCFG_DAD(uint8_t a) {
+    return static_cast<uint32_t>(a) << 4;
+}
 
 // DSTS
-inline constexpr uint32_t DSTS_FNSOF_ODD = 1U << 8;  // Frame number bit 0 (odd/even)
+inline constexpr uint32_t DSTS_FNSOF_ODD = 1U << 8; // Frame number bit 0 (odd/even)
 
 // DCTL
 inline constexpr uint32_t DCTL_RWUSIG = 1U << 0;
@@ -129,16 +132,22 @@ inline constexpr uint32_t DCTL_SGONAK = 1U << 9;
 inline constexpr uint32_t DCTL_CGONAK = 1U << 10;
 
 // DEPCTL (IN/OUT endpoint control)
-inline constexpr uint32_t DEPCTL_MPSIZ(uint32_t sz) { return sz & 0x7FF; }
+inline constexpr uint32_t DEPCTL_MPSIZ(uint32_t sz) {
+    return sz & 0x7FF;
+}
 inline constexpr uint32_t DEPCTL_USBAEP = 1U << 15;
 inline constexpr uint32_t DEPCTL_NAKSTS = 1U << 17;
-inline constexpr uint32_t DEPCTL_EPTYP(uint32_t t) { return (t & 3) << 18; }
+inline constexpr uint32_t DEPCTL_EPTYP(uint32_t t) {
+    return (t & 3) << 18;
+}
 inline constexpr uint32_t DEPCTL_STALL = 1U << 21;
-inline constexpr uint32_t DEPCTL_TXFNUM(uint8_t n) { return static_cast<uint32_t>(n) << 22; }
+inline constexpr uint32_t DEPCTL_TXFNUM(uint8_t n) {
+    return static_cast<uint32_t>(n) << 22;
+}
 inline constexpr uint32_t DEPCTL_CNAK = 1U << 26;
 inline constexpr uint32_t DEPCTL_SNAK = 1U << 27;
-inline constexpr uint32_t DEPCTL_SD0PID = 1U << 28;      // Set DATA0 PID (bulk/int) / Set even frame (iso)
-inline constexpr uint32_t DEPCTL_SODDFRM = 1U << 29;     // Set odd frame (isochronous)
+inline constexpr uint32_t DEPCTL_SD0PID = 1U << 28;  // Set DATA0 PID (bulk/int) / Set even frame (iso)
+inline constexpr uint32_t DEPCTL_SODDFRM = 1U << 29; // Set odd frame (isochronous)
 inline constexpr uint32_t DEPCTL_EPDIS = 1U << 30;
 inline constexpr uint32_t DEPCTL_EPENA = 1U << 31;
 
@@ -176,7 +185,7 @@ inline constexpr uint32_t EPTYP_ISOCHRONOUS = 1;
 inline constexpr uint32_t EPTYP_BULK = 2;
 inline constexpr uint32_t EPTYP_INTERRUPT = 3;
 
-}  // namespace otg
+} // namespace otg
 
 // ============================================================================
 // STM32 OTG HAL Implementation
@@ -184,76 +193,91 @@ inline constexpr uint32_t EPTYP_INTERRUPT = 3;
 
 /// STM32 OTG FS HAL Implementation
 /// Satisfies the umiusb::Hal concept
-template<uint32_t BaseAddr = 0x50000000, uint8_t MaxEndpoints = 4>
+template <uint32_t BaseAddr = 0x50000000, uint8_t MaxEndpoints = 4>
 class Stm32OtgHal : public HalBase<Stm32OtgHal<BaseAddr, MaxEndpoints>> {
     using Regs = OtgRegs<BaseAddr>;
     using Base = HalBase<Stm32OtgHal<BaseAddr, MaxEndpoints>>;
 
-public:
+  public:
     static constexpr uint16_t EP0_SIZE = 64;
     static constexpr uint8_t MAX_EP = MaxEndpoints;
 
-private:
+  private:
     // Buffers
     alignas(4) uint8_t setup_buf_[8];
     alignas(4) uint8_t ep0_buf_[EP0_SIZE];
-    alignas(4) uint8_t ep_rx_buf_[MAX_EP][640];  // 24-bit/96kHz Audio OUT needs up to 582 bytes
+    alignas(4) uint8_t ep_rx_buf_[MAX_EP][640]; // 24-bit/96kHz Audio OUT needs up to 582 bytes
 
     // Endpoint configuration cache (for re-enabling after XFRC)
     std::array<uint16_t, MAX_EP> out_ep_mps_{};
     std::array<TransferType, MAX_EP> out_ep_type_{};
     std::array<TransferType, MAX_EP> in_ep_type_{};
-    std::array<uint16_t, MAX_EP> last_in_len_{};  // Last IN transfer length for IISOIXFR retry
+    std::array<uint16_t, MAX_EP> last_in_len_{}; // Last IN transfer length for IISOIXFR retry
+
+    // Feedback EP transmission control (ref: STM32F401_USB_AUDIO_DAC)
+    // tx_flag prevents overlapping feedback transmissions.
+    // fnsof captured at IsoINIncomplete is used for parity check before sending.
+    bool fb_tx_flag_ = false;           // true while feedback EP transfer is in progress
+    uint16_t fb_fnsof_at_iisoixfr_ = 0; // FNSOF captured at last IsoINIncomplete
+    uint8_t fb_ep_ = 0;                 // Feedback endpoint number (set by AudioInterface)
 
     // EP0 IN multi-packet transfer state
     const uint8_t* ep0_tx_ptr_ = nullptr;
     uint16_t ep0_tx_remaining_ = 0;
 
-public:
+  public:
     // Debug counters (non-volatile for increment, read from debugger)
     uint32_t dbg_setup_count_ = 0;
     uint32_t dbg_ep0_xfrc_count_ = 0;
     uint32_t dbg_ep0_stall_count_ = 0;
+    uint32_t dbg_poll_count_ = 0; // Total poll() calls
     uint32_t dbg_sof_count_ = 0;
-    uint32_t dbg_ep1_out_count_ = 0;       // Audio OUT packet count
-    uint32_t dbg_ep1_out_bytes_ = 0;       // Audio OUT total bytes
-    int16_t dbg_ep1_rx_sample0_ = 0;       // First sample in Audio OUT packet
-    int16_t dbg_ep1_rx_sample1_ = 0;       // Second sample in Audio OUT packet
-    uint32_t dbg_ep1_fifo_word_ = 0;       // First word from EP1 packet
-    uint32_t dbg_ep2_fb_count_ = 0;        // Feedback EP write count
-    uint32_t dbg_ep2_fb_xfrc_ = 0;         // Feedback EP XFRC count
-    uint32_t dbg_ep2_int_count_ = 0;       // Feedback EP IN interrupt count
-    uint32_t dbg_ep2_int_last_ = 0;        // Last DIEPINT(2) snapshot
-    uint32_t dbg_ep2_last_fb_ = 0;         // Last feedback value sent
-    uint32_t dbg_ep2_diepctl_ = 0;         // DIEPCTL(2) value
-    uint32_t dbg_ep2_diepint_ = 0;         // DIEPINT(2) value
-    uint32_t dbg_ep2_fifo_before_ = 0;     // DTXFSTS(2) before FIFO write
-    uint32_t dbg_ep2_fifo_after_ = 0;      // DTXFSTS(2) after FIFO write
-    uint32_t dbg_ep3_in_count_ = 0;        // Audio IN packet count (EP3)
-    uint32_t dbg_ep3_xfrc_count_ = 0;      // Audio IN XFRC count (EP3)
-    uint32_t dbg_ep3_epena_busy_ = 0;      // Audio IN EPENA still set count (EP3)
-    uint32_t dbg_ep1_in_count_ = 0;        // Audio IN packet count (EP1, for AudioInOnly)
-    uint32_t dbg_ep1_xfrc_count_ = 0;      // Audio IN XFRC count (EP1, for AudioInOnly)
-    uint32_t dbg_ep1_epena_busy_ = 0;      // Audio IN EPENA still set count (EP1)
-    uint32_t dbg_ep1_last_len_ = 0;        // Last len passed to ep_write for EP1
-    uint32_t dbg_ep1_fifo_before_ = 0;     // DTXFSTS before FIFO write
-    uint32_t dbg_ep1_fifo_after_ = 0;      // DTXFSTS after FIFO write
-    uint32_t dbg_ep1_txf_cfg_ = 0;         // DIEPTXF(1) value
-    uint32_t dbg_ep1_diepctl_ = 0;         // DIEPCTL(1) value
-    uint32_t dbg_ep1_diepint_ = 0;         // DIEPINT(1) value
-    uint32_t dbg_iepint_count_ = 0;        // IEPINT handler call count
-    uint32_t dbg_last_daint_ = 0;          // Last DAINT value in IEPINT
-    uint32_t dbg_last_daintmsk_ = 0;       // Last DAINTMSK value
-    uint32_t dbg_gintsts_iepint_count_ = 0; // GINTSTS IEPINT flag count
-    uint32_t dbg_ep1_fifo_at_xfrc_ = 0;    // FIFO space at XFRC
-    uint32_t dbg_ep1_dsts_at_write_ = 0;   // DSTS at ep_write (frame number)
-    uint32_t dbg_ep1_dsts_at_sof_ = 0;     // DSTS at SOF callback
-    uint32_t dbg_ep1_parity_mismatch_ = 0; // Times parity didn't match SOF
-    uint32_t dbg_iisoixfr_count_ = 0;     // Incomplete isochronous IN transfer count
-    uint32_t dbg_ep1_first_word_ = 0;     // First word written to EP1 FIFO
-    uint32_t dbg_ep1_second_word_ = 0;    // Second word written to EP1 FIFO
-    uint32_t dbg_fifo_first_word_ = 0;    // First word read from RX FIFO
-    uint32_t dbg_ep1_doepint_ = 0;        // DOEPINT(1) last snapshot
+    uint32_t dbg_last_gintsts_ = 0;          // GINTSTS at last SOF
+    uint32_t dbg_last_gintmsk_ = 0;          // GINTMSK at last SOF
+    uint32_t dbg_last_gints_ = 0;            // gints at last SOF
+    uint32_t dbg_sof_after_clear_ = 0;       // SOF flag after clear (should be 0)
+    uint32_t dbg_sof_callback_count_ = 0;    // Actual SOF callback invocations (deduplicated)
+    uint32_t dbg_sof_skip_count_ = 0;        // SOF skipped due to same frame
+    uint16_t last_sof_frame_ = 0xFFFF;       // Last processed frame number for deduplication
+    uint32_t dbg_ep1_out_count_ = 0;         // Audio OUT packet count
+    uint32_t dbg_ep1_out_bytes_ = 0;         // Audio OUT total bytes
+    int16_t dbg_ep1_rx_sample0_ = 0;         // First sample in Audio OUT packet
+    int16_t dbg_ep1_rx_sample1_ = 0;         // Second sample in Audio OUT packet
+    uint32_t dbg_ep1_fifo_word_ = 0;         // First word from EP1 packet
+    uint32_t dbg_ep2_fb_count_ = 0;          // Feedback EP write count
+    uint32_t dbg_ep2_fb_xfrc_ = 0;           // Feedback EP XFRC count
+    uint32_t dbg_ep2_int_count_ = 0;         // Feedback EP IN interrupt count
+    uint32_t dbg_ep2_int_last_ = 0;          // Last DIEPINT(2) snapshot
+    uint32_t dbg_ep2_last_fb_ = 0;           // Last feedback value sent
+    uint32_t dbg_ep2_diepctl_ = 0;           // DIEPCTL(2) value
+    uint32_t dbg_ep2_diepint_ = 0;           // DIEPINT(2) value
+    uint32_t dbg_ep2_fifo_before_ = 0;       // DTXFSTS(2) before FIFO write
+    uint32_t dbg_ep2_fifo_after_ = 0;        // DTXFSTS(2) after FIFO write
+    uint32_t dbg_ep3_in_count_ = 0;          // Audio IN packet count (EP3)
+    uint32_t dbg_ep3_xfrc_count_ = 0;        // Audio IN XFRC count (EP3)
+    uint32_t dbg_ep3_epena_busy_ = 0;        // Audio IN EPENA still set count (EP3)
+    uint32_t dbg_ep1_in_count_ = 0;          // Audio IN packet count (EP1, for AudioInOnly)
+    uint32_t dbg_ep1_xfrc_count_ = 0;        // Audio IN XFRC count (EP1, for AudioInOnly)
+    uint32_t dbg_ep1_epena_busy_ = 0;        // Audio IN EPENA still set count (EP1)
+    uint32_t dbg_ep1_last_len_ = 0;          // Last len passed to ep_write for EP1
+    uint32_t dbg_ep1_fifo_before_ = 0;       // DTXFSTS before FIFO write
+    uint32_t dbg_ep1_fifo_after_ = 0;        // DTXFSTS after FIFO write
+    uint32_t dbg_ep1_txf_cfg_ = 0;           // DIEPTXF(1) value
+    uint32_t dbg_ep1_diepctl_ = 0;           // DIEPCTL(1) value
+    uint32_t dbg_ep1_diepint_ = 0;           // DIEPINT(1) value
+    uint32_t dbg_iepint_count_ = 0;          // IEPINT handler call count
+    uint32_t dbg_last_daint_ = 0;            // Last DAINT value in IEPINT
+    uint32_t dbg_last_daintmsk_ = 0;         // Last DAINTMSK value
+    uint32_t dbg_gintsts_iepint_count_ = 0;  // GINTSTS IEPINT flag count
+    uint32_t dbg_ep1_fifo_at_xfrc_ = 0;      // FIFO space at XFRC
+    uint32_t dbg_ep1_dsts_at_write_ = 0;     // DSTS at ep_write (frame number)
+    uint32_t dbg_ep1_dsts_at_sof_ = 0;       // DSTS at SOF callback
+    uint32_t dbg_ep1_parity_mismatch_ = 0;   // Times parity didn't match SOF
+    uint32_t dbg_iisoixfr_count_ = 0;        // Incomplete isochronous IN transfer count
+    uint32_t dbg_ep1_first_word_ = 0;        // First word written to EP1 FIFO
+    uint32_t dbg_ep1_second_word_ = 0;       // Second word written to EP1 FIFO
+    uint32_t dbg_fifo_first_word_ = 0;       // First word read from RX FIFO
+    uint32_t dbg_ep1_doepint_ = 0;           // DOEPINT(1) last snapshot
     uint32_t dbg_ep1_doepint_err_count_ = 0; // Unhandled DOEPINT(1) bits count
     uint32_t dbg_ep1_doepint_err_last_ = 0;  // Last unhandled DOEPINT(1) bits
     uint32_t dbg_ep1_doepint_xfrc_count_ = 0;
@@ -261,15 +285,15 @@ public:
     uint32_t dbg_ep1_doepint_otepdis_count_ = 0;
     uint32_t dbg_ep1_doepint_stsphsrx_count_ = 0;
     uint32_t dbg_ep1_doepint_nak_count_ = 0;
-    uint32_t dbg_rxflvl_count_ = 0;       // RXFLVL events
-    uint32_t dbg_rxflvl_out_count_ = 0;   // RXFLVL OUT_DATA events
-    uint32_t dbg_rxflvl_setup_count_ = 0; // RXFLVL SETUP_DATA events
-    uint32_t dbg_rxflvl_other_count_ = 0; // RXFLVL other events
+    uint32_t dbg_rxflvl_count_ = 0;             // RXFLVL events
+    uint32_t dbg_rxflvl_out_count_ = 0;         // RXFLVL OUT_DATA events
+    uint32_t dbg_rxflvl_setup_count_ = 0;       // RXFLVL SETUP_DATA events
+    uint32_t dbg_rxflvl_other_count_ = 0;       // RXFLVL other events
     uint32_t dbg_rxflvl_pktsts_count_[16] = {}; // RXFLVL pktsts histogram
-    uint32_t dbg_ep1_out_bcnt_last_ = 0;  // EP1 OUT last byte count
-    uint32_t dbg_ep1_out_bcnt_min_ = 0;   // EP1 OUT min byte count
-    uint32_t dbg_ep1_out_bcnt_max_ = 0;   // EP1 OUT max byte count
-    uint32_t dbg_ep1_out_zero_count_ = 0; // EP1 OUT zero-length count
+    uint32_t dbg_ep1_out_bcnt_last_ = 0;        // EP1 OUT last byte count
+    uint32_t dbg_ep1_out_bcnt_min_ = 0;         // EP1 OUT min byte count
+    uint32_t dbg_ep1_out_bcnt_max_ = 0;         // EP1 OUT max byte count
+    uint32_t dbg_ep1_out_zero_count_ = 0;       // EP1 OUT zero-length count
     uint32_t dbg_ep1_out_zero_outdata_ = 0;
     uint32_t dbg_ep1_out_zero_setup_ = 0;
     uint32_t dbg_ep1_out_zero_other_ = 0;
@@ -280,6 +304,9 @@ public:
     uint8_t dbg_last_brequest_ = 0;
     uint16_t dbg_last_wvalue_ = 0;
     uint16_t dbg_last_wlength_ = 0;
+    uint32_t dbg_ep_configure_out_count_ = 0;
+    uint32_t dbg_ep1_configure_count_ = 0;
+    uint32_t dbg_ep1_doepctl_after_cfg_ = 0;
 
     void rearm_out_ep(uint8_t ep) {
         uint16_t mps = out_ep_mps_[ep];
@@ -287,9 +314,9 @@ public:
             mps = 64;
         }
 
-        Regs::reg(Regs::DOEPTSIZ(ep)) &= ~(0x7FFFFU);         // Clear XFRSIZ
-        Regs::reg(Regs::DOEPTSIZ(ep)) &= ~(0x3FFU << 19);     // Clear PKTCNT
-        Regs::reg(Regs::DOEPTSIZ(ep)) |= (1U << 19) | mps;    // PKTCNT=1, XFRSIZ=mps
+        Regs::reg(Regs::DOEPTSIZ(ep)) &= ~(0x7FFFFU);      // Clear XFRSIZ
+        Regs::reg(Regs::DOEPTSIZ(ep)) &= ~(0x3FFU << 19);  // Clear PKTCNT
+        Regs::reg(Regs::DOEPTSIZ(ep)) |= (1U << 19) | mps; // PKTCNT=1, XFRSIZ=mps
 
         if (out_ep_type_[ep] == TransferType::Isochronous) {
             if ((Regs::reg(Regs::DSTS) & otg::DSTS_FNSOF_ODD) == 0) {
@@ -302,7 +329,49 @@ public:
         Regs::reg(Regs::DOEPCTL(ep)) |= otg::DEPCTL_CNAK | otg::DEPCTL_EPENA;
     }
 
-public:
+  public:
+    /// Configure feedback endpoint number for tx_flag / parity control.
+    void set_feedback_ep(uint8_t ep) { fb_ep_ = ep; }
+
+    /// Check if feedback EP is ready to transmit (previous transfer done + parity match).
+    /// Reference: STM32F401_USB_AUDIO_DAC SOF handler.
+    [[nodiscard]] bool is_feedback_tx_ready() const {
+        if (fb_tx_flag_) {
+            return false; // Previous transfer still in flight
+        }
+        // Parity check: only transmit when current FNSOF parity matches the one
+        // captured at last IsoINIncomplete. This avoids sending feedback on the
+        // same frame that triggered the incomplete transfer.
+        uint32_t odd_now = (Regs::reg(Regs::DSTS) & otg::DSTS_FNSOF_ODD) ? 1 : 0;
+        return (fb_fnsof_at_iisoixfr_ & 1) == odd_now;
+    }
+
+    /// Mark feedback EP as in-flight. Called after ep_write for feedback.
+    void set_feedback_tx_flag() { fb_tx_flag_ = true; }
+
+    // Ensure isochronous OUT EP has correct frame parity for next frame.
+    // Call from SOF handler to prevent incomplete ISO OUT transfers.
+    void update_iso_out_ep(uint8_t ep) {
+        if (out_ep_type_[ep] != TransferType::Isochronous) {
+            return;
+        }
+
+        uint32_t doepctl = Regs::reg(Regs::DOEPCTL(ep));
+        if ((doepctl & otg::DEPCTL_EPENA) == 0) {
+            // EP disabled — full re-arm with correct parity
+            rearm_out_ep(ep);
+        } else {
+            // EP enabled but may have wrong parity — update parity bits
+            // Current frame odd → next frame even → SD0PID (even frame)
+            // Current frame even → next frame odd → SODDFRM
+            if ((Regs::reg(Regs::DSTS) & otg::DSTS_FNSOF_ODD) == 0) {
+                Regs::reg(Regs::DOEPCTL(ep)) |= otg::DEPCTL_SODDFRM;
+            } else {
+                Regs::reg(Regs::DOEPCTL(ep)) |= otg::DEPCTL_SD0PID;
+            }
+        }
+    }
+
     void init() {
         // Select FS embedded PHY (must be set before core reset for proper PHY selection)
         Regs::reg(Regs::GUSBCFG) |= otg::GUSBCFG_PHYSEL;
@@ -310,7 +379,8 @@ public:
         // Core soft reset
         wait_ahb_idle();
         Regs::reg(Regs::GRSTCTL) |= otg::GRSTCTL_CSRST;
-        while (Regs::reg(Regs::GRSTCTL) & otg::GRSTCTL_CSRST) {}
+        while (Regs::reg(Regs::GRSTCTL) & otg::GRSTCTL_CSRST) {
+        }
         wait_ahb_idle();
 
         // Activate transceiver
@@ -318,7 +388,7 @@ public:
 
         // Force device mode and re-select FS PHY (PHYSEL is cleared by core reset)
         Regs::reg(Regs::GUSBCFG) |= otg::GUSBCFG_PHYSEL | otg::GUSBCFG_FDMOD | otg::GUSBCFG_TRDT(6);
-        delay(50000);  // Wait for mode switch
+        delay(50000); // Wait for mode switch
 
         // Soft disconnect
         Regs::reg(Regs::DCTL) |= otg::DCTL_SDIS;
@@ -355,8 +425,8 @@ public:
         // RX FIFO needs: max_packet_size/4 + 1 + setup_packets(2×8bytes) + status_info(10)
         // For 582 bytes: 146 + 1 + 4 + 10 = 161 words minimum, use 176 for safety
         // Budget: RX 176 + TX0 24 + TX1 16 + TX2 8 + TX3 96 = 320 words
-        Regs::reg(Regs::GRXFSIZ) = 176;                 // RX FIFO: 176 words @ 0
-        Regs::reg(Regs::DIEPTXF0) = (24U << 16) | 176;  // TX0: 24 words @ 176 (EP0 control)
+        Regs::reg(Regs::GRXFSIZ) = 176;                  // RX FIFO: 176 words @ 0
+        Regs::reg(Regs::DIEPTXF0) = (24U << 16) | 176;   // TX0: 24 words @ 176 (EP0 control)
         Regs::reg(Regs::DIEPTXF(1)) = (16U << 16) | 200; // TX1: 16 words @ 200 (MIDI/INT IN)
         Regs::reg(Regs::DIEPTXF(2)) = (8U << 16) | 216;  // TX2: 8 words @ 216 (Feedback)
         Regs::reg(Regs::DIEPTXF(3)) = (96U << 16) | 224; // TX3: 96 words @ 224 (Audio IN)
@@ -364,11 +434,9 @@ public:
         // Clear pending interrupts
         Regs::reg(Regs::GINTSTS) = 0xBFFFFFFFU;
 
-        // Enable interrupts (including SOF for isochronous timing, IISOIXFR for incomplete transfers)
-        Regs::reg(Regs::GINTMSK) = otg::GINTSTS_RXFLVL | otg::GINTSTS_USBSUSP |
-                                   otg::GINTSTS_USBRST | otg::GINTSTS_ENUMDNE |
-                                   otg::GINTSTS_IEPINT | otg::GINTSTS_OEPINT |
-                                   otg::GINTSTS_SOF | otg::GINTSTS_IISOIXFR;
+        // Enable interrupts (SOF required for Async feedback + Audio IN timing)
+        Regs::reg(Regs::GINTMSK) = otg::GINTSTS_RXFLVL | otg::GINTSTS_USBRST | otg::GINTSTS_ENUMDNE |
+                                   otg::GINTSTS_IEPINT | otg::GINTSTS_OEPINT | otg::GINTSTS_SOF;
         Regs::reg(Regs::GAHBCFG) = otg::GAHBCFG_GINTMSK;
 
         // Configure EP0 IN
@@ -378,8 +446,8 @@ public:
         Regs::reg(Regs::DAINTMSK) = (1U << 0) | (1U << 16);
 
         // Configure endpoint masks
-        Regs::reg(Regs::DOEPMSK) = otg::DOEPMSK_STUPM | otg::DOEPMSK_XFRCM |
-                                   otg::DOEPMSK_EPDM | otg::DOEPMSK_OTEPSPRM | otg::DOEPMSK_NAKM;
+        Regs::reg(Regs::DOEPMSK) =
+            otg::DOEPMSK_STUPM | otg::DOEPMSK_XFRCM | otg::DOEPMSK_EPDM | otg::DOEPMSK_OTEPSPRM | otg::DOEPMSK_NAKM;
         Regs::reg(Regs::DIEPMSK) = otg::DIEPMSK_TOM | otg::DIEPMSK_XFRCM | otg::DIEPMSK_EPDM;
 
         // Prepare EP0 OUT for SETUP
@@ -413,11 +481,8 @@ public:
             // Cache IN endpoint type for frame parity in ep_write
             in_ep_type_[ep] = config.type;
 
-            uint32_t diepctl = otg::DEPCTL_MPSIZ(config.max_packet_size) |
-                               otg::DEPCTL_EPTYP(type) |
-                               otg::DEPCTL_TXFNUM(ep) |
-                               otg::DEPCTL_SD0PID |
-                               otg::DEPCTL_USBAEP;
+            uint32_t diepctl = otg::DEPCTL_MPSIZ(config.max_packet_size) | otg::DEPCTL_EPTYP(type) |
+                               otg::DEPCTL_TXFNUM(ep) | otg::DEPCTL_SD0PID | otg::DEPCTL_USBAEP;
             Regs::reg(Regs::DIEPCTL(ep)) = diepctl;
             Regs::reg(Regs::DAINTMSK) |= (1U << ep);
         } else {
@@ -425,18 +490,35 @@ public:
             out_ep_mps_[ep] = config.max_packet_size;
             out_ep_type_[ep] = config.type;
 
+            ++dbg_ep_configure_out_count_;
+            if (ep == 1) {
+                ++dbg_ep1_configure_count_;
+            }
+
             Regs::reg(Regs::DAINTMSK) |= (1U << (ep + 16));
-            Regs::reg(Regs::DOEPCTL(ep)) = otg::DEPCTL_MPSIZ(config.max_packet_size) |
-                                           otg::DEPCTL_EPTYP(type) |
-                                           otg::DEPCTL_SD0PID |
-                                           otg::DEPCTL_USBAEP;
+            Regs::reg(Regs::DOEPCTL(ep)) = otg::DEPCTL_MPSIZ(config.max_packet_size) | otg::DEPCTL_EPTYP(type) |
+                                           otg::DEPCTL_SD0PID | otg::DEPCTL_USBAEP;
 
             // Setup transfer size
             Regs::reg(Regs::DOEPTSIZ(ep)) = (1U << 19) | config.max_packet_size;
 
             // Enable endpoint
             Regs::reg(Regs::DOEPCTL(ep)) |= otg::DEPCTL_CNAK | otg::DEPCTL_EPENA;
+
+            if (ep == 1) {
+                dbg_ep1_doepctl_after_cfg_ = Regs::reg(Regs::DOEPCTL(ep));
+            }
         }
+    }
+
+    /// Check if IN endpoint is busy (previous transfer not yet complete)
+    [[nodiscard]] bool is_ep_busy(uint8_t ep) const {
+        if (ep == 0 || ep >= MAX_EP)
+            return false;
+        if (in_ep_type_[ep] == TransferType::Isochronous) {
+            return (Regs::reg(Regs::DIEPCTL(ep)) & otg::DEPCTL_EPENA) != 0;
+        }
+        return false;
     }
 
     void ep_write(uint8_t ep, const uint8_t* data, uint16_t len) {
@@ -454,8 +536,10 @@ public:
                 // If endpoint is still enabled, previous transfer hasn't completed.
                 // Avoid reprogramming ISO IN EP while busy (prevents feedback overwrite).
                 if (Regs::reg(Regs::DIEPCTL(ep)) & otg::DEPCTL_EPENA) {
-                    if (ep == 1) ++dbg_ep1_epena_busy_;
-                    else if (ep == 3) ++dbg_ep3_epena_busy_;
+                    if (ep == 1)
+                        ++dbg_ep1_epena_busy_;
+                    else if (ep == 3)
+                        ++dbg_ep3_epena_busy_;
                     return;
                 }
 
@@ -476,14 +560,17 @@ public:
                 if (fifo_space < words) {
                     // Wait for AHB idle before flush (as per HAL)
                     uint32_t timeout = 1000;
-                    while (!(Regs::reg(Regs::GRSTCTL) & otg::GRSTCTL_AHBIDL) && --timeout > 0) {}
+                    while (!(Regs::reg(Regs::GRSTCTL) & otg::GRSTCTL_AHBIDL) && --timeout > 0) {
+                    }
                     // Flush this endpoint's TX FIFO
                     Regs::reg(Regs::GRSTCTL) = otg::GRSTCTL_TXFFLSH | otg::GRSTCTL_TXFNUM(ep);
                     timeout = 1000;
-                    while ((Regs::reg(Regs::GRSTCTL) & otg::GRSTCTL_TXFFLSH) && --timeout > 0) {}
+                    while ((Regs::reg(Regs::GRSTCTL) & otg::GRSTCTL_TXFFLSH) && --timeout > 0) {
+                    }
                     // Update fifo_space after flush
                     fifo_space = Regs::reg(Regs::DTXFSTS(ep)) & 0xFFFF;
-                    if (ep == 1) dbg_ep1_fifo_before_ = fifo_space;
+                    if (ep == 1)
+                        dbg_ep1_fifo_before_ = fifo_space;
                 }
 
                 // Save length for potential IISOIXFR retry
@@ -538,7 +625,8 @@ public:
                     dbg_ep2_diepctl_ = Regs::reg(Regs::DIEPCTL(2));
                     dbg_ep2_diepint_ |= Regs::reg(Regs::DIEPINT(2));
                 }
-                if (ep == 3) ++dbg_ep3_in_count_;
+                if (ep == 3)
+                    ++dbg_ep3_in_count_;
             } else {
                 // Non-isochronous (Bulk/Interrupt): wait for previous transfer to complete
                 // Check if EPENA is still set from previous transfer
@@ -552,12 +640,14 @@ public:
                 Regs::reg(Regs::DIEPTSIZ(ep)) = (static_cast<uint32_t>(pktcnt) << 19) | len;
                 Regs::reg(Regs::DIEPCTL(ep)) |= otg::DEPCTL_CNAK | otg::DEPCTL_EPENA;
 
-                if (ep == 3) ++dbg_ep3_in_count_;
+                if (ep == 3)
+                    ++dbg_ep3_in_count_;
 
                 if (len > 0 && data != nullptr) {
                     uint32_t words = (len + 3) / 4;
                     uint32_t timeout = 10000;
-                    while ((Regs::reg(Regs::DTXFSTS(ep)) & 0xFFFF) < words && --timeout > 0) {}
+                    while ((Regs::reg(Regs::DTXFSTS(ep)) & 0xFFFF) < words && --timeout > 0) {
+                    }
 
                     volatile uint32_t& fifo_reg = Regs::fifo(ep);
                     const uint32_t* src = reinterpret_cast<const uint32_t*>(data);
@@ -569,7 +659,7 @@ public:
         }
     }
 
-private:
+  private:
     /// Send one packet on EP0 IN (called from ep_write and XFRC handler)
     void ep0_send_packet() {
         uint16_t chunk = (ep0_tx_remaining_ > EP0_SIZE) ? EP0_SIZE : ep0_tx_remaining_;
@@ -581,7 +671,8 @@ private:
         if (chunk > 0 && ep0_tx_ptr_ != nullptr) {
             uint32_t words = (chunk + 3) / 4;
             uint32_t timeout = 10000;
-            while ((Regs::reg(Regs::DTXFSTS(0)) & 0xFFFF) < words && --timeout > 0) {}
+            while ((Regs::reg(Regs::DTXFSTS(0)) & 0xFFFF) < words && --timeout > 0) {
+            }
 
             volatile uint32_t& fifo_reg = Regs::fifo(0);
             const uint32_t* src = reinterpret_cast<const uint32_t*>(ep0_tx_ptr_);
@@ -593,8 +684,7 @@ private:
         ep0_tx_remaining_ -= chunk;
     }
 
-public:
-
+  public:
     /// Prepare EP0 to receive data (for control OUT data stage)
     void ep0_prepare_rx(uint16_t len) {
         // Setup transfer size for EP0 OUT
@@ -604,7 +694,8 @@ public:
     }
 
     void ep_stall(uint8_t ep, bool in) {
-        if (ep == 0) ++dbg_ep0_stall_count_;
+        if (ep == 0)
+            ++dbg_ep0_stall_count_;
         if (in) {
             Regs::reg(Regs::DIEPCTL(ep)) |= otg::DEPCTL_STALL;
         } else {
@@ -623,6 +714,7 @@ public:
     }
 
     void poll() {
+        ++dbg_poll_count_;
         uint32_t gintsts = Regs::reg(Regs::GINTSTS);
         uint32_t gintmsk = Regs::reg(Regs::GINTMSK);
         uint32_t gints = gintsts & gintmsk;
@@ -637,8 +729,7 @@ public:
         if (gints & otg::GINTSTS_ENUMDNE) {
             Regs::reg(Regs::DIEPCTL(0)) &= ~0x7FFU;
             Regs::reg(Regs::DCTL) |= otg::DCTL_CGINAK;
-            Regs::reg(Regs::GUSBCFG) = (Regs::reg(Regs::GUSBCFG) & ~otg::GUSBCFG_TRDT_MASK) |
-                                       otg::GUSBCFG_TRDT(6);
+            Regs::reg(Regs::GUSBCFG) = (Regs::reg(Regs::GUSBCFG) & ~otg::GUSBCFG_TRDT_MASK) | otg::GUSBCFG_TRDT(6);
             Regs::reg(Regs::GINTSTS) = otg::GINTSTS_ENUMDNE;
         }
 
@@ -661,15 +752,29 @@ public:
         }
 
         // SOF (Start of Frame) - for isochronous timing
+        // Deduplicate by frame number: ISR may fire multiple times per frame due to
+        // other interrupts (RXFLVL, IEPINT). Only process SOF once per frame.
         if (gints & otg::GINTSTS_SOF) {
-            Regs::reg(Regs::GINTSTS) = otg::GINTSTS_SOF;
+            Regs::reg(Regs::GINTSTS) = otg::GINTSTS_SOF; // Clear flag
             ++dbg_sof_count_;
-            // Record DSTS at SOF for debugging frame parity
-            dbg_ep1_dsts_at_sof_ = Regs::reg(Regs::DSTS);
-            // Accumulate EP1 DIEPINT flags for debugging (before callback clears them)
-            dbg_ep1_diepint_ |= Regs::reg(Regs::DIEPINT(1));
-            if (Base::callbacks.on_sof != nullptr) {
-                Base::callbacks.on_sof(Base::callbacks.context);
+
+            uint32_t dsts = Regs::reg(Regs::DSTS);
+            uint16_t frame = static_cast<uint16_t>((dsts >> 8) & 0x3FFF);
+            dbg_last_gintsts_ = gintsts;
+            dbg_last_gintmsk_ = gintmsk;
+            dbg_last_gints_ = gints;
+            dbg_sof_after_clear_ = Regs::reg(Regs::GINTSTS) & otg::GINTSTS_SOF;
+            dbg_ep1_dsts_at_sof_ = dsts;
+
+            if (frame != last_sof_frame_) {
+                last_sof_frame_ = frame;
+                ++dbg_sof_callback_count_;
+                dbg_ep1_diepint_ |= Regs::reg(Regs::DIEPINT(1));
+                if (Base::callbacks.on_sof != nullptr) {
+                    Base::callbacks.on_sof(Base::callbacks.context);
+                }
+            } else {
+                ++dbg_sof_skip_count_;
             }
         }
 
@@ -695,6 +800,17 @@ public:
         if (gints & otg::GINTSTS_IISOIXFR) {
             Regs::reg(Regs::GINTSTS) = otg::GINTSTS_IISOIXFR;
             ++dbg_iisoixfr_count_;
+
+            // Capture FNSOF for feedback parity check (ref: STM32F401_USB_AUDIO_DAC)
+            fb_fnsof_at_iisoixfr_ = static_cast<uint16_t>((Regs::reg(Regs::DSTS) >> 8) & 0x3FFF);
+            // If feedback EP missed, clear tx_flag so SOF can retry
+            if (fb_ep_ > 0 && (Regs::reg(Regs::DIEPCTL(fb_ep_)) & otg::DEPCTL_EPENA) != 0) {
+                fb_tx_flag_ = false;
+                Regs::reg(Regs::GRSTCTL) = otg::GRSTCTL_TXFFLSH | otg::GRSTCTL_TXFNUM(fb_ep_);
+                uint32_t timeout = 1000;
+                while ((Regs::reg(Regs::GRSTCTL) & otg::GRSTCTL_TXFFLSH) && --timeout > 0) {
+                }
+            }
 
             // Check all isochronous IN endpoints and retry if they missed the transfer
             const uint32_t odd_now = (Regs::reg(Regs::DSTS) & otg::DSTS_FNSOF_ODD) ? 1 : 0;
@@ -731,7 +847,7 @@ public:
         }
     }
 
-private:
+  private:
     void handle_reset() {
         Base::address_ = 0;
         // Clear any pending EP0 transfer state
@@ -749,8 +865,8 @@ private:
         }
 
         Regs::reg(Regs::DAINTMSK) |= 0x10001U;
-        Regs::reg(Regs::DOEPMSK) = otg::DOEPMSK_STUPM | otg::DOEPMSK_XFRCM |
-                                   otg::DOEPMSK_EPDM | otg::DOEPMSK_OTEPSPRM | otg::DOEPMSK_NAKM;
+        Regs::reg(Regs::DOEPMSK) =
+            otg::DOEPMSK_STUPM | otg::DOEPMSK_XFRCM | otg::DOEPMSK_EPDM | otg::DOEPMSK_OTEPSPRM | otg::DOEPMSK_NAKM;
         Regs::reg(Regs::DIEPMSK) = otg::DIEPMSK_TOM | otg::DIEPMSK_XFRCM | otg::DIEPMSK_EPDM;
         Regs::reg(Regs::DCFG) &= ~otg::DCFG_DAD_MASK;
 
@@ -866,6 +982,7 @@ private:
                         dbg_ep1_fifo_at_xfrc_ = Regs::reg(Regs::DTXFSTS(1)) & 0xFFFF;
                     } else if (ep == 2) {
                         ++dbg_ep2_fb_xfrc_;
+                        fb_tx_flag_ = false; // Feedback transfer complete
                     } else if (ep == 3) {
                         ++dbg_ep3_xfrc_count_;
                     }
@@ -883,11 +1000,8 @@ private:
                 bool rearm = false;
                 if (ep == 1) {
                     dbg_ep1_doepint_ = epints;
-                    constexpr uint32_t kHandled = otg::DEPINT_XFRC |
-                                                  otg::DEPINT_STUP |
-                                                  otg::DEPINT_OTEPDIS |
-                                                  otg::DEPINT_STSPHSRX |
-                                                  otg::DEPINT_NAK;
+                    constexpr uint32_t kHandled = otg::DEPINT_XFRC | otg::DEPINT_STUP | otg::DEPINT_OTEPDIS |
+                                                  otg::DEPINT_STSPHSRX | otg::DEPINT_NAK;
                     uint32_t unhandled = epints & ~kHandled;
                     if (unhandled != 0) {
                         ++dbg_ep1_doepint_err_count_;
@@ -966,7 +1080,8 @@ private:
     }
 
     void configure_ep0_out() {
-        if (Regs::reg(Regs::DOEPCTL(0)) & otg::DEPCTL_EPENA) return;
+        if (Regs::reg(Regs::DOEPCTL(0)) & otg::DEPCTL_EPENA)
+            return;
         Regs::reg(Regs::DOEPTSIZ(0)) = (1U << 19) | (3U * 8U) | (3U << 29);
         Regs::reg(Regs::DOEPCTL(0)) |= otg::DEPCTL_EPENA | otg::DEPCTL_CNAK;
     }
@@ -980,7 +1095,8 @@ private:
             uint32_t word = fifo_reg;
             dst[i] = word;
             // Save first word for debugging
-            if (i == 0) dbg_fifo_first_word_ = word;
+            if (i == 0)
+                dbg_fifo_first_word_ = word;
         }
 
         uint16_t remaining = len % 4;
@@ -1006,16 +1122,19 @@ private:
 
     void flush_tx_fifos(uint8_t fifo_num) {
         Regs::reg(Regs::GRSTCTL) = otg::GRSTCTL_TXFFLSH | otg::GRSTCTL_TXFNUM(fifo_num);
-        while (Regs::reg(Regs::GRSTCTL) & otg::GRSTCTL_TXFFLSH) {}
+        while (Regs::reg(Regs::GRSTCTL) & otg::GRSTCTL_TXFFLSH) {
+        }
     }
 
     void flush_rx_fifo() {
         Regs::reg(Regs::GRSTCTL) = otg::GRSTCTL_RXFFLSH;
-        while (Regs::reg(Regs::GRSTCTL) & otg::GRSTCTL_RXFFLSH) {}
+        while (Regs::reg(Regs::GRSTCTL) & otg::GRSTCTL_RXFFLSH) {
+        }
     }
 
     void wait_ahb_idle() {
-        while (!(Regs::reg(Regs::GRSTCTL) & otg::GRSTCTL_AHBIDL)) {}
+        while (!(Regs::reg(Regs::GRSTCTL) & otg::GRSTCTL_AHBIDL)) {
+        }
     }
 
     static void delay(uint32_t count) {
@@ -1026,17 +1145,22 @@ private:
 
     static constexpr uint32_t transfer_type_to_hw(TransferType type) {
         switch (type) {
-            case TransferType::Control: return otg::EPTYP_CONTROL;
-            case TransferType::Isochronous: return otg::EPTYP_ISOCHRONOUS;
-            case TransferType::Bulk: return otg::EPTYP_BULK;
-            case TransferType::Interrupt: return otg::EPTYP_INTERRUPT;
-            default: return otg::EPTYP_BULK;
+        case TransferType::Control:
+            return otg::EPTYP_CONTROL;
+        case TransferType::Isochronous:
+            return otg::EPTYP_ISOCHRONOUS;
+        case TransferType::Bulk:
+            return otg::EPTYP_BULK;
+        case TransferType::Interrupt:
+            return otg::EPTYP_INTERRUPT;
+        default:
+            return otg::EPTYP_BULK;
         }
     }
 };
 
 // Type aliases for common configurations
-using Stm32FsHal = Stm32OtgHal<0x50000000, 4>;  // USB OTG FS
+using Stm32FsHal = Stm32OtgHal<0x50000000, 4>; // USB OTG FS
 // using Stm32HsHal = Stm32OtgHal<0x40040000, 6>;  // USB OTG HS (future)
 
-}  // namespace umiusb
+} // namespace umiusb

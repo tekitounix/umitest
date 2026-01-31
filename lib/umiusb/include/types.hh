@@ -69,6 +69,7 @@ namespace bDeviceClass {
     inline constexpr uint8_t CDC = 0x02;
     inline constexpr uint8_t HID = 0x03;
     inline constexpr uint8_t MassStorage = 0x08;
+    inline constexpr uint8_t Misc = 0xEF;
     inline constexpr uint8_t Vendor = 0xFF;
 }
 

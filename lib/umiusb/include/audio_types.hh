@@ -121,202 +121,96 @@ using PllRateController = umidsp::PiRateController;
 // Feedback Calculator (for Asynchronous mode)
 // ============================================================================
 
-/// Calculates feedback value for Asynchronous mode
-/// UAC1: 10.14 fixed-point format (Full Speed)
-/// UAC2: 16.16 fixed-point format
+/// Calculates feedback value for Asynchronous mode.
+/// Full Speed uses 10.14 fixed-point format (3 bytes) per USB 2.0 §5.12.4.2.
+/// Algorithm based on STM32F401_USB_AUDIO_DAC reference (PID-style buffer tracking).
 ///
-/// Based on TinyUSB's FIFO count method with proper low-pass filtering
-enum class FeedbackMode : uint8_t {
-    FifoLevel = 0,
-    BufferDelta = 1,
-};
-
+/// The host adjusts its packet size based on the feedback value to keep the
+/// device's ring buffer at ~50% fill level.
 template <UacVersion Version = UacVersion::Uac1>
 class FeedbackCalculator {
   public:
-    // Use power-of-2 window for efficient shift-based calculation
-    static constexpr uint32_t MEASUREMENT_WINDOW = 32; // SOF frames to average
-    static constexpr uint32_t WINDOW_SHIFT = 5;        // log2(32) = 5
+    // FS feedback: 10.14 format, 3 bytes (USB 2.0 §5.12.4.2)
+    // Note: USB Audio 2.0 §5.2.3.2 specifies 16.16 (4 bytes) for UAC2,
+    // but macOS FS driver uses 10.14 regardless of UAC version.
+    static constexpr uint32_t FEEDBACK_SHIFT = 14;
+    static constexpr uint32_t FEEDBACK_BYTES = 3;
 
-    // UAC1 FS: 10.14 format, UAC2: 16.16 format
-    static constexpr uint32_t FEEDBACK_SHIFT = (Version == UacVersion::Uac1) ? 14 : 16;
-    static constexpr uint32_t FEEDBACK_BYTES = (Version == UacVersion::Uac1) ? 3 : 4;
+    // Feedback clamp: ±1 sample/frame from nominal
+    static constexpr uint32_t FB_DELTA_MAX = 1U << FEEDBACK_SHIFT;
 
     void reset(uint32_t nominal_rate) {
         nominal_rate_ = nominal_rate;
-        // 10.14 format: feedback = samples_per_ms * 16384
-        // For 48kHz: 48 * 16384 = 786432 = 0x0C0000
+        // 10.14 format: feedback = samples_per_ms << 14
+        // For 48kHz: 48 << 14 = 786432 = 0x0C0000
         nominal_feedback_ = (nominal_rate << FEEDBACK_SHIFT) / 1000;
         current_feedback_ = nominal_feedback_;
-        sample_count_ = 0;
-        sof_count_ = 0;
-        accumulated_samples_ = 0;
-
-        // Clamp to ±1 sample/frame in Q format (host typically only follows ±1)
-        const uint32_t range = (1U << FEEDBACK_SHIFT);
-        min_feedback_ = nominal_feedback_ - range;
-        max_feedback_ = nominal_feedback_ + range;
-
-        // Initialize FIFO level average (Q16 format) to target level
-        // Target is fifo_threshold (half of FIFO depth in frames)
-        fifo_level_avg_q16_ = fifo_threshold_ << 16;
-        last_level_ = fifo_threshold_;
-        update_delta_gain();
-
-        // Calculate TinyUSB-style rate constants
-        // rate_const = (max_value - nominal) / fifo_threshold
-        rate_const_up_ = (max_feedback_ - nominal_feedback_) / fifo_threshold_;
-        rate_const_down_ = (nominal_feedback_ - min_feedback_) / fifo_threshold_;
-
-        // Ensure minimum rate_const to avoid zero division / no adjustment
-        if (rate_const_up_ == 0)
-            rate_const_up_ = 1;
-        if (rate_const_down_ == 0)
-            rate_const_down_ = 1;
+        buf_half_size_ = 0;
     }
 
-    /// Set FIFO threshold for feedback calculation
-    /// @param threshold Target FIFO level in frames (typically half of FIFO depth)
-    void set_fifo_threshold(uint32_t threshold) {
-        fifo_threshold_ = threshold;
-        // Recalculate rate constants with new threshold
-        if (fifo_threshold_ > 0) {
-            rate_const_up_ = (max_feedback_ - nominal_feedback_) / fifo_threshold_;
-            rate_const_down_ = (nominal_feedback_ - min_feedback_) / fifo_threshold_;
-            if (rate_const_up_ == 0)
-                rate_const_up_ = 1;
-            if (rate_const_down_ == 0)
-                rate_const_down_ = 1;
-        }
-        fifo_level_avg_q16_ = fifo_threshold_ << 16;
-        last_level_ = fifo_threshold_;
-        update_delta_gain();
+    /// Set the buffer half-size (nominal fill target in samples).
+    /// This is AUDIO_TOTAL_BUF_SIZE / (2 * bytes_per_stereo_sample) in reference terms.
+    void set_buffer_half_size(uint32_t half_size_samples) {
+        buf_half_size_ = half_size_samples;
     }
 
-    /// Set the actual device sample rate (for FIFO-based feedback)
-    /// Use this when the device has a known fixed clock rate different from nominal
-    /// @param actual_rate The actual sample rate in Hz (e.g., 47991 for STM32F4 I2S)
-    ///
-    /// This recalculates nominal_feedback_ AND rate_const_ based on the actual rate
-    /// so that FIFO-based adjustments work correctly around the actual clock rate.
+    /// Set the actual device sample rate (when device clock differs from nominal).
     void set_actual_rate(uint32_t actual_rate) {
         nominal_rate_ = actual_rate;
-        // Calculate feedback value for the actual rate
-        // UAC1 10.14 format: feedback = samples_per_ms * 16384
-        // For 47991 Hz: 47.991 * 16384 = 786,300 = 0x0BFFCC
         nominal_feedback_ = (actual_rate << FEEDBACK_SHIFT) / 1000;
         current_feedback_ = nominal_feedback_;
-
-        // Recalculate min/max based on actual rate (±1 sample/frame)
-        const uint32_t range = (1U << FEEDBACK_SHIFT);
-        min_feedback_ = nominal_feedback_ - range;
-        max_feedback_ = nominal_feedback_ + range;
-
-        // Recalculate rate constants
-        rate_const_up_ = (max_feedback_ - nominal_feedback_) / fifo_threshold_;
-        rate_const_down_ = (nominal_feedback_ - min_feedback_) / fifo_threshold_;
-        if (rate_const_up_ == 0)
-            rate_const_up_ = 1;
-        if (rate_const_down_ == 0)
-            rate_const_down_ = 1;
-
-        // Initialize FIFO level average to target
-        fifo_level_avg_q16_ = fifo_threshold_ << 16;
-        last_level_ = fifo_threshold_;
-        update_delta_gain();
     }
 
-    /// Call this every SOF (1ms for FS, 125us for HS) to update timing
-    void on_sof() {
-        sof_count_++;
-        if (sof_count_ >= MEASUREMENT_WINDOW) {
-            update_feedback();
-        }
-    }
-
-    /// Call this when samples are consumed by I2S DMA
-    void add_consumed_samples(uint32_t count) { accumulated_samples_ += count; }
-
-    /// Update feedback based on FIFO level (TinyUSB FIFO count method)
-    /// Call this periodically to adjust feedback based on buffer fill level
-    /// @param current_level Current FIFO fill level (frames)
-    /// @param target_level Target FIFO fill level (frames), typically half buffer
+    /// Update feedback from buffer fill level.
+    /// Call every 2 SOFs (every 2ms) from the SOF handler.
     ///
-    /// Algorithm from TinyUSB audiod_fb_fifo_count_update():
-    /// 1. Apply 64-point low-pass filter to smooth FIFO level readings
-    /// 2. Compare filtered level to threshold
-    /// 3. Apply linear adjustment based on deviation
-    void update_from_fifo_level(uint32_t current_level) {
-        // Low-pass filter (32-point averaging) for smoother feedback
-        // Use 64-bit arithmetic to prevent overflow (like TinyUSB)
-        // lvl = (lvl * 31 + (lvl_new << 16)) >> 5
-        uint64_t lvl64 = fifo_level_avg_q16_;
-        lvl64 = ((lvl64 * 31) + (static_cast<uint64_t>(current_level) << 16)) >> 5;
-        fifo_level_avg_q16_ = static_cast<uint32_t>(lvl64);
+    /// @param writable_samples Number of writable (free) sample-frames in the ring buffer.
+    ///
+    /// Algorithm from STM32F401_USB_AUDIO_DAC:
+    ///   deviation = writable - half_size  (positive = underfilled, negative = overfilled)
+    ///   tmp = (1 << 22) + (deviation * PID_GAIN)
+    ///   fb = (nominal * tmp) >> 22
+    ///   clamp to ±1 kHz
+    void update_from_buffer_level(int32_t writable_samples) {
+        if (buf_half_size_ == 0)
+            return;
 
-        // Extract integer part of filtered level
-        uint32_t filtered_level = fifo_level_avg_q16_ >> 16;
+        int32_t deviation = writable_samples - static_cast<int32_t>(buf_half_size_);
 
-        if (mode_ == FeedbackMode::BufferDelta) {
-            // Reference-style delta feedback: adjust based on frame-to-frame level change
-            int32_t delta = static_cast<int32_t>(filtered_level) - static_cast<int32_t>(last_level_);
-            last_level_ = filtered_level;
-            int64_t adjust = (static_cast<int64_t>(delta_gain_q16_) * delta) >> 16;
-            int64_t fb = static_cast<int64_t>(nominal_feedback_) + adjust;
-            if (fb < static_cast<int64_t>(min_feedback_))
-                fb = min_feedback_;
-            if (fb > static_cast<int64_t>(max_feedback_))
-                fb = max_feedback_;
-            current_feedback_ = static_cast<uint32_t>(fb);
-        } else {
-            // TinyUSB approach: linear adjustment based on deviation from target
-            if (filtered_level < fifo_threshold_) {
-                // Buffer underfilled: increase feedback to request more data from host
-                uint32_t deficit = fifo_threshold_ - filtered_level;
-                current_feedback_ = nominal_feedback_ + (deficit * rate_const_up_);
-            } else {
-                // Buffer overfilled: decrease feedback to request less data from host
-                uint32_t excess = filtered_level - fifo_threshold_;
-                current_feedback_ = nominal_feedback_ - (excess * rate_const_down_);
-            }
-        }
+        // PID gain: 256 per sample deviation (from reference)
+        // This provides ~1 sample/frame correction per deviation sample
+        constexpr int32_t PID_GAIN = 256;
+        int64_t tmp = (1LL << 22) + (static_cast<int64_t>(deviation) * PID_GAIN);
 
-        // Clamp to TinyUSB-style ±1 sample/frame range
-        if (current_feedback_ < min_feedback_)
-            current_feedback_ = min_feedback_;
-        if (current_feedback_ > max_feedback_)
-            current_feedback_ = max_feedback_;
+        // Prevent negative multiplier (would invert feedback direction)
+        if (tmp < 0)
+            tmp = 0;
+
+        uint64_t pid_result = static_cast<uint64_t>(nominal_feedback_) * static_cast<uint64_t>(tmp);
+        uint32_t fb = static_cast<uint32_t>(pid_result >> 22);
+
+        // Clamp to ±1 sample/frame from nominal
+        uint32_t fb_max = nominal_feedback_ + FB_DELTA_MAX;
+        uint32_t fb_min = (nominal_feedback_ > FB_DELTA_MAX) ? (nominal_feedback_ - FB_DELTA_MAX) : 0;
+        if (fb > fb_max)
+            fb = fb_max;
+        if (fb < fb_min)
+            fb = fb_min;
+
+        current_feedback_ = fb;
     }
 
-    /// Get current feedback value
+    /// Get current feedback value (Q10.14)
     [[nodiscard]] uint32_t get_feedback() const { return current_feedback_; }
 
-    /// Get feedback as byte array for USB transfer
-    [[nodiscard]] auto get_feedback_bytes() const {
-        if constexpr (Version == UacVersion::Uac1) {
-            // If the host ignores fractional feedback, dither to integer samples/ms.
-            uint32_t fb = current_feedback_;
-            uint32_t int_fb = fb & 0xFFFFC000u; // integer part in 10.14
-            uint32_t frac = fb & 0x00003FFFu;   // fractional part
-            uint32_t acc = fb_dither_accum_ + frac;
-            if (acc >= (1U << FEEDBACK_SHIFT)) {
-                int_fb += (1U << FEEDBACK_SHIFT);
-                acc -= (1U << FEEDBACK_SHIFT);
-            }
-            fb_dither_accum_ = acc;
-            return std::array<uint8_t, 3>{
-                static_cast<uint8_t>(int_fb & 0xFF),
-                static_cast<uint8_t>((int_fb >> 8) & 0xFF),
-                static_cast<uint8_t>((int_fb >> 16) & 0xFF),
-            };
-        } else {
-            return std::array<uint8_t, 4>{
-                static_cast<uint8_t>(current_feedback_ & 0xFF),
-                static_cast<uint8_t>((current_feedback_ >> 8) & 0xFF),
-                static_cast<uint8_t>((current_feedback_ >> 16) & 0xFF),
-                static_cast<uint8_t>((current_feedback_ >> 24) & 0xFF),
-            };
-        }
+    /// Get feedback as 3-byte array for USB transfer (10.14 format, little-endian).
+    [[nodiscard]] std::array<uint8_t, FEEDBACK_BYTES> get_feedback_bytes() const {
+        uint32_t fb = current_feedback_ & 0x00FFFFFFu;
+        return {
+            static_cast<uint8_t>(fb & 0xFF),
+            static_cast<uint8_t>((fb >> 8) & 0xFF),
+            static_cast<uint8_t>((fb >> 16) & 0xFF),
+        };
     }
 
     /// Get feedback rate as float (for debugging)
@@ -324,72 +218,11 @@ class FeedbackCalculator {
         return static_cast<float>(current_feedback_) / (1 << FEEDBACK_SHIFT);
     }
 
-    void set_feedback_mode(FeedbackMode mode) { mode_ = mode; }
-
-    void set_delta_gain_q16(uint32_t gain_q16) {
-        delta_gain_q16_ = gain_q16;
-        delta_gain_auto_ = false;
-    }
-
-    void set_delta_gain_auto() {
-        delta_gain_auto_ = true;
-        update_delta_gain();
-    }
-
   private:
-    void update_delta_gain() {
-        if (!delta_gain_auto_)
-            return;
-        if (fifo_threshold_ == 0) {
-            delta_gain_q16_ = 0;
-            return;
-        }
-        // Default: 1 sample/frame adjustment spread across fifo_threshold frames.
-        delta_gain_q16_ = (1u << (FEEDBACK_SHIFT + 16)) / fifo_threshold_;
-    }
-
-    void update_feedback() {
-        if (accumulated_samples_ > 0) {
-            // Calculate feedback using shift instead of division
-            // measured = (samples << FEEDBACK_SHIFT) / WINDOW
-            //          = samples << (FEEDBACK_SHIFT - WINDOW_SHIFT)
-            uint32_t measured = accumulated_samples_ << (FEEDBACK_SHIFT - WINDOW_SHIFT);
-
-            // Smooth the feedback to avoid sudden jumps
-            // Use exponential moving average: new = old * 7/8 + measured * 1/8
-            // Implemented with shifts: (old * 7 + measured) >> 3
-            current_feedback_ = ((current_feedback_ * 7) + measured) >> 3;
-
-            // Clamp to TinyUSB-style ±1 sample/frame range (not ±1%)
-            if (current_feedback_ < min_feedback_)
-                current_feedback_ = min_feedback_;
-            if (current_feedback_ > max_feedback_)
-                current_feedback_ = max_feedback_;
-        }
-        sof_count_ = 0;
-        accumulated_samples_ = 0;
-    }
-
     uint32_t nominal_rate_ = 48000;
     uint32_t nominal_feedback_ = 0;
     uint32_t current_feedback_ = 0;
-    uint32_t min_feedback_ = 0; // TinyUSB-style min (sample_freq - 1) / 1000 << shift
-    uint32_t max_feedback_ = 0; // TinyUSB-style max (sample_freq / 1000 + 1) << shift
-    uint32_t sample_count_ = 0;
-    uint32_t sof_count_ = 0;
-    uint32_t accumulated_samples_ = 0;
-    uint32_t fifo_level_avg_q16_ = 128 << 16; // Q16 filtered FIFO level
-    uint32_t fifo_threshold_ = 128;           // Target FIFO level in frames (half of FIFO depth)
-    mutable uint32_t fb_dither_accum_ = 0;
-    uint32_t last_level_ = 0;
-    FeedbackMode mode_ = FeedbackMode::FifoLevel;
-    uint32_t delta_gain_q16_ = 0;
-    bool delta_gain_auto_ = true;
-
-    // TinyUSB-style rate constants for FIFO-based feedback
-    // Calculated as: rate_const = (max_value - nominal) / fifo_threshold
-    uint32_t rate_const_up_ = 1;   // When buffer underfilled
-    uint32_t rate_const_down_ = 1; // When buffer overfilled
+    uint32_t buf_half_size_ = 0; // Target: half of ring buffer capacity in frames
 };
 
 // ============================================================================
@@ -418,9 +251,16 @@ class AudioRingBuffer {
         overrun_count_ = 0;
     }
 
-    /// Reset and immediately enable reading (for Audio IN - no prebuffer needed)
+    /// Reset and immediately enable reading with silence prebuffer.
+    /// Prebuffer prevents underrun at stream start: USB SOF calls send_audio_in()
+    /// before the audio task has written any data to the ring buffer.
     void reset_and_start() {
         reset();
+        // Prebuffer 1/4 capacity with silence so send_audio_in() doesn't underrun
+        // Using 1/4 instead of 1/2 to leave more room for writes, reducing overrun risk
+        constexpr uint32_t prebuffer_frames = Frames / 4;
+        __builtin_memset(buffer_, 0, prebuffer_frames * BYTES_PER_FRAME);
+        write_pos_.store(prebuffer_frames, std::memory_order_release);
         playback_started_.store(true, std::memory_order_release);
     }
 
@@ -456,6 +296,45 @@ class AudioRingBuffer {
         // Release semantics: ensure all writes to buffer are visible before updating write_pos_
         write_pos_.store((write + frame_count) & MASK, std::memory_order_release);
 
+        return frame_count;
+    }
+
+    /// Write frames, overwriting oldest data if buffer is full
+    /// This keeps the buffer always full with the most recent data.
+    /// Ideal for Audio IN where we want fresh data ready when streaming starts.
+    uint32_t write_overwrite(const SampleT* samples, uint32_t frame_count) {
+        if (frame_count > Frames - 1) {
+            // Can't write more than buffer capacity minus 1
+            frame_count = Frames - 1;
+        }
+
+        uint32_t write = write_pos_.load(std::memory_order_relaxed);
+        uint32_t read = read_pos_.load(std::memory_order_acquire);
+
+        uint32_t available = (write - read) & MASK;
+        uint32_t free_space = Frames - 1 - available;
+
+        // If not enough space, advance read pointer to make room
+        if (frame_count > free_space) {
+            uint32_t need_space = frame_count - free_space;
+            read_pos_.store((read + need_space) & MASK, std::memory_order_release);
+            overrun_count_++;
+        }
+
+        // Now write the data
+        uint32_t write_idx = write & MASK;
+        uint32_t first_chunk = Frames - write_idx;
+
+        if (frame_count <= first_chunk) {
+            __builtin_memcpy(&buffer_[write_idx * Channels], samples, frame_count * BYTES_PER_FRAME);
+        } else {
+            __builtin_memcpy(&buffer_[write_idx * Channels], samples, first_chunk * BYTES_PER_FRAME);
+            __builtin_memcpy(buffer_,
+                             &samples[static_cast<size_t>(first_chunk) * Channels],
+                             (frame_count - first_chunk) * BYTES_PER_FRAME);
+        }
+
+        write_pos_.store((write + frame_count) & MASK, std::memory_order_release);
         return frame_count;
     }
 
@@ -804,8 +683,9 @@ inline constexpr uint8_t CLOCK_INTERNAL_VARIABLE = 0x02;
 inline constexpr uint8_t CLOCK_INTERNAL_PROGRAMMABLE = 0x03;
 inline constexpr uint8_t CLOCK_SYNCED_TO_SOF = 0x04;
 
-// Audio function category
-inline constexpr uint8_t FUNCTION_SUBCLASS = 0x00;
+// Audio function category (UAC2)
+inline constexpr uint8_t FUNCTION_CATEGORY_UNDEFINED = 0x00;
+inline constexpr uint8_t FUNCTION_CATEGORY_IO_BOX = 0x08;
 
 // Interface protocol
 inline constexpr uint8_t IP_VERSION_02_00 = 0x20;

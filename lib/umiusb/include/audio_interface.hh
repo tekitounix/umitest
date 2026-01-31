@@ -62,12 +62,10 @@ struct AudioPort {
     // Add +1 sample headroom so feedback can request extra frames (e.g. 96k -> 97).
     static constexpr uint16_t PACKET_SIZE =
         (static_cast<uint16_t>(((MaxSampleRate_ + 999) / 1000) + 1) * BYTES_PER_FRAME);
-    // Buffer size: ~4-8ms at max sample rate, rounded up to power of 2
-    // 96kHz -> 384 frames -> 1024, 48kHz -> 192 frames -> 256
-    static constexpr uint32_t BUFFER_FRAMES = (MaxSampleRate_ >= 96000)   ? 1024
-                                              : (MaxSampleRate_ >= 88200) ? 512
-                                              : (MaxSampleRate_ >= 44100) ? 256
-                                                                          : 128;
+    // Buffer size: ~20ms at max sample rate, rounded up to power of 2
+    // Increased to 1024 for all rates to handle timing jitter between
+    // DMA writes (64 frames @ 750Hz) and USB reads (48 frames @ 1000Hz)
+    static constexpr uint32_t BUFFER_FRAMES = 1024;
 
     static_assert(RATES_COUNT == 0 || MAX_SAMPLE_RATE >= Rates::max_rate,
                   "MAX_SAMPLE_RATE must be >= max rate in Rates list");
@@ -141,7 +139,11 @@ class AudioInterface {
     // Version
     static constexpr UacVersion UAC_VERSION = Version;
     static constexpr bool IS_UAC2 = (Version == UacVersion::Uac2);
+    static constexpr bool USES_IAD = IS_UAC2;
     static constexpr AudioSyncMode SYNC_MODE = SyncMode_;
+    // FS feedback: 3 bytes (10.14 format) per USB 2.0 §5.12.4.2
+    // macOS FS driver uses 10.14 regardless of UAC version.
+    static constexpr uint16_t FB_PACKET_SIZE = 3;
     static constexpr bool SAMPLE_RATE_CONTROL = SampleRateControlEnabled_;
     using SampleT = SampleT_;
 
@@ -241,8 +243,8 @@ class AudioInterface {
     static constexpr std::size_t calc_descriptor_size() {
         std::size_t size = 9; // Configuration descriptor
 
-        if constexpr (HAS_AUDIO && HAS_MIDI) {
-            size += 8; // IAD
+        if constexpr (HAS_AUDIO) {
+            size += 8; // IAD (Interface Association Descriptor)
         }
 
         if constexpr (HAS_AUDIO) {
@@ -349,7 +351,9 @@ class AudioInterface {
 
     static constexpr std::size_t MAX_DESC_SIZE = calc_descriptor_size();
     // UAC1 bRefresh exponent; bRefresh=2 => 4ms (2^2 frames).
-    static constexpr uint8_t FB_REFRESH = (SYNC_MODE == AudioSyncMode::Async && !IS_UAC2) ? 2 : 0;
+    // bRefresh = 2 means feedback period = 2^2 = 4 ms (update every 4 SOF).
+    // Applied to both UAC1 and UAC2 per STM32 reference implementations.
+    static constexpr uint8_t FB_REFRESH = (SYNC_MODE == AudioSyncMode::Async) ? 2 : 0;
 
     // ========================================================================
     // Descriptor Builder
@@ -408,14 +412,14 @@ class AudioInterface {
         w(0x80);      // bmAttributes (bus powered)
         w(100);       // bMaxPower (200mA)
 
-        // IAD for Audio + MIDI composite (single Audio function)
-        if constexpr (HAS_AUDIO && HAS_MIDI) {
+        // IAD for Audio function (do not include MIDI interface)
+        if constexpr (HAS_AUDIO) {
             w(8, bDescriptorType::InterfaceAssociation);
             w(audio_ctrl_iface);
-            w(iface_num);
+            w(static_cast<uint8_t>(1 + (HAS_AUDIO_OUT ? 1 : 0) + (HAS_AUDIO_IN ? 1 : 0)));
             w(bDeviceClass::Audio);
             w(0x00);
-            w(0x00);
+            w(IS_UAC2 ? uac::uac2::IP_VERSION_02_00 : 0x00);
             w(0);
         }
 
@@ -440,17 +444,17 @@ class AudioInterface {
                 // AC Header
                 w(9, bDescriptorType::CsInterface, uac::ac::HEADER);
                 w16(0x0200); // bcdADC = 2.0
-                w(uac::uac2::FUNCTION_SUBCLASS);
+                w(uac::uac2::FUNCTION_CATEGORY_IO_BOX);
                 w16(ac_total);
                 w(0x00); // bmControls
 
-                // Clock Source (shared)
+                // Clock Source (shared) - matches TinyUSB speaker_fb
                 w(8, bDescriptorType::CsInterface, uac::ac::CLOCK_SOURCE);
                 w(1); // bClockID
-                w(uac::uac2::CLOCK_INTERNAL_FIXED);
-                w(0x07); // bmControls
-                w(0);    // bAssocTerminal
-                w(0);    // iClockSource
+                w(SAMPLE_RATE_CONTROL ? uac::uac2::CLOCK_INTERNAL_PROGRAMMABLE : uac::uac2::CLOCK_INTERNAL_FIXED);
+                w(SAMPLE_RATE_CONTROL ? 0x03 : 0x01); // bmControls: freq=RW (3) only
+                w(0);                                 // bAssocTerminal: 0 = not associated with specific terminal
+                w(0);                                 // iClockSource
 
                 // Audio OUT path: IT(2) -> OT(3)
                 if constexpr (HAS_AUDIO_OUT) {
@@ -627,26 +631,27 @@ class AudioInterface {
                     // Audio Endpoint
                     w(7, bDescriptorType::Endpoint);
                     w(EP_AUDIO_OUT);
-                    w(static_cast<uint8_t>(SYNC_MODE));
-                    w16(AudioOut::PACKET_SIZE);
+                    w(static_cast<uint8_t>(SYNC_MODE)); // bmAttributes: 0x05 for Async
+                    constexpr uint16_t out_packet_size =
+                        static_cast<uint16_t>((((AudioOut::SAMPLE_RATE + 999) / 1000) + 1) * AudioOut::BYTES_PER_FRAME);
+                    w16(out_packet_size);
                     w(1);
-                    w(0);
 
-                    // CS Audio Endpoint
+                    // CS Audio Endpoint (UAC2)
                     w(8, bDescriptorType::CsEndpoint, uac::as::GENERAL);
-                    w(0x00);
-                    w(0x00);
-                    w(0);
-                    w16(0);
+                    w(0x00); // bmAttributes: D7=0 means non-max packets OK (UAC2 4.10.1.2)
+                    w(0x00); // bmControls
+                    w(0);    // bLockDelayUnits
+                    w16(0);  // wLockDelay
 
                     if constexpr (SYNC_MODE == AudioSyncMode::Async) {
                         // Feedback Endpoint
+                        // UAC1: 10.14 format (3 bytes), UAC2: 16.16 format (4 bytes)
                         w(7, bDescriptorType::Endpoint);
                         w(0x80 | EP_FEEDBACK);
                         w(0x11); // Iso, Feedback
-                        w16(4);  // 4 bytes for UAC2
-                        w(4);    // bInterval
-                        w(0);
+                        w16(FB_PACKET_SIZE);
+                        w(1);    // bInterval (1ms)
                     }
                 } else {
                     auto write_out_alt = [&]<size_t AltIndex>() {
@@ -763,20 +768,23 @@ class AudioInterface {
                     w(AudioIn::BIT_DEPTH / 8);
                     w(AudioIn::BIT_DEPTH);
 
-                    // Audio Endpoint (IN)
+                    // Audio Endpoint (IN) - UAC2
+                    // Use Synchronous mode (0x0D) for Audio IN
+                    // Synchronous: device provides data at SOF rate
                     w(7, bDescriptorType::Endpoint);
                     w(0x80 | EP_AUDIO_IN);
-                    w(static_cast<uint8_t>(SYNC_MODE));
-                    w16(AudioIn::PACKET_SIZE);
+                    w(0x0D); // Isochronous, Synchronous
+                    constexpr uint16_t in_packet_size =
+                        static_cast<uint16_t>((((AudioIn::SAMPLE_RATE + 999) / 1000) + 1) * AudioIn::BYTES_PER_FRAME);
+                    w16(in_packet_size);
                     w(1);
-                    w(0);
 
-                    // CS Audio Endpoint
+                    // CS Audio Endpoint (UAC2)
                     w(8, bDescriptorType::CsEndpoint, uac::as::GENERAL);
-                    w(0x00);
-                    w(0x00);
-                    w(0);
-                    w16(0);
+                    w(0x00); // bmAttributes
+                    w(0x00); // bmControls
+                    w(0);    // bLockDelayUnits
+                    w16(0);  // wLockDelay
                 } else {
                     auto write_in_alt = [&]<size_t AltIndex>() {
                         using Alt = typename AudioIn::template Alt<AltIndex>;
@@ -1055,32 +1063,48 @@ class AudioInterface {
         data[2] = static_cast<uint8_t>((v >> 16) & 0xFF);
     }
 
-    static void configure_pll_controller(PllRateController& controller, uint32_t target_level) {
-        if (target_level >= 512) {
-            target_level = (target_level * 2) / 3; // 96kHz: slower, smoother tracking to reduce audible modulation
-        }
-        umidsp::PiConfig cfg = umidsp::PiConfig::stable(static_cast<int32_t>(target_level));
-        if (target_level >= 512) {
-            // 96kHz: slower, smoother tracking to reduce audible modulation
-            cfg.max_ppm = 150;   // Reduced from 200 to minimize rate swings
-            cfg.hysteresis = 48; // Increased from 32 to prevent oscillation around target
-            cfg.kp_num = 1;
-            cfg.kp_den = 12; // Reduced from 8 (slower proportional response)
-            cfg.ki_num = 1;
-            cfg.ki_den = 800;        // Reduced from 600 (slower integral buildup)
-            cfg.integral_max = 6000; // Reduced from 8000
-        } else {
-            // 44.1/48kHz: gentler tracking to suppress tick noise
-            cfg.max_ppm = 200;   // Reduced from 300
-            cfg.hysteresis = 36; // Increased from 24
-            cfg.kp_num = 1;
-            cfg.kp_den = 6; // Reduced from 4 (slower response)
-            cfg.ki_num = 1;
-            cfg.ki_den = 500;        // Reduced from 400
-            cfg.integral_max = 8000; // Reduced from 12000
-        }
+    void configure_pll_controller(PllRateController& controller, uint32_t target_level) {
+        // PI for buffer-level tracking + IIR LPF for extremely smooth rate output.
+        umidsp::PiConfig cfg{};
+        cfg.target_level = static_cast<int32_t>(target_level);
+        cfg.max_ppm = 500;   // ±500ppm range
+        cfg.hysteresis = 16; // Wide deadband
+        cfg.kp_num = 1;
+        cfg.kp_den = 4; // Kp=0.25
+        cfg.ki_num = 1;
+        cfg.ki_den = 100;         // Ki=0.01
+        cfg.integral_max = 50000; // I max = 500ppm
         controller.set_config(cfg);
         controller.reset();
+        asrc_smoothed_rate_q32 = static_cast<int64_t>(0x10000) << 16; // 1.0 in Q16.32
+    }
+
+    /// Update ASRC rate: PI every DMA + IIR LPF (tau=30s) for continuous smooth output.
+    /// The LPF ensures rate changes are ~0.03Hz — far below audible threshold.
+    uint32_t update_asrc_rate() {
+        int32_t level = out_ring_buffer_.buffer_level();
+        int32_t ppm = pll_controller_.update(level);
+        uint32_t target_rate = AudioRingBuffer<OUT_BUFFER_FRAMES, AudioOut::CHANNELS, SampleT>::ppm_to_rate_q16(ppm);
+
+        // IIR LPF in Q16.32: smoothed += alpha * (target - smoothed)
+        int64_t target_q32 = static_cast<int64_t>(target_rate) << 16;
+        int64_t error_q32 = target_q32 - asrc_smoothed_rate_q32;
+        asrc_smoothed_rate_q32 += (error_q32 * asrc_lpf_alpha) >> 32;
+
+        return static_cast<uint32_t>(asrc_smoothed_rate_q32 >> 16);
+    }
+
+    /// Convert PPM to Q16.32 rate ratio
+    static constexpr int64_t ppm_to_rate_q32(int32_t ppm) {
+        // rate = 1.0 + ppm/1e6 in Q16.32
+        // 1.0 in Q16.32 = 0x10000'0000'0000 (actually 0x1'0000 << 16 = 0x1'0000'0000)
+        // Wait: Q16.16 has 1.0 = 0x10000. Q16.32 extends fractional to 32 bits.
+        // 1.0 in Q16.32 = int64_t(0x10000) << 16 = 0x1'0000'0000
+        // ppm/1e6 in Q16.32 = (ppm * (1<<32)) / 1000000
+        //                    = (ppm * 4294967296) / 1000000
+        //                    = ppm * 4295 (approximately)
+        constexpr int64_t one_q32 = static_cast<int64_t>(0x10000) << 16;
+        return one_q32 + (static_cast<int64_t>(ppm) * 4295);
     }
 
     static void samples_from_i16(const int16_t* src, SampleT* dst, uint32_t count) {
@@ -1110,8 +1134,9 @@ class AudioInterface {
     bool audio_out_streaming_ = false;
     bool audio_in_streaming_ = false;
     bool midi_configured_ = false;
-    bool audio_in_pending_ = false; // Ready to send next Audio IN packet
-    uint32_t sof_count_ = 0;        // SOF frame counter for feedback interval
+    bool audio_in_pending_ = false;  // Ready to send next Audio IN packet
+    uint32_t in_prepared_bytes_ = 0; // Prepared packet size in in_packet_buf_
+    uint32_t sof_count_ = 0;         // SOF frame counter for feedback interval
 
     // Feature Unit state (UAC1) - Audio OUT
     bool fu_out_mute_ = false;
@@ -1142,23 +1167,32 @@ class AudioInterface {
     uint32_t in_rate_accum_ = 0;                 ///< Accumulator for fractional IN frames (Hz % 1000)
 
     // Debug counters for sample rate change
-    mutable uint32_t dbg_sr_get_cur_count_ = 0;    ///< GET CUR sample rate requests
-    mutable uint32_t dbg_sr_set_cur_count_ = 0;    ///< SET CUR sample rate requests
-    mutable uint32_t dbg_sr_ep0_rx_count_ = 0;     ///< on_ep0_rx calls with pending sample rate
-    mutable uint32_t dbg_sr_last_requested_ = 0;   ///< Last requested sample rate
-    mutable uint32_t dbg_sr_ep_request_count_ = 0; ///< Endpoint sample rate requests (UAC1)
+    mutable uint32_t dbg_sr_get_cur_count_ = 0;     ///< GET CUR sample rate requests
+    mutable uint32_t dbg_sr_set_cur_count_ = 0;     ///< SET CUR sample rate requests
+    mutable uint32_t dbg_sr_ep0_rx_count_ = 0;      ///< on_ep0_rx calls with pending sample rate
+    mutable uint32_t dbg_sr_last_requested_ = 0;    ///< Last requested sample rate
+    mutable uint32_t dbg_sr_ep_request_count_ = 0;  ///< Endpoint sample rate requests (UAC1)
+    mutable uint32_t dbg_uac2_get_cur_count_ = 0;   ///< UAC2 Clock Source GET CUR
+    mutable uint32_t dbg_uac2_set_cur_count_ = 0;   ///< UAC2 Clock Source SET CUR
+    mutable uint32_t dbg_uac2_get_range_count_ = 0; ///< UAC2 Clock Source GET RANGE
 
     // Debug: Audio OUT packet boundary discontinuity (USB RX)
     int32_t dbg_out_rx_last_sample_l_ = 0;
     int32_t dbg_out_rx_last_sample_r_ = 0;
     bool dbg_out_rx_has_last_sample_ = false;
-    bool dbg_out_rx_enabled_ = false;
+    bool dbg_out_rx_enabled_ = true;
     uint8_t out_discard_packets_ = 0;
     bool out_primed_ = false;
+    bool out_reset_done_ = false; ///< Set by reset_audio_out(), cleared by set_interface()
     uint32_t out_prime_frames_ = 0;
+    mutable uint32_t dbg_read_audio_total_ = 0;
+    mutable uint32_t dbg_read_prime_fail_ = 0;
+    mutable uint32_t dbg_read_prime_success_ = 0;
+    mutable int32_t dbg_read_prime_level_ = 0;
+    mutable int32_t dbg_read_prime_threshold_ = 0;
     uint16_t out_rx_blocked_frames_ = 0;
-    static constexpr uint16_t kBlockFramesLowRate = 12;
-    static constexpr uint16_t kBlockFramesHighRate = 48;
+    static constexpr uint16_t kBlockFramesLowRate = 500;  // 500ms stabilization after rate change
+    static constexpr uint16_t kBlockFramesHighRate = 500; // 500ms stabilization after rate change
     static constexpr uint8_t kDiscardPacketsAfterReset = 8;
     uint32_t dbg_out_rx_disc_count_ = 0;
     uint32_t dbg_out_rx_disc_max_ = 0;
@@ -1186,6 +1220,27 @@ class AudioInterface {
     int32_t dbg_out_rx_packet_dr_ = 0;
     uint32_t dbg_out_rx_packet_raw0_ = 0;
     uint32_t dbg_out_rx_packet_raw1_ = 0;
+    int32_t dbg_out_decoded_sample0_ = 0;
+    int32_t dbg_out_decoded_sample1_ = 0;
+
+    // Debug: on_rx entry tracking
+    mutable uint32_t dbg_on_rx_called_ = 0;
+    mutable uint32_t dbg_on_rx_passed_ = 0;
+    mutable uint8_t dbg_on_rx_last_ep_ = 0xFF;
+    mutable uint32_t dbg_on_rx_last_len_ = 0;
+    mutable uint8_t dbg_on_rx_has_out_ = 0;
+    mutable uint8_t dbg_on_rx_ep_match_ = 0;
+    mutable uint8_t dbg_on_rx_streaming_ = 0;
+    mutable uint16_t dbg_on_rx_bytes_per_frame_ = 0;
+    mutable uint8_t dbg_on_rx_bit_depth_ = 0;
+    mutable uint32_t dbg_on_rx_bpf_zero_count_ = 0;
+    mutable uint32_t dbg_on_rx_blocked_count_ = 0;
+    mutable uint32_t dbg_on_rx_discard_count_ = 0;
+    mutable uint32_t dbg_on_rx_processing_ = 0;
+    mutable uint32_t dbg_on_sof_called_ = 0;
+    mutable uint32_t dbg_on_sof_streaming_ = 0;
+    mutable uint32_t dbg_on_sof_decrement_ = 0;
+    mutable uint32_t dbg_configure_sync_windows_count_ = 0;
     using AudioOutPacketCallback = void (*)(const OutPacketStats&);
     AudioOutPacketCallback on_audio_out_packet_ = nullptr;
 
@@ -1199,6 +1254,18 @@ class AudioInterface {
     FeedbackCalculator<Version> feedback_calc_;
     PllRateController pll_controller_;
     PllRateController in_pll_controller_; // ASRC for Audio IN
+    // Smoothed ASRC rate in Q16.32 (high precision) to prevent wow/flutter.
+    // Output is truncated to Q16.16 for read_interpolated().
+    // IIR LPF: smoothed += alpha * (target - smoothed)
+    // alpha = Ts/tau in Q0.32. With tau=2s, Ts=1.33ms: alpha = 0.000667 => ~2863 in Q0.32
+    // ASRC rate control: PI updated every ~1 second, cached rate held constant between updates.
+    // 750 DMA cycles × 1.33ms = ~1 second update interval.
+    static constexpr uint32_t ASRC_UPDATE_INTERVAL = 750;
+    uint32_t asrc_update_counter = 0;
+    uint32_t asrc_cached_rate_q16 = 0x10000; // 1.0 initially
+    // Q0.32 LPF coefficient: alpha ≈ 0.000667 for ~2s time constant @ ~1.33ms update
+    static constexpr uint32_t asrc_lpf_alpha = 2863;
+    int64_t asrc_smoothed_rate_q32 = static_cast<int64_t>(0x10000) << 16; // 1.0 in Q16.32
     MidiProcessor midi_processor_;
 
     AltRuntimeConfig current_out_alt_ = default_out_alt();
@@ -1219,9 +1286,10 @@ class AudioInterface {
     alignas(4) uint8_t in_packet_buf_[IN_PACKET_BYTES]{};
 
     static constexpr uint32_t FB_UPDATE_INTERVAL =
-        (SYNC_MODE == AudioSyncMode::Async && !IS_UAC2) ? (1U << FB_REFRESH) : 1;
+        (SYNC_MODE == AudioSyncMode::Async) ? (1U << FB_REFRESH) : 1;
     bool fb_last_valid_ = false;
-    std::array<uint8_t, IS_UAC2 ? 4 : 3> fb_last_bytes_{};
+    // UAC1: 3 bytes (10.14), UAC2: 4 bytes (16.16)
+    std::array<uint8_t, FB_PACKET_SIZE> fb_last_bytes_{};
 
     // Interface numbers (runtime, matches descriptor)
     static constexpr uint8_t audio_out_iface_num_ = HAS_AUDIO ? 1 : 0;
@@ -1271,15 +1339,16 @@ class AudioInterface {
         if constexpr (HAS_AUDIO_OUT) {
             out_ring_buffer_.reset();
             feedback_calc_.reset(actual_rate);
-            feedback_calc_.set_actual_rate(actual_rate);
-            feedback_calc_.set_fifo_threshold(out_ring_buffer_.capacity() / 2);
+            feedback_calc_.set_buffer_half_size(out_ring_buffer_.capacity() / 2);
             configure_pll_controller(pll_controller_, out_ring_buffer_.capacity() / 2);
-            fb_last_valid_ = false;
+            fb_last_bytes_ = feedback_calc_.get_feedback_bytes();
+            fb_last_valid_ = true;
             out_discard_packets_ = kDiscardPacketsAfterReset;
             out_primed_ = false;
             configure_out_sync_windows(actual_rate);
             dbg_out_rx_has_last_sample_ = false;
             dbg_out_rx_packet_index_ = 0;
+            out_reset_done_ = true;
         }
     }
 
@@ -1321,13 +1390,24 @@ class AudioInterface {
         ++dbg_set_interface_count_;
         dbg_last_set_iface_ = interface;
         dbg_last_set_alt_ = alt_setting;
+        dbg_audio_out_iface_num_ = audio_out_iface_num_;
+
+        // Reset buffer level tracking on interface change
+        dbg_out_buf_level_min_ = UINT32_MAX;
+        dbg_out_buf_level_max_ = 0;
+        dbg_out_read_count_ = 0;
 
         // Audio OUT streaming interface
         if constexpr (HAS_AUDIO_OUT) {
+            ++dbg_set_iface_has_out_;
             if (interface == audio_out_iface_num_) {
+                ++dbg_set_iface_out_match_;
+                dbg_last_alt_check_ = alt_setting;
+                dbg_alt_count_ = AudioOut::ALT_COUNT;
                 bool was_streaming = audio_out_streaming_;
 
                 if (alt_setting >= 1 && alt_setting <= AudioOut::ALT_COUNT) {
+                    ++dbg_set_iface_alt_valid_;
                     current_out_alt_ = OUT_ALT_CONFIGS[alt_setting - 1];
                     hal.ep_configure(
                         {EP_AUDIO_OUT, Direction::Out, TransferType::Isochronous, current_out_alt_.packet_size});
@@ -1338,16 +1418,27 @@ class AudioInterface {
 
                     if constexpr (SYNC_MODE == AudioSyncMode::Async) {
                         // Async mode: configure feedback endpoint
-                        constexpr uint16_t fb_size = IS_UAC2 ? 4 : 3;
+                        // UAC1: 3 bytes (10.14), UAC2: 4 bytes (16.16)
+                        constexpr uint16_t fb_size = FB_PACKET_SIZE;
                         hal.ep_configure({EP_FEEDBACK, Direction::In, TransferType::Isochronous, fb_size});
+                        hal.set_feedback_ep(EP_FEEDBACK);
+
+                        // Send initial feedback immediately after EP config
+                        uint32_t rate = (actual_sample_rate_ > 0) ? actual_sample_rate_ : current_sample_rate_;
+                        if (rate == 0) {
+                            rate = AudioOut::SAMPLE_RATE;
+                        }
+                        feedback_calc_.reset(rate);
+                        fb_last_bytes_ = feedback_calc_.get_feedback_bytes();
+                        fb_last_valid_ = true;
+                        hal.ep_write(EP_FEEDBACK, fb_last_bytes_.data(), FB_PACKET_SIZE);
+                        hal.set_feedback_tx_flag();
+                        ++dbg_fb_sent_count_;
                     }
 
                     audio_out_streaming_ = true;
-                    out_ring_buffer_.reset();
-                    out_discard_packets_ = kDiscardPacketsAfterReset;
-                    out_primed_ = false;
-                    configure_out_sync_windows(current_sample_rate_);
-                    dbg_out_rx_has_last_sample_ = false;
+
+                    // Check if alt setting requires a rate change
                     if (!rate_in_list(current_out_alt_, current_sample_rate_) && current_out_alt_.rates_count > 0) {
                         current_sample_rate_ = current_out_alt_.rates[0];
                         sample_rate_changed_ = true;
@@ -1355,13 +1446,36 @@ class AudioInterface {
                             on_sample_rate_change(current_sample_rate_);
                         }
                     }
-                    // Use actual_sample_rate_ if set, otherwise fall back to current_sample_rate_
-                    uint32_t rate = (actual_sample_rate_ > 0) ? actual_sample_rate_ : current_sample_rate_;
-                    feedback_calc_.reset(rate);
-                    feedback_calc_.set_actual_rate(rate);
-                    feedback_calc_.set_fifo_threshold(out_ring_buffer_.capacity() / 2);
-                    configure_pll_controller(pll_controller_, out_ring_buffer_.capacity() / 2);
-                    fb_last_bytes_ = feedback_calc_.get_feedback_bytes();
+
+                    if (out_reset_done_) {
+                        // reset_audio_out() already reset the ring buffer,
+                        // feedback, and priming state. Skip redundant reset
+                        // to preserve any packets received between
+                        // reset_audio_out() and this set_interface() call.
+                        out_reset_done_ = false;
+                        sample_rate_changed_ = false;
+                    } else if (sample_rate_changed_ || !was_streaming) {
+                        // Rate changed or fresh start: full reset
+                        out_ring_buffer_.reset();
+                        out_discard_packets_ = kDiscardPacketsAfterReset;
+                        out_primed_ = false;
+                        configure_out_sync_windows(current_sample_rate_);
+                        dbg_out_rx_has_last_sample_ = false;
+                        uint32_t rate = (actual_sample_rate_ > 0) ? actual_sample_rate_ : current_sample_rate_;
+                        feedback_calc_.reset(rate);
+                        feedback_calc_.set_buffer_half_size(out_ring_buffer_.capacity() / 2);
+                        configure_pll_controller(pll_controller_, out_ring_buffer_.capacity() / 2);
+                        fb_last_bytes_ = feedback_calc_.get_feedback_bytes();
+                        sample_rate_changed_ = false;
+                    } else {
+                        // Same rate, was already streaming: preserve ring buffer
+                        // to avoid underruns during rapid SET_INTERFACE cycling.
+                        uint32_t rate = (actual_sample_rate_ > 0) ? actual_sample_rate_ : current_sample_rate_;
+                        feedback_calc_.set_actual_rate(rate);
+                        feedback_calc_.set_buffer_half_size(out_ring_buffer_.capacity() / 2);
+                        configure_pll_controller(pll_controller_, out_ring_buffer_.capacity() / 2);
+                        fb_last_bytes_ = feedback_calc_.get_feedback_bytes();
+                    }
                     fb_last_valid_ = true;
                 } else {
                     audio_out_streaming_ = false;
@@ -1385,9 +1499,7 @@ class AudioInterface {
                     hal.ep_configure(
                         {EP_AUDIO_IN, Direction::In, TransferType::Isochronous, current_in_alt_.packet_size});
                     audio_in_streaming_ = true;
-                    audio_in_pending_ = true; // Ready to send first packet
-                    // Audio IN: immediately enable reading to avoid buffer overrun
-                    // (Unlike Audio OUT which needs prebuffer for smooth playback)
+                    audio_in_pending_ = true; // Ready to send first packet on SOF
                     in_ring_buffer_.reset_and_start();
                     configure_pll_controller(in_pll_controller_, in_ring_buffer_.capacity() / 2);
                     if (!rate_in_list(current_in_alt_, current_sample_rate_) && current_in_alt_.rates_count > 0) {
@@ -1397,6 +1509,7 @@ class AudioInterface {
                             on_sample_rate_change(current_sample_rate_);
                         }
                     }
+                    // First packet will be sent on next SOF
                 } else {
                     audio_in_streaming_ = false;
                     audio_in_pending_ = false;
@@ -1426,8 +1539,9 @@ class AudioInterface {
                 uint8_t entity = setup.wIndex >> 8;
                 bool is_get = (setup.bmRequestType & 0x80) != 0;
 
-                if (entity == 1) {                // Clock Source
-                    if (ctrl == 0x01 && is_get) { // GET CUR freq
+                if (entity == 1) {                                          // Clock Source
+                    if (ctrl == 0x01 && is_get && setup.bRequest == 0x01) { // GET CUR freq
+                        ++dbg_uac2_get_cur_count_;
                         uint32_t rate = current_sample_rate_;
                         response[0] = rate & 0xFF;
                         response[1] = (rate >> 8) & 0xFF;
@@ -1436,14 +1550,22 @@ class AudioInterface {
                         response = response.subspan(0, 4);
                         return true;
                     }
-                    if (ctrl == 0x01 && !is_get && SAMPLE_RATE_CONTROL) { // SET CUR freq
+                    if (ctrl == 0x01 && !is_get && SAMPLE_RATE_CONTROL && setup.bRequest == 0x01) { // SET CUR freq
+                        ++dbg_uac2_set_cur_count_;
                         pending_uac2_sample_rate_set_ = true;
                         response = response.subspan(0, 0);
                         return true;
                     }
-                    if (ctrl == 0x02 && is_get) { // GET RANGE
-                        constexpr auto& rates = HAS_AUDIO_OUT ? AudioOut::RATES : AudioIn::RATES;
-                        constexpr uint16_t rate_count = HAS_AUDIO_OUT ? AudioOut::RATES_COUNT : AudioIn::RATES_COUNT;
+                    if (ctrl == 0x02 && is_get && setup.bRequest == 0x01) { // GET CUR clock valid
+                        response[0] = 1;                                    // clock is valid
+                        response = response.subspan(0, 1);
+                        return true;
+                    }
+                    if (ctrl == 0x01 && is_get && setup.bRequest == 0x02) { // GET RANGE (sampling freq)
+                        ++dbg_uac2_get_range_count_;
+                        // Use AudioOut rates if available, otherwise AudioIn
+                        constexpr uint16_t rate_count =
+                            HAS_AUDIO_OUT ? AudioOut::RATES_COUNT : (HAS_AUDIO_IN ? AudioIn::RATES_COUNT : 0);
 
                         uint16_t max_ranges = 0;
                         if (response.size() >= 2) {
@@ -1455,7 +1577,12 @@ class AudioInterface {
 
                         size_t p = 2;
                         for (uint16_t i = 0; i < count; ++i) {
-                            uint32_t rate = rates[i];
+                            uint32_t rate = 0;
+                            if constexpr (HAS_AUDIO_OUT) {
+                                rate = AudioOut::RATES[i];
+                            } else if constexpr (HAS_AUDIO_IN) {
+                                rate = AudioIn::RATES[i];
+                            }
                             response[p++] = rate & 0xFF;
                             response[p++] = (rate >> 8) & 0xFF;
                             response[p++] = (rate >> 16) & 0xFF;
@@ -1751,19 +1878,34 @@ class AudioInterface {
     }
 
     void on_rx(uint8_t ep, std::span<const uint8_t> data) {
+        ++dbg_on_rx_called_;
+        dbg_on_rx_last_ep_ = ep;
+        dbg_on_rx_last_len_ = static_cast<uint32_t>(data.size());
         if constexpr (HAS_AUDIO_OUT) {
+            dbg_on_rx_has_out_ = 1;
+            dbg_on_rx_ep_match_ = (ep == EP_AUDIO_OUT) ? 1 : 0;
+            dbg_on_rx_streaming_ = audio_out_streaming_ ? 1 : 0;
             if (ep == EP_AUDIO_OUT && audio_out_streaming_) {
-                if (current_out_alt_.bytes_per_frame == 0)
-                    return;
-                bool dbg_enabled = dbg_out_rx_enabled_;
-                if (out_rx_blocked_frames_ > 0) {
+                ++dbg_on_rx_passed_;
+                dbg_on_rx_bytes_per_frame_ = current_out_alt_.bytes_per_frame;
+                dbg_on_rx_bit_depth_ = current_out_alt_.bit_depth;
+                if (current_out_alt_.bytes_per_frame == 0) {
+                    ++dbg_on_rx_bpf_zero_count_;
                     return;
                 }
+                bool dbg_enabled = dbg_out_rx_enabled_;
+                // Temporarily disable blocking for debugging
+                // if (out_rx_blocked_frames_ > 0) {
+                //     ++dbg_on_rx_blocked_count_;
+                //     return;
+                // }
                 if (out_discard_packets_ > 0) {
                     --out_discard_packets_;
                     dbg_out_rx_has_last_sample_ = false;
+                    ++dbg_on_rx_discard_count_;
                     return;
                 }
+                ++dbg_on_rx_processing_; // 実際に処理に入った回数
                 if (dbg_enabled) {
                     dbg_out_rx_last_len_ = static_cast<uint32_t>(data.size());
                     if (dbg_out_rx_min_len_ == 0 || dbg_out_rx_last_len_ < dbg_out_rx_min_len_) {
@@ -1926,6 +2068,12 @@ class AudioInterface {
                     }
                 }
 
+                // Capture decoded sample before ring buffer write
+                if (frame_count > 0) {
+                    dbg_out_decoded_sample0_ = out_decode_buf_[0];
+                    dbg_out_decoded_sample1_ = out_decode_buf_[1];
+                }
+
                 out_ring_buffer_.write(out_decode_buf_, frame_count);
 
                 // TEMPORARY: Disable FIFO-based feedback for debugging
@@ -1953,66 +2101,71 @@ class AudioInterface {
 
     template <typename HalT>
     void on_sof(HalT& hal) {
+        ++dbg_on_sof_called_;
+        // Note: ISO OUT parity update in SOF disrupts reception — disabled.
+        // STM32 OTG FS handles parity via rearm_out_ep after XFRC.
         // Async mode: Update feedback from FIFO level and send every SOF when streaming
         // TinyUSB FIFO count method: adjust feedback based on buffer fill level
         if constexpr (HAS_AUDIO_OUT) {
             if (audio_out_streaming_) {
+                ++dbg_on_sof_streaming_;
                 if (out_rx_blocked_frames_ > 0) {
                     --out_rx_blocked_frames_;
+                    ++dbg_on_sof_decrement_;
                 }
                 if constexpr (SYNC_MODE == AudioSyncMode::Async) {
                     ++sof_count_;
+                    // Update feedback value at FB_UPDATE_INTERVAL rate
                     const bool update = (!fb_last_valid_) || ((sof_count_ % FB_UPDATE_INTERVAL) == 0);
                     if (update && !dbg_fb_override_enable_) {
                         if (out_rx_blocked_frames_ == 0) {
-                            // Update feedback based on current buffer level
-                            uint32_t level = out_ring_buffer_.buffered_frames();
-                            feedback_calc_.update_from_fifo_level(level);
+                            uint32_t used = out_ring_buffer_.buffered_frames();
+                            int32_t writable = static_cast<int32_t>(out_ring_buffer_.capacity() - 1 - used);
+                            feedback_calc_.update_from_buffer_level(writable);
                             fb_last_bytes_ = feedback_calc_.get_feedback_bytes();
                             fb_last_valid_ = true;
                         }
                     }
 
                     if (dbg_fb_override_enable_) {
-                        if constexpr (UAC_VERSION == UacVersion::Uac1) {
-                            uint32_t v = dbg_fb_override_value_ & 0x00FFFFFFu;
-                            fb_last_bytes_ = {static_cast<uint8_t>(v & 0xFF),
-                                              static_cast<uint8_t>((v >> 8) & 0xFF),
-                                              static_cast<uint8_t>((v >> 16) & 0xFF)};
-                        } else {
-                            uint32_t v = dbg_fb_override_value_;
-                            fb_last_bytes_ = {static_cast<uint8_t>(v & 0xFF),
-                                              static_cast<uint8_t>((v >> 8) & 0xFF),
-                                              static_cast<uint8_t>((v >> 16) & 0xFF),
-                                              static_cast<uint8_t>((v >> 24) & 0xFF)};
-                        }
+                        uint32_t v = dbg_fb_override_value_ & 0x00FFFFFFu;
+                        fb_last_bytes_ = {static_cast<uint8_t>(v & 0xFF),
+                                          static_cast<uint8_t>((v >> 8) & 0xFF),
+                                          static_cast<uint8_t>((v >> 16) & 0xFF)};
                         fb_last_valid_ = true;
                     }
 
-                    hal.ep_write(EP_FEEDBACK, fb_last_bytes_.data(), static_cast<uint16_t>(fb_last_bytes_.size()));
-                    ++dbg_fb_sent_count_;
-                    if (on_feedback_sent)
-                        on_feedback_sent();
+                    // Transmit feedback only when:
+                    // 1. Previous transfer completed (tx_flag cleared by XFRC)
+                    // 2. Frame parity matches (avoids IsoINIncomplete collision)
+                    // Reference: STM32F401_USB_AUDIO_DAC, STM32F411-usbaudio
+                    if (fb_last_valid_ && hal.is_feedback_tx_ready()) {
+                        hal.ep_write(EP_FEEDBACK, fb_last_bytes_.data(), FB_PACKET_SIZE);
+                        hal.set_feedback_tx_flag();
+                        dbg_out_fb_value_ = feedback_calc_.get_feedback();
+                        ++dbg_fb_sent_count_;
+                        if (on_feedback_sent) {
+                            on_feedback_sent();
+                        }
+                    }
                 }
             }
         }
 
-        // Audio IN: First packet sent from SOF, subsequent packets sent from XFRC
-        // (TinyUSB-style: chain transfers from xfer_complete callback)
+        // Audio IN: Send from SOF, chain from XFRC
         if constexpr (HAS_AUDIO_IN) {
             ++dbg_sof_count_;
 
             // App callback for supplying Audio IN data (1ms timing)
-            // Called BEFORE send_audio_in so app can write to ring buffer
             if (on_sof_app != nullptr) {
                 on_sof_app();
             }
 
-            if (audio_in_streaming_ && audio_in_pending_) {
+            // Send Audio IN packet on every SOF when streaming
+            // No pending check - just send every 1ms
+            if (audio_in_streaming_) {
                 ++dbg_sof_streaming_count_;
-                // Send first packet on SOF (only when pending is set by set_interface)
-                audio_in_pending_ = false;
-                send_audio_in(hal); // Use ring buffer data from PDM mic
+                send_audio_in_now(hal);
             }
         }
         (void)hal;
@@ -2023,14 +2176,13 @@ class AudioInterface {
     void on_tx_complete(HalT& hal, uint8_t ep) {
         if constexpr (HAS_AUDIO_OUT) {
             // Feedback EP: No action needed on XFRC
-            // (feedback is sent at bRefresh interval from on_sof, not based on XFRC)
-            (void)ep;
         }
+        // Audio IN: No XFRC chaining — send is driven solely by SOF (1kHz).
+        // Chaining caused runaway sends (>7kHz) when buffer was near-empty,
+        // because silence-padded packets complete instantly and re-trigger.
         if constexpr (HAS_AUDIO_IN) {
             if (ep == EP_AUDIO_IN && audio_in_streaming_) {
-                // TinyUSB-style: immediately schedule next transfer on XFRC
-                // Don't wait for SOF - send directly from ISR
-                send_audio_in(hal); // Use ring buffer data from PDM mic
+                ++dbg_in_xfrc_count_;
             }
         }
         (void)hal;
@@ -2038,9 +2190,7 @@ class AudioInterface {
     }
 
     void on_samples_consumed(uint32_t frame_count) {
-        if constexpr (HAS_AUDIO_OUT && SYNC_MODE == AudioSyncMode::Async) {
-            feedback_calc_.add_consumed_samples(frame_count);
-        }
+        // No longer used for feedback calculation (PID uses buffer level instead)
         (void)frame_count;
     }
 
@@ -2132,6 +2282,16 @@ class AudioInterface {
                 }
                 out_primed_ = true;
             }
+            // Debug: track buffer level before read
+            {
+                uint32_t lvl = static_cast<uint32_t>(out_ring_buffer_.buffer_level());
+                if (lvl < dbg_out_buf_level_min_)
+                    dbg_out_buf_level_min_ = lvl;
+                if (lvl > dbg_out_buf_level_max_)
+                    dbg_out_buf_level_max_ = lvl;
+                ++dbg_out_read_count_;
+            }
+
             uint32_t read = out_ring_buffer_.read(out_read_buf_, frame_count);
             apply_volume_out(out_read_buf_, read);
             samples_to_i16(out_read_buf_, dest, read * AudioOut::CHANNELS);
@@ -2151,14 +2311,29 @@ class AudioInterface {
             (void)frame_count;
             return 0;
         } else {
+            ++dbg_read_audio_total_;
             if (!out_primed_) {
                 int32_t level = out_ring_buffer_.buffer_level();
+                dbg_read_prime_level_ = level;
+                dbg_read_prime_threshold_ = static_cast<int32_t>(out_prime_frames_);
                 if (level < static_cast<int32_t>(out_prime_frames_)) {
+                    ++dbg_read_prime_fail_;
                     __builtin_memset(dest, 0, static_cast<size_t>(frame_count) * AudioOut::CHANNELS * sizeof(SampleT));
                     return 0;
                 }
+                ++dbg_read_prime_success_;
                 out_primed_ = true;
             }
+            // Debug: track buffer level before read
+            {
+                uint32_t lvl = static_cast<uint32_t>(out_ring_buffer_.buffer_level());
+                if (lvl < dbg_out_buf_level_min_)
+                    dbg_out_buf_level_min_ = lvl;
+                if (lvl > dbg_out_buf_level_max_)
+                    dbg_out_buf_level_max_ = lvl;
+                ++dbg_out_read_count_;
+            }
+
             uint32_t read = out_ring_buffer_.read(dest, frame_count);
             apply_volume_out(dest, read);
             if (read < frame_count) {
@@ -2186,13 +2361,10 @@ class AudioInterface {
                     return 0;
                 }
                 out_primed_ = true;
+                out_ring_buffer_.start_playback(); // Enable read_interpolated()
             }
-            int32_t level = out_ring_buffer_.buffer_level();
-            int32_t ppm = pll_controller_.update(level);
-            uint32_t rate = AudioRingBuffer<OUT_BUFFER_FRAMES, AudioOut::CHANNELS, SampleT>::ppm_to_rate_q16(ppm);
-
+            uint32_t rate = update_asrc_rate();
             uint32_t read = out_ring_buffer_.read_interpolated(out_read_buf_, frame_count, rate);
-            // Note: Feedback is now calculated from FIFO level in on_sof(), not from consumed samples
             apply_volume_out(out_read_buf_, read);
             samples_to_i16(out_read_buf_, dest, read * AudioOut::CHANNELS);
             return read;
@@ -2216,11 +2388,9 @@ class AudioInterface {
                     return 0;
                 }
                 out_primed_ = true;
+                out_ring_buffer_.start_playback(); // Enable read_interpolated()
             }
-            int32_t level = out_ring_buffer_.buffer_level();
-            int32_t ppm = pll_controller_.update(level);
-            uint32_t rate = AudioRingBuffer<OUT_BUFFER_FRAMES, AudioOut::CHANNELS, SampleT>::ppm_to_rate_q16(ppm);
-
+            uint32_t rate = update_asrc_rate();
             uint32_t read = out_ring_buffer_.read_interpolated(dest, frame_count, rate);
             apply_volume_out(dest, read);
             return read;
@@ -2257,16 +2427,18 @@ class AudioInterface {
 
             uint32_t samples = read * AudioOut::CHANNELS;
             for (uint32_t i = 0; i < samples; ++i) {
-                int64_t sample = static_cast<int64_t>(dest[i]);
-                sample = (sample * gain) >> 15;
+                // Use int32_t multiply to ensure compiler generates SMULL on Cortex-M4
+                // (avoids 64x64 multiply from int64_t cast before multiply)
+                int32_t s = static_cast<int32_t>(dest[i]);
+                int32_t result = static_cast<int32_t>((static_cast<int64_t>(s) * gain) >> 15);
                 if constexpr (std::is_same_v<SampleT, int16_t>) {
-                    if (sample > 32767)
-                        sample = 32767;
-                    if (sample < -32768)
-                        sample = -32768;
-                    dest[i] = static_cast<int16_t>(sample);
+                    if (result > 32767)
+                        result = 32767;
+                    if (result < -32768)
+                        result = -32768;
+                    dest[i] = static_cast<int16_t>(result);
                 } else {
-                    dest[i] = static_cast<SampleT>(clamp_i24(static_cast<int32_t>(sample)));
+                    dest[i] = static_cast<SampleT>(clamp_i24(result));
                 }
             }
         }
@@ -2277,6 +2449,13 @@ class AudioInterface {
     // Audio IN Buffer Access
     // ========================================================================
 
+    /// Reset Audio IN ring buffer (clear all data)
+    void reset_audio_in_buffer() {
+        if constexpr (HAS_AUDIO_IN) {
+            in_ring_buffer_.reset();
+        }
+    }
+
     uint32_t write_audio_in(const int16_t* src, uint32_t frame_count) {
         if constexpr (!HAS_AUDIO_IN) {
             (void)src;
@@ -2285,6 +2464,24 @@ class AudioInterface {
         } else {
             uint32_t samples = frame_count * AudioIn::CHANNELS;
             samples_from_i16(src, in_write_buf_, samples);
+            return in_ring_buffer_.write(in_write_buf_, frame_count);
+        }
+    }
+
+    /// Write to Audio IN buffer, dropping new data if buffer is full.
+    /// This is preferred over write_overwrite for Audio IN because:
+    /// 1. Dropping new data is safe (next DMA callback will provide fresh data)
+    /// 2. write_overwrite can corrupt data being read by USB ISR
+    uint32_t write_audio_in_overwrite(const int16_t* src, uint32_t frame_count) {
+        if constexpr (!HAS_AUDIO_IN) {
+            (void)src;
+            (void)frame_count;
+            return 0;
+        } else {
+            uint32_t samples = frame_count * AudioIn::CHANNELS;
+            samples_from_i16(src, in_write_buf_, samples);
+            // Use write() instead of write_overwrite() - drops new data on overrun
+            // This prevents race condition where read_pos_ is modified during USB read
             return in_ring_buffer_.write(in_write_buf_, frame_count);
         }
     }
@@ -2300,8 +2497,9 @@ class AudioInterface {
         }
     }
 
+    /// Send Audio IN packet (all-in-one: read, convert, send)
     template <typename HalT>
-    void send_audio_in(HalT& hal) {
+    void send_audio_in_now(HalT& hal) {
         if constexpr (!HAS_AUDIO_IN) {
             (void)hal;
             return;
@@ -2309,7 +2507,14 @@ class AudioInterface {
             if (!audio_in_streaming_)
                 return;
 
-            ++dbg_send_audio_in_count_; // Debug: track calls
+            // Check if EP is still busy from previous transfer
+            // If busy, skip this send to avoid data loss (HAL will silently discard)
+            if (hal.is_ep_busy(EP_AUDIO_IN)) {
+                ++dbg_in_ep_busy_skip_;
+                return;
+            }
+
+            ++dbg_send_audio_in_count_;
 
             uint32_t frames_per_packet = current_sample_rate_ / 1000;
             uint32_t remainder = current_sample_rate_ % 1000;
@@ -2322,21 +2527,9 @@ class AudioInterface {
                 frames_per_packet = IN_MAX_PACKET_FRAMES;
             }
 
-            // ASRC DISABLED FOR TESTING: Use direct read without interpolation/rate adjustment
-            // The ASRC PI controller may be causing 4Hz modulation - bypass to test
-            // int32_t level = in_ring_buffer_.buffer_level();
-            // int32_t ppm = in_pll_controller_.update(level);
-            // uint32_t rate = AudioRingBuffer<IN_BUFFER_FRAMES, AudioIn::CHANNELS, SampleT>::ppm_to_rate_q16(ppm);
-            // uint32_t read = in_ring_buffer_.read_interpolated(in_read_buf_, frames_per_packet, rate);
-
-            // Direct read without ASRC (rate = 1.0, no interpolation)
             uint32_t read = in_ring_buffer_.read(in_read_buf_, frames_per_packet);
-
-            // Debug: track buffer level
             dbg_in_buffered_ = in_ring_buffer_.buffered_frames();
 
-            // For isochronous IN, we must send data every frame even if buffer is empty
-            // Send silence if no data available
             if (read < frames_per_packet) {
                 __builtin_memset(in_read_buf_ + (read * AudioIn::CHANNELS),
                                  0,
@@ -2344,39 +2537,7 @@ class AudioInterface {
                 read = frames_per_packet;
             }
 
-            // Apply mute/volume
-            if (fu_in_mute_) {
-                __builtin_memset(in_read_buf_, 0, read * AudioIn::CHANNELS * sizeof(SampleT));
-            } else if (fu_in_volume_ < 0) {
-                // Volume attenuation (same algorithm as OUT)
-                int32_t neg_vol = -static_cast<int32_t>(fu_in_volume_);
-                int32_t db_256 = (neg_vol * 48) / 127;
-                if (db_256 < 12288) {
-                    int32_t shift = db_256 / 1541;
-                    int32_t frac = db_256 % 1541;
-                    int32_t gain = 32768 >> shift;
-                    gain = gain - ((gain * frac) / 3082);
-                    if (gain < 1) {
-                        gain = 1;
-                    }
-                    for (uint32_t i = 0; i < read * AudioIn::CHANNELS; ++i) {
-                        int64_t sample = static_cast<int64_t>(in_read_buf_[i]);
-                        sample = (sample * gain) >> 15;
-                        if constexpr (std::is_same_v<SampleT, int16_t>) {
-                            if (sample > 32767)
-                                sample = 32767;
-                            if (sample < -32768)
-                                sample = -32768;
-                            in_read_buf_[i] = static_cast<int16_t>(sample);
-                        } else {
-                            in_read_buf_[i] = static_cast<SampleT>(clamp_i24(static_cast<int32_t>(sample)));
-                        }
-                    }
-                } else {
-                    __builtin_memset(in_read_buf_, 0, read * AudioIn::CHANNELS * sizeof(SampleT));
-                }
-            }
-
+            // Skip volume processing for now - just send raw data
             uint32_t sample_count = read * AudioIn::CHANNELS;
             uint8_t* out = in_packet_buf_;
             if (current_in_alt_.bit_depth == 16) {
@@ -2402,8 +2563,6 @@ class AudioInterface {
                     sample_to_i24(v, out);
                     out += 3;
                 }
-            } else {
-                return;
             }
 
             hal.ep_write(EP_AUDIO_IN, in_packet_buf_, read * current_in_alt_.bytes_per_frame);
@@ -2465,7 +2624,8 @@ class AudioInterface {
             (void)cable;
             return;
         } else {
-            if (len == 0) return;
+            if (len == 0)
+                return;
 
             uint16_t pos = 0;
             std::array<uint8_t, 4> packet{};
@@ -2473,7 +2633,7 @@ class AudioInterface {
             // Send complete 3-byte packets (CIN = 0x04)
             while (pos + 3 <= len && (pos + 3 < len || data[len - 1] != 0xF7)) {
                 // Still have 3+ bytes and not the final packet
-                packet[0] = static_cast<uint8_t>((cable << 4) | 0x04);  // CIN = SysEx start/continue
+                packet[0] = static_cast<uint8_t>((cable << 4) | 0x04); // CIN = SysEx start/continue
                 packet[1] = data[pos];
                 packet[2] = data[pos + 1];
                 packet[3] = data[pos + 2];
@@ -2496,7 +2656,7 @@ class AudioInterface {
                     packet[1] = data[pos];
                     packet[2] = data[pos + 1];
                     packet[3] = 0;
-                } else {  // remaining == 3
+                } else { // remaining == 3
                     // CIN = 0x07: SysEx ends with 3 bytes
                     packet[0] = static_cast<uint8_t>((cable << 4) | 0x07);
                     packet[1] = data[pos];
@@ -2513,6 +2673,7 @@ class AudioInterface {
     // ========================================================================
 
     [[nodiscard]] bool is_streaming() const { return audio_out_streaming_; }
+    [[nodiscard]] bool is_out_primed() const { return out_primed_; }
     [[nodiscard]] bool is_audio_in_streaming() const { return audio_in_streaming_; }
     [[nodiscard]] bool is_midi_configured() const { return midi_configured_; }
 
@@ -2534,6 +2695,41 @@ class AudioInterface {
     [[nodiscard]] uint32_t overrun_count() const {
         if constexpr (HAS_AUDIO_OUT)
             return out_ring_buffer_.overrun_count();
+        return 0;
+    }
+    [[nodiscard]] uint32_t out_ring_write_pos() const {
+        if constexpr (HAS_AUDIO_OUT)
+            return out_ring_buffer_.dbg_write_pos();
+        return 0;
+    }
+    [[nodiscard]] uint32_t out_ring_read_pos() const {
+        if constexpr (HAS_AUDIO_OUT)
+            return out_ring_buffer_.dbg_read_pos();
+        return 0;
+    }
+    [[nodiscard]] uint32_t out_ring_overrun() const {
+        if constexpr (HAS_AUDIO_OUT)
+            return out_ring_buffer_.overrun_count();
+        return 0;
+    }
+    [[nodiscard]] uint32_t out_ring_underrun() const {
+        if constexpr (HAS_AUDIO_OUT)
+            return out_ring_buffer_.underrun_count();
+        return 0;
+    }
+    [[nodiscard]] uint32_t in_buffered_frames() const {
+        if constexpr (HAS_AUDIO_IN)
+            return in_ring_buffer_.buffered_frames();
+        return 0;
+    }
+    [[nodiscard]] uint32_t in_underrun_count() const {
+        if constexpr (HAS_AUDIO_IN)
+            return in_ring_buffer_.underrun_count();
+        return 0;
+    }
+    [[nodiscard]] uint32_t in_overrun_count() const {
+        if constexpr (HAS_AUDIO_IN)
+            return in_ring_buffer_.overrun_count();
         return 0;
     }
     [[nodiscard]] uint32_t current_feedback() const {
@@ -2577,11 +2773,6 @@ class AudioInterface {
     [[nodiscard]] bool is_audio_in_pending() const { return audio_in_pending_; }
     [[nodiscard]] bool is_in_muted() const { return fu_in_mute_; }
     [[nodiscard]] int16_t in_volume_db256() const { return fu_in_volume_; }
-    [[nodiscard]] uint32_t in_buffered_frames() const {
-        if constexpr (HAS_AUDIO_IN)
-            return in_ring_buffer_.buffered_frames();
-        return 0;
-    }
     [[nodiscard]] bool is_in_playback_started() const {
         if constexpr (HAS_AUDIO_IN)
             return in_ring_buffer_.is_playback_started();
@@ -2593,10 +2784,18 @@ class AudioInterface {
     mutable uint32_t dbg_sof_count_ = 0;             // SOF interrupts (with HAS_AUDIO_IN)
     mutable uint32_t dbg_sof_streaming_count_ = 0;   // SOF with audio_in_streaming_ true
     mutable uint32_t dbg_in_buffered_ = 0;           // Last seen buffered frames
+    mutable uint32_t dbg_in_ep_busy_skip_ = 0;       // Skipped sends due to EP busy
+    mutable uint32_t dbg_in_xfrc_count_ = 0;         // TX complete (XFRC) count for Audio IN
     mutable uint32_t dbg_set_interface_count_ = 0;   // set_interface() calls
     mutable uint32_t dbg_fb_sent_count_ = 0;         // Feedback packets sent
     mutable uint8_t dbg_last_set_iface_ = 0;         // Last interface number
     mutable uint8_t dbg_last_set_alt_ = 0;           // Last alt setting
+    mutable uint8_t dbg_audio_out_iface_num_ = 0;    // audio_out_iface_num_ value
+    mutable uint32_t dbg_set_iface_has_out_ = 0;     // HAS_AUDIO_OUT branch entered
+    mutable uint32_t dbg_set_iface_out_match_ = 0;   // interface == audio_out_iface_num_ branch entered
+    mutable uint32_t dbg_set_iface_alt_valid_ = 0;   // alt_setting valid branch entered
+    mutable uint8_t dbg_last_alt_check_ = 0;         // Last alt_setting checked
+    mutable uint8_t dbg_alt_count_ = 0;              // AudioOut::ALT_COUNT value
     mutable uint32_t dbg_force_streaming_count_ = 0; // Force streaming attempts
     mutable uint32_t dbg_out_rx_last_len_ = 0;       // Last Audio OUT packet size (bytes)
     mutable uint32_t dbg_out_rx_min_len_ = 0;        // Min Audio OUT packet size (bytes)
@@ -2604,6 +2803,12 @@ class AudioInterface {
     mutable uint32_t dbg_out_rx_short_count_ = 0;    // Count of packets < expected size
     volatile bool dbg_fb_override_enable_ = false;
     volatile uint32_t dbg_fb_override_value_ = 0;
+
+    // Debug: Audio OUT buffer level tracking (updated in read_audio)
+    mutable uint32_t dbg_out_buf_level_min_ = UINT32_MAX; // Min buffer level since last reset
+    mutable uint32_t dbg_out_buf_level_max_ = 0;          // Max buffer level since last reset
+    mutable uint32_t dbg_out_read_count_ = 0;             // read_audio() call count
+    mutable uint32_t dbg_out_fb_value_ = 0;               // Last feedback value sent to host
 
     struct OutPacketStats {
         uint32_t packet_index;
@@ -2633,9 +2838,40 @@ class AudioInterface {
     // Debug getters for last set_interface values
     uint8_t dbg_last_set_iface() const { return dbg_last_set_iface_; }
     uint8_t dbg_last_set_alt() const { return dbg_last_set_alt_; }
+    uint8_t dbg_audio_out_iface_num() const { return dbg_audio_out_iface_num_; }
+    uint32_t dbg_set_iface_has_out() const { return dbg_set_iface_has_out_; }
+    uint32_t dbg_set_iface_out_match() const { return dbg_set_iface_out_match_; }
+    uint32_t dbg_set_iface_alt_valid() const { return dbg_set_iface_alt_valid_; }
+    uint8_t dbg_last_alt_check() const { return dbg_last_alt_check_; }
+    uint8_t dbg_alt_count() const { return dbg_alt_count_; }
+    uint32_t dbg_on_rx_called() const { return dbg_on_rx_called_; }
+    uint32_t dbg_on_rx_passed() const { return dbg_on_rx_passed_; }
+    uint8_t dbg_on_rx_last_ep() const { return dbg_on_rx_last_ep_; }
+    uint32_t dbg_on_rx_last_len() const { return dbg_on_rx_last_len_; }
+    uint8_t dbg_on_rx_has_out() const { return dbg_on_rx_has_out_; }
+    uint8_t dbg_on_rx_ep_match() const { return dbg_on_rx_ep_match_; }
+    uint8_t dbg_on_rx_streaming() const { return dbg_on_rx_streaming_; }
+    uint16_t dbg_on_rx_bytes_per_frame() const { return dbg_on_rx_bytes_per_frame_; }
+    uint8_t dbg_on_rx_bit_depth() const { return dbg_on_rx_bit_depth_; }
+    uint32_t dbg_on_rx_bpf_zero_count() const { return dbg_on_rx_bpf_zero_count_; }
+    uint32_t dbg_on_rx_blocked_count() const { return dbg_on_rx_blocked_count_; }
+    uint32_t dbg_in_buffered() const { return dbg_in_buffered_; }
+    uint32_t dbg_in_xfrc_count() const { return dbg_in_xfrc_count_; }
+    uint32_t dbg_send_audio_in_count() const { return dbg_send_audio_in_count_; }
+    uint32_t dbg_on_rx_discard_count() const { return dbg_on_rx_discard_count_; }
+    uint32_t dbg_on_rx_processing() const { return dbg_on_rx_processing_; }
+    uint32_t dbg_on_sof_called() const { return dbg_on_sof_called_; }
+    uint32_t dbg_on_sof_streaming() const { return dbg_on_sof_streaming_; }
+    uint32_t dbg_on_sof_decrement() const { return dbg_on_sof_decrement_; }
+    uint32_t dbg_configure_sync_windows_count() const { return dbg_configure_sync_windows_count_; }
     uint32_t dbg_out_rx_last_len() const { return dbg_out_rx_last_len_; }
     uint32_t dbg_out_rx_min_len() const { return dbg_out_rx_min_len_; }
     uint32_t dbg_out_rx_max_len() const { return dbg_out_rx_max_len_; }
+    uint32_t dbg_read_audio_total() const { return dbg_read_audio_total_; }
+    uint32_t dbg_read_prime_fail() const { return dbg_read_prime_fail_; }
+    uint32_t dbg_read_prime_success() const { return dbg_read_prime_success_; }
+    int32_t dbg_read_prime_level() const { return dbg_read_prime_level_; }
+    int32_t dbg_read_prime_threshold() const { return dbg_read_prime_threshold_; }
     uint32_t dbg_out_rx_short_count() const { return dbg_out_rx_short_count_; }
     uint32_t dbg_out_rx_disc_count() const { return dbg_out_rx_disc_count_; }
     uint32_t dbg_out_rx_disc_max() const { return dbg_out_rx_disc_max_; }
@@ -2659,10 +2895,13 @@ class AudioInterface {
     int32_t dbg_out_rx_packet_cur_r() const { return dbg_out_rx_packet_cur_r_; }
     int32_t dbg_out_rx_packet_prev_l() const { return dbg_out_rx_packet_prev_l_; }
     int32_t dbg_out_rx_packet_prev_r() const { return dbg_out_rx_packet_prev_r_; }
+    int32_t dbg_out_decoded_sample0() const { return dbg_out_decoded_sample0_; }
+    int32_t dbg_out_decoded_sample1() const { return dbg_out_decoded_sample1_; }
     int32_t dbg_out_rx_packet_dl() const { return dbg_out_rx_packet_dl_; }
     int32_t dbg_out_rx_packet_dr() const { return dbg_out_rx_packet_dr_; }
     uint32_t dbg_out_rx_packet_raw0() const { return dbg_out_rx_packet_raw0_; }
     uint32_t dbg_out_rx_packet_raw1() const { return dbg_out_rx_packet_raw1_; }
+    int32_t dbg_out_rx_last_sample_l() const { return dbg_out_rx_last_sample_l_; }
     void set_audio_out_packet_callback(AudioOutPacketCallback cb) { on_audio_out_packet_ = cb; }
     uint32_t dbg_out_rx_intra_event_count() const { return dbg_out_rx_intra_event_count_; }
     uint32_t dbg_out_rx_intra_event_len() const { return dbg_out_rx_intra_event_len_; }
@@ -2677,31 +2916,13 @@ class AudioInterface {
         dbg_fb_override_value_ = value;
     }
 
-    void set_feedback_mode(FeedbackMode mode) {
-        if constexpr (HAS_AUDIO_OUT) {
-            feedback_calc_.set_feedback_mode(mode);
-        }
-    }
-
-    void set_feedback_delta_gain(uint32_t gain_q16) {
-        if constexpr (HAS_AUDIO_OUT) {
-            feedback_calc_.set_delta_gain_q16(gain_q16);
-        }
-    }
-
-    void set_feedback_delta_gain_auto() {
-        if constexpr (HAS_AUDIO_OUT) {
-            feedback_calc_.set_delta_gain_auto();
-        }
-    }
-
     /// Set actual hardware sample rate (for USB feedback calculation)
     /// Call this after reconfiguring I2S/codec for a new sample rate
     void set_actual_rate(uint32_t rate) {
-        actual_sample_rate_ = rate; // Save for feedback calculation only
+        actual_sample_rate_ = rate;
         if constexpr (HAS_AUDIO_OUT) {
-            // set_actual_rate recalculates nominal_feedback_, min/max, and rate_const
             feedback_calc_.set_actual_rate(rate);
+            feedback_calc_.set_buffer_half_size(out_ring_buffer_.capacity() / 2);
         }
     }
 
@@ -2715,6 +2936,7 @@ class AudioInterface {
 
     void configure_out_sync_windows(uint32_t rate) noexcept {
         if constexpr (HAS_AUDIO_OUT) {
+            ++dbg_configure_sync_windows_count_;
             if (rate >= 96000) {
                 out_prime_frames_ = out_ring_buffer_.capacity() / 2;
                 out_rx_blocked_frames_ = kBlockFramesHighRate;
@@ -2731,6 +2953,10 @@ class AudioInterface {
     uint32_t dbg_sr_ep0_rx() const { return dbg_sr_ep0_rx_count_; }
     uint32_t dbg_sr_last_req() const { return dbg_sr_last_requested_; }
     uint32_t dbg_sr_ep_req() const { return dbg_sr_ep_request_count_; }
+    uint32_t dbg_uac2_get_cur() const { return dbg_uac2_get_cur_count_; }
+    uint32_t dbg_uac2_set_cur() const { return dbg_uac2_set_cur_count_; }
+    uint32_t dbg_uac2_get_range() const { return dbg_uac2_get_range_count_; }
+    uint32_t dbg_set_interface_count() const { return dbg_set_interface_count_; }
 };
 
 // ============================================================================
