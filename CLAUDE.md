@@ -84,7 +84,7 @@ Key characteristics:
 
 ## Build System
 
-Uses xmake with custom package repository (`.tools/arm-embedded-xmake-repo`) for embedded build automation.
+Uses xmake with custom package repository (`.refs/arm-embedded-xmake-repo`) for embedded build automation.
 
 **Custom Packages:**
 - `arm-embedded`: ARM cross-compiler (gcc-arm and armclang supported), embedded rules, VSCode integration
@@ -116,9 +116,6 @@ xmake robot                    # Robot Framework tests
 xmake coding init              # Generate .clangd, .clang-tidy, .clang-format
 xmake coding format            # Format source files
 
-# Debugger (requires target, may auto-switch to debug build)
-xmake debugger --target=stm32f4_kernel
-
 # Run a single test binary
 xmake run test_kernel
 
@@ -137,7 +134,7 @@ xmake info                     # Show build configuration
 
 **Dependencies:**
 - Add packages via `add_requires` in `xmake.lua`
-- If a package is missing, add it to `.tools/arm-embedded-xmake-repo` and sync to the remote repo
+- If a package is missing, add it to `.refs/arm-embedded-xmake-repo` and sync to the remote repo
 
 ## Directory Structure
 
@@ -248,8 +245,8 @@ xmake webhost-serve
 |----------|---------|
 | `docs/refs/specs/ARCHITECTURE.md` | High-level architecture |
 | `docs/new/UMI_SYSTEM_ARCHITECTURE.md` | STM32F4 detailed design |
-| `docs/refs/development/CODING_STYLE.md` | Detailed style guide |
-| `docs/refs/development/DEBUG_GUIDE.md` | Debugging (pyOCD, GDB, RTT) |
+| `docs/dev/CODING_STYLE.md` | Detailed style guide |
+| `docs/dev/DEBUG_GUIDE.md` | Debugging (pyOCD, GDB, RTT) |
 | `docs/new/DESIGN_CONTEXT_API.md` | AudioContext API design |
 | `docs/refs/guides/TESTING.md` | Test strategy |
 | `docs/refs/reference/API_APPLICATION.md` | `process()` constraints |
