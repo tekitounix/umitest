@@ -6,9 +6,10 @@
 
 #include <cstdint>
 #include <span>
-
 #include <umios/backend/cm/stm32f4/gpio.hh>
 #include <umios/backend/cm/stm32f4/pdm_mic.hh>
+
+#include "bsp.hh"
 
 // USB types
 #include <audio_interface.hh>
@@ -68,6 +69,24 @@ void enable_i2s_irq();
 
 // USB accessors
 umiusb::Stm32FsHal& usb_hal();
-umiusb::AudioFullDuplexMidi96kMaxAsyncFixedEps& usb_audio();
+
+#if USB_AUDIO_UAC2
+using UsbAudioDevice =
+    umiusb::AudioInterface<umiusb::UacVersion::Uac2,
+                           umiusb::AudioPort<2, 24, 48000, 1, 48000, umiusb::AudioRates<48000>>, // Audio OUT (EP1)
+                           umiusb::NoAudioPort,    // Audio IN disabled for testing
+                           umiusb::MidiPort<1, 2>, // MIDI OUT (EP2 OUT direction)
+                           umiusb::MidiPort<1, 1>, // MIDI IN (EP1 IN direction)
+                           2,                      // Feedback EP
+                           umiusb::AudioSyncMode::Async,
+                           false>; // Disable sample rate control - fixed clock
+#elif USB_AUDIO_ADAPTIVE
+using UsbAudioDevice = umiusb::AudioFullDuplexMidi96kMaxAdaptive;
+#else
+using UsbAudioDevice = umiusb::AudioFullDuplexMidi96kMaxAsyncFixedEps;
+#endif
+
+UsbAudioDevice& usb_audio();
+bool usb_is_configured();
 
 } // namespace umi::mcu

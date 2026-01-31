@@ -2,9 +2,10 @@
 // STM32F4 MCU Abstraction Layer Implementation
 
 #include "mcu.hh"
-#include "bsp.hh"
 
 #include <cstring>
+
+#include "bsp.hh"
 
 // Platform drivers
 #include <umios/backend/cm/common/nvic.hh>
@@ -20,16 +21,19 @@
 #include <hal/stm32_otg.hh>
 #include <umiusb.hh>
 
+// UID for USB serial number
+#include <umios/backend/cm/stm32f4/uid.hh>
+
+using umi::port::arm::NVIC;
+using umi::stm32::CicDecimator;
+using umi::stm32::CS43L22;
+using umi::stm32::DMA_I2S;
+using umi::stm32::DmaPdm;
 using umi::stm32::GPIO;
 using umi::stm32::I2C;
 using umi::stm32::I2S;
-using umi::stm32::DMA_I2S;
-using umi::stm32::CS43L22;
 using umi::stm32::PdmMic;
-using umi::stm32::DmaPdm;
-using umi::stm32::CicDecimator;
 using umi::stm32::RCC;
-using umi::port::arm::NVIC;
 
 namespace bsp = umi::bsp::board;
 
@@ -52,19 +56,32 @@ CicDecimator cic_decimator_inst;
 
 // USB stack
 umiusb::Stm32FsHal usb_hal_inst;
+#if USB_AUDIO_UAC2
+using UsbAudioDevice =
+    umiusb::AudioInterface<umiusb::UacVersion::Uac2,
+                           umiusb::AudioPort<2, 24, 48000, 1, 48000, umiusb::AudioRates<48000>>, // Audio OUT (EP1)
+                           umiusb::NoAudioPort,    // Audio IN disabled for testing
+                           umiusb::MidiPort<1, 2>, // MIDI OUT (EP2 OUT direction)
+                           umiusb::MidiPort<1, 1>, // MIDI IN (EP1 IN direction)
+                           2,
+                           umiusb::AudioSyncMode::Async,
+                           false>; // Disable sample rate control - fixed clock
+#elif USB_AUDIO_ADAPTIVE
+using UsbAudioDevice = umiusb::AudioFullDuplexMidi96kMaxAdaptive;
+#else
 using UsbAudioDevice = umiusb::AudioFullDuplexMidi96kMaxAsyncFixedEps;
+#endif
 UsbAudioDevice usb_audio_inst;
-umiusb::Device<umiusb::Stm32FsHal, UsbAudioDevice>
-    usb_device(usb_hal_inst,
-               usb_audio_inst,
-               {
-                   .vendor_id = bsp::usb::vendor_id,
-                   .product_id = bsp::usb::product_id,
-                   .device_version = bsp::usb::device_version,
-                   .manufacturer_idx = 1,
-                   .product_idx = 2,
-                   .serial_idx = 0,
-               });
+umiusb::Device<umiusb::Stm32FsHal, UsbAudioDevice> usb_device(usb_hal_inst,
+                                                              usb_audio_inst,
+                                                              {
+                                                                  .vendor_id = bsp::usb::vendor_id,
+                                                                  .product_id = bsp::usb::product_id,
+                                                                  .device_version = bsp::usb::device_version,
+                                                                  .manufacturer_idx = 1,
+                                                                  .product_idx = 2,
+                                                                  .serial_idx = 3,
+                                                              });
 
 } // namespace
 
@@ -83,9 +100,30 @@ using namespace umiusb::desc;
 constexpr auto str_manufacturer = String("UMI-OS");
 constexpr auto str_product = String("UMI Kernel Synth");
 
-constexpr std::array<std::span<const uint8_t>, 2> string_table = {{
+// Serial number: runtime-generated USB string descriptor from STM32F4 UID
+// Uses DFU-compatible 12-char short format (matches system bootloader serial)
+// Layout: [bLength][bDescriptorType=0x03][char16_t * 12]
+constexpr uint32_t SERIAL_CHARS = 12;
+constexpr uint32_t SERIAL_STR_LEN = 2 + SERIAL_CHARS * 2; // 26 bytes
+uint8_t serial_desc_buf[SERIAL_STR_LEN];
+
+void init_serial_string() {
+    auto uid = umi::backend::stm32f4::read_uid();
+    char serial[13];
+    umi::backend::stm32f4::uid_to_serial(uid, serial);
+
+    serial_desc_buf[0] = SERIAL_STR_LEN;
+    serial_desc_buf[1] = 0x03; // bDescriptorType = String
+    for (uint32_t i = 0; i < SERIAL_CHARS; ++i) {
+        serial_desc_buf[2 + i * 2] = static_cast<uint8_t>(serial[i]); // UTF-16LE low byte
+        serial_desc_buf[2 + i * 2 + 1] = 0;                           // UTF-16LE high byte
+    }
+}
+
+std::array<std::span<const uint8_t>, 3> string_table = {{
     {str_manufacturer.data.data(), str_manufacturer.size},
     {str_product.data.data(), str_product.size},
+    {serial_desc_buf, SERIAL_STR_LEN},
 }};
 } // namespace usb_config
 
@@ -116,8 +154,12 @@ umiusb::Stm32FsHal& usb_hal() {
     return usb_hal_inst;
 }
 
-umiusb::AudioFullDuplexMidi96kMaxAsyncFixedEps& usb_audio() {
+UsbAudioDevice& usb_audio() {
     return usb_audio_inst;
+}
+
+bool usb_is_configured() {
+    return usb_device.is_configured();
 }
 
 // Buffer accessors
@@ -240,18 +282,22 @@ void init_pdm_mic() {
 }
 
 void init_usb() {
-    for (int i = 0; i < 10000; ++i) {
-        asm volatile("");
-    }
-
+    // Ensure OTG_FS peripheral is in known state after pyocd flash/reset.
+    // The peripheral may retain stale state from the previous firmware run
+    // while the core was halted during flash programming.
     usb_hal_inst.disconnect();
-    for (int i = 0; i < 500000; ++i) {
+
+    // USB spec requires SE0 for >2.5µs to signal disconnect (TDDIS).
+    // macOS needs longer (~50ms) to reliably de-enumerate the device,
+    // especially after pyocd flash where OTG_FS was in an undefined state.
+    for (int i = 0; i < 5000000; ++i) {
         asm volatile("");
     }
 
     // NOTE: Callbacks must be set by kernel BEFORE calling init_usb()
     // Do NOT set empty callbacks here - they would overwrite kernel's callbacks
 
+    usb_config::init_serial_string();
     usb_device.set_strings(usb_config::string_table);
     usb_device.init();
     usb_hal_inst.connect();
@@ -298,6 +344,9 @@ uint32_t configure_plli2s(uint32_t rate) {
 
     case 48000:
     default:
+        // PLLI2S = 86MHz for 48kHz with I2SDIV=3, ODD=1
+        // I2SCLK = HSE(8MHz) × N / M / R = 8 × 258 / 8 / 3 = 86 MHz
+        // Fs = 86MHz / [256 × (2×3 + 1)] = 86MHz / 1792 = 47,991 Hz
         plli2sn = 258;
         plli2sr = 3;
         i2sdiv = 3;
@@ -388,17 +437,20 @@ void on_pdm_buffer_ready(uint16_t* buf);
 extern "C" void DMA1_Stream3_IRQHandler() {
     if (dma_pdm.transfer_complete()) {
         dma_pdm.clear_tc();
-        uint16_t* completed_buf =
-            (umi::mcu::dma_pdm_current_buffer() == 0) ? pdm_buf1_data : pdm_buf0_data;
+        uint16_t* completed_buf = (umi::mcu::dma_pdm_current_buffer() == 0) ? pdm_buf1_data : pdm_buf0_data;
         umi::kernel::on_pdm_buffer_ready(completed_buf);
     }
 }
 
+static volatile uint32_t g_dbg_dma_isr_count = 0;
+static volatile uint32_t g_dbg_dma_tc_count = 0;
+
 extern "C" void DMA1_Stream5_IRQHandler() {
+    g_dbg_dma_isr_count = g_dbg_dma_isr_count + 1;
     if (dma_i2s.transfer_complete()) {
+        g_dbg_dma_tc_count = g_dbg_dma_tc_count + 1;
         dma_i2s.clear_tc();
-        uint16_t* completed_buf =
-            (umi::mcu::dma_i2s_current_buffer() == 1) ? audio_buf0_data : audio_buf1_data;
+        uint16_t* completed_buf = (umi::mcu::dma_i2s_current_buffer() == 1) ? audio_buf0_data : audio_buf1_data;
         umi::kernel::on_audio_buffer_ready(completed_buf);
     }
 }
