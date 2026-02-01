@@ -79,6 +79,11 @@ struct UMP32 {
     [[nodiscard]] constexpr uint8_t velocity() const noexcept { return word & 0x7F; }
     [[nodiscard]] constexpr uint8_t cc_number() const noexcept { return (word >> 8) & 0x7F; }
     [[nodiscard]] constexpr uint8_t cc_value() const noexcept { return word & 0x7F; }
+
+    // Aliases (05-midi.md spec names)
+    [[nodiscard]] constexpr uint8_t message_type() const noexcept { return mt(); }
+    [[nodiscard]] constexpr uint8_t byte2() const noexcept { return data1(); }
+    [[nodiscard]] constexpr uint8_t byte3() const noexcept { return data2(); }
     [[nodiscard]] constexpr uint8_t program() const noexcept { return (word >> 8) & 0x7F; }
     [[nodiscard]] constexpr uint8_t pressure() const noexcept { return (word >> 8) & 0x7F; }
     [[nodiscard]] constexpr uint16_t pitch_bend_value() const noexcept {
