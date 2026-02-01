@@ -7,6 +7,7 @@
 #include "types.hh"
 #include "event.hh"
 #include "error.hh"
+#include "shared_state.hh"
 #include <span>
 #include <cstdint>
 #include <algorithm>
@@ -57,6 +58,20 @@ struct AudioContext {
     /// Absolute sample position in the stream
     /// For DAW sync and LFO phase management
     sample_position_t sample_position;
+
+    // === Shared state (read-only in process()) ===
+
+    /// Parameter values (denormalized, written by EventRouter)
+    const SharedParamState* params = nullptr;
+
+    /// MIDI channel state (program, pressure, pitch bend per channel)
+    const SharedChannelState* channel = nullptr;
+
+    /// Hardware input state (raw ADC/GPIO values)
+    const SharedInputState* input_state = nullptr;
+
+    /// Number of output events written by Processor
+    uint32_t output_event_count = 0;
 
     // === Convenience accessors ===
 

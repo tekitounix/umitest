@@ -27,6 +27,15 @@ inline constexpr uint8_t sys_register_proc    = 5;
 inline constexpr uint8_t sys_unregister_proc  = 6;
 // 7–15: reserved
 
+// --- Configuration API (20–25) ---
+inline constexpr uint8_t sys_set_route_table    = 20;
+inline constexpr uint8_t sys_set_param_mapping  = 21;
+inline constexpr uint8_t sys_set_input_mapping  = 22;
+inline constexpr uint8_t sys_configure_input    = 23;
+inline constexpr uint8_t sys_set_app_config     = 24;
+inline constexpr uint8_t sys_send_param_request = 25;
+// 26–31: reserved
+
 // --- Filesystem (32–47) ---
 inline constexpr uint8_t sys_file_open        = 32;
 inline constexpr uint8_t sys_file_read        = 33;

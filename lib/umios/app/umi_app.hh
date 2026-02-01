@@ -172,6 +172,46 @@ inline void set_param(uint32_t index, float value) noexcept {
 }
 
 // ============================================================================
+// Configuration API (RouteTable, ParamMapping)
+// ============================================================================
+
+/// Set the MIDI routing table
+/// @param table Pointer to RouteTable (must remain valid)
+/// @return 0 on success
+inline int32_t set_route_table(const void* table) noexcept {
+    return syscall::set_route_table(table);
+}
+
+/// Set the CC-to-parameter mapping
+/// @param mapping Pointer to ParamMapping (must remain valid)
+/// @return 0 on success
+inline int32_t set_param_mapping(const void* mapping) noexcept {
+    return syscall::set_param_mapping(mapping);
+}
+
+/// Set the hardware input-to-parameter mapping
+/// @param mapping Pointer to InputParamMapping (must remain valid)
+/// @return 0 on success
+inline int32_t set_input_mapping(const void* mapping) noexcept {
+    return syscall::set_input_mapping(mapping);
+}
+
+/// Set full application configuration
+/// @param config Pointer to AppConfig (must remain valid)
+/// @return 0 on success
+inline int32_t set_app_config(const void* config) noexcept {
+    return syscall::set_app_config(config);
+}
+
+/// Request a parameter value change from the control task
+/// @param param_id Parameter index (0-31)
+/// @param value Desired value
+/// @return 0 on success
+inline int32_t request_param(uint32_t param_id, float value) noexcept {
+    return syscall::send_param_request(param_id, value);
+}
+
+// ============================================================================
 // Shared Memory Access
 // ============================================================================
 

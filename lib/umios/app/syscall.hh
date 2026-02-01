@@ -35,6 +35,15 @@ inline constexpr uint32_t get_param = 11;      ///< Get parameter (future)
 inline constexpr uint32_t set_param = 12;      ///< Set parameter (future)
 // 13–15: reserved
 
+// --- Configuration API (20–25) ---
+inline constexpr uint32_t set_route_table = 20;    ///< Set RouteTable (ptr)
+inline constexpr uint32_t set_param_mapping = 21;  ///< Set ParamMapping (ptr)
+inline constexpr uint32_t set_input_mapping = 22;  ///< Set InputParamMapping (ptr)
+inline constexpr uint32_t configure_input = 23;    ///< Set InputConfig (ptr)
+inline constexpr uint32_t set_app_config = 24;     ///< Set full AppConfig (ptr)
+inline constexpr uint32_t send_param_request = 25; ///< Request param change (id, value_bits)
+// 26–31: reserved
+
 // --- Filesystem (32–47) ---
 inline constexpr uint32_t file_open = 32;  ///< Open file (future)
 inline constexpr uint32_t file_read = 33;  ///< Read from file (future)
@@ -68,17 +77,18 @@ inline constexpr uint32_t Shutdown = (1 << 31); ///< Shutdown requested
 #if defined(__ARM_ARCH)
 
 /// Invoke syscall with 0-4 arguments
-/// @param nr Syscall number (in r0)
-/// @param a0-a3 Arguments (in r1-r4)
-/// @return Result (from r0)
-inline int32_t call(uint32_t nr, uint32_t a0 = 0, uint32_t a1 = 0, uint32_t a2 = 0, uint32_t a3 = 0) noexcept {
-    register uint32_t r0 __asm__("r0") = nr;
-    register uint32_t r1 __asm__("r1") = a0;
-    register uint32_t r2 __asm__("r2") = a1;
-    register uint32_t r3 __asm__("r3") = a2;
-    register uint32_t r4 __asm__("r4") = a3;
+/// Calling convention: r12 = syscall number, r0-r3 = arguments, return in r0
+/// Cortex-M SVC exception frame auto-stacks {r0,r1,r2,r3,r12,lr,pc,xpsr}
+/// so kernel reads syscall_nr from sp[4] and args from sp[0]-sp[3].
+[[gnu::always_inline]] inline int32_t call(uint32_t nr, uint32_t a0 = 0, uint32_t a1 = 0, uint32_t a2 = 0,
+                                           uint32_t a3 = 0) noexcept {
+    register uint32_t r0 __asm__("r0") = a0;
+    register uint32_t r1 __asm__("r1") = a1;
+    register uint32_t r2 __asm__("r2") = a2;
+    register uint32_t r3 __asm__("r3") = a3;
+    register uint32_t r12 __asm__("r12") = nr;
 
-    __asm__ volatile("svc #0" : "+r"(r0) : "r"(r1), "r"(r2), "r"(r3), "r"(r4) : "memory");
+    __asm__ volatile("svc #0" : "+r"(r0) : "r"(r1), "r"(r2), "r"(r3), "r"(r12) : "memory");
 
     return static_cast<int32_t>(r0);
 }
@@ -134,11 +144,13 @@ inline void sleep_usec(uint32_t usec) noexcept {
 }
 
 /// Get current time in microseconds (64-bit)
+/// Returns 64-bit value via r0 (low) and r1 (high)
 inline uint64_t get_time_usec() noexcept {
 #if defined(__ARM_ARCH)
-    register uint32_t r0 __asm__("r0") = nr::get_time;
+    register uint32_t r0 __asm__("r0");
     register uint32_t r1 __asm__("r1");
-    __asm__ volatile("svc #0" : "+r"(r0), "=r"(r1) : : "memory");
+    register uint32_t r12 __asm__("r12") = nr::get_time;
+    __asm__ volatile("svc #0" : "=r"(r0), "=r"(r1) : "r"(r12) : "memory");
     return (static_cast<uint64_t>(r1) << 32) | r0;
 #else
     return 0;
@@ -162,6 +174,38 @@ inline float get_param(uint32_t /*index*/) noexcept {
 
 /// Set a parameter value (stub)
 inline void set_param(uint32_t /*index*/, float /*value*/) noexcept {}
+
+/// Set route table (copies from app memory to kernel)
+inline int32_t set_route_table(const void* table) noexcept {
+    return call(nr::set_route_table, static_cast<uint32_t>(reinterpret_cast<uintptr_t>(table)));
+}
+
+/// Set parameter mapping (copies from app memory to kernel)
+inline int32_t set_param_mapping(const void* mapping) noexcept {
+    return call(nr::set_param_mapping, static_cast<uint32_t>(reinterpret_cast<uintptr_t>(mapping)));
+}
+
+/// Set input parameter mapping (copies from app memory to kernel)
+inline int32_t set_input_mapping(const void* mapping) noexcept {
+    return call(nr::set_input_mapping, static_cast<uint32_t>(reinterpret_cast<uintptr_t>(mapping)));
+}
+
+/// Configure a single hardware input
+inline int32_t configure_input(const void* config) noexcept {
+    return call(nr::configure_input, static_cast<uint32_t>(reinterpret_cast<uintptr_t>(config)));
+}
+
+/// Set full application config (copies from app memory to kernel)
+inline int32_t set_app_config(const void* config) noexcept {
+    return call(nr::set_app_config, static_cast<uint32_t>(reinterpret_cast<uintptr_t>(config)));
+}
+
+/// Request parameter value change (param_id, float value as bits)
+inline int32_t send_param_request(uint32_t param_id, float value) noexcept {
+    uint32_t value_bits;
+    __builtin_memcpy(&value_bits, &value, sizeof(value_bits));
+    return call(nr::send_param_request, param_id, value_bits);
+}
 
 // ============================================================================
 // Coroutine Scheduler Adapters
