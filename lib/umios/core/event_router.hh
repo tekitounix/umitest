@@ -231,6 +231,42 @@ public:
     /// Set parameter mapping (for ROUTE_PARAM path)
     void set_param_mapping(const ParamMapping* mapping) noexcept { param_mapping = mapping; }
 
+    /// Process a hardware input event (button, potentiometer, encoder)
+    /// Routes via RouteFlags to audio queue (as ButtonDown/Up or Param events),
+    /// control queue (as INPUT_CHANGE), and/or SharedParamState (via InputParamMapping)
+    /// @param input_id Hardware input index (0-15)
+    /// @param value 16-bit value: 0xFFFF=pressed, 0x0000=released for buttons; 0-65535 for analog
+    /// @param is_button True if this is a button (generates ButtonDown/Up events), false for analog
+    /// @param route Route flags for this input
+    void receive_input(uint8_t input_id, uint16_t value, bool is_button, RouteFlags route) noexcept {
+        if (route == ROUTE_NONE) return;
+
+        // Route to audio event queue (buttons as ButtonDown/Up events)
+        if ((static_cast<uint8_t>(route) & ROUTE_AUDIO) != 0 && audio_push != nullptr) {
+            if (is_button) {
+                if (value != 0) {
+                    (void)audio_push(audio_queue_ptr, Event::button_down(0, input_id));
+                } else {
+                    (void)audio_push(audio_queue_ptr, Event::button_up(0, input_id));
+                }
+            }
+        }
+
+        // Route to control queue as INPUT_CHANGE
+        if ((static_cast<uint8_t>(route) & ROUTE_CONTROL) != 0 && control_push != nullptr) {
+            (void)control_push(control_queue_ptr, ControlEvent::make_input_change(input_id, value));
+        }
+
+        // Route to parameter state via InputParamMapping
+        if ((static_cast<uint8_t>(route) & ROUTE_PARAM) != 0 &&
+            input_param_mapping != nullptr && shared_params != nullptr) {
+            apply_input_to_param(input_id, value, *input_param_mapping, *shared_params);
+        }
+    }
+
+    /// Set input parameter mapping (for ROUTE_PARAM path on HW inputs)
+    void set_input_param_mapping(const InputParamMapping* mapping) noexcept { input_param_mapping = mapping; }
+
     /// Process a raw input event through the routing table
     /// @param raw The raw input event
     /// @param buffer_start_us Timestamp of current audio buffer start (μs)
@@ -326,6 +362,7 @@ private:
 
     const RouteTable* route_table = nullptr;
     const ParamMapping* param_mapping = nullptr;
+    const InputParamMapping* input_param_mapping = nullptr;
     SharedParamState* shared_params = nullptr;
     SharedChannelState* shared_channel = nullptr;
     AudioPushFn audio_push = nullptr;

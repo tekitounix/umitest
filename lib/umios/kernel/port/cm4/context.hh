@@ -6,6 +6,7 @@
 #pragma once
 
 #include <cstdint>
+#include <umios/kernel/fpu_policy.hh>
 
 namespace umi::port::cm4 {
 
@@ -135,6 +136,29 @@ inline void init_task_context(TaskContext& ctx,
     ctx.arg = arg;
     ctx.uses_fpu = uses_fpu;
     ctx.initialized = true;
+}
+
+// ============================================================================
+// Policy-based Stack Initialization (compile-time FPU policy)
+// ============================================================================
+
+/// Initialize task stack with compile-time FPU policy.
+/// The policy is automatically determined by resolve_fpu_policy().
+template <umi::FpuPolicy Policy>
+inline uint32_t* init_task_stack(uint32_t* stack_top,
+                                  void (*entry)(void*),
+                                  void* arg) {
+    return init_task_stack(stack_top, entry, arg, umi::needs_fpu_frame(Policy));
+}
+
+/// Initialize a TaskContext with compile-time FPU policy.
+template <umi::FpuPolicy Policy>
+inline void init_task_context(TaskContext& ctx,
+                               uint32_t* stack_base,
+                               uint32_t stack_size,
+                               void (*entry)(void*),
+                               void* arg) {
+    init_task_context(ctx, stack_base, stack_size, entry, arg, umi::needs_fpu_frame(Policy));
 }
 
 }  // namespace umi::port::cm4

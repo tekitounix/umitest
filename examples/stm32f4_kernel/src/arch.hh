@@ -7,6 +7,7 @@
 #include <cstdint>
 
 #include <port/cm4/context.hh>
+#include <umios/kernel/fpu_policy.hh>
 
 namespace umi::arch::cm4 {
 
@@ -27,6 +28,16 @@ void init_task(TaskContext& tcb,
                void (*entry)(void*),
                void* arg,
                bool use_fpu);
+
+template <umi::FpuPolicy Policy>
+inline void init_task(TaskContext& tcb,
+                      uint32_t* stack,
+                      uint32_t stack_size,
+                      void (*entry)(void*),
+                      void* arg) {
+    umi::port::cm4::init_task_context<Policy>(tcb, stack, stack_size, entry, arg);
+}
+
 void yield();
 void wait_for_interrupt();
 void request_context_switch();

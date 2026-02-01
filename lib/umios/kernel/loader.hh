@@ -306,11 +306,9 @@ struct SharedMemory {
     // Flags
     std::atomic<uint32_t> flags{0};
 
-    // LED/Button state (kernel <-> app)
+    // LED state (app → kernel)
     std::atomic<uint8_t> led_state{0};        ///< LED state bitmap (bit0-3 = LED0-3)
-    std::atomic<uint8_t> button_pressed{0};   ///< Button press flag (cleared on read)
-    std::atomic<uint8_t> button_current{0};   ///< Current button state
-    uint8_t _pad_io[1]{};                     ///< Padding for alignment
+    uint8_t _pad_io[3]{};                     ///< Padding for alignment
 
     // Application heap memory region
     // Set by kernel before starting app

@@ -14,6 +14,7 @@
 #include <umios/app/syscall.hh>
 #include <umios/core/audio_context.hh>
 #include <umios/core/event_router.hh>
+#include <umios/kernel/fpu_policy.hh>
 #include <umios/kernel/umi_kernel.hh>
 
 #include "arch.hh"
@@ -74,6 +75,19 @@ using HW = umi::Hw<Stm32F4Hw>;
 
 umi::Kernel<8, 4, HW, 1> g_kernel;
 
+// Compile-time FPU policy determination
+static constexpr umi::TaskFpuDecl fpu_decl {
+    .audio   = true,
+    .system  = false,
+    .control = true,
+    .idle    = false,
+};
+static constexpr int fpu_task_count = umi::count_fpu_tasks(fpu_decl);
+static constexpr auto audio_fpu_policy   = umi::resolve_fpu_policy(fpu_decl.audio,   fpu_task_count);
+static constexpr auto system_fpu_policy  = umi::resolve_fpu_policy(fpu_decl.system,  fpu_task_count);
+static constexpr auto control_fpu_policy = umi::resolve_fpu_policy(fpu_decl.control, fpu_task_count);
+static constexpr auto idle_fpu_policy    = umi::resolve_fpu_policy(fpu_decl.idle,    fpu_task_count);
+
 umi::TaskId g_audio_task_id;
 umi::TaskId g_system_task_id;
 umi::TaskId g_control_task_id;
@@ -111,12 +125,6 @@ namespace bsp = umi::bsp::board;
 // SpscQueues (lock-free IPC replacing manual ring buffers)
 // ============================================================================
 
-struct ButtonEvent {
-    uint8_t type;
-    uint8_t id;
-};
-
-umi::SpscQueue<ButtonEvent, 16> g_button_queue;
 umi::SpscQueue<uint16_t*, 4> g_audio_ready_queue;
 
 // EventRouter (Phase 3c)
@@ -148,6 +156,10 @@ volatile uint32_t g_last_wait_bits = 0;
 
 AppLoader g_loader;
 __attribute__((section(".shared"))) SharedMemory g_shared;
+
+// LED override: kernel can force specific LEDs regardless of app state
+volatile uint8_t g_led_override = 0;       // Kernel forced LED bits
+volatile uint8_t g_led_override_mask = 0xFF; // Bits under kernel control (default: all)
 
 // ============================================================================
 // Button Debouncer
@@ -532,22 +544,11 @@ static void process_audio_frame(uint16_t* buf) {
         std::array<Event, INPUT_EVENT_CAPACITY> input_events{};
         size_t input_event_count = 0;
 
-        // Drain EventRouter audio queue (routed MIDI events with sample-accurate timing)
+        // Drain EventRouter audio queue (routed MIDI + button events with sample-accurate timing)
         {
             Event ev;
             while (input_event_count < input_events.size() && g_router_audio_queue.pop(ev)) {
                 input_events[input_event_count++] = ev;
-            }
-        }
-
-        while (input_event_count < input_events.size()) {
-            auto ev = g_button_queue.try_pop();
-            if (!ev)
-                break;
-            if (ev->type == 0) {
-                input_events[input_event_count++] = Event::button_down(0, ev->id);
-            } else {
-                input_events[input_event_count++] = Event::button_up(0, ev->id);
             }
         }
 
@@ -975,7 +976,8 @@ void setup_usb_callbacks() {
         evt_log(4, streaming ? 1 : 0);
         if (streaming) {
             restart_audio_dma();
-            mcu::gpio(bsp::led::gpio_port).set(bsp::led::blue);
+            // Blue LED: kernel override for USB OUT streaming
+            g_led_override |= (1 << 3);
         } else {
             // Zero DMA buffers immediately when streaming stops
             // to prevent stale audio from being output by I2S
@@ -986,24 +988,20 @@ void setup_usb_callbacks() {
             // Drain audio queue — stale buffers
             while (g_audio_ready_queue.try_pop()) {
             }
-            mcu::gpio(bsp::led::gpio_port).reset(bsp::led::blue);
+            g_led_override &= ~(1 << 3);
         }
     };
 
     mcu::usb_audio().on_audio_in_change = [](bool streaming) {
         if (streaming) {
-            mcu::gpio(bsp::led::gpio_port).set(bsp::led::orange);
+            g_led_override |= (1 << 1); // Orange LED: USB IN streaming
         } else {
-            mcu::gpio(bsp::led::gpio_port).reset(bsp::led::orange);
+            g_led_override &= ~(1 << 1);
         }
     };
 
     mcu::usb_audio().on_audio_rx = []() {
-        static uint8_t cnt = 0;
-        if (++cnt >= 48) {
-            cnt = 0;
-            mcu::gpio(bsp::led::gpio_port).toggle(bsp::led::green);
-        }
+        // No direct GPIO — LED state driven by tick_callback
     };
 }
 
@@ -1034,6 +1032,9 @@ void* load_app(const uint8_t* app_image_start) {
     uintptr_t entry_addr = reinterpret_cast<uintptr_t>(app_header->entry_point(app_image_start)) | 1;
     auto app_entry = reinterpret_cast<void (*)()>(entry_addr);
     g_loader.set_entry(app_entry);
+
+    // App loaded: release LED control to app, keep only Blue (USB streaming) + Orange (USB IN) for kernel
+    g_led_override_mask = (1 << 3) | (1 << 1);
 
     return reinterpret_cast<void*>(app_entry);
 }
@@ -1110,6 +1111,29 @@ static void tick_callback() {
         return;
     }
 
+    // --- Button GPIO read → debounce → EventRouter + SharedInputState ---
+    {
+        bool raw = mcu::gpio(bsp::button::gpio_port).read(bsp::button::user);
+        uint8_t result = g_user_button.update(raw);
+        if (result != 0) {
+            uint16_t value = (result == 1) ? 0xFFFF : 0x0000;
+            g_event_router.receive_input(0, value, true, ROUTE_AUDIO | ROUTE_CONTROL);
+            // Update SharedInputState so app controller_task can poll button state
+            g_shared.input_state.raw[0] = value;
+        }
+    }
+
+    // --- LED GPIO drive: merge app state with kernel override ---
+    {
+        uint8_t app_leds = g_shared.led_state.load(std::memory_order_relaxed);
+        uint8_t final_leds = (app_leds & ~g_led_override_mask) | (g_led_override & g_led_override_mask);
+        auto& port = mcu::gpio(bsp::led::gpio_port);
+        (final_leds & (1 << 0)) ? port.set(bsp::led::green) : port.reset(bsp::led::green);
+        (final_leds & (1 << 1)) ? port.set(bsp::led::orange) : port.reset(bsp::led::orange);
+        (final_leds & (1 << 2)) ? port.set(bsp::led::red) : port.reset(bsp::led::red);
+        (final_leds & (1 << 3)) ? port.set(bsp::led::blue) : port.reset(bsp::led::blue);
+    }
+
     g_kernel.tick(1000);
 
     // System task: wake every tick (PDM polling, sample rate change)
@@ -1160,7 +1184,7 @@ void start_rtos(void* app_entry) {
         .entry = audio_task_entry,
         .arg = nullptr,
         .prio = umi::Priority::Realtime,
-        .uses_fpu = true,
+        .uses_fpu = fpu_decl.audio,
         .name = "audio",
     });
 
@@ -1168,7 +1192,7 @@ void start_rtos(void* app_entry) {
         .entry = system_task_entry,
         .arg = nullptr,
         .prio = umi::Priority::Server,
-        .uses_fpu = false,
+        .uses_fpu = fpu_decl.system,
         .name = "system",
     });
 
@@ -1176,7 +1200,7 @@ void start_rtos(void* app_entry) {
         .entry = control_task_entry,
         .arg = app_entry,
         .prio = umi::Priority::User,
-        .uses_fpu = true,
+        .uses_fpu = fpu_decl.control,
         .name = "control",
     });
 
@@ -1184,19 +1208,22 @@ void start_rtos(void* app_entry) {
         .entry = idle_task_entry,
         .arg = nullptr,
         .prio = umi::Priority::Idle,
-        .uses_fpu = false,
+        .uses_fpu = fpu_decl.idle,
         .name = "idle",
     });
 
-    // Initialize hardware TCBs (port layer)
-    arch::cm4::init_task(g_audio_tcb, g_audio_task_stack, AUDIO_TASK_STACK_SIZE, audio_task_entry, nullptr, true);
+    // Initialize hardware TCBs (port layer) — FPU policy resolved at compile time
+    arch::cm4::init_task<audio_fpu_policy>(
+        g_audio_tcb, g_audio_task_stack, AUDIO_TASK_STACK_SIZE, audio_task_entry, nullptr);
 
-    arch::cm4::init_task(g_system_tcb, g_system_task_stack, SYSTEM_TASK_STACK_SIZE, system_task_entry, nullptr, false);
+    arch::cm4::init_task<system_fpu_policy>(
+        g_system_tcb, g_system_task_stack, SYSTEM_TASK_STACK_SIZE, system_task_entry, nullptr);
 
-    arch::cm4::init_task(
-        g_control_tcb, g_control_task_stack, CONTROL_TASK_STACK_SIZE, control_task_entry, app_entry, true);
+    arch::cm4::init_task<control_fpu_policy>(
+        g_control_tcb, g_control_task_stack, CONTROL_TASK_STACK_SIZE, control_task_entry, app_entry);
 
-    arch::cm4::init_task(g_idle_tcb, g_idle_task_stack, IDLE_TASK_STACK_SIZE, idle_task_entry, nullptr, false);
+    arch::cm4::init_task<idle_fpu_policy>(
+        g_idle_tcb, g_idle_task_stack, IDLE_TASK_STACK_SIZE, idle_task_entry, nullptr);
 
     // System task starts Blocked, wakes on SysTick resume_task().
     // Audio task starts Ready — it immediately calls wait_block(AudioReady)
