@@ -100,18 +100,78 @@ OS非依存のレジスタ操作抽象化レイヤ。
   - audio_codec
     - cs43l22.hh
 
-目次
-application
-  .umia
-    header
-  abi
-  entry
-  
-kernel
-  service
-    loader
-    updater
-      relocator
-    
-  memory
-  port
+
+stack は固定サイズにする
+実行中に境界は動かさない
+
+カーネルがロード時に MPU ガードを張る
+stack 下端
+heap 上端
+最小サイズの no-access リージョンを 1 枚置く
+
+heap アロケータ
+境界チェック
+使用量とピーク計測のみ
+
+heap と stack の衝突は MPU で即 Fault
+遅検出にしない。
+
+一時的大容量は stack に置かない
+scratch arena や固定 pool を使う。
+
+Fault 時は OS がログを取る
+レジスタ
+Fault ステータス
+heap stack 使用量
+
+heap 用 syscall は不要
+固定領域なら MemMap も不要。必要なのはロード時設定だけ。
+
+一文で
+スタック境界は固定して MPU で守り、ヒープはその内側で管理し、動かさない。可変にしたい容量は stack ではなく scratch に逃がす。
+
+
+Fault ハンドリング
+
+MPU ガードに触れる
+スタックオーバーフロー等で MemManageFault。
+
+Fault ハンドラに入る
+OS 用スタックで実行。
+
+ログ保存
+レジスタと Fault 状態を固定バッファへ。
+
+現在タスクを死亡マーク
+復帰対象から外す。
+
+復帰 PC をトランポリンに差し替え
+アプリ文脈を捨てるため。
+
+PendSV をセット
+安全なスケジューラ遷移を予約。
+
+Fault から例外復帰
+アプリには戻らずトランポリンへ。
+
+トランポリン実行
+割り込み状態を正規化。
+
+PendSV ハンドラでスケジューラ実行
+死亡タスクを破棄。
+
+アイドルまたは次アプリへ
+
+``` C++
+void fault_handler(...) {
+  save_log();
+  mark_current_task_dead();
+  set_return_pc(trampoline_entry);
+  trigger_pendsv();
+}
+
+void trampoline_entry(void) {
+  disable_interrupts();
+  schedule();
+}
+```
