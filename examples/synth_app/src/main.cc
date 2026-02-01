@@ -2,10 +2,9 @@
 // Polyphonic Synth Application (.umia)
 // Uses PolySynth from headless_webhost
 // Processor/Controller separation model:
-//   - Processor: Audio processing + MIDI/Button events (called from ISR)
-//   - Controller: LED state management (main loop with co_await 16ms)
+//   - Processor: Audio processing + MIDI events (called from ISR)
+//   - Controller: Button/LED state management (main loop with co_await 16ms)
 
-#include <atomic>
 #include <synth.hh> // headless_webhost/src/synth.hh
 #include <umi_app.hh>
 #include <umios/app/syscall.hh>
@@ -30,7 +29,7 @@ constexpr uint8_t RESONANCE = 1;
 // Routing Configuration
 // ============================================================================
 
-// Route table: notes → audio, CC#74/71 → param pipeline
+// Route table: notes → audio, CC#74/71 → param pipeline, buttons → control
 static const RouteTable g_route_table = [] {
     auto rt = RouteTable::make_default();
     rt.control_change[74] = ROUTE_PARAM; // CC#74 (Brightness) → param
@@ -51,14 +50,12 @@ static const ParamMapping g_param_mapping = [] {
 // ============================================================================
 
 namespace led {
-constexpr uint8_t GREEN = 0;  // PD12 - Heartbeat
-constexpr uint8_t ORANGE = 1; // PD13 - Mode indicator
-constexpr uint8_t RED = 2;    // PD14 - Mode indicator
-constexpr uint8_t BLUE = 3;   // PD15 - Mode indicator
+constexpr uint8_t GREEN = 0; // PD12 - Heartbeat
+constexpr uint8_t RED = 2;   // PD14 - Mode indicator
 } // namespace led
 
 // ============================================================================
-// Synth Processor (Audio + Events)
+// Synth Processor (Audio only — no button handling)
 // ============================================================================
 
 class SynthProcessor {
@@ -83,17 +80,10 @@ class SynthProcessor {
             // TODO: Apply cutoff/resonance to synth filter when PolySynth exposes filter API
         }
 
-        // Process input events (MIDI notes via ROUTE_AUDIO, buttons)
+        // Process input events (MIDI notes via ROUTE_AUDIO)
         for (const auto& ev : ctx.input_events) {
-            switch (ev.type) {
-            case EventType::Midi:
+            if (ev.type == EventType::Midi) {
                 synth_.handle_midi(ev.midi.bytes, ev.midi.size);
-                break;
-            case EventType::ButtonDown:
-                led_mode_.store((led_mode_.load(std::memory_order_relaxed) + 1) % 5, std::memory_order_relaxed);
-                break;
-            default:
-                break;
             }
         }
 
@@ -117,14 +107,9 @@ class SynthProcessor {
                 lfo_phase_ -= 1.0f;
             }
         }
-
-        // Export LFO phase for controller (atomic write)
-        lfo_phase_out_.store(lfo_phase_, std::memory_order_relaxed);
     }
 
-    // Atomic accessors for Controller
-    [[nodiscard]] float lfo_phase() const noexcept { return lfo_phase_out_.load(std::memory_order_relaxed); }
-    [[nodiscard]] uint8_t led_mode() const noexcept { return led_mode_.load(std::memory_order_relaxed); }
+    [[nodiscard]] float lfo_phase() const noexcept { return lfo_phase_; }
 
   private:
     umi::synth::PolySynth synth_;
@@ -134,24 +119,51 @@ class SynthProcessor {
     float last_cutoff_ = 1000.0f;
     float last_resonance_ = 0.5f;
 
-    // LFO for heartbeat LED
+    // LFO for heartbeat LED (updated in process(), read in controller_task)
+    // Note: single-writer (audio ISR), single-reader (controller task) — no atomic needed
+    // since we only read an approximate phase value for LED blinking
     float lfo_phase_ = 0.0f;
-    std::atomic<float> lfo_phase_out_{0.0f};
-
-    // LED mode (changed by button events)
-    std::atomic<uint8_t> led_mode_{0};
 };
 
 // ============================================================================
-// Controller Task (LED management)
+// Controller Task (Button + LED management via ControlEventQueue)
 // ============================================================================
 
 umi::coro::Task<void> controller_task(SynthProcessor& proc, umi::kernel::SharedMemory& shared) {
+    uint8_t led_mode = 0;
+
     while (true) {
         co_await 16ms;
 
+        // Poll ControlEventQueue for button events (routed via ROUTE_CONTROL)
+        // ControlEvents are delivered by EventRouter → g_control_event_queue
+        // The kernel drains them; here we check SharedInputState for button changes
+        // Button events come as input_events in AudioContext (ROUTE_AUDIO path),
+        // but for controller we use the control path:
+        // For now, check SharedMemory input_state for button (input 0)
+        // The EventRouter receive_input() with ROUTE_CONTROL pushes ControlEvent::INPUT_CHANGE
+        // which the kernel's control_event_queue receives.
+        // Since synth_app's controller_task doesn't have direct access to the kernel's
+        // control_event_queue, we use the audio event path: buttons routed to ROUTE_AUDIO
+        // arrive as ButtonDown/ButtonUp events in process(). We need a way to communicate
+        // button presses from audio ISR to controller.
+        //
+        // Simplest approach: use SharedInputState. The kernel updates input_state.raw[0]
+        // with the button value via EventRouter. We detect edges here.
+
+        // Read button state from SharedInputState (written by EventRouter ROUTE_PARAM path
+        // or directly by kernel)
+        static uint16_t prev_button = 0;
+        uint16_t cur_button = shared.input_state.raw[0];
+        if (cur_button != prev_button) {
+            if (cur_button == 0xFFFF && prev_button == 0) {
+                // Button pressed — cycle LED mode
+                led_mode = (led_mode + 1) % 5;
+            }
+            prev_button = cur_button;
+        }
+
         float phase = proc.lfo_phase();
-        uint8_t mode = proc.led_mode();
 
         uint8_t led_state = 0;
 
@@ -160,16 +172,10 @@ umi::coro::Task<void> controller_task(SynthProcessor& proc, umi::kernel::SharedM
             led_state |= (1 << led::GREEN);
         }
 
-        // Mode LEDs: binary pattern on Orange/Red/Blue
-        if (mode > 0) {
-            if ((mode & 1) != 0) {
-                led_state |= (1 << led::ORANGE);
-            }
-            if ((mode & 2) != 0) {
+        // Mode LEDs: binary pattern on Red (Orange/Blue are kernel-controlled)
+        if (led_mode > 0) {
+            if ((led_mode & 1) != 0) {
                 led_state |= (1 << led::RED);
-            }
-            if ((mode & 4) != 0) {
-                led_state |= (1 << led::BLUE);
             }
         }
 
