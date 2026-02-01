@@ -140,6 +140,28 @@ class AudioInterface {
     static constexpr bool SAMPLE_RATE_CONTROL = SampleRateControlEnabled_;
     using SampleT = SampleT_;
 
+    /// Frame divisor: 1000 for FS (1ms frames), 8000 for HS (125μs microframes).
+    /// constexpr when SUPPORTS_HS is false (zero overhead).
+    [[nodiscard]] uint32_t frame_divisor() const {
+        if constexpr (!SUPPORTS_HS) return FsTraits::FRAME_DIVISOR;
+        return (current_speed_ == Speed::HIGH) ? HsTraits::FRAME_DIVISOR : FsTraits::FRAME_DIVISOR;
+    }
+
+    /// Feedback byte count: 3 for FS (10.14), 4 for HS (16.16).
+    [[nodiscard]] uint8_t feedback_bytes() const {
+        if constexpr (!SUPPORTS_HS) return FsTraits::FB_BYTES;
+        return (current_speed_ == Speed::HIGH) ? HsTraits::FB_BYTES : FsTraits::FB_BYTES;
+    }
+
+    /// Feedback shift: 14 for FS, 16 for HS.
+    [[nodiscard]] uint8_t feedback_shift() const {
+        if constexpr (!SUPPORTS_HS) return FsTraits::FB_SHIFT;
+        return (current_speed_ == Speed::HIGH) ? HsTraits::FB_SHIFT : FsTraits::FB_SHIFT;
+    }
+
+    /// Current negotiated USB speed.
+    [[nodiscard]] Speed current_speed() const { return current_speed_; }
+
     // Port types
     using AudioOut = AudioOut_;
     using AudioIn = AudioIn_;
@@ -1181,6 +1203,9 @@ class AudioInterface {
     uint32_t in_prepared_bytes_ = 0; // Prepared packet size in in_packet_buf_
     uint32_t sof_count_ = 0;         // SOF frame counter for feedback interval
 
+    // Runtime speed (only used when SUPPORTS_HS == true)
+    Speed current_speed_ = Speed::FULL;
+
     // Feature Unit state (UAC1) - Audio OUT
     bool fu_out_mute_ = false;
     int16_t fu_out_volume_ = 0; // 1/256 dB
@@ -1427,6 +1452,11 @@ class AudioInterface {
 
     template <typename HalT>
     void configure_endpoints(HalT& hal) {
+        // Query negotiated speed from HAL
+        if constexpr (SUPPORTS_HS) {
+            current_speed_ = hal.get_speed();
+        }
+
         if constexpr (HAS_MIDI_OUT) {
             hal.ep_configure({EP_MIDI_OUT, Direction::OUT, TransferType::BULK, MidiOut::PACKET_SIZE});
         }
