@@ -132,6 +132,18 @@ static_assert(uac2_fu[6] == 0x00, "bmaControls[0] byte1");
 static constexpr auto uac2_fu_mono = audio::Uac2FeatureUnit<1>(7, 4, 0x0000000F, 0x00000000);
 static_assert(uac2_fu_mono.size == 14, "UAC2 FU mono = 14 bytes"); // 6 + (1+1)*4
 
+// Device Qualifier descriptor
+static constexpr auto dq_desc = DeviceQualifierDesc{
+    .usb_version = 0x0200,
+    .device_class = 0xEF,
+    .device_subclass = 0x02,
+    .device_protocol = 0x01,
+}.build();
+static_assert(dq_desc.size == 10, "Device Qualifier must be 10 bytes");
+static_assert(dq_desc[0] == 10, "bLength");
+static_assert(dq_desc[1] == dtype::DeviceQualifier, "bDescriptorType");
+static_assert(dq_desc[9] == 0, "bReserved");
+
 // SpeedTraits
 static_assert(SpeedTraits<Speed::FULL>::FRAME_DIVISOR == 1000, "FS frame divisor");
 static_assert(SpeedTraits<Speed::FULL>::FB_BYTES == 3, "FS feedback 3 bytes");

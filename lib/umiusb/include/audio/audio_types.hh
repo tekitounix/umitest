@@ -655,13 +655,18 @@ inline constexpr uint8_t ELEMENT = 0x04;
 inline constexpr uint8_t GENERAL = 0x01; // For endpoint
 } // namespace ms
 
-// Terminal types
+// Terminal types (USB Audio Terminal Types spec)
 inline constexpr uint16_t TERMINAL_USB_STREAMING = 0x0101;
 inline constexpr uint16_t TERMINAL_SPEAKER = 0x0301;
 inline constexpr uint16_t TERMINAL_HEADPHONES = 0x0302;
+inline constexpr uint16_t TERMINAL_HEADSET = 0x0402;
 inline constexpr uint16_t TERMINAL_MICROPHONE = 0x0201;
 inline constexpr uint16_t TERMINAL_LINE_IN = 0x0501;
+inline constexpr uint16_t TERMINAL_DIGITAL_IN = 0x0502;
 inline constexpr uint16_t TERMINAL_LINE_OUT = 0x0602;
+inline constexpr uint16_t TERMINAL_SPDIF_OUT = 0x0605;
+inline constexpr uint16_t TERMINAL_SYNTHESIZER = 0x0703;
+inline constexpr uint16_t TERMINAL_INSTRUMENT = 0x0710;
 
 // Format types
 inline constexpr uint8_t FORMAT_TYPE_I = 0x01;

@@ -135,6 +135,28 @@ struct DeviceDesc {
 };
 
 // ============================================================================
+// Device Qualifier Descriptor (USB 2.0 §9.6.2)
+// ============================================================================
+
+/// Device Qualifier — describes the device in the "other" speed.
+/// Required for HS-capable devices; FS-only devices STALL this.
+struct DeviceQualifierDesc {
+    uint16_t usb_version = 0x0200;
+    uint8_t device_class = 0;
+    uint8_t device_subclass = 0;
+    uint8_t device_protocol = 0;
+    uint8_t max_packet_size_0 = 64;
+    uint8_t num_configurations = 1;
+
+    constexpr auto build() const {
+        return bytes(10, dtype::DeviceQualifier) +
+               le16(usb_version) +
+               bytes(device_class, device_subclass, device_protocol,
+                     max_packet_size_0, num_configurations, 0);  // bReserved=0
+    }
+};
+
+// ============================================================================
 // Configuration Descriptor Header
 // ============================================================================
 

@@ -284,6 +284,13 @@ private:
                 break;
             }
 
+            case bDescriptorType::DeviceQualifier:
+            case bDescriptorType::OtherSpeedConfig:
+                // FS-only devices must STALL these requests (USB 2.0 §9.6.2).
+                // HS-capable devices should respond — handled by Class if needed.
+                hal_.ep_stall(0, true);
+                return;
+
             default:
                 break;
         }
