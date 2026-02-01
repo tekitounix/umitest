@@ -7,6 +7,7 @@
 #include "app_header.hh"
 #include "../core/audio_context.hh"
 #include "../core/event.hh"
+#include "../core/shared_state.hh"
 #include <cstdint>
 #include <cstddef>
 #include <span>
@@ -293,10 +294,15 @@ struct SharedMemory {
     std::atomic<uint32_t> event_write_idx{0};
     std::atomic<uint32_t> event_read_idx{0};
     
-    // Parameter block (app -> kernel for UI)
-    static constexpr size_t MAX_PARAMS = 32;
-    std::atomic<float> params[MAX_PARAMS];
-    
+    // Parameter state (written by EventRouter, read by Processor via AudioContext)
+    SharedParamState param_state;
+
+    // MIDI channel state (written by EventRouter)
+    SharedChannelState channel_state;
+
+    // Hardware input state (written by kernel drivers)
+    SharedInputState input_state;
+
     // Flags
     std::atomic<uint32_t> flags{0};
 

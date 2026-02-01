@@ -43,9 +43,9 @@ void init_task(TaskContext& tcb,
 }
 
 void yield() {
-    __asm__ volatile("mov r0, %0\n"
+    __asm__ volatile("mov r12, %0\n"
                      "svc 0\n" ::"i"(syscall_yield)
-                     : "r0");
+                     : "r12");
 }
 
 void wait_for_interrupt() {

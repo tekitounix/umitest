@@ -13,6 +13,7 @@
 #include <span>
 #include <umios/app/syscall.hh>
 #include <umios/core/audio_context.hh>
+#include <umios/core/event_router.hh>
 #include <umios/kernel/umi_kernel.hh>
 
 #include "arch.hh"
@@ -110,19 +111,19 @@ namespace bsp = umi::bsp::board;
 // SpscQueues (lock-free IPC replacing manual ring buffers)
 // ============================================================================
 
-struct MidiMsg {
-    uint8_t data[4];
-    uint8_t len;
-};
-
 struct ButtonEvent {
     uint8_t type;
     uint8_t id;
 };
 
-umi::SpscQueue<MidiMsg, 64> g_midi_queue;
 umi::SpscQueue<ButtonEvent, 16> g_button_queue;
 umi::SpscQueue<uint16_t*, 4> g_audio_ready_queue;
+
+// EventRouter (Phase 3c)
+static EventRouter g_event_router;
+static ControlEventQueue<> g_control_event_queue;
+static EventQueue<INPUT_EVENT_CAPACITY> g_router_audio_queue;
+static RouteTable g_route_table = RouteTable::make_default();
 
 // ============================================================================
 // Global State
@@ -531,30 +532,11 @@ static void process_audio_frame(uint16_t* buf) {
         std::array<Event, INPUT_EVENT_CAPACITY> input_events{};
         size_t input_event_count = 0;
 
-        while (input_event_count < input_events.size()) {
-            auto msg = g_midi_queue.try_pop();
-            if (!msg)
-                break;
-
-            uint8_t status = 0;
-            uint8_t d1 = 0;
-            uint8_t d2 = 0;
-
-            if (msg->len >= 4) {
-                status = msg->data[1];
-                d1 = msg->data[2];
-                d2 = msg->data[3];
-            } else if (msg->len == 3) {
-                status = msg->data[0];
-                d1 = msg->data[1];
-                d2 = msg->data[2];
-            } else if (msg->len == 2) {
-                status = msg->data[0];
-                d1 = msg->data[1];
-            }
-
-            if (status != 0) {
-                input_events[input_event_count++] = Event::make_midi(0, 0, status, d1, d2);
+        // Drain EventRouter audio queue (routed MIDI events with sample-accurate timing)
+        {
+            Event ev;
+            while (input_event_count < input_events.size() && g_router_audio_queue.pop(ev)) {
+                input_events[input_event_count++] = ev;
             }
         }
 
@@ -580,6 +562,10 @@ static void process_audio_frame(uint16_t* buf) {
             mcu::audio::buffer_size,
             dt,
             g_shared.sample_position,
+            &g_shared.param_state,
+            &g_shared.channel_state,
+            &g_shared.input_state,
+            0,
         };
 
         g_loader.call_process(ctx);
@@ -820,12 +806,20 @@ inline constexpr uint32_t wait_event = 2;
 inline constexpr uint32_t get_time = 3;
 inline constexpr uint32_t get_shared = 4;
 inline constexpr uint32_t register_proc = 5;
+inline constexpr uint32_t set_route_table = 20;
+inline constexpr uint32_t set_param_mapping = 21;
+inline constexpr uint32_t set_input_mapping = 22;
+inline constexpr uint32_t configure_input = 23;
+inline constexpr uint32_t set_app_config = 24;
+inline constexpr uint32_t send_param_request = 25;
 } // namespace app_syscall
 
 static void svc_handler_impl(uint32_t* sp) {
-    uint32_t syscall_nr = sp[0];
-    uint32_t arg0 = sp[1];
-    uint32_t arg1 = sp[2];
+    // Cortex-M exception frame: {r0, r1, r2, r3, r12, lr, pc, xpsr}
+    // r12 convention: sp[4] = syscall number, sp[0]-sp[3] = arguments
+    uint32_t syscall_nr = sp[4];
+    uint32_t arg0 = sp[0];
+    uint32_t arg1 = sp[1];
     int32_t result = 0;
 
     switch (syscall_nr) {
@@ -880,6 +874,53 @@ static void svc_handler_impl(uint32_t* sp) {
         }
         break;
 
+    case app_syscall::set_route_table: {
+        auto* table = reinterpret_cast<const RouteTable*>(arg0);
+        if (table != nullptr) {
+            g_route_table = *table;
+        }
+        result = 0;
+        break;
+    }
+
+    case app_syscall::set_param_mapping: {
+        // Store pointer directly — app memory is accessible to kernel
+        auto* mapping = reinterpret_cast<const ParamMapping*>(arg0);
+        g_event_router.set_param_mapping(mapping);
+        result = 0;
+        break;
+    }
+
+    case app_syscall::set_input_mapping: {
+        // TODO: implement InputParamMapping storage
+        result = 0;
+        break;
+    }
+
+    case app_syscall::configure_input: {
+        // TODO: implement InputConfig storage
+        result = 0;
+        break;
+    }
+
+    case app_syscall::set_app_config: {
+        // TODO: implement full AppConfig (requires more RAM for double-buffer)
+        result = 0;
+        break;
+    }
+
+    case app_syscall::send_param_request: {
+        if (arg0 < SharedParamState::MAX_PARAMS) {
+            float value;
+            __builtin_memcpy(&value, &arg1, sizeof(value));
+            g_shared.param_state.values[arg0] = value;
+            g_shared.param_state.changed_flags |= (1u << arg0);
+            ++g_shared.param_state.version;
+        }
+        result = 0;
+        break;
+    }
+
     default:
         result = -1;
         break;
@@ -894,12 +935,25 @@ static void svc_handler_impl(uint32_t* sp) {
 
 void setup_usb_callbacks() {
     mcu::usb_audio().set_midi_callback([](uint8_t, const uint8_t* data, uint8_t len) {
-        MidiMsg msg{};
-        msg.len = (len > 4) ? 4 : len;
-        for (uint8_t i = 0; i < msg.len; ++i) {
-            msg.data[i] = data[i];
+        // EventRouter path: create RawInput and route
+        RawInput raw{};
+        raw.hw_timestamp = static_cast<uint32_t>(g_tick_us & 0xFFFFFFFF);
+        raw.source_id = static_cast<uint8_t>(InputSource::USB);
+        // USB MIDI: data[0] = CIN/cable, data[1..3] = MIDI bytes
+        if (len >= 4) {
+            raw.payload[0] = data[1];
+            raw.payload[1] = data[2];
+            raw.payload[2] = data[3];
+            raw.size = 3;
+        } else {
+            for (uint8_t i = 0; i < len && i < 6; ++i) {
+                raw.payload[i] = data[i];
+            }
+            raw.size = (len > 6) ? 6 : len;
         }
-        g_midi_queue.try_push(msg);
+        uint64_t buffer_start = g_shared.sample_position * 1'000'000ULL / g_shared.sample_rate;
+        g_event_router.receive(raw, buffer_start, g_shared.sample_rate);
+
         g_kernel.notify(g_control_task_id, umi::syscall::event::Midi);
     });
 
@@ -958,6 +1012,12 @@ void init_shared_memory() {
     g_shared.set_sample_rate(bsp::audio::default_sample_rate);
     g_shared.buffer_size = mcu::audio::buffer_size;
     g_shared.sample_position = 0;
+
+    // Initialize EventRouter
+    g_event_router.set_route_table(&g_route_table);
+    g_event_router.set_shared_state(&g_shared.param_state, &g_shared.channel_state);
+    g_event_router.set_audio_queue(&g_router_audio_queue);
+    g_event_router.set_control_queue(&g_control_event_queue);
 }
 
 void init_loader(uint8_t* app_ram_start, uintptr_t app_ram_size) {
