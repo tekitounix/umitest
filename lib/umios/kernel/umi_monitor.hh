@@ -146,6 +146,18 @@ private:
 };
 
 // =====================================================================
+// Memory Usage (12-memory-protection.md)
+// =====================================================================
+
+/// Aggregated memory usage snapshot
+struct MemoryUsage {
+    std::size_t heap_used = 0;
+    std::size_t heap_peak = 0;
+    std::size_t stack_used = 0;
+    std::size_t stack_peak = 0;
+};
+
+// =====================================================================
 // Task Profiler
 // =====================================================================
 //
