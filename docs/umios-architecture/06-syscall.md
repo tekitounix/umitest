@@ -312,3 +312,9 @@ struct PluginRuntime {
 3. 新しい syscall の追加時はグループ内の次の番号を使う
 4. 既存の番号は変更しない（ABI 互換性）
 5. 廃止された syscall は番号を予約として保持し再利用しない
+
+## 関連ドキュメント
+
+- [11-scheduler.md](11-scheduler.md) — WaitEvent / Yield の動作（notify / wait_block）
+- [13-system-services.md](13-system-services.md) — FS syscall の非同期設計、サービスアーキテクチャ
+- [04-param-system.md](04-param-system.md) — SetAppConfig の詳細

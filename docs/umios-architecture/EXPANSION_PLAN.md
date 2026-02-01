@@ -172,3 +172,124 @@ structure.md が定義する「umios lib」の4柱:
 - umios-architecture/ は**設計仕様**（目標アーキテクチャ、ターゲット非依存の考え方）
 - 重複する内容は umios-architecture を正とし、umi-kernel/spec/ から参照する形にする
 - umi-kernel/platform/ のターゲット固有情報は umios-architecture には含めない
+
+---
+
+## 統合前の矛盾チェック
+
+umios-architecture/ と umi-kernel/ の間で確認された不整合を以下にまとめる。
+新ドキュメント作成時にこれらを解決しないと矛盾が拡大するため、**統合作業の前に方針を確定する必要がある**。
+
+### 凡例
+
+- **正:** どちらを正とするか
+- **対応:** 具体的な修正アクション
+
+---
+
+### 矛盾1（高）: Syscall 番号体系が3系統存在する
+
+| ドキュメント | 体系 | 例: Yield / RegisterProc / Log |
+|---|---|---|
+| 06-syscall.md | 10刻みスパース | 1 / 2 / 50 |
+| umi-kernel/spec/system-services.md | 16刻みブロック | 1 / 5 / (なし) |
+| umi-kernel/ARCHITECTURE.md | 独自配置 | 5 / 1 / 20 |
+| **実装コード** (syscall_numbers.hh) | system-services.md + Configuration(20-25) | 1 / 5 / 10 |
+
+**正:** 06-syscall.md（目標設計）を正とする。README.md で「矛盾がある場合は本仕様を正とする」と宣言済み。
+**対応:**
+1. 実装コードは現時点では旧番号のまま運用可（移行は実装フェーズ）
+2. umi-kernel/ARCHITECTURE.md の Syscall 一覧は**廃止注記**を追加し、06-syscall.md を参照させる
+3. umi-kernel/spec/system-services.md は 06-syscall.md への参照に書き換える
+4. 13-system-services.md 作成時は 06-syscall.md の番号体系のみを使う
+
+### 矛盾2（高）: FS Syscall 番号（60番台 vs 32番台）
+
+06-syscall.md では FileOpen=60、実装と system-services.md では FileOpen=32。
+
+**正:** 06-syscall.md（60番台）
+**対応:** 矛盾1 と同じ。実装の移行は別途。13-system-services.md では 60番台を使用。
+
+### 矛盾3（高）: メモリレイアウトのアドレス範囲
+
+| 項目 | 07-memory.md | umi-kernel/spec/memory-protection.md |
+|---|---|---|
+| App Data | 0x2000C000–0x20018000 (48KB) | 0x2000C000–0x20014000 (32KB) |
+| App Stack | 0x2001C000–0x20020000 (16KB) | 0x20014000–0x20018000 (16KB) |
+| SRAM 使用上限 | 0x20020000 (128KB) | 0x20018000 (96KB) |
+
+**正:** 要確認。07-memory.md は STM32F407VG の SRAM 128KB をフルに使う設計。memory-protection.md は 96KB しか使っていない。
+**提案:** 07-memory.md の値が新しい設計意図であると考えられるため 07-memory.md を正とする。ただし実装（リンカスクリプト）との整合確認が必要。12-memory-protection.md 作成時に 07-memory.md のアドレスを使用し、memory-protection.md は参照のみとする。
+
+### 矛盾4（中）: FPU Exclusive ポリシーの意味が逆
+
+| ドキュメント | Exclusive の動作 |
+|---|---|
+| 11-scheduler.md | 「常に保存/復元する」 |
+| umi-kernel/ARCHITECTURE.md | 「独占所有のため保存/復元**不要**」 |
+
+**正:** ARCHITECTURE.md の解釈が論理的に正しい。「Exclusive = そのタスクが FPU を独占 = 他タスクは FPU 不使用 = 退避不要」。
+**対応:** 11-scheduler.md の Exclusive の説明を修正する。拡充時に合わせて対応。
+
+### 矛盾5（中）: SharedMemory の buffer_size（64 vs 256）
+
+ARCHITECTURE.md は 64 frames、10-shared-memory.md は 256 frames。
+
+**正:** 07-memory.md で階層を明確化済み（DMA=64, process()=256）。10-shared-memory.md の 256 が正。
+**対応:** ARCHITECTURE.md の更新は umios-architecture のスコープ外。新規ドキュメントでは 256 を使用。
+
+### 矛盾6（中）: SharedMemory params の型（flat array vs SharedParamState）
+
+ARCHITECTURE.md と application.md は `params[32]`、10-shared-memory.md は `SharedParamState`。
+
+**正:** 10-shared-memory.md（新設計）
+**対応:** 新規ドキュメントでは SharedParamState を使用。umi-kernel 側は参照更新のみ。
+
+### 矛盾7（中）: イベントフラグ名 Button vs Control
+
+06-syscall.md は `Control = (1 << 4)` に改名。実装コードは `Button` のまま。
+
+**正:** 06-syscall.md（Control）
+**対応:** 新規ドキュメントでは Control を使用。実装の改名は実装フェーズ。
+
+### 矛盾8（中）: Syscall 呼び出し規約（r12 vs r0）
+
+system-services.md の概念コードでは r0 に番号を渡しているが、06-syscall.md と実装は r12。
+
+**正:** 06-syscall.md + 実装（r12）
+**対応:** system-services.md の概念コードは参考程度。13-system-services.md では 06-syscall.md の規約を参照。
+
+### 矛盾9（中）: Configuration API 内の番号並び順
+
+| Syscall | 06-syscall.md | 実装 (syscall_numbers.hh) |
+|---|---|---|
+| SetRouteTable | 21 | 20 |
+| SetParamMapping | 22 | 21 |
+| SetInputMapping | 23 | 22 |
+| ConfigureInput | 24 | 23 |
+| SetAppConfig | 20 | 24 |
+| SendParamRequest | 25 | 25 |
+
+**正:** 06-syscall.md（目標設計）
+**対応:** 実装の移行は実装フェーズ。新規ドキュメントでは 06-syscall.md の番号を使用。
+
+### 矛盾10（中）: ARCHITECTURE.md に存在し目標設計で廃止された Syscall
+
+SendEvent, PeekEvent, GetParam, SetParam, SetLed, GetLed, GetButton が ARCHITECTURE.md にあるが 06-syscall.md にない。
+
+**正:** 06-syscall.md（これらは SharedMemory 経由に移行済み）
+**対応:** 新規ドキュメントではこれらの Syscall を参照しない。ARCHITECTURE.md には「06-syscall.md を参照」の注記を推奨。
+
+---
+
+### 統合作業の前提条件まとめ
+
+新ドキュメント（11拡充, 12-14新規）を書く際の統一ルール:
+
+1. **Syscall 番号は 06-syscall.md の体系を使用する**（10刻みスパース）
+2. **メモリアドレスは 07-memory.md を使用する**（128KB フル活用）
+3. **SharedMemory 構造体は 10-shared-memory.md を使用する**（SharedParamState）
+4. **FPU Exclusive は「独占 = 退避不要」に修正する**
+5. **イベント名は Control（Button ではなく）を使用する**
+6. **umi-kernel/ のドキュメント修正は本計画のスコープ外**とし、別途対応する
+7. 各新規ドキュメントの冒頭に「状態」欄を設け、既存ドキュメントとの対応を明記する

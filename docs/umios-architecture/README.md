@@ -25,7 +25,10 @@
 | [08-backend-adapters](08-backend-adapters.md) | バックエンド別アダプタ（組み込み / WASM / Plugin） |
 | [09-app-binary](09-app-binary.md) | アプリバイナリ仕様（.umia / .umim） |
 | [10-shared-memory](10-shared-memory.md) | SharedMemory 構造体の完全定義 |
-| [11-scheduler](11-scheduler.md) | スケジューラ・FPU コンテキスト退避 |
+| [11-scheduler](11-scheduler.md) | RT-Kernel（スケジューラ、コンテキストスイッチ、タスク通知） |
+| [12-memory-protection](12-memory-protection.md) | メモリ保護と監視（MPU、Fault、ヒープ/スタック監視） |
+| [13-system-services](13-system-services.md) | システムサービス（Loader、Updater、FS、Shell、Diagnostics） |
+| [14-security](14-security.md) | セキュリティと暗号（Ed25519 署名検証、SHA、CRC） |
 
 ### 推奨読み順
 
@@ -44,7 +47,12 @@
               08-backend-adapters ←──────┘
                     │
                     ▼
-              11-scheduler
+              11-scheduler ──→ 12-memory-protection
+                    │
+                    ▼
+              13-system-services
+                    │
+              09-app-binary ──→ 14-security
 ```
 
 基礎概念（00→01→02）を先に読み、その後は興味に応じて分岐してよい。
@@ -68,4 +76,7 @@
 | 08-backend-adapters | （新規） |
 | 09-app-binary | umi-kernel/ARCHITECTURE.md, umi-kernel/spec/application.md |
 | 10-shared-memory | 01-audio-context, 04-param-system, 07-memory から構造体定義を集約 |
-| 11-scheduler | 00-overview の FPU 列を移設（他セクションは TODO） |
+| 11-scheduler | umi-kernel/spec/kernel.md, umi-kernel/ARCHITECTURE.md |
+| 12-memory-protection | umi-kernel/spec/memory-protection.md, umi-kernel/MEMORY.md |
+| 13-system-services | umi-kernel/spec/system-services.md, umi-kernel/service/*, umi-kernel/BOOT_SEQUENCE.md |
+| 14-security | （新規。09-app-binary の署名仕様を展開） |
