@@ -42,8 +42,8 @@ struct RegionDesc {
 };
 
 namespace event {
-    constexpr std::uint32_t MidiReady  = 1 << 1;
-    constexpr std::uint32_t VSync      = 1 << 2;
+    constexpr std::uint32_t midi_ready = 1 << 1;
+    constexpr std::uint32_t vsync      = 1 << 2;
 }
 
 // Syscall stubs (implemented by kernel's SVC handler)
@@ -155,7 +155,7 @@ public:
 private:
     void handle_event(const umi::Event& ev) {
         switch (ev.type) {
-            case umi::EventType::Midi:
+            case umi::EventType::MIDI:
                 if (ev.midi.is_note_on()) {
                     // Simple MIDI-to-frequency (A4 = 440Hz at note 69)
                     float note = static_cast<float>(ev.midi.note());
@@ -167,7 +167,7 @@ private:
                 }
                 break;
                 
-            case umi::EventType::Param:
+            case umi::EventType::PARAM:
                 if (ev.param.id == 0) {
                     set_frequency(params_[0].denormalize(ev.param.value));
                 } else if (ev.param.id == 1) {
@@ -268,7 +268,7 @@ const MidiShared* midi_buffer = nullptr;
 // UI Coroutine: handles display updates
 Task<void> ui_task(SchedulerContext<8>& ctx) {
     while (true) {
-        co_await ctx.wait_for(event::VSync);
+        co_await ctx.wait_for(event::vsync);
         // Update display
     }
 }
@@ -289,7 +289,7 @@ Task<void> param_task(SchedulerContext<8>& ctx) {
 // MIDI Coroutine: processes incoming MIDI
 Task<void> midi_task(SchedulerContext<8>& ctx) {
     while (true) {
-        co_await ctx.wait_for(event::MidiReady);
+        co_await ctx.wait_for(event::midi_ready);
         
         if (midi_buffer) {
             while (midi_buffer->head != midi_buffer->tail) {

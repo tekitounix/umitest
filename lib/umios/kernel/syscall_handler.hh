@@ -13,36 +13,45 @@ namespace umi::kernel {
 // Syscall Numbers (Application ABI)
 // ============================================================================
 // Must match lib/umios/app/syscall.hh nr::*
-//
-// Number layout:
-//   0–15:   Core API (process control, scheduling, info)
-//   16–31:  Reserved (core API expansion)
-//   32–47:  Filesystem
-//   48–63:  Reserved (storage expansion)
-//   64–255: Reserved
+// Sparse layout grouped by 10 (see docs/umios-architecture/06-syscall.md)
 
 namespace app_syscall {
-    // --- Core API (0–15) ---
+    // --- Group 0: Process Control (0–9) ---
     inline constexpr uint32_t exit             = 0;
     inline constexpr uint32_t yield            = 1;
-    inline constexpr uint32_t wait_event       = 2;
-    inline constexpr uint32_t get_time         = 3;
-    inline constexpr uint32_t get_shared       = 4;
-    inline constexpr uint32_t register_proc    = 5;
-    inline constexpr uint32_t unregister_proc  = 6;
-    // 7–15: reserved
+    inline constexpr uint32_t register_proc    = 2;
+    inline constexpr uint32_t unregister_proc  = 3;
 
-    // --- Filesystem (32–47) ---
-    inline constexpr uint32_t file_open        = 32;
-    inline constexpr uint32_t file_read        = 33;
-    inline constexpr uint32_t file_write       = 34;
-    inline constexpr uint32_t file_close       = 35;
-    inline constexpr uint32_t file_seek        = 36;
-    inline constexpr uint32_t file_stat        = 37;
-    inline constexpr uint32_t dir_open         = 38;
-    inline constexpr uint32_t dir_read         = 39;
-    inline constexpr uint32_t dir_close        = 40;
-    // 41–47: reserved
+    // --- Group 1: Time / Scheduling (10–19) ---
+    inline constexpr uint32_t wait_event       = 10;
+    inline constexpr uint32_t get_time         = 11;
+    inline constexpr uint32_t sleep            = 12;
+
+    // --- Group 2: Configuration (20–29) ---
+    inline constexpr uint32_t set_app_config     = 20;
+    inline constexpr uint32_t set_route_table    = 21;
+    inline constexpr uint32_t set_param_mapping  = 22;
+    inline constexpr uint32_t set_input_mapping  = 23;
+    inline constexpr uint32_t configure_input    = 24;
+    inline constexpr uint32_t send_param_request = 25;
+
+    // --- Group 4: Info (40–49) ---
+    inline constexpr uint32_t get_shared       = 40;
+
+    // --- Group 5: I/O (50–59) ---
+    inline constexpr uint32_t log              = 50;
+    inline constexpr uint32_t panic            = 51;
+
+    // --- Group 6: Filesystem (60–69) ---
+    inline constexpr uint32_t file_open        = 60;
+    inline constexpr uint32_t file_read        = 61;
+    inline constexpr uint32_t file_write       = 62;
+    inline constexpr uint32_t file_close       = 63;
+    inline constexpr uint32_t file_seek        = 64;
+    inline constexpr uint32_t file_stat        = 65;
+    inline constexpr uint32_t dir_open         = 66;
+    inline constexpr uint32_t dir_read         = 67;
+    inline constexpr uint32_t dir_close        = 68;
 }
 
 // ============================================================================

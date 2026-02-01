@@ -78,12 +78,12 @@ enum class SyscallError : int32_t {
 // ============================================================================
 
 namespace event {
-inline constexpr uint32_t Audio = (1 << 0);     ///< Audio buffer ready
-inline constexpr uint32_t Midi = (1 << 1);      ///< MIDI data available
-inline constexpr uint32_t VSync = (1 << 2);     ///< Display refresh
-inline constexpr uint32_t Timer = (1 << 3);     ///< Timer tick
-inline constexpr uint32_t Control = (1 << 4);   ///< ControlEvent arrived
-inline constexpr uint32_t Shutdown = (1 << 31); ///< Shutdown requested
+inline constexpr uint32_t audio = (1 << 0);       ///< Audio buffer ready
+inline constexpr uint32_t midi = (1 << 1);        ///< MIDI data available
+inline constexpr uint32_t vsync = (1 << 2);       ///< Display refresh
+inline constexpr uint32_t timer = (1 << 3);       ///< Timer tick
+inline constexpr uint32_t control = (1 << 4);     ///< ControlEvent arrived
+inline constexpr uint32_t shutdown = (1u << 31);  ///< Shutdown requested
 } // namespace event
 
 // ============================================================================

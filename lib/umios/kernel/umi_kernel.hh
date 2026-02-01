@@ -27,15 +27,15 @@ using usec = std::uint64_t;
 
 /// Task priority levels (lower value = higher priority)
 enum class Priority : std::uint8_t {
-    Realtime = 0,  ///< Audio processing, DMA callbacks - highest
-    Server   = 1,  ///< Drivers, I/O handlers
-    User     = 2,  ///< Application tasks - round-robin among same priority
-    Idle     = 3,  ///< Background, sleep management - lowest
+    REALTIME = 0,  ///< Audio processing, DMA callbacks - highest
+    SERVER   = 1,  ///< Drivers, I/O handlers
+    USER     = 2,  ///< Application tasks - round-robin among same priority
+    IDLE     = 3,  ///< Background, sleep management - lowest
 };
 
 /// Core affinity
 enum class Core : std::uint8_t {
-    Any = 0xFF,  ///< Can run on any core
+    ANY = 0xFF,  ///< Can run on any core
 };
 
 /// Task identifier (opaque handle)
@@ -48,17 +48,25 @@ struct TaskId {
 struct TaskConfig {
     void (*entry)(void*) {nullptr};  ///< Task entry point
     void* arg {nullptr};             ///< Argument passed to entry
-    Priority prio {Priority::Idle};  ///< Task priority
-    std::uint8_t core_affinity {static_cast<std::uint8_t>(Core::Any)};
+    Priority prio {Priority::IDLE};  ///< Task priority
+    std::uint8_t core_affinity {static_cast<std::uint8_t>(Core::ANY)};
     bool uses_fpu {true};            ///< Whether this task uses FPU (default: safe)
     const char* name {"<unnamed>"};  ///< Task name for debugging/shell
 };
 
 /// Event bits for wait() syscall
+/// Must match lib/umios/app/syscall.hh event::*
 namespace KernelEvent {
-    constexpr std::uint32_t AudioReady = 1 << 0;
-    constexpr std::uint32_t MidiReady  = 1 << 1;
-    constexpr std::uint32_t VSync      = 1 << 2;
+    constexpr std::uint32_t audio    = 1 << 0;
+    constexpr std::uint32_t midi     = 1 << 1;
+    constexpr std::uint32_t vsync    = 1 << 2;
+    constexpr std::uint32_t timer    = 1 << 3;
+    constexpr std::uint32_t control  = 1 << 4;
+    constexpr std::uint32_t shutdown = 1u << 31;
+
+    // Legacy aliases (will be removed)
+    constexpr std::uint32_t AudioReady = audio;
+    constexpr std::uint32_t MidiReady  = midi;
 }
 
 // =====================================================================
@@ -410,11 +418,11 @@ public:
     static constexpr std::size_t max_cores = MaxCores;
     static constexpr std::size_t num_priorities = 4;
 
-    enum class State : std::uint8_t { Unused, Ready, Running, Blocked };
+    enum class State : std::uint8_t { UNUSED, READY, RUNNING, BLOCKED };
 
     struct Tcb {
         TaskConfig cfg {};
-        State state {State::Unused};
+        State state {State::UNUSED};
         std::uint8_t next {0xFF};
     };
 
@@ -430,7 +438,7 @@ public:
         if (!id.valid()) return {};
         auto& t = tasks[id.value];
         t.cfg = cfg;
-        t.state = State::Ready;
+        t.state = State::READY;
         t.next = 0xFF;
         bitmap_add_ready(id, cfg.prio);
         return id;
@@ -440,7 +448,7 @@ public:
         MaskedCritical<HW> guard;
         if (!valid_task(id)) return;
         auto s = tasks[id.value].state;
-        if (s == State::Ready || s == State::Running) return;
+        if (s == State::READY || s == State::RUNNING) return;
         set_ready_with_bitmap(id);
         schedule();
     }
@@ -448,7 +456,7 @@ public:
     void suspend_task(TaskId id) {
         MaskedCritical<HW> guard;
         if (!valid_task(id)) return;
-        if (tasks[id.value].state == State::Blocked) return;
+        if (tasks[id.value].state == State::BLOCKED) return;
         set_blocked_with_bitmap(id);
         auto cur = current_task();
         if (cur.has_value() && cur->value == id.value) {
@@ -466,11 +474,11 @@ public:
         }
 
         auto& t = tasks[id.value];
-        if (t.state == State::Ready || t.state == State::Running) {
+        if (t.state == State::READY || t.state == State::RUNNING) {
             bitmap_remove_ready(id, t.cfg.prio);
         }
 
-        t.state = State::Unused;
+        t.state = State::UNUSED;
         t.cfg = {};
         t.next = 0xFF;
 
@@ -499,10 +507,10 @@ public:
     /// Must be called under MaskedCritical (or from PendSV/SysTick context).
     void resolve_pending() {
         for (std::uint16_t i = 0; i < tasks.size(); ++i) {
-            if (tasks[i].state != State::Blocked) continue;
+            if (tasks[i].state != State::BLOCKED) continue;
             TaskId id{i};
             if (notifications.should_wake(id)) {
-                tasks[i].state = State::Ready;
+                tasks[i].state = State::READY;
                 notifications.clear_wait_mask(id);
                 bitmap_add_ready(id, tasks[i].cfg.prio);
             }
@@ -516,12 +524,12 @@ public:
         notifications.notify(id, bits);
 
         if (!valid_task(id)) return;
-        if (tasks[id.value].state != State::Blocked) return;
+        if (tasks[id.value].state != State::BLOCKED) return;
 
         MaskedCritical<HW> guard;
-        if (tasks[id.value].state == State::Blocked) {
+        if (tasks[id.value].state == State::BLOCKED) {
             if (notifications.should_wake(id)) {
-                tasks[id.value].state = State::Ready;
+                tasks[id.value].state = State::READY;
                 notifications.clear_wait_mask(id);
                 bitmap_add_ready(id, tasks[id.value].cfg.prio);
                 schedule();
@@ -590,17 +598,17 @@ public:
     }
 
     Priority get_task_priority(TaskId id) const {
-        if (!valid_task(id)) return Priority::Idle;
+        if (!valid_task(id)) return Priority::IDLE;
         return tasks[id.value].cfg.prio;
     }
 
     const char* get_task_state_str(TaskId id) const {
         if (!id.valid() || id.value >= tasks.size()) return "Invalid";
         switch (tasks[id.value].state) {
-            case State::Unused:  return "Unused";
-            case State::Ready:   return "Ready";
-            case State::Running: return "Running";
-            case State::Blocked: return "Blocked";
+            case State::UNUSED:  return "Unused";
+            case State::READY:   return "Ready";
+            case State::RUNNING: return "Running";
+            case State::BLOCKED: return "Blocked";
             default:             return "Unknown";
         }
     }
@@ -608,7 +616,7 @@ public:
     template<typename Fn>
     void for_each_task(Fn&& fn) const {
         for (std::uint16_t i = 0; i < tasks.size(); ++i) {
-            if (tasks[i].state != State::Unused) {
+            if (tasks[i].state != State::UNUSED) {
                 TaskId id{i};
                 fn(id, tasks[i].cfg, tasks[i].state);
             }
@@ -656,12 +664,12 @@ public:
         auto& t = tasks[task_idx];
 
         // Core affinity check
-        if (t.cfg.core_affinity != static_cast<std::uint8_t>(Core::Any) &&
+        if (t.cfg.core_affinity != static_cast<std::uint8_t>(Core::ANY) &&
             t.cfg.core_affinity != self_core) {
             std::uint8_t cur = task_idx;
             while (cur != 0xFF) {
                 auto& task = tasks[cur];
-                if (task.cfg.core_affinity == static_cast<std::uint8_t>(Core::Any) ||
+                if (task.cfg.core_affinity == static_cast<std::uint8_t>(Core::ANY) ||
                     task.cfg.core_affinity == self_core) {
                     return cur;
                 }
@@ -673,7 +681,7 @@ public:
                 cur = q.head;
                 while (cur != 0xFF) {
                     auto& task = tasks[cur];
-                    if (task.cfg.core_affinity == static_cast<std::uint8_t>(Core::Any) ||
+                    if (task.cfg.core_affinity == static_cast<std::uint8_t>(Core::ANY) ||
                         task.cfg.core_affinity == self_core) {
                         return cur;
                     }
@@ -683,7 +691,7 @@ public:
             return std::nullopt;
         }
 
-        if (highest_prio == static_cast<std::size_t>(Priority::User) && queue.count > 1) {
+        if (highest_prio == static_cast<std::size_t>(Priority::USER) && queue.count > 1) {
             last_user_idx = task_idx;
         }
 
@@ -692,12 +700,12 @@ public:
 
     std::optional<std::uint16_t> get_next_task_fallback(std::uint8_t self_core) {
         std::optional<TaskId> best;
-        Priority best_prio = Priority::Idle;
+        Priority best_prio = Priority::IDLE;
 
         for (std::uint16_t i = 0; i < tasks.size(); ++i) {
             auto& t = tasks[i];
-            if (t.state != State::Ready && t.state != State::Running) continue;
-            if (t.cfg.core_affinity != static_cast<std::uint8_t>(Core::Any) &&
+            if (t.state != State::READY && t.state != State::RUNNING) continue;
+            if (t.cfg.core_affinity != static_cast<std::uint8_t>(Core::ANY) &&
                 t.cfg.core_affinity != self_core) continue;
 
             if (!best.has_value() || t.cfg.prio < best_prio) {
@@ -718,9 +726,9 @@ public:
 
         auto& next = tasks[next_idx];
 
-        next.state = State::Running;
-        if (cur_id.has_value() && tasks[cur_id->value].state == State::Running) {
-            tasks[cur_id->value].state = State::Ready;
+        next.state = State::RUNNING;
+        if (cur_id.has_value() && tasks[cur_id->value].state == State::RUNNING) {
+            tasks[cur_id->value].state = State::READY;
         }
         cur_id = TaskId{next_idx};
     }
@@ -745,13 +753,13 @@ private:
 
     bool valid_task(TaskId id) const {
         return id.valid() && id.value < tasks.size() &&
-               tasks[id.value].state != State::Unused;
+               tasks[id.value].state != State::UNUSED;
     }
 
     TaskId allocate_tcb() {
         for (std::uint16_t i = 0; i < tasks.size(); ++i) {
-            if (tasks[i].state == State::Unused) {
-                tasks[i].state = State::Blocked;
+            if (tasks[i].state == State::UNUSED) {
+                tasks[i].state = State::BLOCKED;
                 return TaskId{i};
             }
         }
@@ -812,20 +820,20 @@ private:
     void set_ready_with_bitmap(TaskId id) {
         if (!valid_task(id)) return;
         auto& t = tasks[id.value];
-        if (t.state == State::Ready) return;
-        t.state = State::Ready;
+        if (t.state == State::READY) return;
+        t.state = State::READY;
         bitmap_add_ready(id, t.cfg.prio);
     }
 
     void set_blocked_with_bitmap(TaskId id) {
         if (!valid_task(id)) return;
         auto& t = tasks[id.value];
-        if (t.state == State::Blocked) return;
+        if (t.state == State::BLOCKED) return;
         Priority prio = t.cfg.prio;
-        if (t.state == State::Ready || t.state == State::Running) {
+        if (t.state == State::READY || t.state == State::RUNNING) {
             bitmap_remove_ready(id, prio);
         }
-        t.state = State::Blocked;
+        t.state = State::BLOCKED;
     }
 
     void schedule() {
