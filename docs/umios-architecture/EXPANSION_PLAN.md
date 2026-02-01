@@ -1,295 +1,363 @@
-# umios-architecture ドキュメント拡張計画
+# umios-architecture 仕様実装計画
 
-## 現状分析
+## 概要
 
-### 既存ドキュメント（umios-architecture/）
+`docs/umios-architecture/` の全仕様に対して、未実装項目を実装する。
+ドキュメントが正（実装をドキュメントに合わせる）。
 
-| # | ファイル | カバー範囲 | 完成度 |
-|---|---------|-----------|--------|
-| 00 | overview | システム全体像・タスクモデル | ○ |
-| 01 | audio-context | AudioContext 統一仕様 | ○ |
-| 02 | processor-controller | Processor/Controller モデル | ○ |
-| 03 | event-system | イベントシステム・EventRouter | ○ |
-| 04 | param-system | パラメータシステム | ○ |
-| 05 | midi | MIDI 統合 | ○ |
-| 06 | syscall | Syscall 番号体系 | ○ |
-| 07 | memory | メモリレイアウト（組み込み） | ○ |
-| 08 | backend-adapters | バックエンドアダプタ | ○ |
-| 09 | app-binary | .umia バイナリ仕様 | ○ |
-| 10 | shared-memory | SharedMemory 構造体 | ○ |
-| 11 | scheduler | スケジューラ・FPU ポリシー | **△ 大部分がTODO** |
+## 実装状況サマリ
 
-### 不足領域（structure.md との差分）
+| # | ドキュメント | 実装率 | 主な未実装項目 |
+|---|------------|--------|--------------|
+| 05 | midi | 60% | MidiInput/Output concept, UsbMidiInput/UartMidiInput, SysExAssembler, hw_timestamp_to_sample_pos |
+| 07 | memory | 90% | SharedMemory サブリージョンシンボルの実使用 |
+| 12 | memory-protection | 85% | MemoryUsage 構造体、process_pending_fault() の形式化 |
+| 13 | system-services | 70% | SystemTask のクラス化・イベントディスパッチ形式化 |
+| 14 | security | 80% | SHA-256 を umios/crypto/ に移動 |
+| 17 | shell | 95% | 軽微な差分のみ |
+| 18 | updater | 70% | OS-side Updater クラス（umiboot に基盤あり） |
+| 19 | storage-service | 0% | StorageService, BlockDevice, littlefs/FATfs 全て |
+| 20 | diagnostics | 85% | FaultLog クラス、ErrorLedPattern、ScopedCycles |
 
-structure.md が定義する「umios lib」の4柱:
+## 実装ステップ
 
-1. **RT-Kernel** — scheduler, notify, wait_block, context switch
-2. **System Service** — loader, updater, file system, shell, diagnostics
-3. **Memory Management** — MPU, heap/stack monitor, fault handle
-4. **Security** — crypto (sha256, sha512, ed25519)
+### Phase 1: MIDI インフラ (05-midi.md)
 
-このうち umios-architecture でカバーされているのは:
-- RT-Kernel: 11-scheduler に FPU ポリシーのみ。他は TODO
-- System Service: 06-syscall に番号体系。個別サービスの設計仕様なし
-- Memory Management: 07-memory にレイアウトのみ。MPU/Fault/監視なし
-- Security: **完全に未カバー**
+既存: `lib/umidi/` に Parser/SysExBuffer あり。kernel.cc に USB コールバック直接実装。
 
-### umi-kernel/ の関連仕様（統合元候補）
+#### Step 1-1: MidiInput / MidiOutput concept
 
-| umi-kernel ファイル | 関連する追加領域 | 扱い |
-|---|---|---|
-| spec/kernel.md (§3-5) | RT-Kernel（タスクモデル、スケジューリング、割り込み、通知） | → 11-scheduler に統合 |
-| spec/memory-protection.md | Memory Management（MPU、Fault、ヒープ/スタック監視） | → 新規 12 に昇格 |
-| spec/system-services.md | System Service（Syscall詳細、監視） | → 06-syscall 拡張 + 新規 13 |
-| service/FILESYSTEM.md | System Service（FS設計） | → 新規 13 に含む |
-| service/SHELL.md | System Service（シェル） | 空ファイル。新規 13 に項目のみ |
-| BOOT_SEQUENCE.md | System Service（loader/起動） | → 新規 13 に含む |
+**ファイル:** `lib/umidi/include/core/transport.hh` (新規)
 
----
+```cpp
+namespace umidi {
 
-## 追加計画
+template <typename T>
+concept MidiInput = requires(T& t) {
+    { t.poll() } -> std::same_as<void>;
+    { t.is_connected() } -> std::convertible_to<bool>;
+};
 
-### 方針
+template <typename T>
+concept MidiOutput = requires(T& t, const UMP32& ump) {
+    { t.send(ump) } -> std::convertible_to<bool>;
+    { t.is_connected() } -> std::convertible_to<bool>;
+};
 
-- 既存の番号体系（00-11）を継続し、12番以降を追加
-- 11-scheduler は TODO を埋める形で **拡充**（新規作成ではない）
-- umi-kernel/spec/ の規範仕様を umios-architecture の「目標設計仕様」レベルに抽象化して統合
-- ターゲット固有の詳細（STM32F4 レジスタアドレス等）は umios-architecture には入れず、umi-kernel に残す
-
-### 変更一覧
-
-#### 1. 11-scheduler.md — 拡充（RT-Kernel）
-
-**現状:** FPU ポリシーのみ記載、他 TODO
-**対応:** umi-kernel/spec/kernel.md §3-5 を元に以下を追記
-
-- タスク優先度と実行モデル（4タスク表、役割分離規範）
-- コンテキストスイッチ（レジスタ退避/復元、PendSV/SVC フロー）
-- スケジューリングアルゴリズム（O(1) ビットマップ）
-- 割り込みとタスク通知（notify、wait_block、WaitEvent）
-- タイマーとスリープ（SysTick、delay）
-- ポート層 API 一覧（structure.md の RT-Kernel Port セクション参照）
-
-**ソース:** umi-kernel/spec/kernel.md, umi-kernel/ARCHITECTURE.md, structure.md
-
-#### 2. 12-memory-protection.md — 新規（Memory Management）
-
-**理由:** 07-memory はレイアウトのみ。保護・監視・Fault は別の関心事
-
-- MPU 境界設計（AppText/AppData/AppStack/SharedMemory）
-- ヒープ/スタック衝突検出アルゴリズム
-- Fault 処理と隔離方針（OS 生存保証）
-- ヒープ/スタック使用量モニタリング
-- ターゲット非搭載時の縮退動作（MPU なし、特権分離なし）
-
-**ソース:** umi-kernel/spec/memory-protection.md, umi-kernel/MEMORY.md
-
-#### 3. 13-system-services.md — 新規（System Service）
-
-**理由:** 06-syscall は ABI 番号体系。サービスの設計・ライフサイクルは別
-
-- サービスアーキテクチャ概要（SystemTask 上で動作するサービス群）
-- App Loader（.umia 検証、ロードフロー、sign validator）
-- Updater（DFU over SysEx、relocator、CRC validator）
-- File System（littlefs 統合、BlockDevice 抽象、非同期 syscall）
-- Shell（SysEx stdio、コマンド体系）
-- Diagnostics（プロファイラ、ヒープ統計、タスク統計）
-- Boot Sequence（Reset→main のフロー概要）
-
-**ソース:** umi-kernel/spec/system-services.md, umi-kernel/service/FILESYSTEM.md, umi-kernel/BOOT_SEQUENCE.md
-
-#### 4. 14-security.md — 新規（Security / Crypto）
-
-**理由:** 完全に未カバー。structure.md に crypto 項目あり
-
-- セキュリティモデル概要（何を守るか: アプリ署名検証、OTA 改竄検知）
-- 暗号プリミティブ（SHA-256, SHA-512, Ed25519）
-- アプリ署名検証フロー（Loader → sign validator → 実行許可）
-- OTA/DFU の完全性検証（CRC + 署名）
-- 鍵管理（公開鍵の格納場所、更新方針）
-- 組み込み制約（リアルタイム安全性、ROM/RAM フットプリント）
-
-**ソース:** structure.md, 09-app-binary.md（AppHeader の sign フィールド）
-
-#### 5. 06-syscall.md — 軽微な拡張
-
-- 13-system-services への相互参照を追加
-- ファイルシステム API の詳細は 13 に委譲する旨を明記
-
-#### 6. README.md — 更新
-
-- ドキュメント一覧に 12-14 を追加
-- 推奨読み順フローチャートに新ドキュメントを追加
-
----
-
-## 新しいドキュメント構成（完成後）
-
-```
-00-overview
-01-audio-context
-02-processor-controller
-03-event-system          ← EventRouter はここ
-04-param-system
-05-midi
-06-syscall               ← ABI 定義（軽微更新）
-07-memory                ← レイアウト（変更なし）
-08-backend-adapters
-09-app-binary
-10-shared-memory
-11-scheduler             ← RT-Kernel 全体に拡充 ★
-12-memory-protection     ← 新規: MPU/Fault/監視 ★
-13-system-services       ← 新規: Loader/FS/Shell/Diagnostics ★
-14-security              ← 新規: Crypto/署名検証 ★
+} // namespace umidi
 ```
 
-## 推奨読み順（追加分）
+#### Step 1-2: SysExAssembler
+
+**ファイル:** `lib/umidi/include/core/sysex_assembler.hh` (新規)
+
+仕様通りの SysExAssembler 構造体。既存 SysExBuffer とは別（SysExBuffer はリングバッファ、Assembler は単一メッセージ組み立て）。
+
+```cpp
+struct SysExAssembler {
+    uint8_t buffer[256];
+    uint16_t length = 0;
+    bool complete = false;
+    void feed(const UMP32& ump);
+    bool is_complete() const;
+    std::span<const uint8_t> data() const;
+    void reset();
+};
+```
+
+#### Step 1-3: UsbMidiInput / UartMidiInput アダプタ
+
+**ファイル:** `lib/umios/backend/cm/usb_midi_input.hh` (新規), `lib/umios/backend/cm/uart_midi_input.hh` (新規)
+
+既存の kernel.cc USB コールバックを MidiInput concept に適合するクラスとして抽出。
+
+#### Step 1-4: hw_timestamp_to_sample_pos
+
+**ファイル:** `lib/umidi/include/core/timestamp.hh` (新規)
+
+```cpp
+uint16_t hw_timestamp_to_sample_pos(
+    uint64_t event_time_us, uint64_t block_start_us,
+    uint32_t sample_rate, uint32_t buffer_size);
+```
+
+kernel.cc の既存インライン計算をこの関数に置換。
+
+---
+
+### Phase 2: Diagnostics (20-diagnostics.md)
+
+既存: KernelMetrics 実装済み (metrics.hh)、StackMonitor/HeapMonitor 実装済み (umi_monitor.hh)、デバッグカウンタは g_dbg_* アドホック変数。
+
+#### Step 2-1: FaultLog クラス
+
+**ファイル:** `lib/umios/kernel/fault_log.hh` (新規)
+
+```cpp
+struct FaultLogEntry {
+    backend::cm::FaultInfo info;
+    uint32_t timestamp_ms;
+};
+
+template <size_t N = 8>
+class FaultLog {
+    void push(const FaultLogEntry& entry);
+    const FaultLogEntry* get(size_t idx) const;
+    const FaultLogEntry* latest() const;
+    void clear();
+    size_t count() const;
+};
+```
+
+グローバル `g_fault_log`, `g_fault_pending`, `g_pending_fault` を追加。
+
+#### Step 2-2: ErrorLedPattern + classify_fault
+
+**ファイル:** `lib/umios/kernel/fault_log.hh` に追加
+
+```cpp
+enum class ErrorLedPattern { StackOverflow, AccessViolation, InvalidInstruction, BusFault, Unknown };
+ErrorLedPattern classify_fault(const backend::cm::FaultInfo& info);
+```
+
+#### Step 2-3: DWT ユーティリティ
+
+**ファイル:** `lib/umios/backend/cm/dwt.hh` (新規)
+
+```cpp
+namespace dwt {
+    void enable();
+    void disable();
+    uint32_t cycles();
+    void reset();
+    bool is_available();
+}
+```
+
+#### Step 2-4: ScopedCycles
+
+**ファイル:** `lib/umios/kernel/metrics.hh` に追加
+
+```cpp
+class ScopedCycles {
+    uint32_t start;
+    uint32_t& dest;
+public:
+    ScopedCycles(uint32_t& dest);
+    ~ScopedCycles();
+};
+```
+
+---
+
+### Phase 3: Memory Protection (12-memory-protection.md)
+
+既存: MPU 設定は kernel.cc に実装済み。StackMonitor/HeapMonitor 実装済み。
+
+#### Step 3-1: MemoryUsage 構造体
+
+**ファイル:** `lib/umios/kernel/umi_monitor.hh` に追加
+
+```cpp
+struct MemoryUsage {
+    size_t heap_used;
+    size_t heap_peak;
+    size_t stack_used;
+    size_t stack_peak;
+};
+```
+
+HeapMonitor と StackMonitor から集約するユーティリティ関数も追加。
+
+#### Step 3-2: Fault 処理の形式化
+
+**ファイル:** `lib/umios/kernel/fault_handler.hh` (新規)
+
+- `record_fault()`: ISR 内で FaultInfo を保存、`g_fault_pending = true`
+- `process_pending_fault()`: SystemTask から呼び出し、FaultLog に記録、アプリ terminate
+
+kernel.cc の既存 HardFault ハンドラからロジックを抽出。
+
+#### Step 3-3: ProtectionMode テンプレート
+
+**ファイル:** `lib/umios/kernel/protection.hh` (新規)
+
+```cpp
+enum class ProtectionMode { Full, Privileged, PrivilegedWithMpu };
+template <class HW, ProtectionMode Mode = ProtectionMode::Full>
+class Protection {
+    static constexpr bool uses_mpu();
+    static constexpr bool needs_syscall();
+};
+```
+
+---
+
+### Phase 4: Security (14-security.md)
+
+既存: SHA-512 + Ed25519 は `lib/umios/crypto/`。SHA-256 は `lib/umiboot/include/umiboot/auth.hh` 内にソフトウェア実装あり。CRC32 は umiboot に実装済み。
+
+#### Step 4-1: SHA-256 を umios/crypto/ に移動
+
+**ファイル:** `lib/umios/crypto/sha256.hh` (新規), `lib/umios/crypto/sha256.cc` (新規)
+
+umiboot/auth.hh 内の `detail::Sha256` を独立モジュールとして抽出。umiboot 側は umios/crypto/sha256.hh を include するように変更。
+
+---
+
+### Phase 5: System Services (13-system-services.md)
+
+既存: `system_task_entry()` 関数が kernel.cc に実装。ShellCommands, StandardIO 実装済み。
+
+#### Step 5-1: SystemTask イベントディスパッチの形式化
+
+**ファイル:** `lib/umios/kernel/system_task.hh` (新規)
+
+```cpp
+template <class HW, class Kernel>
+class SystemTask {
+    void run();  // メインループ: wait_block → dispatch
+private:
+    void dispatch_sysex();
+    void dispatch_fs();
+    void dispatch_fault();
+    void dispatch_tick();
+};
+```
+
+kernel.cc の `system_task_entry()` をこのクラスのインスタンス化に置換。
+
+---
+
+### Phase 6: Updater (18-updater.md)
+
+既存: umiboot に BootloaderInterface (A/B partition, rollback, commit) が完全実装。DFU SysEx プロトコル定義済み。OS-side Updater クラスが未実装。
+
+#### Step 6-1: Updater クラス
+
+**ファイル:** `lib/umios/kernel/updater.hh` (新規)
+
+- DFU コマンドハンドラ (FW_QUERY, FW_BEGIN, FW_DATA, FW_VERIFY, FW_COMMIT, FW_ROLLBACK, FW_REBOOT)
+- umiboot::BootloaderInterface をバックエンドとして使用
+- 7-bit エンコード/デコード
+- SystemMode 列挙型（既存 shell_commands.hh から移動）
+
+#### Step 6-2: kernel.cc 統合
+
+既存の DFU 処理コード（あれば）を Updater クラスに委譲。
+
+---
+
+### Phase 7: Storage Service (19-storage-service.md)
+
+完全に新規実装。ハードウェア依存（Flash/SD）が大きいため、抽象層のみ先行実装。
+
+#### Step 7-1: BlockDevice インターフェース
+
+**ファイル:** `lib/umios/kernel/block_device.hh` (新規)
+
+```cpp
+struct BlockDevice {
+    virtual int read(uint32_t block, uint32_t offset, void* buf, uint32_t size) = 0;
+    virtual int write(uint32_t block, uint32_t offset, const void* buf, uint32_t size) = 0;
+    virtual int erase(uint32_t block) = 0;
+    virtual uint32_t block_size() = 0;
+    virtual uint32_t block_count() = 0;
+    virtual ~BlockDevice() = default;
+};
+```
+
+注: 組み込みでの vtable 使用だが、StorageService は非リアルタイムパスのため許容。
+
+#### Step 7-2: StorageService クラス
+
+**ファイル:** `lib/umios/kernel/storage_service.hh` (新規)
+
+- 非同期リクエストキュー
+- FS マウントポイント管理 (`/flash/` → littlefs, `/sd/` → FATfs)
+- ファイルディスクリプタ管理（アプリごと最大4個）
+
+#### Step 7-3: FS Syscall ハンドラ
+
+**ファイル:** kernel.cc の svc_handler_impl に case 60-68 追加
+
+リクエストを StorageService キューに投入、notify(FS) で応答。
+
+#### Step 7-4: littlefs 移植実装
+
+`.refs/` に littlefs 元リポジトリをクローンし、参照しながらプロジェクトスタイル（C++23、命名規則、エラー処理）に合わせて移植実装する。ラッパーではなく、コードをこちらの規約で書き直す。
+
+**ファイル:** `lib/umios/fs/littlefs/` (新規ディレクトリ)
+
+- `lfs.hh` / `lfs.cc` — littlefs コア（COW、ウェアレベリング、電断耐性）
+- `lfs_block_device.hh` — BlockDevice を実装する Flash 向けアダプタ
+
+**参照元:** `.refs/littlefs/` (git clone)
+
+#### Step 7-5: FATfs 移植実装
+
+同様に `.refs/` に FATfs 元コードを配置し、参照しながら移植。
+
+**ファイル:** `lib/umios/fs/fatfs/` (新規ディレクトリ)
+
+- `ff.hh` / `ff.cc` — FAT32 コア
+- `fatfs_block_device.hh` — BlockDevice を実装する SD カード向けアダプタ
+
+**参照元:** `.refs/fatfs/` (元コード配置)
+
+---
+
+### Phase 8: SharedMemory サブリージョン (07-memory.md)
+
+#### Step 8-1: リンカシンボルの実使用
+
+kernel.cc の `SharedMemory g_shared` を、リンカシンボル `_shared_audio_start` 等を使って配置するように変更。現在は `.shared` セクション一括配置。
+
+```cpp
+extern "C" {
+    extern uint8_t _shared_audio_start[];
+    extern uint8_t _shared_midi_start[];
+    extern uint8_t _shared_hwstate_start[];
+}
+```
+
+SharedMemory 構造体のレイアウトがサブリージョン境界と一致することを static_assert で検証。
+
+---
+
+## 実装順序と依存関係
 
 ```
-11-scheduler ─→ 12-memory-protection
-      │
-      ▼
-07-memory
-      │
-      ▼
-13-system-services ←── 06-syscall
-      │
-      ▼
-09-app-binary ─→ 14-security
+Phase 1 (MIDI)          ← 依存なし
+Phase 2 (Diagnostics)   ← 依存なし
+Phase 3 (MemProtection) ← Phase 2 (FaultLog)
+Phase 4 (Security)      ← 依存なし
+Phase 5 (SystemServices)← Phase 2, 3
+Phase 6 (Updater)       ← Phase 4 (SHA-256), Phase 5
+Phase 7 (Storage)       ← Phase 5 (SystemTask)
+Phase 8 (Memory)        ← 依存なし
 ```
 
-## 実施順序
+Phase 1, 2, 4, 8 は並行可能。
 
-1. **11-scheduler 拡充** — 既存 TODO を埋める。他の新規ドキュメントの基盤
-2. **12-memory-protection** — 11 と密接に関連（Fault→タスク停止等）
-3. **13-system-services** — Loader/FS 等。12 の MPU 設定に依存
-4. **14-security** — Loader の署名検証に依存するため最後
-5. **06-syscall, README.md 更新** — 相互参照の整備
+## 検証
 
-## umi-kernel/ との関係
+各 Phase 完了時:
+1. `xmake build stm32f4_kernel && xmake build synth_app` — ビルド成功
+2. 実機フラッシュ (`xmake flash-kernel && xmake flash-synth-app`)
+3. デバッガで syscall 動作確認（GDB/pyOCD で変更箇所のブレークポイント検証）
 
-- umi-kernel/spec/ は**ポーティング向けの規範仕様**（MUST/SHALL レベル）として維持
-- umios-architecture/ は**設計仕様**（目標アーキテクチャ、ターゲット非依存の考え方）
-- 重複する内容は umios-architecture を正とし、umi-kernel/spec/ から参照する形にする
-- umi-kernel/platform/ のターゲット固有情報は umios-architecture には含めない
+Phase 7 (Storage) はさらに Flash/SD の実機 I/O 確認が必要。
 
----
+## 前提: 解決済みのドキュメント修正
 
-## 統合前の矛盾チェック
+以下はドキュメント側を実装に合わせて修正済み（コミット 16c9818）:
 
-umios-architecture/ と umi-kernel/ の間で確認された不整合を以下にまとめる。
-新ドキュメント作成時にこれらを解決しないと矛盾が拡大するため、**統合作業の前に方針を確定する必要がある**。
+- 01-audio-context.md: output_events は `EventQueue<>&`、shared state はポインタ型、`input_state` 名を維持
+- 04-param-system.md / 10-shared-memory.md: SharedParamState サイズ 164B → 136B に修正
 
-### 凡例
+## 注意事項
 
-- **正:** どちらを正とするか
-- **対応:** 具体的な修正アクション
-
----
-
-### 矛盾1（高）: Syscall 番号体系が3系統存在する
-
-| ドキュメント | 体系 | 例: Yield / RegisterProc / Log |
-|---|---|---|
-| 06-syscall.md | 10刻みスパース | 1 / 2 / 50 |
-| umi-kernel/spec/system-services.md | 16刻みブロック | 1 / 5 / (なし) |
-| umi-kernel/ARCHITECTURE.md | 独自配置 | 5 / 1 / 20 |
-| **実装コード** (syscall_numbers.hh) | system-services.md + Configuration(20-25) | 1 / 5 / 10 |
-
-**正:** 06-syscall.md（目標設計）を正とする。README.md で「矛盾がある場合は本仕様を正とする」と宣言済み。
-**対応:**
-1. 実装コードは現時点では旧番号のまま運用可（移行は実装フェーズ）
-2. umi-kernel/ARCHITECTURE.md の Syscall 一覧は**廃止注記**を追加し、06-syscall.md を参照させる
-3. umi-kernel/spec/system-services.md は 06-syscall.md への参照に書き換える
-4. 13-system-services.md 作成時は 06-syscall.md の番号体系のみを使う
-
-### 矛盾2（高）: FS Syscall 番号（60番台 vs 32番台）
-
-06-syscall.md では FileOpen=60、実装と system-services.md では FileOpen=32。
-
-**正:** 06-syscall.md（60番台）
-**対応:** 矛盾1 と同じ。実装の移行は別途。13-system-services.md では 60番台を使用。
-
-### 矛盾3（高）: メモリレイアウトのアドレス範囲
-
-| 項目 | 07-memory.md | umi-kernel/spec/memory-protection.md |
-|---|---|---|
-| App Data | 0x2000C000–0x20018000 (48KB) | 0x2000C000–0x20014000 (32KB) |
-| App Stack | 0x2001C000–0x20020000 (16KB) | 0x20014000–0x20018000 (16KB) |
-| SRAM 使用上限 | 0x20020000 (128KB) | 0x20018000 (96KB) |
-
-**正:** 要確認。07-memory.md は STM32F407VG の SRAM 128KB をフルに使う設計。memory-protection.md は 96KB しか使っていない。
-**提案:** 07-memory.md の値が新しい設計意図であると考えられるため 07-memory.md を正とする。ただし実装（リンカスクリプト）との整合確認が必要。12-memory-protection.md 作成時に 07-memory.md のアドレスを使用し、memory-protection.md は参照のみとする。
-
-### 矛盾4（中）: FPU Exclusive ポリシーの意味が逆
-
-| ドキュメント | Exclusive の動作 |
-|---|---|
-| 11-scheduler.md | 「常に保存/復元する」 |
-| umi-kernel/ARCHITECTURE.md | 「独占所有のため保存/復元**不要**」 |
-
-**正:** ARCHITECTURE.md の解釈が論理的に正しい。「Exclusive = そのタスクが FPU を独占 = 他タスクは FPU 不使用 = 退避不要」。
-**対応:** 11-scheduler.md の Exclusive の説明を修正する。拡充時に合わせて対応。
-
-### 矛盾5（中）: SharedMemory の buffer_size（64 vs 256）
-
-ARCHITECTURE.md は 64 frames、10-shared-memory.md は 256 frames。
-
-**正:** 07-memory.md で階層を明確化済み（DMA=64, process()=256）。10-shared-memory.md の 256 が正。
-**対応:** ARCHITECTURE.md の更新は umios-architecture のスコープ外。新規ドキュメントでは 256 を使用。
-
-### 矛盾6（中）: SharedMemory params の型（flat array vs SharedParamState）
-
-ARCHITECTURE.md と application.md は `params[32]`、10-shared-memory.md は `SharedParamState`。
-
-**正:** 10-shared-memory.md（新設計）
-**対応:** 新規ドキュメントでは SharedParamState を使用。umi-kernel 側は参照更新のみ。
-
-### 矛盾7（中）: イベントフラグ名 Button vs Control
-
-06-syscall.md は `Control = (1 << 4)` に改名。実装コードは `Button` のまま。
-
-**正:** 06-syscall.md（Control）
-**対応:** 新規ドキュメントでは Control を使用。実装の改名は実装フェーズ。
-
-### 矛盾8（中）: Syscall 呼び出し規約（r12 vs r0）
-
-system-services.md の概念コードでは r0 に番号を渡しているが、06-syscall.md と実装は r12。
-
-**正:** 06-syscall.md + 実装（r12）
-**対応:** system-services.md の概念コードは参考程度。13-system-services.md では 06-syscall.md の規約を参照。
-
-### 矛盾9（中）: Configuration API 内の番号並び順
-
-| Syscall | 06-syscall.md | 実装 (syscall_numbers.hh) |
-|---|---|---|
-| SetRouteTable | 21 | 20 |
-| SetParamMapping | 22 | 21 |
-| SetInputMapping | 23 | 22 |
-| ConfigureInput | 24 | 23 |
-| SetAppConfig | 20 | 24 |
-| SendParamRequest | 25 | 25 |
-
-**正:** 06-syscall.md（目標設計）
-**対応:** 実装の移行は実装フェーズ。新規ドキュメントでは 06-syscall.md の番号を使用。
-
-### 矛盾10（中）: ARCHITECTURE.md に存在し目標設計で廃止された Syscall
-
-SendEvent, PeekEvent, GetParam, SetParam, SetLed, GetLed, GetButton が ARCHITECTURE.md にあるが 06-syscall.md にない。
-
-**正:** 06-syscall.md（これらは SharedMemory 経由に移行済み）
-**対応:** 新規ドキュメントではこれらの Syscall を参照しない。ARCHITECTURE.md には「06-syscall.md を参照」の注記を推奨。
-
----
-
-### 統合作業の前提条件まとめ
-
-新ドキュメント（11拡充, 12-14新規）を書く際の統一ルール:
-
-1. **Syscall 番号は 06-syscall.md の体系を使用する**（10刻みスパース）
-2. **メモリアドレスは 07-memory.md を使用する**（128KB フル活用）
-3. **SharedMemory 構造体は 10-shared-memory.md を使用する**（SharedParamState）
-4. **FPU Exclusive は「独占 = 退避不要」に修正する**
-5. **イベント名は Control（Button ではなく）を使用する**
-6. **umi-kernel/ のドキュメント修正は本計画のスコープ外**とし、別途対応する
-7. 各新規ドキュメントの冒頭に「状態」欄を設け、既存ドキュメントとの対応を明記する
+- 既存の kernel.cc の動作を壊す変更は段階的に移行する
+- 新規ファイルはヘッダオンリー（テンプレート）を基本とし、.cc が必要な場合のみ分離
+- Phase 7 の FS 移植は規模が大きいため、BlockDevice 抽象層と syscall ハンドラを先行し、FS コア実装は後続
