@@ -488,8 +488,30 @@ public:
     // Task Notification
     // -----------------------------------------------------------------
 
+    /// Signal a task (set notification bits) without scheduling.
+    /// Lock-free, safe to call from any ISR including those above BASEPRI.
+    /// Caller must trigger PendSV or call resolve_pending() to wake the task.
+    void signal(TaskId id, std::uint32_t bits) {
+        notifications.notify(id, bits);
+    }
+
+    /// Resolve pending signals: wake blocked tasks whose wait_mask is satisfied.
+    /// Must be called under MaskedCritical (or from PendSV/SysTick context).
+    void resolve_pending() {
+        for (std::uint16_t i = 0; i < tasks.size(); ++i) {
+            if (tasks[i].state != State::Blocked) continue;
+            TaskId id{i};
+            if (notifications.should_wake(id)) {
+                tasks[i].state = State::Ready;
+                notifications.clear_wait_mask(id);
+                bitmap_add_ready(id, tasks[i].cfg.prio);
+            }
+        }
+    }
+
     /// Notify a task (set bits) and wake if blocked.
-    /// Safe to call from any context (ISR or task).
+    /// Safe to call from any context protected by MaskedCritical (BASEPRI-masked).
+    /// NOT safe from ISRs above BASEPRI threshold — use signal() + PendSV instead.
     void notify(TaskId id, std::uint32_t bits) {
         notifications.notify(id, bits);
 

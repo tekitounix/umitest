@@ -250,12 +250,11 @@ extern "C" [[noreturn]] void Reset_Handler() {
     umi::irq::set_handler(irqn::DMA1_Stream3, DMA1_Stream3_IRQHandler);
     umi::irq::set_handler(irqn::DMA1_Stream5, DMA1_Stream5_IRQHandler);
     umi::irq::set_handler(irqn::OTG_FS, OTG_FS_IRQHandler);
-    // DMA I2S must be highest priority to avoid audio glitches
-    // DMA1_Stream3 (PDM): priority 0x20 (group 1)
-    // DMA1_Stream5 (I2S TX): priority 0x10 (group 0, sub 1) - highest audio
-    // OTG_FS: priority 0x40 (group 2) - below DMA
-    umi::port::arm::NVIC::set_prio(irqn::DMA1_Stream3, 0x20);
-    umi::port::arm::NVIC::set_prio(irqn::DMA1_Stream5, 0x10);
+    // DMA I2S: priority 0x00 (highest) — above BASEPRI threshold (0x10).
+    // These ISRs use signal()+PendSV, never MaskedCritical.
+    // OTG_FS: priority 0x40 — below BASEPRI, uses notify() safely.
+    umi::port::arm::NVIC::set_prio(irqn::DMA1_Stream3, 0x00);
+    umi::port::arm::NVIC::set_prio(irqn::DMA1_Stream5, 0x00);
     umi::port::arm::NVIC::set_prio(irqn::OTG_FS, 0x40);
 
     // Call C++ global constructors

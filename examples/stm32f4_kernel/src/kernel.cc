@@ -37,24 +37,15 @@ struct Stm32F4Hw {
     static void set_timer_absolute(umi::usec) {}
     static umi::usec monotonic_time_usecs() { return g_tick_us; }
 
-    // PRIMASK-based nestable critical section.
-    static inline volatile uint32_t nest_count_ = 0;
-    static inline volatile uint32_t saved_primask_ = 0;
-
+    // BASEPRI-based critical section (no nesting required).
+    // Masks priority >= 1 (BASEPRI = 0x10 on STM32F4 with 4-bit priority).
+    // Audio DMA (priority 0) is NOT masked — runs through critical sections.
+    // DMA ISR must NOT use MaskedCritical; use signal() + PendSV instead.
     static void enter_critical() {
-        uint32_t prev;
-        __asm__ volatile("mrs %0, primask" : "=r"(prev)::"memory");
-        __asm__ volatile("cpsid i" ::: "memory");
-        if (nest_count_ == 0)
-            saved_primask_ = prev;
-        nest_count_ = nest_count_ + 1;
+        __asm__ volatile("msr basepri, %0" ::"r"(0x10u) : "memory");
     }
     static void exit_critical() {
-        nest_count_ = nest_count_ - 1;
-        if (nest_count_ == 0) {
-            uint32_t restore = saved_primask_;
-            __asm__ volatile("msr primask, %0" ::"r"(restore) : "memory");
-        }
+        __asm__ volatile("msr basepri, %0" ::"r"(0u) : "memory");
     }
 
     static void trigger_ipi(std::uint8_t) {}
@@ -62,7 +53,14 @@ struct Stm32F4Hw {
 
     static void request_context_switch() { arch::cm4::request_context_switch(); }
 
-    static void enter_sleep() { __asm__ volatile("wfi"); }
+    static void enter_sleep() {
+        // Temporarily lower BASEPRI to 0 so all interrupts (including SysTick)
+        // can wake the CPU from WFI. Restore after wake.
+        __asm__ volatile("msr basepri, %0\n"
+                         "wfi\n"
+                         "msr basepri, %0\n" ::"r"(0u)
+                         : "memory");
+    }
     static std::uint32_t cycle_count() { return arch::cm4::dwt_cycle(); }
     static std::uint32_t cycles_per_usec() { return 168; }
 };
@@ -563,9 +561,9 @@ static void process_audio_frame(uint16_t* buf) {
             mcu::audio::buffer_size,
             dt,
             g_shared.sample_position,
-            &g_shared.param_state,
-            &g_shared.channel_state,
-            &g_shared.input_state,
+            &g_shared.params,
+            &g_shared.channel,
+            &g_shared.input,
             0,
         };
 
@@ -787,7 +785,10 @@ void on_audio_buffer_ready(uint16_t* buf) {
     if (!g_audio_ready_queue.try_push(buf)) {
         g_dbg_audio_overrun = g_dbg_audio_overrun + 1;
     }
-    g_kernel.notify(g_audio_task_id, KernelEvent::AudioReady);
+    // Lock-free signal: DMA ISR runs above BASEPRI, must not use MaskedCritical.
+    // Wake logic is deferred to PendSV (switch_context_callback → resolve_pending).
+    g_kernel.signal(g_audio_task_id, KernelEvent::AudioReady);
+    arch::cm4::request_context_switch(); // Pend PendSV for deferred wake
 }
 
 void on_pdm_buffer_ready(uint16_t* buf) {
@@ -801,18 +802,25 @@ void on_pdm_buffer_ready(uint16_t* buf) {
 
 // Syscall numbers — must match lib/umios/app/syscall.hh nr::*
 namespace app_syscall {
+// Group 0: Process Control
 inline constexpr uint32_t exit = 0;
 inline constexpr uint32_t yield = 1;
-inline constexpr uint32_t wait_event = 2;
-inline constexpr uint32_t get_time = 3;
-inline constexpr uint32_t get_shared = 4;
-inline constexpr uint32_t register_proc = 5;
-inline constexpr uint32_t set_route_table = 20;
-inline constexpr uint32_t set_param_mapping = 21;
-inline constexpr uint32_t set_input_mapping = 22;
-inline constexpr uint32_t configure_input = 23;
-inline constexpr uint32_t set_app_config = 24;
+inline constexpr uint32_t register_proc = 2;
+// Group 1: Time / Scheduling
+inline constexpr uint32_t wait_event = 10;
+inline constexpr uint32_t get_time = 11;
+inline constexpr uint32_t sleep = 12;
+// Group 2: Configuration
+inline constexpr uint32_t set_app_config = 20;
+inline constexpr uint32_t set_route_table = 21;
+inline constexpr uint32_t set_param_mapping = 22;
+inline constexpr uint32_t set_input_mapping = 23;
+inline constexpr uint32_t configure_input = 24;
 inline constexpr uint32_t send_param_request = 25;
+// Group 4: Info
+inline constexpr uint32_t get_shared = 40;
+// Group 5: I/O
+inline constexpr uint32_t log = 50;
 } // namespace app_syscall
 
 static void svc_handler_impl(uint32_t* sp) {
@@ -914,16 +922,36 @@ static void svc_handler_impl(uint32_t* sp) {
         if (arg0 < SharedParamState::MAX_PARAMS) {
             float value;
             __builtin_memcpy(&value, &arg1, sizeof(value));
-            g_shared.param_state.values[arg0] = value;
-            g_shared.param_state.changed_flags |= (1u << arg0);
-            ++g_shared.param_state.version;
+            g_shared.params.values[arg0] = value;
+            g_shared.params.changed_flags |= (1u << arg0);
+            ++g_shared.params.version;
         }
         result = 0;
         break;
     }
 
+    case app_syscall::sleep: {
+        // Sleep implemented as wait_event with timeout and no mask
+        uint64_t timeout_us = arg0;
+        if (timeout_us > 0) {
+            g_control_task_waiting = true;
+            g_control_task_wait_mask = 0;
+            g_control_task_wakeup_us = g_tick_us + timeout_us;
+            (void)g_kernel.wait_block(g_control_task_id, 0);
+            g_control_task_wakeup_us = 0;
+            g_control_task_waiting = false;
+        }
+        result = 0;
+        break;
+    }
+
+    case app_syscall::log:
+        // TODO: implement RTT/SysEx log output
+        result = 0;
+        break;
+
     default:
-        result = -1;
+        result = -1; // SyscallError::INVALID_SYSCALL
         break;
     }
 
@@ -1013,7 +1041,7 @@ void init_shared_memory() {
 
     // Initialize EventRouter
     g_event_router.set_route_table(&g_route_table);
-    g_event_router.set_shared_state(&g_shared.param_state, &g_shared.channel_state);
+    g_event_router.set_shared_state(&g_shared.params, &g_shared.channel);
     g_event_router.set_audio_queue(&g_router_audio_queue);
     g_event_router.set_control_queue(&g_control_event_queue);
 }
@@ -1119,7 +1147,7 @@ static void tick_callback() {
             uint16_t value = (result == 1) ? 0xFFFF : 0x0000;
             g_event_router.receive_input(0, value, true, ROUTE_AUDIO | ROUTE_CONTROL);
             // Update SharedInputState so app controller_task can poll button state
-            g_shared.input_state.raw[0] = value;
+            g_shared.input.raw[0] = value;
         }
     }
 
@@ -1156,10 +1184,11 @@ static void tick_callback() {
 }
 
 static void switch_context_callback() {
-    // PendSV is lowest-priority ISR, but DMA ISR can preempt and
-    // modify kernel state (via notify). Use critical section to
-    // ensure get_next_task + prepare_switch are atomic.
+    // PendSV is lowest-priority ISR. DMA ISR (priority 0, above BASEPRI)
+    // can preempt and call signal(). We resolve pending signals here
+    // under critical section, then select the next task.
     Stm32F4Hw::enter_critical();
+    g_kernel.resolve_pending();
     auto next_opt = g_kernel.get_next_task();
     if (next_opt.has_value()) {
         g_kernel.prepare_switch(*next_opt);
