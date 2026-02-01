@@ -4,7 +4,7 @@
 
 #include <cstdint>
 #include <concepts>
-#include "types.hh"
+#include "core/types.hh"
 
 namespace umiusb {
 

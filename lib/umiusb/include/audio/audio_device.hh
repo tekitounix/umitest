@@ -2,7 +2,7 @@
 // UMI-USB: High-level Audio Device Configuration (modern, compact)
 #pragma once
 
-#include "audio_interface.hh"
+#include "audio/audio_interface.hh"
 
 namespace umiusb {
 

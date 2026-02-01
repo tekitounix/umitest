@@ -23,23 +23,19 @@
 //
 #pragma once
 
-// Core types and descriptors
-#include "types.hh"
+// Core: USB protocol types, HAL concept, device core, descriptors
+#include "core/types.hh"
+#include "core/hal.hh"
+#include "core/device.hh"
+#include "core/descriptor.hh"
 
-// Hardware abstraction concept
-#include "hal.hh"
+// Audio: USB Audio Class (UAC1/UAC2)
+#include "audio/audio_types.hh"
+#include "audio/audio_interface.hh"
+#include "audio/audio_device.hh"
 
-// Device core
-#include "device.hh"
-
-// USB Classes
-#include "audio_types.hh"
-#include "audio_interface.hh"
-#include "audio_device.hh"
-#include "umidi_adapter.hh"
-
-// Compile-time descriptor builder
-#include "descriptor.hh"
+// MIDI: UMI MIDI adapter
+#include "midi/umidi_adapter.hh"
 
 // Version
 namespace umiusb {

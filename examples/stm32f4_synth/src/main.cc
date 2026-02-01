@@ -35,7 +35,7 @@
 
 // USB stack (umiusb)
 #include <umiusb.hh>
-#include <audio_interface.hh>
+#include <audio/audio_interface.hh>
 #include <hal/stm32_otg.hh>
 
 // Synth engine (shared with WASM build)

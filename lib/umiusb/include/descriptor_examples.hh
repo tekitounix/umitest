@@ -5,7 +5,7 @@
 //
 #pragma once
 
-#include "descriptor.hh"
+#include "core/descriptor.hh"
 
 namespace umiusb::examples {
 

@@ -10,8 +10,8 @@
 #include <type_traits>
 #include <utility>
 
-#include "audio_types.hh"
-#include "types.hh"
+#include "audio/audio_types.hh"
+#include "core/types.hh"
 
 namespace umiusb {
 
@@ -40,8 +40,7 @@ template <uint8_t Channels_,
           uint32_t MaxSampleRate_ = SampleRate_,
           typename Rates_ = AudioRates<SampleRate_>,
           typename AltSettings_ = DefaultAltList<BitDepth_, Rates_>,
-          uint32_t ChannelConfig_ = DefaultChannelConfig<Channels_>::value,
-          uint32_t BufferFrames_ = 0>
+          uint32_t ChannelConfig_ = DefaultChannelConfig<Channels_>::value>
 struct AudioPort {
     static constexpr bool ENABLED = true;
     static constexpr uint8_t CHANNELS = Channels_;
@@ -63,11 +62,9 @@ struct AudioPort {
     // Add +1 sample headroom so feedback can request extra frames (e.g. 96k -> 97).
     static constexpr uint16_t PACKET_SIZE =
         (static_cast<uint16_t>(((MaxSampleRate_ + 999) / 1000) + 1) * BYTES_PER_FRAME);
-    // Buffer size: needs to absorb macOS duplex IO cycle bursts.
-    // macOS CoreAudio batches OUT data in IO cycles (~512 frames),
-    // requiring ≥2x IO buffer to avoid starvation between bursts.
-    // BufferFrames_=0 means use default (2048 for OUT, 1024 is fine for IN).
-    static constexpr uint32_t BUFFER_FRAMES = (BufferFrames_ > 0) ? BufferFrames_ : 2048;
+    // Buffer size: ~20ms at max sample rate, rounded up to power of 2.
+    // Handles timing jitter between DMA writes (64 frames @ 750Hz) and USB reads (48 frames @ 1000Hz).
+    static constexpr uint32_t BUFFER_FRAMES = 1024;
 
     static_assert(RATES_COUNT == 0 || MAX_SAMPLE_RATE >= Rates::max_rate,
                   "MAX_SAMPLE_RATE must be >= max rate in Rates list");
@@ -1295,10 +1292,7 @@ class AudioInterface {
     static constexpr uint32_t IN_MAX_PACKET_FRAMES = HAS_AUDIO_IN ? ((AudioIn::MAX_SAMPLE_RATE / 1000) + 1) : 1;
 
     static constexpr uint32_t OUT_DECODE_SAMPLES = HAS_AUDIO_OUT ? (OUT_MAX_PACKET_FRAMES * AudioOut::CHANNELS) : 1;
-    // out_read_buf_ only needs to hold one read_audio() call worth of frames (not entire ring buffer).
-    // Max read is frame_count (typically 64) + 1 for interpolation. Use 256 frames as safe upper bound.
-    static constexpr uint32_t OUT_READ_MAX_FRAMES = 256;
-    static constexpr uint32_t OUT_READ_SAMPLES = HAS_AUDIO_OUT ? (OUT_READ_MAX_FRAMES * AudioOut::CHANNELS) : 1;
+    static constexpr uint32_t OUT_READ_SAMPLES = HAS_AUDIO_OUT ? (OUT_BUFFER_FRAMES * AudioOut::CHANNELS) : 1;
     static constexpr uint32_t IN_READ_SAMPLES = HAS_AUDIO_IN ? (IN_MAX_PACKET_FRAMES * AudioIn::CHANNELS) : 1;
     static constexpr uint32_t IN_PACKET_BYTES = HAS_AUDIO_IN ? (IN_MAX_PACKET_FRAMES * AudioIn::CHANNELS * 3) : 1;
 
@@ -2959,10 +2953,7 @@ class AudioInterface {
                 out_prime_frames_ = out_ring_buffer_.capacity() / 2;
                 out_rx_blocked_frames_ = kBlockFramesHighRate;
             } else {
-                // Use capacity/2 for duplex: macOS CoreAudio batches OUT data
-                // in IO cycles aligned to Audio IN (~512 frames), requiring
-                // deeper priming to absorb burst/starvation pattern.
-                out_prime_frames_ = out_ring_buffer_.capacity() / 2;
+                out_prime_frames_ = out_ring_buffer_.capacity() / 4;
                 out_rx_blocked_frames_ = kBlockFramesLowRate;
             }
         }

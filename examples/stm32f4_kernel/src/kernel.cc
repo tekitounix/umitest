@@ -20,7 +20,7 @@
 #include "mcu.hh"
 
 // USB stack (needed for complete type)
-#include <audio_interface.hh>
+#include <audio/audio_interface.hh>
 #include <hal/stm32_otg.hh>
 #include <protocol/standard_io.hh>
 #include <umios/kernel/shell_commands.hh>
@@ -378,9 +378,6 @@ static volatile uint32_t g_dbg_ring_read_pos = 0;
 static volatile uint32_t g_dbg_ring_buffered = 0;
 static volatile uint32_t g_dbg_ring_overrun = 0;
 static volatile uint32_t g_dbg_ring_underrun = 0;
-static volatile uint32_t g_dbg_hal_iisoixfr = 0;         // HAL: IsoINIncomplete count
-static volatile uint32_t g_dbg_hal_ep3_in_count = 0;     // HAL: Audio IN EP3 packet count
-static volatile uint32_t g_dbg_hal_ep3_epena_busy = 0;   // HAL: Audio IN EP3 busy skip count
 
 // Event log for debugging USB sequence
 // Each entry: [event_type(8) | data(24)]
@@ -498,9 +495,6 @@ static void process_audio_frame(uint16_t* buf) {
     g_dbg_ring_buffered = mcu::usb_audio().buffered_frames();
     g_dbg_ring_overrun = mcu::usb_audio().out_ring_overrun();
     g_dbg_ring_underrun = mcu::usb_audio().out_ring_underrun();
-    g_dbg_hal_iisoixfr = mcu::usb_hal().dbg_iisoixfr_count_;
-    g_dbg_hal_ep3_in_count = mcu::usb_hal().dbg_ep3_in_count_;
-    g_dbg_hal_ep3_epena_busy = mcu::usb_hal().dbg_ep3_epena_busy_;
 
     uint32_t t2b = dwt_cyccnt();
 #if 0 // TEST TONE: bypass USB audio, output 440Hz sine via I2S

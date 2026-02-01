@@ -6,8 +6,8 @@
 #include <cstring>
 #include <span>
 #include <array>
-#include "types.hh"
-#include "hal.hh"
+#include "core/types.hh"
+#include "core/hal.hh"
 
 namespace umiusb {
 

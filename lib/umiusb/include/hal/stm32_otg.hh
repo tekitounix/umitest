@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <cstring>
 
-#include "../hal.hh"
+#include "../core/hal.hh"
 
 namespace umiusb {
 
