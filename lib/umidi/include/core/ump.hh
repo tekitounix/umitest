@@ -255,4 +255,46 @@ static_assert(sizeof(UMP64) == 8, "UMP64 must be 8 bytes");
     }
 }
 
+/// Downconvert MIDI 2.0 Channel Voice (MT=4, UMP64) to MIDI 1.0 CV (MT=2, UMP32).
+/// For MT!=4, returns a UMP32 with word0 only (discards word1).
+[[nodiscard]] constexpr UMP32 downconvert(const UMP64& msg) noexcept {
+    if (msg.mt() != 4) {
+        // Not a MIDI 2.0 CV message — just return word0 as UMP32
+        return UMP32{msg.word0};
+    }
+    // MT=4 → MT=2 conversion
+    uint8_t group = msg.group();
+    uint8_t status = msg.status();
+    uint8_t opcode = status & 0xF0;
+    uint8_t channel = status & 0x0F;
+    uint8_t d1 = msg.data1();  // note number / index (7-bit, same in both versions)
+
+    uint8_t d2 = 0;
+    switch (opcode) {
+    case 0x90: // Note On — velocity 16bit → 7bit
+    case 0x80: // Note Off
+        d2 = static_cast<uint8_t>(msg.data_16_hi() >> 9);  // 16bit → 7bit
+        if (d2 == 0 && opcode == 0x90) d2 = 1;  // Note On vel=0 means Note Off
+        break;
+    case 0xB0: // Control Change — 32bit → 7bit
+        d2 = static_cast<uint8_t>(msg.data_32() >> 25);  // 32bit → 7bit
+        break;
+    case 0xE0: { // Pitch Bend — 32bit → 14bit
+        uint16_t pb14 = static_cast<uint16_t>(msg.data_32() >> 18);
+        d1 = pb14 & 0x7F;        // LSB
+        d2 = (pb14 >> 7) & 0x7F; // MSB
+        break;
+    }
+    case 0xC0: // Program Change
+    case 0xD0: // Channel Pressure — 32bit → 7bit
+        d2 = static_cast<uint8_t>(msg.data_32() >> 25);
+        break;
+    default:
+        d2 = static_cast<uint8_t>(msg.data_16_hi() >> 9);
+        break;
+    }
+
+    return UMP32(2, group, opcode | channel, d1, d2);
+}
+
 } // namespace umidi

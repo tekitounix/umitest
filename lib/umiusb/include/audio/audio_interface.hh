@@ -6,6 +6,7 @@
 #include <array>
 #include <audio/rate/pi_controller.hh>
 #include <cstdint>
+#include <cstring>
 #include <span>
 #include <type_traits>
 #include <utility>
@@ -119,7 +120,7 @@ template <UacVersion Version = UacVersion::UAC1,
           AudioSyncMode SyncMode_ = AudioSyncMode::ASYNC,
           bool SampleRateControlEnabled_ = true,
           typename SampleT_ = int32_t>
-class AudioInterface {
+class AudioClass {
   public:
     // Version
     static constexpr UacVersion UAC_VERSION = Version;
@@ -195,6 +196,10 @@ class AudioInterface {
     static constexpr uint8_t EP_FEEDBACK = FeedbackEp_;
     static constexpr uint8_t EP_MIDI_OUT = MidiOut::ENDPOINT;
     static constexpr uint8_t EP_MIDI_IN = MidiIn::ENDPOINT;
+
+    // AC Interrupt EP (optional, for UAC2 status notifications)
+    // Uses EP number one above the highest used EP, or 0 to disable
+    static constexpr uint8_t EP_AC_INTERRUPT = 0;  ///< 0 = disabled (can be overridden via specialization)
 
     // Audio OUT configuration (for backward compatibility)
     static constexpr uint32_t SAMPLE_RATE =
@@ -382,7 +387,9 @@ class AudioInterface {
     // Descriptor Builder
     // ========================================================================
 
+    template<Speed DescSpeed = Speed::FULL>
     static constexpr auto build_descriptor() {
+        using ST = SpeedTraits<DescSpeed>;
         std::array<uint8_t, MAX_DESC_SIZE> desc{};
         std::size_t p = 0;
 
@@ -687,9 +694,9 @@ class AudioInterface {
                     w(EP_AUDIO_OUT);
                     w(static_cast<uint8_t>(SYNC_MODE)); // bmAttributes: 0x05 for Async
                     constexpr uint16_t out_packet_size =
-                        static_cast<uint16_t>((((AudioOut::SAMPLE_RATE + 999) / 1000) + 1) * AudioOut::BYTES_PER_FRAME);
+                        static_cast<uint16_t>((((AudioOut::SAMPLE_RATE + ST::FRAME_DIVISOR - 1) / ST::FRAME_DIVISOR) + 1) * AudioOut::BYTES_PER_FRAME);
                     w16(out_packet_size);
-                    w(1);
+                    w(ST::ISO_BINTERVAL);
 
                     // CS Audio Endpoint (UAC2)
                     w(8, bDescriptorType::CsEndpoint, uac::as::GENERAL);
@@ -703,8 +710,8 @@ class AudioInterface {
                         w(7, bDescriptorType::Endpoint);
                         w(0x80 | EP_FEEDBACK);
                         w(0x11); // Iso, Feedback
-                        w16(FB_PACKET_SIZE);
-                        w(1);    // bInterval (1ms)
+                        w16(ST::FB_BYTES);
+                        w(ST::FB_BINTERVAL);
                     }
                 } else {
                     auto write_out_alt = [&]<size_t AltIndex>() {
@@ -713,7 +720,7 @@ class AudioInterface {
                         constexpr uint8_t bytes_per_frame =
                             static_cast<uint8_t>(AudioOut::CHANNELS * (Alt::BIT_DEPTH / 8));
                         constexpr uint16_t packet_size =
-                            static_cast<uint16_t>((((Alt::MAX_RATE + 999) / 1000) + 1) * bytes_per_frame);
+                            static_cast<uint16_t>((((Alt::MAX_RATE + ST::FRAME_DIVISOR - 1) / ST::FRAME_DIVISOR) + 1) * bytes_per_frame);
                         constexpr uint8_t out_rate_count = static_cast<uint8_t>(Alt::RATES_COUNT);
 
                         w(9, bDescriptorType::Interface);
@@ -749,7 +756,7 @@ class AudioInterface {
                         w(EP_AUDIO_OUT);
                         w(static_cast<uint8_t>(SYNC_MODE));
                         w16(packet_size);
-                        w(1);
+                        w(ST::ISO_BINTERVAL);
                         w(0); // bRefresh is for feedback EP, not data EP
                         w((SYNC_MODE == AudioSyncMode::ASYNC) ? (0x80 | EP_FEEDBACK) : 0);
 
@@ -765,8 +772,8 @@ class AudioInterface {
                             w(9, bDescriptorType::Endpoint);
                             w(0x80 | EP_FEEDBACK);
                             w(0x11); // Iso, Feedback
-                            w16(3);  // 10.14 format (3 bytes)
-                            w(1);    // bInterval (1ms)
+                            w16(ST::FB_BYTES);
+                            w(ST::FB_BINTERVAL);
                             w(FB_REFRESH);
                             w(0); // bSynchAddress
                         }
@@ -840,9 +847,9 @@ class AudioInterface {
                         w(in_sync);
                     }
                     constexpr uint16_t in_packet_size =
-                        static_cast<uint16_t>((((AudioIn::SAMPLE_RATE + 999) / 1000) + 1) * AudioIn::BYTES_PER_FRAME);
+                        static_cast<uint16_t>((((AudioIn::SAMPLE_RATE + ST::FRAME_DIVISOR - 1) / ST::FRAME_DIVISOR) + 1) * AudioIn::BYTES_PER_FRAME);
                     w16(in_packet_size);
-                    w(1);
+                    w(ST::ISO_BINTERVAL);
 
                     // CS Audio Endpoint (UAC2)
                     w(8, bDescriptorType::CsEndpoint, uac::as::GENERAL);
@@ -857,7 +864,7 @@ class AudioInterface {
                         constexpr uint8_t bytes_per_frame =
                             static_cast<uint8_t>(AudioIn::CHANNELS * (Alt::BIT_DEPTH / 8));
                         constexpr uint16_t packet_size =
-                            static_cast<uint16_t>((((Alt::MAX_RATE + 999) / 1000) + 1) * bytes_per_frame);
+                            static_cast<uint16_t>((((Alt::MAX_RATE + ST::FRAME_DIVISOR - 1) / ST::FRAME_DIVISOR) + 1) * bytes_per_frame);
                         constexpr uint8_t in_rate_count = static_cast<uint8_t>(Alt::RATES_COUNT);
 
                         w(9, bDescriptorType::Interface);
@@ -893,7 +900,7 @@ class AudioInterface {
                         w(0x80 | EP_AUDIO_IN);
                         w(static_cast<uint8_t>(SYNC_MODE));
                         w16(packet_size);
-                        w(1);
+                        w(ST::ISO_BINTERVAL);
                         w(0);
                         w(0);
 
@@ -1220,6 +1227,40 @@ class AudioInterface {
     bool default_in_mute_ = false;
     int16_t default_in_volume_ = 0;
 
+    // Selector Unit / Clock Selector state
+    uint8_t selector_cur_ = 1;        ///< Currently selected input (1-based)
+    uint8_t clock_selector_cur_ = 1;  ///< Currently selected clock source (1-based)
+
+    // AC Interrupt EP state
+    bool ac_int_busy_ = false;
+    uint8_t ac_int_buf_[6]{};
+
+    // Mixer Unit state (entity 10) — crosspoint gains
+    // For simplicity, support up to 4 input × 4 output crosspoints
+    static constexpr uint8_t MIXER_MAX_CROSSPOINTS = 16;
+    int16_t mixer_gains_[MIXER_MAX_CROSSPOINTS]{};  ///< Crosspoint gain in 1/256 dB (0 = unity)
+
+    // WinUSB / WebUSB vendor request codes
+    static constexpr uint8_t WINUSB_VENDOR_CODE = 0x01;
+    static constexpr uint8_t WEBUSB_VENDOR_CODE = 0x02;
+
+    // BOS descriptor buffer (WinUSB + WebUSB platform capabilities)
+    // BOS header (5) + WinUSB cap (28) + WebUSB cap (24) = 57 bytes
+    static constexpr uint16_t BOS_DESC_SIZE = 57;
+    uint8_t bos_buf_[BOS_DESC_SIZE]{};
+    bool bos_built_ = false;
+
+    // MS OS 2.0 Descriptor Set buffer
+    // Header (10) + Config subset (8) + Function subset (8) + CompatibleID (20) + Registry GUID (~132) = ~178
+    static constexpr uint16_t MS_DESC_SET_MAX = 192;
+    uint8_t ms_desc_set_buf_[MS_DESC_SET_MAX]{};
+    uint16_t ms_desc_set_size_ = 0;
+
+    // WebUSB URL descriptor buffer
+    static constexpr uint16_t WEBUSB_URL_MAX = 64;
+    uint8_t webusb_url_buf_[WEBUSB_URL_MAX]{};
+    uint8_t webusb_url_size_ = 0;
+
     // Pending SET request
     uint8_t pending_set_entity_ = 0;
     uint8_t pending_set_ctrl_ = 0;
@@ -1368,7 +1409,7 @@ class AudioInterface {
     // Initialization
     // ========================================================================
 
-    AudioInterface() {
+    AudioClass() {
         if constexpr (HAS_AUDIO_OUT) {
             feedback_calc_.reset(AudioOut::SAMPLE_RATE);
         }
@@ -1429,11 +1470,39 @@ class AudioInterface {
     }
 
     [[nodiscard]] std::span<const uint8_t> bos_descriptor() const {
-        return {};  // No BOS by default; Phase 2 adds WinUSB/WebUSB
+        if (!bos_built_) {
+            const_cast<AudioClass*>(this)->build_bos_and_vendor_descriptors();
+        }
+        return {bos_buf_, BOS_DESC_SIZE};
     }
 
-    bool handle_vendor_request(const SetupPacket& /*setup*/, std::span<uint8_t>& /*response*/) {
-        return false;  // No vendor requests by default; Phase 2 adds WinUSB/WebUSB
+    bool handle_vendor_request(const SetupPacket& setup, std::span<uint8_t>& response) {
+        if (!bos_built_) {
+            build_bos_and_vendor_descriptors();
+        }
+        uint8_t request = setup.bRequest;
+
+        // WinUSB: MS OS 2.0 Descriptor Set
+        if (request == WINUSB_VENDOR_CODE && setup.wIndex == 0x07) {
+            uint16_t len = (ms_desc_set_size_ < setup.wLength) ? ms_desc_set_size_ : setup.wLength;
+            if (len > response.size()) len = static_cast<uint16_t>(response.size());
+            std::memcpy(response.data(), ms_desc_set_buf_, len);
+            response = response.subspan(0, len);
+            return true;
+        }
+
+        // WebUSB: URL descriptor
+        if (request == WEBUSB_VENDOR_CODE) {
+            if (setup.wIndex == 0x02 && webusb_url_size_ > 0) { // GET URL
+                uint16_t len = (webusb_url_size_ < setup.wLength) ? webusb_url_size_ : setup.wLength;
+                if (len > response.size()) len = static_cast<uint16_t>(response.size());
+                std::memcpy(response.data(), webusb_url_buf_, len);
+                response = response.subspan(0, len);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     void on_configured(bool configured) {
@@ -1743,6 +1812,58 @@ class AudioInterface {
                         return true;
                     }
                 }
+
+                // Selector Unit (entity 8) — GET/SET CUR returns/sets selected input pin
+                if (entity == 8) {
+                    if (is_get && setup.bRequest == UAC2_CUR) {
+                        response[0] = selector_cur_;
+                        response = response.subspan(0, 1);
+                        return true;
+                    }
+                    if (!is_get && setup.bRequest == UAC2_CUR) {
+                        pending_set_entity_ = 8;
+                        pending_set_ctrl_ = ctrl;
+                        response = response.subspan(0, 0);
+                        return true;
+                    }
+                }
+
+                // Clock Selector (entity 9) — GET/SET CUR returns/sets selected clock
+                if (entity == 9) {
+                    if (is_get && setup.bRequest == UAC2_CUR) {
+                        response[0] = clock_selector_cur_;
+                        response = response.subspan(0, 1);
+                        return true;
+                    }
+                    if (!is_get && setup.bRequest == UAC2_CUR) {
+                        pending_set_entity_ = 9;
+                        pending_set_ctrl_ = ctrl;
+                        response = response.subspan(0, 0);
+                        return true;
+                    }
+                }
+
+                // Mixer Unit (entity 10) — GET/SET CUR crosspoint gain
+                // CN (channel number in wValue low byte) indexes the crosspoint
+                if (entity == 10) {
+                    uint8_t cn = setup.wValue & 0xFF;  // crosspoint index
+                    if (is_get && setup.bRequest == UAC2_CUR) {
+                        if (cn < MIXER_MAX_CROSSPOINTS && response.size() >= 2) {
+                            int16_t val = mixer_gains_[cn];
+                            response[0] = static_cast<uint8_t>(val & 0xFF);
+                            response[1] = static_cast<uint8_t>((val >> 8) & 0xFF);
+                            response = response.subspan(0, 2);
+                            return true;
+                        }
+                    }
+                    if (!is_get && setup.bRequest == UAC2_CUR) {
+                        pending_set_entity_ = 10;
+                        pending_set_ctrl_ = cn;  // store crosspoint index
+                        pending_set_len_ = 2;
+                        response = response.subspan(0, 0);
+                        return true;
+                    }
+                }
             }
         }
 
@@ -2023,6 +2144,31 @@ class AudioInterface {
                 pending_set_ctrl_ = 0;
                 pending_set_len_ = 0;
             }
+
+            // Selector Unit SET CUR data (entity 8)
+            if (pending_set_entity_ == 8 && !data.empty()) {
+                selector_cur_ = data[0];
+                pending_set_entity_ = 0;
+                pending_set_ctrl_ = 0;
+            }
+
+            // Clock Selector SET CUR data (entity 9)
+            if (pending_set_entity_ == 9 && !data.empty()) {
+                clock_selector_cur_ = data[0];
+                pending_set_entity_ = 0;
+                pending_set_ctrl_ = 0;
+            }
+
+            // Mixer Unit SET CUR data (entity 10)
+            if (pending_set_entity_ == 10 && data.size() >= 2) {
+                uint8_t cn = pending_set_ctrl_;  // crosspoint index
+                if (cn < MIXER_MAX_CROSSPOINTS) {
+                    mixer_gains_[cn] = static_cast<int16_t>(data[0] | (data[1] << 8));
+                }
+                pending_set_entity_ = 0;
+                pending_set_ctrl_ = 0;
+                pending_set_len_ = 0;
+            }
         }
 
         // UAC1 Feature Unit SET CUR data phase (entity 2=OUT FU, 5=IN FU)
@@ -2052,6 +2198,110 @@ class AudioInterface {
                 pending_set_len_ = 0;
             }
         }
+    }
+
+    /// Build BOS, MS OS 2.0 Descriptor Set, and WebUSB URL descriptors
+    void build_bos_and_vendor_descriptors() {
+        // --- MS OS 2.0 Descriptor Set ---
+        // Default GUID for UMI Audio devices
+        static constexpr char DEVICE_GUID[] = "{6B29FC40-CA47-1067-B31D-00DD010662DA}";
+        static constexpr uint8_t GUID_LEN = sizeof(DEVICE_GUID) - 1;  // exclude null
+        static constexpr uint16_t GUID_BYTES = (GUID_LEN + 2) * 2;    // UTF-16LE + double-null
+        static constexpr uint16_t REG_PROP_NAME_LEN = 21;             // "DeviceInterfaceGUIDs" + null
+        static constexpr uint16_t REG_PROP_NAME_BYTES = REG_PROP_NAME_LEN * 2;
+        static constexpr uint16_t REG_PROP_SIZE = 10 + REG_PROP_NAME_BYTES + GUID_BYTES;
+        static constexpr uint16_t COMPAT_ID_SIZE = 20;
+        static constexpr uint16_t FUNC_SUBSET_SIZE = 8 + COMPAT_ID_SIZE + REG_PROP_SIZE;
+        static constexpr uint16_t CONFIG_SUBSET_SIZE = 8 + FUNC_SUBSET_SIZE;
+        static constexpr uint16_t DESC_SET_SIZE = 10 + CONFIG_SUBSET_SIZE;
+
+        uint16_t pos = 0;
+        auto w16 = [&](uint16_t v) {
+            ms_desc_set_buf_[pos++] = v & 0xFF;
+            ms_desc_set_buf_[pos++] = (v >> 8) & 0xFF;
+        };
+        auto w32 = [&](uint32_t v) {
+            ms_desc_set_buf_[pos++] = v & 0xFF;
+            ms_desc_set_buf_[pos++] = (v >> 8) & 0xFF;
+            ms_desc_set_buf_[pos++] = (v >> 16) & 0xFF;
+            ms_desc_set_buf_[pos++] = (v >> 24) & 0xFF;
+        };
+
+        // Descriptor Set Header (10 bytes)
+        w16(10); w16(0x00); w32(0x06030000); w16(DESC_SET_SIZE);
+        // Config Subset Header (8 bytes)
+        w16(8); w16(0x01); ms_desc_set_buf_[pos++] = 0; ms_desc_set_buf_[pos++] = 0; w16(CONFIG_SUBSET_SIZE);
+        // Function Subset Header (8 bytes)
+        w16(8); w16(0x02); ms_desc_set_buf_[pos++] = 0; ms_desc_set_buf_[pos++] = 0; w16(FUNC_SUBSET_SIZE);
+        // Compatible ID: WINUSB (20 bytes)
+        w16(20); w16(0x03);
+        static constexpr uint8_t winusb_id[] = {'W','I','N','U','S','B',0,0, 0,0,0,0,0,0,0,0};
+        std::memcpy(ms_desc_set_buf_ + pos, winusb_id, 16); pos += 16;
+        // Registry Property: DeviceInterfaceGUIDs (variable)
+        w16(REG_PROP_SIZE); w16(0x04);
+        w16(7);  // REG_MULTI_SZ
+        w16(REG_PROP_NAME_BYTES);
+        // Property name: "DeviceInterfaceGUIDs\0" in UTF-16LE
+        static constexpr char prop_name[] = "DeviceInterfaceGUIDs";
+        for (uint8_t i = 0; i < REG_PROP_NAME_LEN; ++i) {
+            ms_desc_set_buf_[pos++] = (i < sizeof(prop_name)) ? static_cast<uint8_t>(prop_name[i]) : 0;
+            ms_desc_set_buf_[pos++] = 0;
+        }
+        w16(GUID_BYTES);
+        // GUID in UTF-16LE
+        for (uint8_t i = 0; i < GUID_LEN; ++i) {
+            ms_desc_set_buf_[pos++] = static_cast<uint8_t>(DEVICE_GUID[i]);
+            ms_desc_set_buf_[pos++] = 0;
+        }
+        // Double null termination
+        ms_desc_set_buf_[pos++] = 0; ms_desc_set_buf_[pos++] = 0;
+        ms_desc_set_buf_[pos++] = 0; ms_desc_set_buf_[pos++] = 0;
+        ms_desc_set_size_ = pos;
+
+        // --- WebUSB URL descriptor ---
+        static constexpr char LANDING_URL[] = "umi-audio.dev";
+        webusb_url_buf_[0] = 3 + sizeof(LANDING_URL) - 1;  // bLength
+        webusb_url_buf_[1] = 0x03;  // bDescriptorType = WEBUSB_URL
+        webusb_url_buf_[2] = 0x01;  // bScheme = HTTPS
+        std::memcpy(webusb_url_buf_ + 3, LANDING_URL, sizeof(LANDING_URL) - 1);
+        webusb_url_size_ = 3 + sizeof(LANDING_URL) - 1;
+
+        // --- BOS descriptor ---
+        // WinUSB Platform Capability (28 bytes)
+        static constexpr uint8_t WINUSB_UUID[] = {
+            0xDF, 0x60, 0xDD, 0xD8, 0x89, 0x45, 0xC7, 0x4C,
+            0x9C, 0xD2, 0x65, 0x9D, 0x9E, 0x64, 0x8A, 0x9F
+        };
+        // WebUSB Platform Capability (24 bytes)
+        static constexpr uint8_t WEBUSB_UUID[] = {
+            0x38, 0xB6, 0x08, 0x34, 0xA9, 0x09, 0xA0, 0x47,
+            0x8B, 0xFD, 0xA0, 0x76, 0x88, 0x15, 0xB6, 0x65
+        };
+
+        pos = 0;
+        auto bw = [&](uint8_t v) { bos_buf_[pos++] = v; };
+        auto bw16 = [&](uint16_t v) { bos_buf_[pos++] = v & 0xFF; bos_buf_[pos++] = (v >> 8) & 0xFF; };
+
+        // BOS Header (5 bytes)
+        bw(5); bw(0x0F); bw16(BOS_DESC_SIZE); bw(2);  // bNumDeviceCaps = 2
+
+        // WinUSB Platform Capability (28 bytes)
+        bw(28); bw(0x10); bw(0x05); bw(0x00);  // DeviceCapability, Platform, reserved
+        std::memcpy(bos_buf_ + pos, WINUSB_UUID, 16); pos += 16;
+        // dwWindowsVersion
+        bos_buf_[pos++] = 0x00; bos_buf_[pos++] = 0x00; bos_buf_[pos++] = 0x03; bos_buf_[pos++] = 0x06;
+        bw16(ms_desc_set_size_);        // wMSOSDescriptorSetTotalLength
+        bw(WINUSB_VENDOR_CODE);         // bMS_VendorCode
+        bw(0x00);                       // bAltEnumCode
+
+        // WebUSB Platform Capability (24 bytes)
+        bw(24); bw(0x10); bw(0x05); bw(0x00);
+        std::memcpy(bos_buf_ + pos, WEBUSB_UUID, 16); pos += 16;
+        bw16(0x0100);                   // bcdVersion 1.0
+        bw(WEBUSB_VENDOR_CODE);         // bVendorCode
+        bw(1);                          // iLandingPage
+
+        bos_built_ = true;
     }
 
     void on_rx(uint8_t ep, std::span<const uint8_t> data) {
@@ -2273,6 +2523,35 @@ class AudioInterface {
     }
 
     // ========================================================================
+    // AC Status Interrupt Endpoint
+    // ========================================================================
+
+    /// Send a UAC2 status interrupt notification (6 bytes).
+    /// @param hal HAL reference
+    /// @param originator 0=AudioControl, 1=AudioStreaming, 2=MIDI
+    /// @param entity_id Entity (Unit/Terminal) ID that changed
+    /// @param ctrl_sel Control Selector that changed
+    /// @return true if queued, false if EP disabled or busy
+    template<typename HalT>
+    bool send_status_interrupt(HalT& hal, uint8_t originator, uint8_t entity_id, uint8_t ctrl_sel) {
+        if constexpr (EP_AC_INTERRUPT == 0) {
+            (void)hal; (void)originator; (void)entity_id; (void)ctrl_sel;
+            return false;
+        } else {
+            if (ac_int_busy_) return false;
+            // UAC2 §5.2.2 Audio Control Interrupt Message
+            ac_int_buf_[0] = 0x02;           // bInfo: no pending changes
+            ac_int_buf_[1] = originator;     // bAttribute: originator
+            ac_int_buf_[2] = ctrl_sel;       // wValue low (CS)
+            ac_int_buf_[3] = 0;              // wValue high (CN=0)
+            ac_int_buf_[4] = entity_id;      // wIndex low (entity)
+            ac_int_buf_[5] = 0;              // wIndex high (interface=0)
+            ac_int_busy_ = true;
+            hal.ep_write(0x80 | EP_AC_INTERRUPT, ac_int_buf_, 6);
+            return true;
+        }
+    }
+
     // SOF and Feedback
     // ========================================================================
 
@@ -2360,6 +2639,12 @@ class AudioInterface {
         if constexpr (HAS_AUDIO_IN) {
             if (ep == EP_AUDIO_IN && audio_in_streaming_) {
                 ++dbg_in_xfrc_count_;
+            }
+        }
+        // AC Interrupt EP completion
+        if constexpr (EP_AC_INTERRUPT != 0) {
+            if (ep == EP_AC_INTERRUPT) {
+                ac_int_busy_ = false;
             }
         }
         (void)hal;
@@ -3137,35 +3422,35 @@ class AudioInterface {
 // ============================================================================
 
 // Audio OUT only
-using AudioInterface48kAsync = AudioInterface<UacVersion::UAC1, MaxSpeed::FULL, AudioStereo48k, NoAudioPort, NoMidiPort, NoMidiPort, 2>;
-using AudioInterface44kAsync = AudioInterface<UacVersion::UAC1, MaxSpeed::FULL, AudioStereo44k, NoAudioPort, NoMidiPort, NoMidiPort, 2>;
+using AudioInterface48kAsync = AudioClass<UacVersion::UAC1, MaxSpeed::FULL, AudioStereo48k, NoAudioPort, NoMidiPort, NoMidiPort, 2>;
+using AudioInterface44kAsync = AudioClass<UacVersion::UAC1, MaxSpeed::FULL, AudioStereo44k, NoAudioPort, NoMidiPort, NoMidiPort, 2>;
 using AudioInterface48kAsyncV2 =
-    AudioInterface<UacVersion::UAC2, MaxSpeed::FULL, AudioStereo48k, NoAudioPort, NoMidiPort, NoMidiPort, 2>;
+    AudioClass<UacVersion::UAC2, MaxSpeed::FULL, AudioStereo48k, NoAudioPort, NoMidiPort, NoMidiPort, 2>;
 using AudioInterface96kAsyncV2 =
-    AudioInterface<UacVersion::UAC2, MaxSpeed::FULL, AudioStereo96k, NoAudioPort, NoMidiPort, NoMidiPort, 2>;
+    AudioClass<UacVersion::UAC2, MaxSpeed::FULL, AudioStereo96k, NoAudioPort, NoMidiPort, NoMidiPort, 2>;
 
 // Audio OUT + MIDI
 using AudioMidiInterface48k =
-    AudioInterface<UacVersion::UAC1, MaxSpeed::FULL, AudioStereo48k, NoAudioPort, MidiPort<1, 3>, MidiPort<1, 3>, 2>;
+    AudioClass<UacVersion::UAC1, MaxSpeed::FULL, AudioStereo48k, NoAudioPort, MidiPort<1, 3>, MidiPort<1, 3>, 2>;
 using AudioMidiInterface48kV2 =
-    AudioInterface<UacVersion::UAC2, MaxSpeed::FULL, AudioStereo48k, NoAudioPort, MidiPort<1, 3>, MidiPort<1, 3>, 2>;
+    AudioClass<UacVersion::UAC2, MaxSpeed::FULL, AudioStereo48k, NoAudioPort, MidiPort<1, 3>, MidiPort<1, 3>, 2>;
 
 // MIDI only
-using MidiInterface = AudioInterface<UacVersion::UAC1, MaxSpeed::FULL, NoAudioPort, NoAudioPort, MidiPort<1, 1>, MidiPort<1, 1>, 0>;
-using MidiInterfaceV2 = AudioInterface<UacVersion::UAC2, MaxSpeed::FULL, NoAudioPort, NoAudioPort, MidiPort<1, 1>, MidiPort<1, 1>, 0>;
+using MidiInterface = AudioClass<UacVersion::UAC1, MaxSpeed::FULL, NoAudioPort, NoAudioPort, MidiPort<1, 1>, MidiPort<1, 1>, 0>;
+using MidiInterfaceV2 = AudioClass<UacVersion::UAC2, MaxSpeed::FULL, NoAudioPort, NoAudioPort, MidiPort<1, 1>, MidiPort<1, 1>, 0>;
 
 // Audio IN/OUT (full duplex)
 // EP1=Audio OUT, EP2=Feedback, EP3=Audio IN
 using AudioFullDuplex48k =
-    AudioInterface<UacVersion::UAC1, MaxSpeed::FULL, AudioStereo48k, AudioPort<2, 16, 48000, 3>, NoMidiPort, NoMidiPort, 2>;
+    AudioClass<UacVersion::UAC1, MaxSpeed::FULL, AudioStereo48k, AudioPort<2, 16, 48000, 3>, NoMidiPort, NoMidiPort, 2>;
 using AudioFullDuplex48kV2 =
-    AudioInterface<UacVersion::UAC2, MaxSpeed::FULL, AudioStereo48k, AudioPort<2, 16, 48000, 3>, NoMidiPort, NoMidiPort, 2>;
+    AudioClass<UacVersion::UAC2, MaxSpeed::FULL, AudioStereo48k, AudioPort<2, 16, 48000, 3>, NoMidiPort, NoMidiPort, 2>;
 
 // Audio IN/OUT + MIDI (full duplex with MIDI)
 // STM32 OTG FS has EP0-3, with IN and OUT being independent:
 // EP1 OUT=Audio OUT, EP1 IN=MIDI IN, EP2 IN=Feedback, EP3 OUT=MIDI OUT, EP3 IN=Audio IN
 using AudioFullDuplexMidi48k =
-    AudioInterface<UacVersion::UAC1, MaxSpeed::FULL, AudioStereo48k, AudioPort<2, 16, 48000, 3>, MidiPort<1, 3>, MidiPort<1, 1>, 2>;
+    AudioClass<UacVersion::UAC1, MaxSpeed::FULL, AudioStereo48k, AudioPort<2, 16, 48000, 3>, MidiPort<1, 3>, MidiPort<1, 1>, 2>;
 
 // UAC1 Alt settings: expose 16-bit and 24-bit with full rate list
 using AudioAlt16_All = AudioAltSetting<16, AudioRates<44100, 48000, 96000>>;
@@ -3178,7 +3463,7 @@ using AudioAltList24Lo_16All = AudioAltList<AudioAlt16_All, AudioAlt24_Lo>;
 // Full duplex + MIDI with 96kHz max packet size support
 // Audio OUT: 16/24-bit with 44.1/48/96k. Audio IN: 16-bit 96k, 24-bit 44.1/48k only.
 using AudioFullDuplexMidi96kMaxAsync =
-    AudioInterface<UacVersion::UAC1, MaxSpeed::FULL,
+    AudioClass<UacVersion::UAC1, MaxSpeed::FULL,
                    AudioPort<2, 24, 48000, 1, 96000, AudioRates<44100, 48000, 96000>, AudioAltList24_16>,
                    AudioPort<2, 24, 48000, 3, 96000, AudioRates<44100, 48000, 96000>, AudioAltList24Lo_16All>,
                    MidiPort<1, 3>, // MIDI OUT on EP3
@@ -3187,7 +3472,7 @@ using AudioFullDuplexMidi96kMaxAsync =
                    AudioSyncMode::ASYNC>;
 
 using AudioFullDuplexMidi96kMaxAsyncFixedEps =
-    AudioInterface<UacVersion::UAC1, MaxSpeed::FULL,
+    AudioClass<UacVersion::UAC1, MaxSpeed::FULL,
                    AudioPort<2, 24, 48000, 1, 96000, AudioRates<44100, 48000, 96000>, AudioAltList24_16>,
                    AudioPort<2, 24, 48000, 3, 96000, AudioRates<44100, 48000, 96000>, AudioAltList24Lo_16All>,
                    MidiPort<1, 2>, // MIDI OUT on EP2 (OUT)
@@ -3196,7 +3481,7 @@ using AudioFullDuplexMidi96kMaxAsyncFixedEps =
                    AudioSyncMode::ASYNC>;
 
 using AudioFullDuplexMidi96kMaxAdaptive =
-    AudioInterface<UacVersion::UAC1, MaxSpeed::FULL,
+    AudioClass<UacVersion::UAC1, MaxSpeed::FULL,
                    AudioPort<2, 24, 48000, 1, 96000, AudioRates<44100, 48000, 96000>, AudioAltList24_16>,
                    AudioPort<2, 24, 48000, 3, 96000, AudioRates<44100, 48000, 96000>, AudioAltList24Lo_16All>,
                    MidiPort<1, 3>,
@@ -3205,7 +3490,7 @@ using AudioFullDuplexMidi96kMaxAdaptive =
                    AudioSyncMode::ADAPTIVE>;
 
 using AudioFullDuplexMidi96kMaxSync =
-    AudioInterface<UacVersion::UAC1, MaxSpeed::FULL,
+    AudioClass<UacVersion::UAC1, MaxSpeed::FULL,
                    AudioPort<2, 24, 48000, 1, 96000, AudioRates<44100, 48000, 96000>, AudioAltList24_16>,
                    AudioPort<2, 24, 48000, 3, 96000, AudioRates<44100, 48000, 96000>, AudioAltList24Lo_16All>,
                    MidiPort<1, 3>,
@@ -3215,7 +3500,7 @@ using AudioFullDuplexMidi96kMaxSync =
 
 // Audio OUT + MIDI with 96kHz max packet size support (Audio IN disabled)
 using AudioOutMidi96kMaxAdaptive =
-    AudioInterface<UacVersion::UAC1, MaxSpeed::FULL,
+    AudioClass<UacVersion::UAC1, MaxSpeed::FULL,
                    AudioPort<2, 24, 48000, 1, 96000, AudioRates<44100, 48000, 96000>, AudioAltList24_16>,
                    NoAudioPort,
                    MidiPort<1, 3>,
@@ -3224,7 +3509,7 @@ using AudioOutMidi96kMaxAdaptive =
                    AudioSyncMode::ADAPTIVE>;
 
 using AudioOutMidi96kMaxAsync =
-    AudioInterface<UacVersion::UAC1, MaxSpeed::FULL,
+    AudioClass<UacVersion::UAC1, MaxSpeed::FULL,
                    AudioPort<2, 24, 48000, 1, 96000, AudioRates<44100, 48000, 96000>, AudioAltList24_16>,
                    NoAudioPort,
                    MidiPort<1, 3>,
@@ -3234,7 +3519,7 @@ using AudioOutMidi96kMaxAsync =
 
 // Audio OUT only with 96kHz max packet size support (no MIDI)
 using AudioOut96kMaxAsync =
-    AudioInterface<UacVersion::UAC1, MaxSpeed::FULL,
+    AudioClass<UacVersion::UAC1, MaxSpeed::FULL,
                    AudioPort<2, 24, 48000, 1, 96000, AudioRates<44100, 48000, 96000>, AudioAltList24_16>,
                    NoAudioPort,
                    NoMidiPort,
@@ -3244,7 +3529,7 @@ using AudioOut96kMaxAsync =
 
 // Audio OUT only with 96kHz max packet size support (no MIDI, adaptive sync)
 using AudioOut96kMaxAdaptive =
-    AudioInterface<UacVersion::UAC1, MaxSpeed::FULL,
+    AudioClass<UacVersion::UAC1, MaxSpeed::FULL,
                    AudioPort<2, 24, 48000, 1, 96000, AudioRates<44100, 48000, 96000>, AudioAltList24_16>,
                    NoAudioPort,
                    NoMidiPort,
@@ -3254,6 +3539,25 @@ using AudioOut96kMaxAdaptive =
 
 // Audio IN only (microphone)
 using AudioInOnly48k =
-    AudioInterface<UacVersion::UAC1, MaxSpeed::FULL, NoAudioPort, AudioPort<2, 16, 48000, 1>, NoMidiPort, NoMidiPort, 0>;
+    AudioClass<UacVersion::UAC1, MaxSpeed::FULL, NoAudioPort, AudioPort<2, 16, 48000, 1>, NoMidiPort, NoMidiPort, 0>;
+
+// ============================================================================
+// Deprecated alias — use AudioClass instead
+// ============================================================================
+
+/// @deprecated Use AudioClass instead.
+template <UacVersion Version = UacVersion::UAC1,
+          MaxSpeed MaxSpd = MaxSpeed::FULL,
+          typename AudioOut_ = AudioStereo48k,
+          typename AudioIn_ = NoAudioPort,
+          typename MidiOut_ = NoMidiPort,
+          typename MidiIn_ = NoMidiPort,
+          uint8_t FeedbackEp_ = 2,
+          AudioSyncMode SyncMode_ = AudioSyncMode::ASYNC,
+          bool SampleRateControlEnabled_ = true,
+          typename SampleT_ = int32_t>
+using AudioInterface [[deprecated("Use AudioClass instead")]] =
+    AudioClass<Version, MaxSpd, AudioOut_, AudioIn_, MidiOut_, MidiIn_,
+               FeedbackEp_, SyncMode_, SampleRateControlEnabled_, SampleT_>;
 
 } // namespace umiusb

@@ -349,6 +349,28 @@ class Stm32OtgHal : public HalBase<Stm32OtgHal<BaseAddr, MaxEndpoints>> {
     /// Mark feedback EP as in-flight. Called after ep_write for feedback.
     void set_feedback_tx_flag() { fb_tx_flag_ = true; }
 
+    /// Read data from OUT endpoint buffer
+    uint16_t ep_read(uint8_t ep, uint8_t* buf, uint16_t max_len) {
+        // Data is delivered via on_rx callback, not polled.
+        // This stub exists for Hal concept satisfaction.
+        (void)ep; (void)buf; (void)max_len;
+        return 0;
+    }
+
+    /// Set NAK on endpoint (pause reception)
+    void ep_set_nak(uint8_t ep) {
+        if (ep > 0 && ep < MAX_EP) {
+            Regs::reg(Regs::DOEPCTL(ep)) |= otg::DEPCTL_SNAK;
+        }
+    }
+
+    /// Clear NAK on endpoint (resume reception)
+    void ep_clear_nak(uint8_t ep) {
+        if (ep > 0 && ep < MAX_EP) {
+            Regs::reg(Regs::DOEPCTL(ep)) |= otg::DEPCTL_CNAK;
+        }
+    }
+
     // Ensure isochronous OUT EP has correct frame parity for next frame.
     // Call from SOF handler to prevent incomplete ISO OUT transfers.
     void update_iso_out_ep(uint8_t ep) {
@@ -420,16 +442,35 @@ class Stm32OtgHal : public HalBase<Stm32OtgHal<BaseAddr, MaxEndpoints>> {
             Regs::reg(Regs::DOEPINT(i)) = 0xFB7FU;
         }
 
-        // Configure FIFOs (320 words total for FS)
-        // 96kHz/24-bit/stereo OUT: 97 frames × 6 bytes = 582 bytes = 146 words
-        // RX FIFO needs: max_packet_size/4 + 1 + setup_packets(2×8bytes) + status_info(10)
-        // For 582 bytes: 146 + 1 + 4 + 10 = 161 words minimum, use 176 for safety
-        // Budget: RX 176 + TX0 24 + TX1 16 + TX2 8 + TX3 96 = 320 words
-        Regs::reg(Regs::GRXFSIZ) = 176;                  // RX FIFO: 176 words @ 0
-        Regs::reg(Regs::DIEPTXF0) = (24U << 16) | 176;   // TX0: 24 words @ 176 (EP0 control)
-        Regs::reg(Regs::DIEPTXF(1)) = (16U << 16) | 200; // TX1: 16 words @ 200 (MIDI/INT IN)
-        Regs::reg(Regs::DIEPTXF(2)) = (8U << 16) | 216;  // TX2: 8 words @ 216 (Feedback)
-        Regs::reg(Regs::DIEPTXF(3)) = (96U << 16) | 224; // TX3: 96 words @ 224 (Audio IN)
+        // Configure FIFOs
+        if constexpr (Regs::BASE == 0x40040000) {
+            // HS peripheral: 4096 bytes = 1024 words total
+            // HS audio: 1024 samples/frame × 6 bytes = 6144 bytes max, but micro-frame = 768 bytes
+            // RX FIFO: 512 words (2048 bytes, covers 1 micro-frame + overhead)
+            // Budget: RX 512 + TX0 32 + TX1 32 + TX2 8 + TX3 256 + TX4 64 + TX5 64 = 968 words
+            Regs::reg(Regs::GRXFSIZ) = 512;                  // RX FIFO: 512 words @ 0
+            Regs::reg(Regs::DIEPTXF0) = (32U << 16) | 512;   // TX0: 32 words @ 512 (EP0)
+            Regs::reg(Regs::DIEPTXF(1)) = (32U << 16) | 544; // TX1: 32 words @ 544 (MIDI IN)
+            Regs::reg(Regs::DIEPTXF(2)) = (8U << 16) | 576;  // TX2: 8 words @ 576 (Feedback)
+            Regs::reg(Regs::DIEPTXF(3)) = (256U << 16) | 584;// TX3: 256 words @ 584 (Audio IN)
+            if constexpr (MAX_EP > 4) {
+                Regs::reg(Regs::DIEPTXF(4)) = (64U << 16) | 840; // TX4: 64 words @ 840
+            }
+            if constexpr (MAX_EP > 5) {
+                Regs::reg(Regs::DIEPTXF(5)) = (64U << 16) | 904; // TX5: 64 words @ 904
+            }
+        } else {
+            // FS peripheral: 1280 bytes = 320 words total
+            // 96kHz/24-bit/stereo OUT: 97 frames × 6 bytes = 582 bytes = 146 words
+            // RX FIFO needs: max_packet_size/4 + 1 + setup_packets(2×8bytes) + status_info(10)
+            // For 582 bytes: 146 + 1 + 4 + 10 = 161 words minimum, use 176 for safety
+            // Budget: RX 176 + TX0 24 + TX1 16 + TX2 8 + TX3 96 = 320 words
+            Regs::reg(Regs::GRXFSIZ) = 176;                  // RX FIFO: 176 words @ 0
+            Regs::reg(Regs::DIEPTXF0) = (24U << 16) | 176;   // TX0: 24 words @ 176 (EP0 control)
+            Regs::reg(Regs::DIEPTXF(1)) = (16U << 16) | 200; // TX1: 16 words @ 200 (MIDI/INT IN)
+            Regs::reg(Regs::DIEPTXF(2)) = (8U << 16) | 216;  // TX2: 8 words @ 216 (Feedback)
+            Regs::reg(Regs::DIEPTXF(3)) = (96U << 16) | 224; // TX3: 96 words @ 224 (Audio IN)
+        }
 
         // Clear pending interrupts
         Regs::reg(Regs::GINTSTS) = 0xBFFFFFFFU;
@@ -1163,12 +1204,26 @@ class Stm32OtgHal : public HalBase<Stm32OtgHal<BaseAddr, MaxEndpoints>> {
 using Stm32FsHal = Stm32OtgHal<0x50000000, 4>;  // USB OTG FS: EP0-3, internal PHY
 using Stm32HsHal = Stm32OtgHal<0x40040000, 6>;  // USB OTG HS: EP0-5, ULPI or internal PHY
 
-// Note: Stm32HsHal requires additional initialization for ULPI PHY:
-//   1. Enable GPIOA/B/C/H clocks for ULPI pins
-//   2. Configure ULPI pins as alternate function
-//   3. Set GUSBCFG: ULPI_UTMI_SEL=1, PHYIF=0 (8-bit), ULPIFSLS=0 (HS)
-//   4. Larger FIFO allocation (HS has 4096 bytes vs FS 1280 bytes)
-// When used with internal FS PHY on HS peripheral:
-//   Set GUSBCFG: PHYSEL=1, then configure as FS
+/// Configure GUSBCFG for ULPI external PHY (call before Stm32HsHal::init())
+/// GPIO pin configuration for ULPI must be done separately by the board BSP.
+inline void configure_ulpi_phy() {
+    using Regs = OtgRegs<0x40040000>;
+    // Clear PHYSEL (use external PHY), set ULPI interface
+    uint32_t cfg = Regs::reg(Regs::GUSBCFG);
+    cfg &= ~(1U << 6);   // PHYSEL=0 (external PHY)
+    cfg &= ~(1U << 4);   // ULPI_UTMI_SEL already 0 for ULPI
+    cfg &= ~(1U << 17);  // ULPIFSLS=0 (HS mode)
+    cfg &= ~(1U << 20);  // ULPIEVBUSD=0
+    cfg &= ~(1U << 21);  // ULPIEVBUSI=0
+    Regs::reg(Regs::GUSBCFG) = cfg;
+}
+
+/// Configure GUSBCFG for internal FS PHY on HS peripheral (call before Stm32HsHal::init())
+inline void configure_hs_internal_phy() {
+    using Regs = OtgRegs<0x40040000>;
+    uint32_t cfg = Regs::reg(Regs::GUSBCFG);
+    cfg |= (1U << 6);    // PHYSEL=1 (internal FS PHY)
+    Regs::reg(Regs::GUSBCFG) = cfg;
+}
 
 } // namespace umiusb

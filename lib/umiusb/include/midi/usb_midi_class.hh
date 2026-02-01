@@ -14,6 +14,19 @@
 
 namespace umiusb {
 
+/// MIDI version for USB MIDI class
+enum class UsbMidiVersion : uint8_t {
+    MIDI_1_0 = 0,  ///< Alt Setting 0: USB MIDI 1.0 (CIN packets)
+    MIDI_2_0 = 1,  ///< Alt Setting 1: USB MIDI 2.0 (UMP native)
+};
+
+/// Get UMP word count from Message Type (MT)
+/// @return Number of 32-bit words in this UMP message
+static constexpr uint8_t ump_word_count(uint8_t mt) {
+    constexpr uint8_t table[] = {1, 1, 1, 2, 2, 4, 1, 1, 2, 2, 2, 3, 3, 4, 4, 4};
+    return (mt < 16) ? table[mt] : 1;
+}
+
 /// Standalone USB MIDI Class satisfying the Class concept.
 /// Can be used alone or composed with AudioClass via CompositeClass.
 ///
@@ -56,18 +69,52 @@ public:
         configured_ = configured;
     }
 
-    bool handle_request(const SetupPacket& /*setup*/, std::span<uint8_t>& /*response*/) {
-        return false;  // MIDI has no class-specific control requests
+    bool handle_request(const SetupPacket& setup, std::span<uint8_t>& /*response*/) {
+        // MIDI class requests are minimal — only handle if addressed to our interface
+        if (setup.recipient() == 1) {  // Interface recipient
+            uint8_t iface = setup.wIndex & 0xFF;
+            if (iface == ms_iface_) {
+                // No MIDI class-specific control requests defined in MIDI 1.0
+                return false;
+            }
+        }
+        return false;
     }
 
     void on_rx(uint8_t ep, std::span<const uint8_t> data) {
         if constexpr (HAS_MIDI_OUT) {
             if (ep == EP_MIDI_OUT) {
-                // Parse USB-MIDI packets (4 bytes each)
-                for (std::size_t i = 0; i + 3 < data.size(); i += 4) {
-                    midi_processor_.process_packet(data[i], data[i + 1], data[i + 2], data[i + 3]);
+                if (active_version_ == UsbMidiVersion::MIDI_2_0) {
+                    process_ump_stream(data.data(), static_cast<uint16_t>(data.size()));
+                } else {
+                    // Parse USB-MIDI 1.0 packets (4 bytes each)
+                    for (std::size_t i = 0; i + 3 < data.size(); i += 4) {
+                        midi_processor_.process_packet(data[i], data[i + 1], data[i + 2], data[i + 3]);
+                    }
                 }
             }
+        }
+    }
+
+    /// Process UMP native stream (MIDI 2.0 Alt Setting 1)
+    void process_ump_stream(const uint8_t* data, uint16_t len) {
+        uint16_t pos = 0;
+        while (pos + 3 < len) {
+            uint32_t word0 = static_cast<uint32_t>(data[pos])
+                           | (static_cast<uint32_t>(data[pos + 1]) << 8)
+                           | (static_cast<uint32_t>(data[pos + 2]) << 16)
+                           | (static_cast<uint32_t>(data[pos + 3]) << 24);
+            uint8_t mt = (word0 >> 28) & 0x0F;
+            uint8_t words = ump_word_count(mt);
+            uint16_t bytes_needed = static_cast<uint16_t>(words * 4);
+            if (pos + bytes_needed > len) break;
+
+            // Store UMP words in ump_rx_buf_ for callback/queue
+            if (ump_rx_callback_) {
+                ump_rx_callback_(data + pos, bytes_needed);
+            }
+
+            pos += bytes_needed;
         }
     }
 
@@ -105,6 +152,32 @@ public:
         }
     }
 
+    // --- Set Interface (Alt Setting) ---
+
+    template<typename HalT>
+    void set_interface(HalT& /*hal*/, uint8_t interface, uint8_t alt_setting) {
+        if (interface == ms_iface_) {
+            alt_setting_ = alt_setting;
+            active_version_ = (alt_setting == 1) ? UsbMidiVersion::MIDI_2_0 : UsbMidiVersion::MIDI_1_0;
+        }
+    }
+
+    /// Current MIDI streaming alt setting (0=MIDI 1.0, 1=MIDI 2.0 future)
+    [[nodiscard]] uint8_t current_alt_setting() const { return alt_setting_; }
+
+    // --- Raw Input Queue (EventRouter integration) ---
+
+    /// Set raw input queue for EventRouter integration.
+    /// When set, received MIDI data is pushed to the queue instead of callbacks.
+    void set_raw_input_queue(void* queue) { raw_input_queue_ = queue; }
+
+    /// Set callback for UMP native data (MIDI 2.0 mode)
+    using UmpRxCallback = void (*)(const uint8_t* data, uint16_t len);
+    void set_ump_rx_callback(UmpRxCallback cb) { ump_rx_callback_ = cb; }
+
+    /// Current active MIDI version (depends on Alt Setting)
+    [[nodiscard]] UsbMidiVersion active_version() const { return active_version_; }
+
     // --- MIDI TX API ---
 
     /// Send a MIDI message (3 bytes) on a cable.
@@ -140,6 +213,7 @@ public:
     // --- Descriptor builder ---
 
     void build_descriptor(uint8_t ac_iface, uint8_t ms_iface) {
+        ms_iface_ = ms_iface;
         using namespace desc;
         std::size_t pos = 0;
 
@@ -254,6 +328,42 @@ public:
             w(1); w(emb_out_jack);
         }
 
+        // --- Alt Setting 1: USB MIDI 2.0 (UMP native) ---
+        // MIDI Streaming Interface Alt Setting 1
+        w(9); w(dtype::Interface);
+        w(ms_iface); w(1); w(num_eps);  // alt_setting=1
+        w(0x01); w(0x03); w(0x00); w(0);  // Audio, MidiStreaming, 0, iInterface
+
+        // MS 2.0 Header (class-specific)
+        w(7); w(dtype::CsInterface); w(0x01);  // MS Header
+        w16(0x0200);  // bcdMSC 2.0
+        w16(7);       // wTotalLength (header only, GTB is separate)
+
+        // Endpoints for Alt Setting 1 (same EPs, same config)
+        if constexpr (HAS_MIDI_OUT) {
+            w(9); w(dtype::Endpoint);
+            w(EP_MIDI_OUT);
+            w(0x02);  // Bulk
+            w16(MidiOut::PACKET_SIZE);
+            w(0); w(0); w(0);
+
+            // MS 2.0 CS Endpoint (MS_GENERAL_2_0)
+            w(4); w(dtype::CsEndpoint); w(0x02);  // MS_GENERAL_2_0
+            w(1);  // bNumGrpTrmBlock
+        }
+
+        if constexpr (HAS_MIDI_IN) {
+            w(9); w(dtype::Endpoint);
+            w(static_cast<uint8_t>(0x80 | EP_MIDI_IN));
+            w(0x02);  // Bulk
+            w16(MidiIn::PACKET_SIZE);
+            w(0); w(0); w(0);
+
+            // MS 2.0 CS Endpoint
+            w(4); w(dtype::CsEndpoint); w(0x02);  // MS_GENERAL_2_0
+            w(1);  // bNumGrpTrmBlock
+        }
+
         descriptor_size_ = static_cast<uint16_t>(pos);
 
         // Fill configuration header
@@ -273,7 +383,13 @@ private:
     bool configured_ = false;
     bool midi_tx_busy_ = false;
     uint8_t interface_base_ = 0;
+    uint8_t ms_iface_ = 0;
+    uint8_t alt_setting_ = 0;
+    UsbMidiVersion active_version_ = UsbMidiVersion::MIDI_1_0;
+    void* raw_input_queue_ = nullptr;
     alignas(4) uint8_t tx_buf_[4]{};
+
+    UmpRxCallback ump_rx_callback_ = nullptr;
 
     // Max descriptor size estimate
     static constexpr std::size_t MAX_DESC_SIZE = 256;

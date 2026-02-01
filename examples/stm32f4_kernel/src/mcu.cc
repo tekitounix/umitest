@@ -57,16 +57,7 @@ CicDecimator cic_decimator_inst;
 // USB stack
 umiusb::Stm32FsHal usb_hal_inst;
 #if USB_AUDIO_UAC2
-using UsbAudioDevice =
-    umiusb::AudioInterface<umiusb::UacVersion::UAC2,
-                           umiusb::MaxSpeed::FULL,
-                           umiusb::AudioPort<2, 24, 48000, 1, 48000, umiusb::AudioRates<48000>>, // Audio OUT (EP1)
-                           umiusb::AudioPort<2, 24, 48000, 3, 48000, umiusb::AudioRates<48000>>, // Audio IN (EP3)
-                           umiusb::MidiPort<1, 2>, // MIDI OUT (EP2 OUT)
-                           umiusb::MidiPort<1, 1>, // MIDI IN (EP1 IN)
-                           2,
-                           umiusb::AudioSyncMode::ASYNC,
-                           false>; // Disable sample rate control - fixed clock
+using UsbAudioDevice = umi::mcu::UsbAudioDevice;
 #elif USB_AUDIO_ADAPTIVE
 using UsbAudioDevice = umiusb::AudioFullDuplexMidi96kMaxAdaptive;
 #else

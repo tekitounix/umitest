@@ -75,6 +75,8 @@ namespace dtype {
     // BOS
     inline constexpr uint8_t BOS = 0x0F;
     inline constexpr uint8_t DeviceCapability = 0x10;
+    // MIDI 2.0
+    inline constexpr uint8_t CsGrpTrmBlk = 0x26;
 }
 
 // ============================================================================
@@ -431,6 +433,88 @@ constexpr auto Uac2FeatureUnit(uint8_t unit_id, uint8_t source_id,
     return result;
 }
 
+/// UAC2 Mixer Unit descriptor (simplified: 2 inputs, stereo output)
+/// @param unit_id Mixer Unit ID
+/// @param source1 First source entity ID
+/// @param source2 Second source entity ID
+/// @param num_out_channels Number of output channels
+/// @param bm_channel_config Output channel config bitmap
+/// @param bm_controls Mixer controls bitmap
+/// @param string_idx iMixer
+constexpr auto MixerUnit(uint8_t unit_id,
+                          uint8_t source1, uint8_t source2,
+                          uint8_t num_out_channels = 2,
+                          uint32_t bm_channel_config = 0x00000003,
+                          uint8_t string_idx = 0) {
+    // Minimal mixer: 2 input pins, no programmable mixing controls bitmap
+    // bLength = 13 + 0 (no bmMixerControls for simplicity)
+    constexpr uint8_t len = 13;
+    Bytes<len> result{};
+    result[0] = len;
+    result[1] = dtype::CsInterface;
+    result[2] = ac2::MixerUnit;
+    result[3] = unit_id;
+    result[4] = 2;           // bNrInPins
+    result[5] = source1;     // baSourceID(1)
+    result[6] = source2;     // baSourceID(2)
+    result[7] = num_out_channels;
+    result[8] = static_cast<uint8_t>(bm_channel_config & 0xFF);
+    result[9] = static_cast<uint8_t>((bm_channel_config >> 8) & 0xFF);
+    result[10] = static_cast<uint8_t>((bm_channel_config >> 16) & 0xFF);
+    result[11] = static_cast<uint8_t>((bm_channel_config >> 24) & 0xFF);
+    result[12] = string_idx;
+    return result;
+}
+
+/// UAC1/UAC2 Selector Unit descriptor
+/// @param unit_id Selector Unit ID
+/// @param num_pins Number of input pins
+/// @param source_ids Array of source entity IDs
+/// @param string_idx iSelector
+template<uint8_t NumPins>
+constexpr auto SelectorUnit(uint8_t unit_id,
+                             const std::array<uint8_t, NumPins>& source_ids,
+                             uint8_t string_idx = 0) {
+    constexpr uint8_t len = 6 + NumPins;
+    Bytes<len> result{};
+    result[0] = len;
+    result[1] = dtype::CsInterface;
+    result[2] = ac2::SelectorUnit;
+    result[3] = unit_id;
+    result[4] = NumPins;
+    for (uint8_t i = 0; i < NumPins; ++i) {
+        result[5 + i] = source_ids[i];
+    }
+    result[5 + NumPins] = string_idx;
+    return result;
+}
+
+/// UAC2 Clock Selector descriptor
+/// @param clock_sel_id Clock Selector entity ID
+/// @param num_pins Number of clock source input pins
+/// @param source_ids Array of clock source entity IDs
+/// @param bmControls Clock selector control bitmap
+/// @param string_idx iClockSelector
+template<uint8_t NumPins>
+constexpr auto ClockSelector(uint8_t clock_sel_id,
+                              const std::array<uint8_t, NumPins>& source_ids,
+                              uint8_t bm_controls = 0x03,
+                              uint8_t string_idx = 0) {
+    constexpr uint8_t len = 7 + NumPins;
+    Bytes<len> result{};
+    result[0] = len;
+    result[1] = dtype::CsInterface;
+    result[2] = ac2::ClockSelector;
+    result[3] = clock_sel_id;
+    result[4] = NumPins;
+    for (uint8_t i = 0; i < NumPins; ++i) {
+        result[5 + i] = source_ids[i];
+    }
+    result[5 + NumPins] = bm_controls;
+    result[6 + NumPins] = string_idx;
+    return result;
+}
+
 }  // namespace audio
 
 // ============================================================================
@@ -709,6 +793,45 @@ constexpr auto StandardConfig() {
         if1, ms_header, in_emb, in_ext, out_emb, out_ext,
         ep_out, ep_out_cs, ep_in, ep_in_cs
     );
+}
+
+// ---- MIDI 2.0: Group Terminal Block Descriptor ----
+
+/// Group Terminal Block descriptor (USB MIDI 2.0 §5.4.2)
+/// @param group_terminal_id Group Terminal Block ID
+/// @param group_index Group index (0-based)
+/// @param num_groups Number of groups in this block
+/// @param protocol 0x01=MIDI 1.0, 0x02=MIDI 2.0
+/// @param direction 0x00=Input, 0x01=Output, 0x02=Bidirectional
+template<uint8_t GroupTerminalId, uint8_t GroupIndex, uint8_t NumGroups,
+         uint8_t Protocol = 0x02, uint8_t Direction = 0x02>
+constexpr auto GroupTerminalBlock() {
+    return Bytes<13>{{
+        13,                     // bLength
+        dtype::CsGrpTrmBlk,    // bDescriptorType (0x26)
+        0x01,                   // bDescriptorSubtype (GR_TRM_BLOCK)
+        GroupTerminalId,        // bGrpTrmBlkID
+        Direction,              // bGrpTrmBlkType (0=In, 1=Out, 2=Bidir)
+        GroupIndex,             // nGroupTrm (0-based group index)
+        NumGroups,              // nNumGroupTrm
+        Protocol,               // bMIDIProtocol (1=MIDI1.0, 2=MIDI2.0)
+        0x00, 0x00,             // wMaxInputBandwidth (0 = unknown)
+        0x00, 0x00,             // wMaxOutputBandwidth (0 = unknown)
+        0x00,                   // iBlockItem (no string)
+    }};
+}
+
+/// Group Terminal Block Header descriptor
+/// @param total_length Total length of header + all GTB descriptors
+template<uint16_t TotalLength>
+constexpr auto GroupTerminalBlockHeader() {
+    return Bytes<5>{{
+        5,                              // bLength
+        dtype::CsGrpTrmBlk,            // bDescriptorType (0x26)
+        0x00,                           // bDescriptorSubtype (GR_TRM_BLOCK_HEADER)
+        static_cast<uint8_t>(TotalLength & 0xFF),
+        static_cast<uint8_t>((TotalLength >> 8) & 0xFF),
+    }};
 }
 
 }  // namespace midi

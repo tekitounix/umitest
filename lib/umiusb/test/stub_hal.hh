@@ -78,6 +78,20 @@ struct StubHal : public HalBase<StubHal> {
 
     void set_feedback_tx_flag() { fb_tx_flag = true; }
 
+    uint16_t ep_read(uint8_t ep, uint8_t* buf, uint16_t max_len) {
+        if (ep < MAX_EP && ep_buf_len[ep] > 0) {
+            uint16_t len = (ep_buf_len[ep] < max_len) ? ep_buf_len[ep] : max_len;
+            std::memcpy(buf, ep_buf[ep], len);
+            return len;
+        }
+        return 0;
+    }
+
+    void ep_set_nak(uint8_t /*ep*/) {}
+    void ep_clear_nak(uint8_t /*ep*/) {}
+
+    [[nodiscard]] bool is_ep_busy(uint8_t /*ep*/) const { return false; }
+
     // --- Test helpers ---
 
     void reset() {

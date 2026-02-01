@@ -5,7 +5,7 @@
 #pragma once
 
 #define USB_AUDIO_ADAPTIVE 0
-#define USB_AUDIO_UAC2     0
+#define USB_AUDIO_UAC2     1
 
 #include <cstdint>
 

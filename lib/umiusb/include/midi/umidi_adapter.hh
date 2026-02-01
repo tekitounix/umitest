@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 // UMI-USB: umidi adapter for USB MIDI packets
+// DEPRECATED: Use UsbMidiClass with EventRouter integration instead.
 #pragma once
 
 #include <cstdint>

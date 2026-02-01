@@ -48,6 +48,16 @@ concept Hal = requires(T& hal, const T& chal,
     { hal.set_feedback_ep(uint8_t{}) } -> std::same_as<void>;
     { chal.is_feedback_tx_ready() } -> std::convertible_to<bool>;
     { hal.set_feedback_tx_flag() } -> std::same_as<void>;
+
+    // Data read from OUT endpoint
+    { hal.ep_read(ep, std::declval<uint8_t*>(), len) } -> std::convertible_to<uint16_t>;
+
+    // Flow control (NAK management)
+    { hal.ep_set_nak(ep) } -> std::same_as<void>;
+    { hal.ep_clear_nak(ep) } -> std::same_as<void>;
+
+    // Endpoint busy check (for ISO IN collision avoidance)
+    { chal.is_ep_busy(ep) } -> std::convertible_to<bool>;
 };
 
 // ============================================================================

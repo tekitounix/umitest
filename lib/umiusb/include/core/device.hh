@@ -429,4 +429,47 @@ private:
     }
 };
 
+// ============================================================================
+// Device Builder — type-safe initialization sequence
+// ============================================================================
+
+/// Builds and initializes a USB Device with guaranteed ordering:
+/// disconnect → delay → init → connect.
+template<Hal HalT, Class ClassT>
+class DeviceBuilder {
+    HalT& hal_;
+    ClassT& class_;
+    DeviceInfo info_;
+    std::span<const std::span<const uint8_t>> strings_;
+    bool has_strings_ = false;
+
+public:
+    DeviceBuilder(HalT& hal, ClassT& cls, const DeviceInfo& info)
+        : hal_(hal), class_(cls), info_(info) {}
+
+    DeviceBuilder& set_strings(std::span<const std::span<const uint8_t>> s) {
+        strings_ = s;
+        has_strings_ = true;
+        return *this;
+    }
+
+    /// Execute initialization and return a configured Device.
+    /// Performs: disconnect → delay → init → connect.
+    Device<HalT, ClassT> build() {
+        hal_.disconnect();
+        // Brief delay for host de-enumeration (busy-wait ~50ms)
+        {
+            uint32_t count = 500000;
+            while (count-- > 0) { asm volatile("" ::: "memory"); }
+        }
+        Device<HalT, ClassT> dev(hal_, class_, info_);
+        if (has_strings_) {
+            dev.set_strings(strings_);
+        }
+        dev.init();
+        hal_.connect();
+        return dev;
+    }
+};
+
 }  // namespace umiusb

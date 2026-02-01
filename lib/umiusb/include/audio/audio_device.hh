@@ -189,7 +189,7 @@ private:
     >;
 
 public:
-    using Interface = AudioInterface<
+    using Interface = AudioClass<
         Config::uac_version,
         MaxSpeed::FULL,
         AudioOutPort,

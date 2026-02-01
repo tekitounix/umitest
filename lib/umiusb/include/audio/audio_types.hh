@@ -505,6 +505,7 @@ class AudioRingBuffer {
 // ============================================================================
 
 /// USB MIDI packet processing (shared between UAC1 and UAC2)
+/// @deprecated Use UsbMidiClass instead, which integrates with EventRouter.
 class MidiProcessor {
   public:
     using MidiCallback = void (*)(uint8_t cable, const uint8_t* data, uint8_t len);

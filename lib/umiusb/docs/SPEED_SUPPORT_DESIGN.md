@@ -2481,3 +2481,107 @@ lib/umidi/include/
 3. Alt Setting 0/1 の切り替え対応 (set_interface)
 4. `umidi::downconvert()` の実装/拡張
 5. RouteTable の MT=4 対応 (OS 側)
+
+---
+
+## §7: Hal concept の網羅的不足分析
+
+### 現在の Hal concept (hal.hh)
+
+```cpp
+concept Hal = requires(T& hal, const T& chal, ...) {
+    init, connect, disconnect, set_address,
+    ep_configure, ep_write, ep_stall, ep_unstall,
+    poll, is_connected, get_speed,
+    ep0_prepare_rx,
+    set_feedback_ep, is_feedback_tx_ready, set_feedback_tx_flag,
+    ep_read, ep_set_nak, ep_clear_nak, is_ep_busy   // ← 追加済み
+};
+```
+
+### カテゴリ別整理
+
+| カテゴリ | メソッド | 状態 | 備考 |
+|---------|---------|------|------|
+| **基本** | init, connect, disconnect, set_address | ✅ concept + STM32 実装 | |
+| **EP 操作** | ep_configure, ep_write, ep_stall, ep_unstall | ✅ concept + STM32 実装 | |
+| **EP0** | ep0_prepare_rx | ✅ concept + STM32 実装 | |
+| **Feedback** | set_feedback_ep, is_feedback_tx_ready, set_feedback_tx_flag | ✅ concept + STM32 実装 | |
+| **状態** | is_connected, get_speed | ✅ concept + HalBase | |
+| **ポーリング** | poll | ✅ concept + STM32 実装 | |
+| **データ読出** | ep_read | ✅ concept (STM32: callback 方式のためスタブ) | |
+| **フロー制御** | ep_set_nak, ep_clear_nak | ✅ concept + STM32 実装 (DOEPCTL SNAK/CNAK) | |
+| **衝突防止** | is_ep_busy | ✅ concept + STM32 実装 (DIEPCTL EPENA チェック) | |
+
+### 将来追加候補
+
+| メソッド | 用途 | 優先度 |
+|---------|------|--------|
+| `ep_abort(ep)` | 進行中転送のキャンセル | 低 (現状不要) |
+| `get_frame_number()` | SOF フレーム番号取得 | 中 (デバッグ用) |
+| `set_test_mode(mode)` | USB Compliance テスト | 低 |
+| `remote_wakeup()` | リモートウェイクアップ | 中 (省電力対応時) |
+
+---
+
+## §8: WinUSB ドライバレス対応
+
+### 現状 (実装済み)
+
+| コンポーネント | 状態 | ファイル |
+|--------------|------|---------|
+| MS OS 2.0 Descriptor Set ビルダー | ✅ 実装済み | `descriptor.hh` winusb 名前空間 |
+| BOS Platform Capability (WinUSB) | ✅ 実装済み | `descriptor.hh` winusb::PlatformCapability |
+| RegistryPropertyGuid ビルダー | ✅ 実装済み | `descriptor.hh` winusb::RegistryPropertyGuid |
+| Device の BOS descriptor 応答 | ✅ 実装済み | `device.hh:280-285` class_.bos_descriptor() |
+| Device の vendor request 委譲 | ✅ 実装済み | `device.hh:360-381` class_.handle_vendor_request() |
+| bcdUSB 0x0201 | ✅ 実装済み | `device.hh:148` |
+| AudioClass の BOS descriptor | ✅ 実装済み | `audio_interface.hh` bos_descriptor() |
+| AudioClass の vendor request handler | ✅ 実装済み | `audio_interface.hh` handle_vendor_request() |
+
+### WinUSB フロー
+
+1. Windows がデバイスを検出 → bcdUSB 2.01 を確認
+2. BOS descriptor を要求 → WinUSB Platform Capability を返す (vendor_code=0x01)
+3. MS OS 2.0 Descriptor Set を vendor request 0x01, wIndex=0x07 で要求
+4. CompatibleID "WINUSB" + DeviceInterfaceGUID を返す
+5. Windows が WinUSB ドライバを自動バインド
+
+### 未検証項目
+
+- [ ] Windows 環境での実機テスト (WinUSB ドライバ自動バインド確認)
+- [ ] デバイスマネージャでの認識状態
+- [ ] WinUSB API での通信テスト
+
+---
+
+## §9: WebUSB 対応設計
+
+### 現状 (実装済み)
+
+| コンポーネント | 状態 | ファイル |
+|--------------|------|---------|
+| WebUSB Platform Capability UUID | ✅ 実装済み | `descriptor.hh` webusb 名前空間 |
+| WebUSB PlatformCapability ビルダー | ✅ 実装済み | `descriptor.hh` webusb::PlatformCapability |
+| WebUSB UrlDescriptor ビルダー | ✅ 実装済み | `descriptor.hh` webusb::UrlDescriptor |
+| AudioClass BOS に WebUSB cap 含む | ✅ 実装済み | `audio_interface.hh` build_bos_and_vendor_descriptors() |
+| AudioClass vendor request で URL 返却 | ✅ 実装済み | `audio_interface.hh` handle_vendor_request() |
+
+### WebUSB フロー
+
+1. Chrome が USB デバイスを検出 → BOS descriptor を要求
+2. WebUSB Platform Capability を確認 (vendor_code=0x02, landing_page=1)
+3. vendor request 0x02, wIndex=0x02 (GET_URL) で Landing Page URL を取得
+4. ユーザに通知バナーを表示 → URL クリックで Web Audio 設定ページへ
+
+### Landing Page URL
+
+デフォルト: `https://umi-audio.dev` (AudioClass 内にハードコード)
+
+カスタマイズ: 将来的に AudioClass テンプレートパラメータまたはランタイム設定で変更可能にする
+
+### 未検証項目
+
+- [ ] Chrome での WebUSB 認識テスト
+- [ ] Landing Page URL 通知ポップアップ表示確認
+- [ ] WebUSB API での navigator.usb.requestDevice() テスト

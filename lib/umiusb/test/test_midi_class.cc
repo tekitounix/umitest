@@ -90,5 +90,57 @@ int main() {
         CHECK_EQ(hal.ep_buf[3][1], uint8_t{0x90}, "Status");
     }
 
+    SECTION("ump_word_count returns correct sizes");
+    {
+        CHECK_EQ(ump_word_count(0), uint8_t{1}, "MT=0 Utility: 1 word");
+        CHECK_EQ(ump_word_count(1), uint8_t{1}, "MT=1 System: 1 word");
+        CHECK_EQ(ump_word_count(2), uint8_t{1}, "MT=2 MIDI1.0 CV: 1 word");
+        CHECK_EQ(ump_word_count(3), uint8_t{2}, "MT=3 SysEx7: 2 words");
+        CHECK_EQ(ump_word_count(4), uint8_t{2}, "MT=4 MIDI2.0 CV: 2 words");
+        CHECK_EQ(ump_word_count(5), uint8_t{4}, "MT=5 SysEx8: 4 words");
+    }
+
+    SECTION("MIDI 2.0 Alt Setting switch");
+    {
+        TestMidiClass midi;
+        midi.build_descriptor(0, 1);
+        StubHal hal;
+        hal.init();
+
+        CHECK_EQ(static_cast<uint8_t>(midi.active_version()), uint8_t{0}, "Default MIDI 1.0");
+
+        midi.set_interface(hal, 1, 1);  // Alt Setting 1 = MIDI 2.0
+        CHECK_EQ(static_cast<uint8_t>(midi.active_version()), uint8_t{1}, "Switched to MIDI 2.0");
+
+        midi.set_interface(hal, 1, 0);  // Back to Alt Setting 0
+        CHECK_EQ(static_cast<uint8_t>(midi.active_version()), uint8_t{0}, "Back to MIDI 1.0");
+    }
+
+    SECTION("MIDI 2.0 UMP native receive");
+    {
+        TestMidiClass midi;
+        midi.build_descriptor(0, 1);
+        StubHal hal;
+        hal.init();
+
+        // Switch to MIDI 2.0 mode
+        midi.set_interface(hal, 1, 1);
+
+        static uint16_t rx_len = 0;
+        static uint8_t rx_data[16]{};
+        midi.set_ump_rx_callback([](const uint8_t* data, uint16_t len) {
+            rx_len = len;
+            for (uint16_t i = 0; i < len && i < 16; ++i) rx_data[i] = data[i];
+        });
+
+        // MT=2 (MIDI 1.0 CV) = 1 word = 4 bytes, little-endian
+        // UMP32: 0x20903C7F (MT=2, group=0, status=0x90, note=0x3C, vel=0x7F)
+        uint8_t ump_data[] = {0x7F, 0x3C, 0x90, 0x20};
+        midi.on_rx(3, std::span<const uint8_t>(ump_data, 4));  // EP_MIDI_OUT = 3
+
+        CHECK_EQ(rx_len, uint16_t{4}, "UMP callback received 4 bytes");
+        CHECK_EQ(rx_data[3], uint8_t{0x20}, "MT=2 header byte");
+    }
+
     TEST_SUMMARY();
 }
