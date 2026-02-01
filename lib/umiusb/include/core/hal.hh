@@ -39,6 +39,15 @@ concept Hal = requires(T& hal, const T& chal,
 
     // Status
     { chal.is_connected() } -> std::convertible_to<bool>;
+    { chal.get_speed() } -> std::convertible_to<Speed>;
+
+    // EP0 control transfer support
+    { hal.ep0_prepare_rx(uint16_t{}) } -> std::same_as<void>;
+
+    // Isochronous feedback support
+    { hal.set_feedback_ep(uint8_t{}) } -> std::same_as<void>;
+    { chal.is_feedback_tx_ready() } -> std::convertible_to<bool>;
+    { hal.set_feedback_tx_flag() } -> std::same_as<void>;
 };
 
 // ============================================================================

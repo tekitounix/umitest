@@ -97,6 +97,7 @@ end
 includes("lib/umi")
 includes("lib/umifs")
 includes("lib/umifs/test")
+includes("lib/umiusb/test")
 
 -- Legacy umios target for backward compatibility
 target("umios")

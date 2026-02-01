@@ -32,6 +32,13 @@ concept Class = requires(T& cls, const SetupPacket& setup) {
     // Handle data received on non-EP0 endpoint
     { cls.on_rx(uint8_t{}, std::declval<std::span<const uint8_t>>()) }
         -> std::same_as<void>;
+
+    // BOS descriptor (empty span if not supported)
+    { cls.bos_descriptor() } -> std::convertible_to<std::span<const uint8_t>>;
+
+    // Handle vendor-specific SETUP request (for WinUSB/WebUSB)
+    { cls.handle_vendor_request(setup, std::declval<std::span<uint8_t>&>()) }
+        -> std::convertible_to<bool>;
 };
 
 // ============================================================================
@@ -138,7 +145,7 @@ public:
 
 private:
     void build_device_descriptor() {
-        device_desc_.bcdUSB = 0x0200;  // USB 2.0
+        device_desc_.bcdUSB = 0x0201;  // USB 2.01 (signals BOS descriptor support)
         // UAC2 with IAD requires Misc class (0xEF/0x02/0x01)
         if constexpr (requires { ClassT::USES_IAD; }) {
             if constexpr (ClassT::USES_IAD) {
@@ -190,6 +197,8 @@ private:
                 handle_class_request(setup);
                 break;
             case 2:  // Vendor request
+                handle_vendor_request(setup);
+                break;
             default:
                 hal_.ep_stall(0, true);
                 break;
@@ -268,6 +277,13 @@ private:
                 handle_string_descriptor(setup);
                 return;
 
+            case bDescriptorType::Bos: {
+                auto bos = class_.bos_descriptor();
+                desc = bos.data();
+                len = static_cast<uint16_t>(bos.size());
+                break;
+            }
+
             default:
                 break;
         }
@@ -324,6 +340,29 @@ private:
                 // If wLength > 0, we expect DATA OUT stage
                 if (setup.wLength > 0) {
                     // Prepare EP0 to receive data
+                    hal_.ep0_prepare_rx(setup.wLength);
+                } else {
+                    send_zlp();
+                }
+            }
+        } else {
+            hal_.ep_stall(0, true);
+        }
+    }
+
+    void handle_vendor_request(const SetupPacket& setup) {
+        std::span<uint8_t> response(ep0_buf_, EP0_SIZE);
+        if (class_.handle_vendor_request(setup, response)) {
+            if (setup.direction() == Direction::IN) {
+                if (!response.empty()) {
+                    send_response(response.data(),
+                                  static_cast<uint16_t>(response.size()),
+                                  setup.wLength);
+                } else {
+                    send_zlp();
+                }
+            } else {
+                if (setup.wLength > 0) {
                     hal_.ep0_prepare_rx(setup.wLength);
                 } else {
                     send_zlp();

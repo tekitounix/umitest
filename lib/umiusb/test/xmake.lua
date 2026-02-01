@@ -1,0 +1,23 @@
+-- =====================================================================
+-- UMI-USB Tests
+-- =====================================================================
+
+local test_dir = os.scriptdir()
+local umiusb_dir = path.directory(test_dir)
+local lib_dir = path.directory(umiusb_dir)
+local root_dir = path.directory(lib_dir)
+
+-- =====================================================================
+-- Host unit tests
+-- =====================================================================
+
+target("test_usb_descriptor")
+    add_rules("host.test")
+    set_default(true)
+    add_deps("umi.usb")
+    add_files(path.join(test_dir, "test_descriptor.cc"))
+    add_includedirs(path.join(root_dir, "tests"))
+    add_includedirs(path.join(umiusb_dir, "include"))
+    add_includedirs(path.join(umiusb_dir, "test"))
+    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
+target_end()

@@ -1377,6 +1377,14 @@ class AudioInterface {
         return {descriptor_.data(), calc_descriptor_size()};
     }
 
+    [[nodiscard]] std::span<const uint8_t> bos_descriptor() const {
+        return {};  // No BOS by default; Phase 2 adds WinUSB/WebUSB
+    }
+
+    bool handle_vendor_request(const SetupPacket& /*setup*/, std::span<uint8_t>& /*response*/) {
+        return false;  // No vendor requests by default; Phase 2 adds WinUSB/WebUSB
+    }
+
     void on_configured(bool configured) {
         if (!configured) {
             audio_out_streaming_ = false;
