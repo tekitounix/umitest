@@ -154,7 +154,7 @@ umi::coro::Task<void> controller_task(SynthProcessor& proc, umi::kernel::SharedM
         // Read button state from SharedInputState (written by EventRouter ROUTE_PARAM path
         // or directly by kernel)
         static uint16_t prev_button = 0;
-        uint16_t cur_button = shared.input_state.raw[0];
+        uint16_t cur_button = shared.input.raw[0];
         if (cur_button != prev_button) {
             if (cur_button == 0xFFFF && prev_button == 0) {
                 // Button pressed — cycle LED mode

@@ -22,12 +22,12 @@ namespace umi::kernel {
 LoadResult AppLoader::load(const uint8_t* image, size_t size) noexcept {
     // Check if already loaded
     if (runtime_.state != AppState::None) {
-        return LoadResult::AlreadyLoaded;
+        return LoadResult::ALREADY_LOADED;
     }
 
     // Validate minimum size
     if (size < sizeof(AppHeader)) {
-        return LoadResult::InvalidSize;
+        return LoadResult::INVALID_SIZE;
     }
 
     // Get header
@@ -35,25 +35,25 @@ LoadResult AppLoader::load(const uint8_t* image, size_t size) noexcept {
 
     // Validate header
     auto result = validate_header(header, size);
-    if (result != LoadResult::Ok) {
+    if (result != LoadResult::OK) {
         return result;
     }
 
     // Verify CRC
     if (!verify_crc(header, image)) {
-        return LoadResult::CrcMismatch;
+        return LoadResult::CRC_MISMATCH;
     }
 
     // Verify signature for Release apps
     if (header->target == AppTarget::Release) {
         if (!verify_signature(header, image)) {
-            return LoadResult::SignatureInvalid;
+            return LoadResult::SIGNATURE_INVALID;
         }
     }
 
     // Setup memory layout
     if (!setup_memory(header)) {
-        return LoadResult::OutOfMemory;
+        return LoadResult::MEMORY_ERROR;
     }
 
     // Copy sections to RAM
@@ -66,7 +66,7 @@ LoadResult AppLoader::load(const uint8_t* image, size_t size) noexcept {
     loaded_header_ = header;
     runtime_.state = AppState::Loaded;
 
-    return LoadResult::Ok;
+    return LoadResult::OK;
 }
 
 void AppLoader::unload() noexcept {
@@ -160,12 +160,12 @@ int AppLoader::register_processor(void* processor, ProcessFn process_fn) noexcep
 LoadResult AppLoader::validate_header(const AppHeader* header, size_t image_size) noexcept {
     // Check magic
     if (!header->valid_magic()) {
-        return LoadResult::InvalidMagic;
+        return LoadResult::INVALID_MAGIC;
     }
 
     // Check ABI version
     if (!header->compatible_abi()) {
-        return LoadResult::InvalidVersion;
+        return LoadResult::INVALID_ABI;
     }
 
     // Check target compatibility
@@ -177,33 +177,33 @@ LoadResult AppLoader::validate_header(const AppHeader* header, size_t image_size
     case AppTarget::Development:
         // Development apps only on development kernel
         if constexpr (KERNEL_BUILD_TYPE != BuildType::Development) {
-            return LoadResult::TargetMismatch;
+            return LoadResult::INVALID_TARGET;
         }
         break;
 
     case AppTarget::Release:
         // Release apps only on release kernel
         if constexpr (KERNEL_BUILD_TYPE != BuildType::Release) {
-            return LoadResult::TargetMismatch;
+            return LoadResult::INVALID_TARGET;
         }
         break;
 
     default:
-        return LoadResult::InvalidSize; // Unknown target
+        return LoadResult::INVALID_SIZE; // Unknown target
     }
 
     // Check size consistency
     size_t expected_size = sizeof(AppHeader) + header->sections_size();
     if (header->total_size != expected_size || image_size < expected_size) {
-        return LoadResult::InvalidSize;
+        return LoadResult::INVALID_SIZE;
     }
 
     // Check entry point is within text section
     if (header->entry_offset < sizeof(AppHeader) || header->entry_offset >= sizeof(AppHeader) + header->text_size) {
-        return LoadResult::InvalidSize;
+        return LoadResult::INVALID_SIZE;
     }
 
-    return LoadResult::Ok;
+    return LoadResult::OK;
 }
 
 bool AppLoader::verify_crc(const AppHeader* header, const uint8_t* image) noexcept {

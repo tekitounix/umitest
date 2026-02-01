@@ -24,9 +24,11 @@ namespace detail {
 using ProcessFnPtr = void (*)(void*, AudioContext&);
 
 /// Internal: Register processor with kernel
-inline int32_t register_processor_impl(void* processor, ProcessFnPtr fn) noexcept {
+/// @param event_capacity Desired event buffer capacity (0 = default)
+inline int32_t register_processor_impl(void* processor, ProcessFnPtr fn, uint32_t event_capacity = 0) noexcept {
     return syscall::call(
-        syscall::nr::register_proc, reinterpret_cast<uint32_t>(processor), reinterpret_cast<uint32_t>(fn));
+        syscall::nr::register_proc, reinterpret_cast<uint32_t>(processor), reinterpret_cast<uint32_t>(fn),
+        event_capacity);
 }
 
 } // namespace detail
@@ -87,21 +89,7 @@ inline uint32_t wait_event(uint32_t mask, uint32_t timeout_usec = 0) noexcept {
     return syscall::wait_event(mask, timeout_usec);
 }
 
-/// Check for an event (non-blocking)
-///
-/// @param out_event Pointer to receive the event
-/// @return true if an event was available, false otherwise
-inline bool peek_event(Event* out_event) noexcept {
-    return syscall::call(syscall::nr::peek_event, reinterpret_cast<uint32_t>(out_event)) != 0;
-}
-
-/// Send an event to the kernel
-///
-/// @param ev Event to send
-/// @return 0 on success, negative on error
-inline int send_event(const Event& ev) noexcept {
-    return syscall::call(syscall::nr::send_event, reinterpret_cast<uint32_t>(&ev));
-}
+// peek_event / send_event: reserved for future syscall implementation
 
 // ============================================================================
 // Time Functions
@@ -152,24 +140,7 @@ inline void log(const char* msg) noexcept {
 // Parameter Access
 // ============================================================================
 
-/// Get a parameter value
-///
-/// Parameters are shared between the processor (audio thread)
-/// and the control task (main thread).
-///
-/// @param index Parameter index (0-31)
-/// @return Parameter value
-inline float get_param(uint32_t index) noexcept {
-    return syscall::get_param(index);
-}
-
-/// Set a parameter value
-///
-/// @param index Parameter index (0-31)
-/// @param value Parameter value
-inline void set_param(uint32_t index, float value) noexcept {
-    syscall::set_param(index, value);
-}
+// get_param / set_param: use SharedParamState via get_shared() or request_param()
 
 // ============================================================================
 // Configuration API (RouteTable, ParamMapping)

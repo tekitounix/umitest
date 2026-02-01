@@ -94,34 +94,36 @@ static_assert(alignof(AppHeader) == 4, "AppHeader must be 4-byte aligned");
 // Application Load Result
 // ============================================================================
 
-/// Result of application loading
-enum class LoadResult : uint8_t {
-    Ok = 0,                 ///< Successfully loaded
-    InvalidMagic,           ///< Magic number mismatch
-    InvalidVersion,         ///< ABI version incompatible
-    InvalidSize,            ///< Size fields inconsistent
-    CrcMismatch,            ///< CRC32 verification failed
-    SignatureInvalid,       ///< Ed25519 signature invalid (Release apps)
-    SignatureRequired,      ///< Signature required but not present
-    TargetMismatch,         ///< App target incompatible with kernel build
-    OutOfMemory,            ///< Insufficient memory for app
-    AlreadyLoaded,          ///< An application is already loaded
+/// Result of application loading (09-app-binary.md spec)
+enum class LoadResult : int32_t {
+    OK                 = 0,   ///< Successfully loaded
+    INVALID_MAGIC      = -1,  ///< Magic number mismatch
+    INVALID_ABI        = -2,  ///< ABI version incompatible
+    INVALID_TARGET     = -3,  ///< App target incompatible with kernel build
+    INVALID_SIZE       = -4,  ///< Size fields inconsistent
+    INVALID_ENTRY      = -5,  ///< Entry point invalid
+    CRC_MISMATCH       = -6,  ///< CRC32 verification failed
+    SIGNATURE_INVALID  = -7,  ///< Ed25519 signature invalid (Release apps)
+    MEMORY_ERROR       = -8,  ///< Insufficient memory for app
+    SIGNATURE_REQUIRED = -9,  ///< Signature required but not present
+    ALREADY_LOADED     = -10, ///< An application is already loaded
 };
 
 /// Convert LoadResult to string for debugging
 constexpr const char* load_result_str(LoadResult r) noexcept {
     switch (r) {
-    case LoadResult::Ok:                return "Ok";
-    case LoadResult::InvalidMagic:      return "InvalidMagic";
-    case LoadResult::InvalidVersion:    return "InvalidVersion";
-    case LoadResult::InvalidSize:       return "InvalidSize";
-    case LoadResult::CrcMismatch:       return "CrcMismatch";
-    case LoadResult::SignatureInvalid:  return "SignatureInvalid";
-    case LoadResult::SignatureRequired: return "SignatureRequired";
-    case LoadResult::TargetMismatch:    return "TargetMismatch";
-    case LoadResult::OutOfMemory:       return "OutOfMemory";
-    case LoadResult::AlreadyLoaded:     return "AlreadyLoaded";
-    default:                            return "Unknown";
+    case LoadResult::OK:                 return "OK";
+    case LoadResult::INVALID_MAGIC:      return "INVALID_MAGIC";
+    case LoadResult::INVALID_ABI:        return "INVALID_ABI";
+    case LoadResult::INVALID_TARGET:     return "INVALID_TARGET";
+    case LoadResult::INVALID_SIZE:       return "INVALID_SIZE";
+    case LoadResult::INVALID_ENTRY:      return "INVALID_ENTRY";
+    case LoadResult::CRC_MISMATCH:       return "CRC_MISMATCH";
+    case LoadResult::SIGNATURE_INVALID:  return "SIGNATURE_INVALID";
+    case LoadResult::MEMORY_ERROR:       return "MEMORY_ERROR";
+    case LoadResult::SIGNATURE_REQUIRED: return "SIGNATURE_REQUIRED";
+    case LoadResult::ALREADY_LOADED:     return "ALREADY_LOADED";
+    default:                             return "Unknown";
     }
 }
 

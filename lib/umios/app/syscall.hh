@@ -9,53 +9,69 @@
 namespace umi::syscall {
 
 // ============================================================================
-// Syscall Numbers
+// Syscall Numbers (06-syscall.md spec)
 // ============================================================================
-// Number layout:
-//   0–15:   Core API (process control, scheduling, info)
-//   16–31:  Reserved (core API expansion)
-//   32–47:  Filesystem
-//   48–63:  Reserved (storage expansion)
-//   64–255: Reserved
+// Number layout (sparse, 10-unit groups):
+//   0– 9:  プロセス制御 (exit, yield, register_proc)
+//  10–19:  時間・スケジューリング (wait_event, get_time, sleep)
+//  20–29:  構成・パラメータ (set_app_config, set_route_table, etc.)
+//  30–39:  MIDI / イベント (将来)
+//  40–49:  情報取得 (get_shared)
+//  50–59:  I/O (log, panic)
+//  60–69:  ファイルシステム (将来)
 
 namespace nr {
-// --- Core API (0–15) ---
-inline constexpr uint32_t exit = 0;            ///< Terminate application (unload trigger)
-inline constexpr uint32_t yield = 1;           ///< Return control to kernel
-inline constexpr uint32_t wait_event = 2;      ///< Wait for event with optional timeout
-inline constexpr uint32_t get_time = 3;        ///< Get monotonic time in microseconds
-inline constexpr uint32_t get_shared = 4;      ///< Get SharedMemory pointer
-inline constexpr uint32_t register_proc = 5;   ///< Register audio processor
-inline constexpr uint32_t unregister_proc = 6; ///< Unregister audio processor (future)
-inline constexpr uint32_t peek_event = 7;      ///< Peek event (future)
-inline constexpr uint32_t send_event = 8;      ///< Send event (future)
-inline constexpr uint32_t sleep_usec = 9;      ///< Sleep (future)
-inline constexpr uint32_t log = 10;            ///< Log output (future)
-inline constexpr uint32_t get_param = 11;      ///< Get parameter (future)
-inline constexpr uint32_t set_param = 12;      ///< Set parameter (future)
-// 13–15: reserved
+// --- Group 0: Process Control (0–9) ---
+inline constexpr uint32_t exit = 0;              ///< Terminate application
+inline constexpr uint32_t yield = 1;             ///< Return control to kernel
+inline constexpr uint32_t register_proc = 2;     ///< Register audio processor
+inline constexpr uint32_t unregister_proc = 3;   ///< Unregister audio processor (将来)
 
-// --- Configuration API (20–25) ---
-inline constexpr uint32_t set_route_table = 20;    ///< Set RouteTable (ptr)
-inline constexpr uint32_t set_param_mapping = 21;  ///< Set ParamMapping (ptr)
-inline constexpr uint32_t set_input_mapping = 22;  ///< Set InputParamMapping (ptr)
-inline constexpr uint32_t configure_input = 23;    ///< Set InputConfig (ptr)
-inline constexpr uint32_t set_app_config = 24;     ///< Set full AppConfig (ptr)
-inline constexpr uint32_t send_param_request = 25; ///< Request param change (id, value_bits)
-// 26–31: reserved
+// --- Group 1: Time / Scheduling (10–19) ---
+inline constexpr uint32_t wait_event = 10;       ///< Wait for event with optional timeout
+inline constexpr uint32_t get_time = 11;         ///< Get monotonic time in microseconds
+inline constexpr uint32_t sleep = 12;            ///< Sleep for specified duration
 
-// --- Filesystem (32–47) ---
-inline constexpr uint32_t file_open = 32;  ///< Open file (future)
-inline constexpr uint32_t file_read = 33;  ///< Read from file (future)
-inline constexpr uint32_t file_write = 34; ///< Write to file (future)
-inline constexpr uint32_t file_close = 35; ///< Close file (future)
-inline constexpr uint32_t file_seek = 36;  ///< Seek within file (future)
-inline constexpr uint32_t file_stat = 37;  ///< Get file info (future)
-inline constexpr uint32_t dir_open = 38;   ///< Open directory (future)
-inline constexpr uint32_t dir_read = 39;   ///< Read directory entry (future)
-inline constexpr uint32_t dir_close = 40;  ///< Close directory (future)
-// 41–47: reserved
+// --- Group 2: Configuration (20–29) ---
+inline constexpr uint32_t set_app_config = 20;      ///< Set full AppConfig (ptr)
+inline constexpr uint32_t set_route_table = 21;     ///< Set RouteTable (ptr)
+inline constexpr uint32_t set_param_mapping = 22;   ///< Set ParamMapping (ptr)
+inline constexpr uint32_t set_input_mapping = 23;   ///< Set InputParamMapping (ptr)
+inline constexpr uint32_t configure_input = 24;     ///< Set InputConfig (ptr)
+inline constexpr uint32_t send_param_request = 25;  ///< Request param change (id, value_bits)
+
+// --- Group 4: Info (40–49) ---
+inline constexpr uint32_t get_shared = 40;       ///< Get SharedMemory pointer
+
+// --- Group 5: I/O (50–59) ---
+inline constexpr uint32_t log = 50;              ///< Log output
+inline constexpr uint32_t panic = 51;            ///< Panic (halt)
+
+// --- Group 6: Filesystem (60–69, 将来) ---
+inline constexpr uint32_t file_open = 60;  ///< Open file (将来)
+inline constexpr uint32_t file_read = 61;  ///< Read from file (将来)
+inline constexpr uint32_t file_write = 62; ///< Write to file (将来)
+inline constexpr uint32_t file_close = 63; ///< Close file (将来)
+inline constexpr uint32_t file_seek = 64;  ///< Seek within file (将来)
+inline constexpr uint32_t file_stat = 65;  ///< Get file info (将来)
+inline constexpr uint32_t dir_open = 66;   ///< Open directory (将来)
+inline constexpr uint32_t dir_read = 67;   ///< Read directory entry (将来)
+inline constexpr uint32_t dir_close = 68;  ///< Close directory (将来)
 } // namespace nr
+
+// ============================================================================
+// Syscall Error Codes
+// ============================================================================
+
+enum class SyscallError : int32_t {
+    OK = 0,
+    INVALID_SYSCALL = -1,
+    INVALID_PARAM = -2,
+    ACCESS_DENIED = -3,
+    NOT_FOUND = -4,
+    TIMEOUT = -5,
+    BUSY = -6,
+};
 
 // ============================================================================
 // Event Bit Definitions
@@ -66,7 +82,7 @@ inline constexpr uint32_t Audio = (1 << 0);     ///< Audio buffer ready
 inline constexpr uint32_t Midi = (1 << 1);      ///< MIDI data available
 inline constexpr uint32_t VSync = (1 << 2);     ///< Display refresh
 inline constexpr uint32_t Timer = (1 << 3);     ///< Timer tick
-inline constexpr uint32_t Button = (1 << 4);    ///< Button press
+inline constexpr uint32_t Control = (1 << 4);   ///< ControlEvent arrived
 inline constexpr uint32_t Shutdown = (1 << 31); ///< Shutdown requested
 } // namespace event
 
@@ -140,7 +156,7 @@ inline uint32_t wait_event(uint32_t mask, uint32_t timeout_usec = 0) noexcept {
 
 /// Sleep for specified duration (microseconds)
 inline void sleep_usec(uint32_t usec) noexcept {
-    (void)wait_event(0, usec);
+    call(nr::sleep, usec);
 }
 
 /// Get current time in microseconds (64-bit)
@@ -162,18 +178,10 @@ inline void* get_shared() noexcept {
     return reinterpret_cast<void*>(call(nr::get_shared));
 }
 
-/// Output debug log message (stub)
+/// Output debug log message
 inline void log(const char* msg) noexcept {
-    (void)msg;
+    call(nr::log, static_cast<uint32_t>(reinterpret_cast<uintptr_t>(msg)));
 }
-
-/// Get a parameter value (stub)
-inline float get_param(uint32_t /*index*/) noexcept {
-    return 0.0f;
-}
-
-/// Set a parameter value (stub)
-inline void set_param(uint32_t /*index*/, float /*value*/) noexcept {}
 
 /// Set route table (copies from app memory to kernel)
 inline int32_t set_route_table(const void* table) noexcept {

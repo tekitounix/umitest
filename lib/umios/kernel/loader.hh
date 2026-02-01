@@ -90,7 +90,7 @@ struct AppRuntime {
 /// loader.set_app_memory(app_ram_base, app_ram_size);
 /// 
 /// auto result = loader.load(app_image, app_size);
-/// if (result != LoadResult::Ok) {
+/// if (result != LoadResult::OK) {
 ///     // Handle error
 /// }
 /// 
@@ -120,7 +120,7 @@ public:
     /// Load application from image
     /// @param image Pointer to .umia binary
     /// @param size Size of image in bytes
-    /// @return LoadResult::Ok on success, error code otherwise
+    /// @return LoadResult::OK on success, error code otherwise
     LoadResult load(const uint8_t* image, size_t size) noexcept;
     
     /// Unload current application
@@ -295,13 +295,13 @@ struct SharedMemory {
     std::atomic<uint32_t> event_read_idx{0};
     
     // Parameter state (written by EventRouter, read by Processor via AudioContext)
-    SharedParamState param_state;
+    SharedParamState params;
 
     // MIDI channel state (written by EventRouter)
-    SharedChannelState channel_state;
+    SharedChannelState channel;
 
     // Hardware input state (written by kernel drivers)
-    SharedInputState input_state;
+    SharedInputState input;
 
     // Flags
     std::atomic<uint32_t> flags{0};
