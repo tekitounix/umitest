@@ -83,7 +83,7 @@ class HalBase {
 protected:
     uint8_t address_ = 0;
     bool connected_ = false;
-    Speed speed_ = Speed::Full;
+    Speed speed_ = Speed::FULL;
 
 public:
     HalCallbacks callbacks{};

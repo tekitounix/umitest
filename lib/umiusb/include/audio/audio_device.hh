@@ -8,21 +8,21 @@ namespace umiusb {
 
 // USB speed (used for policy decisions, not for HAL selection)
 enum class UsbSpeed : uint8_t {
-    FullSpeed,
-    HighSpeed,
+    FULL_SPEED,
+    HIGH_SPEED,
 };
 
 // UAC version switching policy
 enum class UacModeSwitch : uint8_t {
-    Fixed,
-    ManualSwitch,
-    AutoSwitch,
+    FIXED,
+    MANUAL_SWITCH,
+    AUTO_SWITCH,
 };
 
 // Sample rate control policy
 enum class SampleRateControl : uint8_t {
-    Fixed,
-    Selectable,
+    FIXED,
+    SELECTABLE,
 };
 
 // Stream configuration (Audio IN/OUT)
@@ -69,7 +69,7 @@ struct FeatureUnitConfig {
 
 struct DefaultsConfig {
     static constexpr uint32_t sample_rate = 0;  // 0 = use stream default
-    static constexpr AudioSyncMode sync_mode = AudioSyncMode::Adaptive;
+    static constexpr AudioSyncMode sync_mode = AudioSyncMode::ADAPTIVE;
 };
 
 struct PolicyConfig {
@@ -102,8 +102,8 @@ template<
     typename AudioOutCfg = NoStreamConfig,
     typename AudioInCfg = NoStreamConfig,
     typename MidiCfg = MidiConfig,
-    SampleRateControl RateControl = SampleRateControl::Selectable,
-    UacModeSwitch ModeSwitch = UacModeSwitch::Fixed,
+    SampleRateControl RateControl = SampleRateControl::SELECTABLE,
+    UacModeSwitch ModeSwitch = UacModeSwitch::FIXED,
     typename FeatureCfg = FeatureUnitConfig,
     typename DefaultsCfg = DefaultsConfig,
     typename PolicyCfg = PolicyConfig,
@@ -128,13 +128,13 @@ struct AudioDeviceConfig {
 // Presets (examples; extend as needed)
 struct Preset {
     using Uac1_48k_FullDuplex_Midi = AudioDeviceConfig<
-        UacVersion::Uac1,
-        UsbSpeed::FullSpeed,
-        AudioSyncMode::Adaptive,
+        UacVersion::UAC1,
+        UsbSpeed::FULL_SPEED,
+        AudioSyncMode::ADAPTIVE,
         StreamConfig<48000, 2, 16, AudioRates<44100, 48000>, 1>,
         StreamConfig<48000, 2, 16, AudioRates<44100, 48000>, 3>,
         MidiConfig,
-        SampleRateControl::Selectable
+        SampleRateControl::SELECTABLE
     >;
 };
 
@@ -197,7 +197,7 @@ public:
         MidiInPort,
         2,
         Config::sync_mode,
-        (Config::sample_rate_control == SampleRateControl::Selectable),
+        (Config::sample_rate_control == SampleRateControl::SELECTABLE),
         typename Config::sample_t
     >;
 };

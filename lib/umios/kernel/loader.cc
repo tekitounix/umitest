@@ -21,7 +21,7 @@ namespace umi::kernel {
 
 LoadResult AppLoader::load(const uint8_t* image, size_t size) noexcept {
     // Check if already loaded
-    if (runtime_.state != AppState::None) {
+    if (runtime_.state != AppState::NONE) {
         return LoadResult::ALREADY_LOADED;
     }
 
@@ -45,7 +45,7 @@ LoadResult AppLoader::load(const uint8_t* image, size_t size) noexcept {
     }
 
     // Verify signature for Release apps
-    if (header->target == AppTarget::Release) {
+    if (header->target == AppTarget::RELEASE) {
         if (!verify_signature(header, image)) {
             return LoadResult::SIGNATURE_INVALID;
         }
@@ -64,13 +64,13 @@ LoadResult AppLoader::load(const uint8_t* image, size_t size) noexcept {
 
     // Update state
     loaded_header_ = header;
-    runtime_.state = AppState::Loaded;
+    runtime_.state = AppState::LOADED;
 
     return LoadResult::OK;
 }
 
 void AppLoader::unload() noexcept {
-    if (runtime_.state == AppState::None) {
+    if (runtime_.state == AppState::NONE) {
         return;
     }
 
@@ -85,7 +85,7 @@ void AppLoader::unload() noexcept {
 }
 
 bool AppLoader::start() noexcept {
-    if (runtime_.state != AppState::Loaded) {
+    if (runtime_.state != AppState::LOADED) {
         return false;
     }
 
@@ -93,7 +93,7 @@ bool AppLoader::start() noexcept {
         return false;
     }
 
-    runtime_.state = AppState::Running;
+    runtime_.state = AppState::RUNNING;
 
 #if defined(__ARM_ARCH) && defined(UMIOS_KERNEL)
     // Start application in unprivileged mode with PSP
@@ -119,7 +119,7 @@ bool AppLoader::start() noexcept {
 
 void AppLoader::terminate(int exit_code) noexcept {
     runtime_.exit_code = exit_code;
-    runtime_.state = AppState::Terminated;
+    runtime_.state = AppState::TERMINATED;
 
     // Clear processor registration
     runtime_.processor = nullptr;
@@ -127,19 +127,19 @@ void AppLoader::terminate(int exit_code) noexcept {
 }
 
 void AppLoader::suspend() noexcept {
-    if (runtime_.state == AppState::Running) {
-        runtime_.state = AppState::Suspended;
+    if (runtime_.state == AppState::RUNNING) {
+        runtime_.state = AppState::SUSPENDED;
     }
 }
 
 void AppLoader::resume() noexcept {
-    if (runtime_.state == AppState::Suspended) {
-        runtime_.state = AppState::Running;
+    if (runtime_.state == AppState::SUSPENDED) {
+        runtime_.state = AppState::RUNNING;
     }
 }
 
 int AppLoader::register_processor(void* processor, ProcessFn process_fn) noexcept {
-    if (runtime_.state != AppState::Running) {
+    if (runtime_.state != AppState::RUNNING) {
         return -1;
     }
 
@@ -170,20 +170,20 @@ LoadResult AppLoader::validate_header(const AppHeader* header, size_t image_size
 
     // Check target compatibility
     switch (header->target) {
-    case AppTarget::User:
+    case AppTarget::USER:
         // User apps run on any kernel
         break;
 
-    case AppTarget::Development:
+    case AppTarget::DEVELOPMENT:
         // Development apps only on development kernel
-        if constexpr (KERNEL_BUILD_TYPE != BuildType::Development) {
+        if constexpr (KERNEL_BUILD_TYPE != BuildType::DEVELOPMENT) {
             return LoadResult::INVALID_TARGET;
         }
         break;
 
-    case AppTarget::Release:
+    case AppTarget::RELEASE:
         // Release apps only on release kernel
-        if constexpr (KERNEL_BUILD_TYPE != BuildType::Release) {
+        if constexpr (KERNEL_BUILD_TYPE != BuildType::RELEASE) {
             return LoadResult::INVALID_TARGET;
         }
         break;
@@ -217,16 +217,16 @@ bool AppLoader::verify_crc(const AppHeader* header, const uint8_t* image) noexce
 }
 
 bool AppLoader::verify_signature(const AppHeader* header, const uint8_t* image) noexcept {
-    if constexpr (KERNEL_BUILD_TYPE == BuildType::Development) {
+    if constexpr (KERNEL_BUILD_TYPE == BuildType::DEVELOPMENT) {
         // In development mode, skip signature verification for User/Development apps
-        if (header->target != AppTarget::Release) {
+        if (header->target != AppTarget::RELEASE) {
             return true;
         }
     }
 
     // Select public key based on build type
     const uint8_t* public_key = nullptr;
-    if constexpr (KERNEL_BUILD_TYPE == BuildType::Release) {
+    if constexpr (KERNEL_BUILD_TYPE == BuildType::RELEASE) {
         public_key = crypto::RELEASE_PUBLIC_KEY;
     } else {
         public_key = crypto::DEVELOPMENT_PUBLIC_KEY;

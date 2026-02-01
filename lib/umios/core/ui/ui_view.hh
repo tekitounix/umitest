@@ -26,11 +26,11 @@ namespace umi {
 // ============================================================================
 
 enum class ControlEventType : uint8_t {
-    ValueChange,      // Knob/slider moved
-    ButtonPress,      // Button pressed
-    ButtonRelease,    // Button released
-    BeginEdit,        // Start of gesture (for undo grouping)
-    EndEdit,          // End of gesture
+    VALUE_CHANGE,     // Knob/slider moved
+    BUTTON_PRESS,     // Button pressed
+    BUTTON_RELEASE,   // Button released
+    BEGIN_EDIT,       // Start of gesture (for undo grouping)
+    END_EDIT,         // End of gesture
 };
 
 struct ControlEvent {
@@ -78,13 +78,13 @@ protected:
     /// Call this when user interacts with a control
     void on_control_event(const ControlEvent& event) {
         switch (event.type) {
-            case ControlEventType::ValueChange:
+            case ControlEventType::VALUE_CHANGE:
                 controller_.set_from_control(event.control_id, event.value);
                 break;
-            case ControlEventType::BeginEdit:
+            case ControlEventType::BEGIN_EDIT:
                 controller_.enable_undo(true);
                 break;
-            case ControlEventType::EndEdit:
+            case ControlEventType::END_EDIT:
                 // Could group undo here
                 break;
             default:

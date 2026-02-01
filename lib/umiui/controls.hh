@@ -83,18 +83,18 @@ struct Slider : Control {
 /// ボタン (モーメンタリ/トグル)
 struct Button : Control {
     enum class Mode : uint8_t {
-        Momentary,  // 押している間だけON
-        Toggle,     // 押すたびにON/OFF切替
+        MOMENTARY,  // 押している間だけON
+        TOGGLE,     // 押すたびにON/OFF切替
     };
-    
-    Mode mode = Mode::Momentary;
+
+    Mode mode = Mode::MOMENTARY;
     
     bool is_on() const { return value > 0.5f; }
     void set_on(bool on) { value = on ? 1.0f : 0.0f; }
     
     void on_press() {
         pressed = true;
-        if (mode == Mode::Toggle) {
+        if (mode == Mode::TOGGLE) {
             set_on(!is_on());
         }
     }
@@ -158,8 +158,8 @@ struct Meter : Control {
 struct Label : Control {
     const char* text = nullptr;
     
-    enum class Align : uint8_t { Left, Center, Right };
-    Align align = Align::Left;
+    enum class Align : uint8_t { LEFT, CENTER, RIGHT };
+    Align align = Align::LEFT;
     bool dim = false;               // 薄い色で表示
 };
 

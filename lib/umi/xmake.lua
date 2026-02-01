@@ -134,6 +134,43 @@ target("umi.usb")
 target_end()
 
 -- =====================================================================
+-- UMI Filesystem — littlefs (static library)
+-- =====================================================================
+
+target("umi.fs.littlefs")
+    set_kind("static")
+    set_group("umi")
+    add_deps("umi.kernel")
+
+    add_files(path.join(lib_dir, "umios/fs/littlefs/lfs.cc"))
+    add_includedirs(path.join(lib_dir, "umios/fs/littlefs"), {public = true})
+    add_includedirs(lib_dir, {public = true})
+    -- Suppress warnings for C99 compound literals used in the faithful C port
+    add_cxxflags(
+        "-Wno-address-of-temporary",
+        "-Wno-c++11-narrowing",
+        "-Wno-missing-field-initializers",
+        "-Wno-reserved-user-defined-literal",
+        "-Wno-unused-function",
+        {force = true})
+target_end()
+
+-- =====================================================================
+-- UMI Filesystem — FATfs (static library)
+-- =====================================================================
+
+target("umi.fs.fatfs")
+    set_kind("static")
+    set_group("umi")
+    add_deps("umi.kernel")
+
+    add_files(path.join(lib_dir, "umios/fs/fatfs/ff.cc"))
+    add_files(path.join(lib_dir, "umios/fs/fatfs/ff_unicode.cc"))
+    add_includedirs(path.join(lib_dir, "umios/fs/fatfs"), {public = true})
+    add_includedirs(lib_dir, {public = true})
+target_end()
+
+-- =====================================================================
 -- Convenience Targets (bundles)
 -- =====================================================================
 

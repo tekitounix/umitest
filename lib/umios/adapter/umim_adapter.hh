@@ -91,9 +91,9 @@ namespace umi::umim {
 
 /// パラメータのスケーリングカーブ
 enum class ParamCurve : uint8_t {
-    Linear = 0, // 線形（デフォルト）
-    Log = 1,    // 対数（周波数向け）
-    Exp = 2,    // 指数（音量向け）
+    LINEAR = 0, // 線形（デフォルト）
+    LOG = 1,    // 対数（周波数向け）
+    EXP = 2,    // 指数（音量向け）
 };
 
 struct Param {

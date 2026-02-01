@@ -296,23 +296,23 @@ TEST(result_ok) {
 }
 
 TEST(result_err) {
-    Result<int> r = Err<int>(ErrorCode::InvalidStatus);
+    Result<int> r = Err<int>(ErrorCode::INVALID_STATUS);
     ASSERT(!r.has_value());
-    ASSERT_EQ(r.error().code, ErrorCode::InvalidStatus);
+    ASSERT_EQ(r.error().code, ErrorCode::INVALID_STATUS);
     TEST_PASS();
 }
 
 TEST(result_error_context) {
     auto err = Error::invalid_status(0xF5);
-    ASSERT_EQ(err.code, ErrorCode::InvalidStatus);
+    ASSERT_EQ(err.code, ErrorCode::INVALID_STATUS);
     ASSERT_EQ(err.context, 0xF5);
     TEST_PASS();
 }
 
 TEST(result_error_factories) {
-    ASSERT_EQ(Error::incomplete().code, ErrorCode::IncompleteMessage);
-    ASSERT_EQ(Error::buffer_overflow().code, ErrorCode::BufferOverflow);
-    ASSERT_EQ(Error::not_implemented().code, ErrorCode::NotImplemented);
+    ASSERT_EQ(Error::incomplete().code, ErrorCode::INCOMPLETE_MESSAGE);
+    ASSERT_EQ(Error::buffer_overflow().code, ErrorCode::BUFFER_OVERFLOW);
+    ASSERT_EQ(Error::not_implemented().code, ErrorCode::NOT_IMPLEMENTED);
     TEST_PASS();
 }
 

@@ -37,7 +37,7 @@ inline float process_lp(OnePoleState& s, float a0, float x) {
 
 } // namespace detail
 
-enum class OnePoleKind { Lp, Hp };
+enum class OnePoleKind { LP, HP };
 
 using OnePoleInline = InlineCoeffs<detail::OnePoleCoeffs, detail::make_onepole_coeffs_tpt>;
 using OnePoleOwn = OwnCoeffs<detail::OnePoleCoeffs, detail::make_onepole_coeffs_tpt>;
@@ -70,7 +70,7 @@ class OnePole {
     float process(float x, float wc) {
         const auto& coeffs_ref = c.coeffs(wc);
         const auto y_lp = detail::process_lp(s, coeffs_ref.a0, x);
-        if constexpr (Kind == OnePoleKind::Lp) {
+        if constexpr (Kind == OnePoleKind::LP) {
             return y_lp;
         } else {
             return x - y_lp;
@@ -88,10 +88,10 @@ class OnePole {
     CoeffSource c{};
 };
 
-using Lpf = OnePole<OnePoleKind::Lp, OnePoleInline>;
-using LpfAsync = OnePole<OnePoleKind::Lp, OnePoleOwn>;
-using LpfShared = OnePole<OnePoleKind::Lp, OnePoleShared>;
+using Lpf = OnePole<OnePoleKind::LP, OnePoleInline>;
+using LpfAsync = OnePole<OnePoleKind::LP, OnePoleOwn>;
+using LpfShared = OnePole<OnePoleKind::LP, OnePoleShared>;
 
-using Hpf = OnePole<OnePoleKind::Hp, OnePoleInline>;
-using HpfAsync = OnePole<OnePoleKind::Hp, OnePoleOwn>;
-using HpfShared = OnePole<OnePoleKind::Hp, OnePoleShared>;
+using Hpf = OnePole<OnePoleKind::HP, OnePoleInline>;
+using HpfAsync = OnePole<OnePoleKind::HP, OnePoleOwn>;
+using HpfShared = OnePole<OnePoleKind::HP, OnePoleShared>;

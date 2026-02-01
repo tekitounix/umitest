@@ -66,12 +66,12 @@ process_svf(SvfState& s, const SvfCoeffs& c, float x, float& lp, float& bp, floa
 } // namespace detail
 
 enum class SvfOut : uint8_t {
-    Lp = 1u << 0,
-    Bp = 1u << 1,
-    Hp = 1u << 2,
-    Notch = 1u << 3,
-    Ap = 1u << 4,
-    All = Lp | Bp | Hp | Notch | Ap,
+    LP = 1u << 0,
+    BP = 1u << 1,
+    HP = 1u << 2,
+    NOTCH = 1u << 3,
+    AP = 1u << 4,
+    ALL = LP | BP | HP | NOTCH | AP,
 };
 
 constexpr SvfOut operator|(SvfOut a, SvfOut b) {
@@ -86,7 +86,7 @@ using SvfInlinePolicy = InlineCoeffs<detail::SvfCoeffs, detail::calc_svf_from_re
 using SvfOwnPolicy = OwnCoeffs<detail::SvfCoeffs, detail::calc_svf_from_resonance>;
 using SvfSharedPolicy = SharedCoeffs<detail::SvfCoeffs>;
 
-template <typename CoeffSource, SvfOut Outputs = SvfOut::All>
+template <typename CoeffSource, SvfOut Outputs = SvfOut::ALL>
 class Svf {
   public:
     Svf()
@@ -128,19 +128,19 @@ class Svf {
         float ap = 0.0f;
         detail::process_svf(s, coeffs_ref, x, lp, bp, hp, notch, ap);
 
-        if constexpr (has_output(Outputs, SvfOut::Lp)) {
+        if constexpr (has_output(Outputs, SvfOut::LP)) {
             lp_ = lp;
         }
-        if constexpr (has_output(Outputs, SvfOut::Bp)) {
+        if constexpr (has_output(Outputs, SvfOut::BP)) {
             bp_ = bp;
         }
-        if constexpr (has_output(Outputs, SvfOut::Hp)) {
+        if constexpr (has_output(Outputs, SvfOut::HP)) {
             hp_ = hp;
         }
-        if constexpr (has_output(Outputs, SvfOut::Notch)) {
+        if constexpr (has_output(Outputs, SvfOut::NOTCH)) {
             notch_ = notch;
         }
-        if constexpr (has_output(Outputs, SvfOut::Ap)) {
+        if constexpr (has_output(Outputs, SvfOut::AP)) {
             ap_ = ap;
         }
     }
@@ -157,19 +157,19 @@ class Svf {
             float ap = 0.0f;
             detail::process_svf(s, coeffs_ref, x, lp, bp, hp, notch, ap);
 
-            if constexpr (has_output(Outputs, SvfOut::Lp)) {
+            if constexpr (has_output(Outputs, SvfOut::LP)) {
                 lp_ = lp;
             }
-            if constexpr (has_output(Outputs, SvfOut::Bp)) {
+            if constexpr (has_output(Outputs, SvfOut::BP)) {
                 bp_ = bp;
             }
-            if constexpr (has_output(Outputs, SvfOut::Hp)) {
+            if constexpr (has_output(Outputs, SvfOut::HP)) {
                 hp_ = hp;
             }
-            if constexpr (has_output(Outputs, SvfOut::Notch)) {
+            if constexpr (has_output(Outputs, SvfOut::NOTCH)) {
                 notch_ = notch;
             }
-            if constexpr (has_output(Outputs, SvfOut::Ap)) {
+            if constexpr (has_output(Outputs, SvfOut::AP)) {
                 ap_ = ap;
             }
         }
@@ -177,13 +177,13 @@ class Svf {
 
     [[nodiscard]] float operator()(float x) {
         process(x);
-        if constexpr (has_output(Outputs, SvfOut::Lp)) {
+        if constexpr (has_output(Outputs, SvfOut::LP)) {
             return lp_;
-        } else if constexpr (has_output(Outputs, SvfOut::Bp)) {
+        } else if constexpr (has_output(Outputs, SvfOut::BP)) {
             return bp_;
-        } else if constexpr (has_output(Outputs, SvfOut::Hp)) {
+        } else if constexpr (has_output(Outputs, SvfOut::HP)) {
             return hp_;
-        } else if constexpr (has_output(Outputs, SvfOut::Notch)) {
+        } else if constexpr (has_output(Outputs, SvfOut::NOTCH)) {
             return notch_;
         } else {
             return ap_;
@@ -208,7 +208,7 @@ class Svf {
     float resonance_ = 0.0f;
 };
 
-template <typename CoeffSource, SvfOut Outputs = SvfOut::All>
+template <typename CoeffSource, SvfOut Outputs = SvfOut::ALL>
 using SvfTpt = Svf<CoeffSource, Outputs>;
 
 using SvfInline = Svf<SvfInlinePolicy>;

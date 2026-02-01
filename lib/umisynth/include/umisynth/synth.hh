@@ -33,9 +33,9 @@ constexpr int NUM_VOICES = 1;
 // Parameter IDs
 // =====================================================================
 
-enum class ParamId { Attack = 0, Decay, Sustain, Release, Cutoff, Resonance, Volume, Count };
+enum class ParamId { ATTACK = 0, DECAY, SUSTAIN, RELEASE, CUTOFF, RESONANCE, VOLUME, COUNT };
 
-constexpr int PARAM_COUNT = static_cast<int>(ParamId::Count);
+constexpr int PARAM_COUNT = static_cast<int>(ParamId::COUNT);
 
 // =====================================================================
 // Port definitions (for UMIM spec compliance)
@@ -244,31 +244,31 @@ class PolySynth {
 
     void set_param(ParamId id, float value) {
         switch (id) {
-        case ParamId::Attack:
+        case ParamId::ATTACK:
             attack_ms = value;
             update_adsr();
             break;
-        case ParamId::Decay:
+        case ParamId::DECAY:
             decay_ms = value;
             update_adsr();
             break;
-        case ParamId::Sustain:
+        case ParamId::SUSTAIN:
             sustain = value;
             update_adsr();
             break;
-        case ParamId::Release:
+        case ParamId::RELEASE:
             release_ms = value;
             update_adsr();
             break;
-        case ParamId::Cutoff:
+        case ParamId::CUTOFF:
             cutoff_hz = value;
             update_filter();
             break;
-        case ParamId::Resonance:
+        case ParamId::RESONANCE:
             resonance = value;
             update_filter();
             break;
-        case ParamId::Volume:
+        case ParamId::VOLUME:
             volume = value;
             break;
         default:
@@ -278,19 +278,19 @@ class PolySynth {
 
     float get_param(ParamId id) const {
         switch (id) {
-        case ParamId::Attack:
+        case ParamId::ATTACK:
             return attack_ms;
-        case ParamId::Decay:
+        case ParamId::DECAY:
             return decay_ms;
-        case ParamId::Sustain:
+        case ParamId::SUSTAIN:
             return sustain;
-        case ParamId::Release:
+        case ParamId::RELEASE:
             return release_ms;
-        case ParamId::Cutoff:
+        case ParamId::CUTOFF:
             return cutoff_hz;
-        case ParamId::Resonance:
+        case ParamId::RESONANCE:
             return resonance;
-        case ParamId::Volume:
+        case ParamId::VOLUME:
             return volume;
         default:
             return 0.0f;
@@ -347,25 +347,25 @@ class PolySynth {
         const uint8_t index = static_cast<uint8_t>(cc - 21);
         switch (index) {
         case 0:
-            set_param(ParamId::Attack, lerp_cc(value, 1.0f, 2000.0f));
+            set_param(ParamId::ATTACK, lerp_cc(value, 1.0f, 2000.0f));
             break;
         case 1:
-            set_param(ParamId::Decay, lerp_cc(value, 1.0f, 2000.0f));
+            set_param(ParamId::DECAY, lerp_cc(value, 1.0f, 2000.0f));
             break;
         case 2:
-            set_param(ParamId::Sustain, lerp_cc(value, 0.0f, 1.0f));
+            set_param(ParamId::SUSTAIN, lerp_cc(value, 0.0f, 1.0f));
             break;
         case 3:
-            set_param(ParamId::Release, lerp_cc(value, 5.0f, 4000.0f));
+            set_param(ParamId::RELEASE, lerp_cc(value, 5.0f, 4000.0f));
             break;
         case 4:
-            set_param(ParamId::Cutoff, lerp_cc(value, 50.0f, 8000.0f));
+            set_param(ParamId::CUTOFF, lerp_cc(value, 50.0f, 8000.0f));
             break;
         case 5:
-            set_param(ParamId::Resonance, lerp_cc(value, 0.0f, 0.99f));
+            set_param(ParamId::RESONANCE, lerp_cc(value, 0.0f, 0.99f));
             break;
         case 6:
-            set_param(ParamId::Volume, lerp_cc(value, 0.0f, 1.0f));
+            set_param(ParamId::VOLUME, lerp_cc(value, 0.0f, 1.0f));
             break;
         default:
             break;
@@ -415,7 +415,7 @@ inline void PolySynth::process(umi::AudioContext& ctx) {
 
     // Process MIDI events
     for (const auto& ev : ctx.input_events) {
-        if (ev.type == umi::EventType::Midi) {
+        if (ev.type == umi::EventType::MIDI) {
             handle_midi(ev.midi.bytes, ev.midi.size);
         }
     }

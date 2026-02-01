@@ -71,7 +71,7 @@ public:
                 self->audio_task_entry();
             },
             .arg = this,
-            .prio = Priority::Realtime,
+            .prio = Priority::REALTIME,
             .name = "audio",
         };
         auto audio_tid = kernel.create_task(audio_cfg);
@@ -85,7 +85,7 @@ public:
                     self->midi_task_entry();
                 },
                 .arg = this,
-                .prio = Priority::Server,
+                .prio = Priority::SERVER,
                 .name = "midi",
             };
             auto midi_tid = kernel.create_task(midi_cfg);

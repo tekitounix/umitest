@@ -218,7 +218,7 @@ private:
         if (cmd >= 0x80 && cmd <= 0xE0) {
             if (!Config.should_accept(channel)) {
                 state_ = State::IDLE;
-                return Err(ErrorCode::ChannelFiltered);
+                return Err(ErrorCode::CHANNEL_FILTERED);
             }
         }
 
@@ -257,7 +257,7 @@ private:
 
         if (!supported) {
             state_ = State::IDLE;
-            return Err(ErrorCode::NotSupported);
+            return Err(ErrorCode::NOT_SUPPORTED);
         }
 
         return Ok(false);  // Waiting for data
@@ -274,7 +274,7 @@ private:
                 return Ok(false);
             }
             state_ = State::IDLE;
-            return Err(ErrorCode::NotSupported);
+            return Err(ErrorCode::NOT_SUPPORTED);
 
         case 0xF7:  // SysEx End
             state_ = State::IDLE;
@@ -296,14 +296,14 @@ private:
             return Ok(true);
 
         default:
-            return Err(ErrorCode::InvalidData);
+            return Err(ErrorCode::INVALID_DATA);
         }
     }
 
     // === Data byte handling ===
     [[nodiscard]] constexpr Result<bool> handle_data(uint8_t byte, UMP32& out) noexcept {
         if (state_ == State::IDLE) {
-            return Err(ErrorCode::InvalidData);
+            return Err(ErrorCode::INVALID_DATA);
         }
 
         if (state_ == State::WAITING_DATA1) {
@@ -323,7 +323,7 @@ private:
             return complete_message(byte, out);
         }
 
-        return Err(ErrorCode::InvalidData);
+        return Err(ErrorCode::INVALID_DATA);
     }
 
     // === Complete message ===

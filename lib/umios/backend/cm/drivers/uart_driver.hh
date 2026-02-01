@@ -147,7 +147,7 @@ inline void set_rx_callback(void (*cb)(uint8_t, void*), void* ctx) {
 // Driver operations table
 inline const Ops kOps = {
     .name = "uart",
-    .category = Category::Uart,
+    .category = Category::UART,
     .init = init,
     .deinit = deinit,
     .irq = irq,

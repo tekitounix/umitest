@@ -124,20 +124,20 @@ using AudioMono48k = AudioPort<1, 16, 48000, 1>;
 
 /// Flexible USB Audio/MIDI Interface
 /// Supports any combination of Audio OUT, Audio IN, MIDI OUT, MIDI IN
-template <UacVersion Version = UacVersion::Uac1,
+template <UacVersion Version = UacVersion::UAC1,
           typename AudioOut_ = AudioStereo48k,
           typename AudioIn_ = NoAudioPort,
           typename MidiOut_ = NoMidiPort,
           typename MidiIn_ = NoMidiPort,
           uint8_t FeedbackEp_ = 2,
-          AudioSyncMode SyncMode_ = AudioSyncMode::Async,
+          AudioSyncMode SyncMode_ = AudioSyncMode::ASYNC,
           bool SampleRateControlEnabled_ = true,
           typename SampleT_ = int32_t>
 class AudioInterface {
   public:
     // Version
     static constexpr UacVersion UAC_VERSION = Version;
-    static constexpr bool IS_UAC2 = (Version == UacVersion::Uac2);
+    static constexpr bool IS_UAC2 = (Version == UacVersion::UAC2);
     static constexpr bool USES_IAD = IS_UAC2;
     static constexpr AudioSyncMode SYNC_MODE = SyncMode_;
     // FS feedback: always 3 bytes (10.14 format)
@@ -164,7 +164,7 @@ class AudioInterface {
     // and explicit feedback EP is omitted. Per TN2274 and XMOS reference design,
     // macOS uses IN packet rate as feedback for OUT clock recovery.
     static constexpr bool use_implicit_fb =
-        (SYNC_MODE == AudioSyncMode::Async) && HAS_AUDIO_OUT && HAS_AUDIO_IN;
+        (SYNC_MODE == AudioSyncMode::ASYNC) && HAS_AUDIO_OUT && HAS_AUDIO_IN;
 
     struct OutPacketStats;
 
@@ -290,14 +290,14 @@ class AudioInterface {
                 size += 9 + (alt_count * 9); // Alt 0 + active alts
                 if constexpr (IS_UAC2) {
                     size += 16 + 6 + 7 + 8; // AS General + Format + EP + CS EP
-                    if constexpr (SYNC_MODE == AudioSyncMode::Async && !use_implicit_fb) {
+                    if constexpr (SYNC_MODE == AudioSyncMode::ASYNC && !use_implicit_fb) {
                         size += 7; // Explicit Feedback EP (UAC2 standard endpoint)
                     }
                 } else {
                     constexpr std::size_t alt_total = []<size_t... Is>(std::index_sequence<Is...>) {
                         std::size_t total = 0;
                         ((total += (7 + (8 + (AudioOut::template Alt<Is>::RATES_COUNT * 3)) + 9 + 7 +
-                                    (SYNC_MODE == AudioSyncMode::Async ? 9 : 0))),
+                                    (SYNC_MODE == AudioSyncMode::ASYNC ? 9 : 0))),
                          ...);
                         return total;
                     }(std::make_index_sequence<alt_count>{});
@@ -358,7 +358,7 @@ class AudioInterface {
     // UAC1 bRefresh exponent; bRefresh=2 => 4ms (2^2 frames).
     // bRefresh = 2 means feedback period = 2^2 = 4 ms (update every 4 SOF).
     // Applied to both UAC1 and UAC2 per STM32 reference implementations.
-    static constexpr uint8_t FB_REFRESH = (SYNC_MODE == AudioSyncMode::Async) ? 2 : 0;
+    static constexpr uint8_t FB_REFRESH = (SYNC_MODE == AudioSyncMode::ASYNC) ? 2 : 0;
 
     // ========================================================================
     // Descriptor Builder
@@ -612,7 +612,7 @@ class AudioInterface {
                     w(audio_out_iface);
                     w(1); // bAlternateSetting
                     // bNumEndpoints: implicit FB uses IN as feedback, no explicit FB EP
-                    w((SYNC_MODE == AudioSyncMode::Async && !use_implicit_fb) ? 2 : 1);
+                    w((SYNC_MODE == AudioSyncMode::ASYNC && !use_implicit_fb) ? 2 : 1);
                     w(bDeviceClass::Audio);
                     w(SUBCLASS_AUDIOSTREAMING);
                     w(uac::uac2::IP_VERSION_02_00);
@@ -650,7 +650,7 @@ class AudioInterface {
                     w(0);    // bLockDelayUnits
                     w16(0);  // wLockDelay
 
-                    if constexpr (SYNC_MODE == AudioSyncMode::Async && !use_implicit_fb) {
+                    if constexpr (SYNC_MODE == AudioSyncMode::ASYNC && !use_implicit_fb) {
                         // Explicit Feedback Endpoint (only when no implicit FB from Audio IN)
                         w(7, bDescriptorType::Endpoint);
                         w(0x80 | EP_FEEDBACK);
@@ -671,7 +671,7 @@ class AudioInterface {
                         w(9, bDescriptorType::Interface);
                         w(audio_out_iface);
                         w(alt_setting); // bAlternateSetting
-                        w((SYNC_MODE == AudioSyncMode::Async) ? 2 : 1);
+                        w((SYNC_MODE == AudioSyncMode::ASYNC) ? 2 : 1);
                         w(bDeviceClass::Audio);
                         w(SUBCLASS_AUDIOSTREAMING);
                         w(0);
@@ -703,7 +703,7 @@ class AudioInterface {
                         w16(packet_size);
                         w(1);
                         w(0); // bRefresh is for feedback EP, not data EP
-                        w((SYNC_MODE == AudioSyncMode::Async) ? (0x80 | EP_FEEDBACK) : 0);
+                        w((SYNC_MODE == AudioSyncMode::ASYNC) ? (0x80 | EP_FEEDBACK) : 0);
 
                         // CS Audio Endpoint - with Sampling Frequency Control (optional)
                         w(7, bDescriptorType::CsEndpoint, uac::as::GENERAL);
@@ -711,7 +711,7 @@ class AudioInterface {
                         w(0);
                         w16(0);
 
-                        if constexpr (SYNC_MODE == AudioSyncMode::Async) {
+                        if constexpr (SYNC_MODE == AudioSyncMode::ASYNC) {
                             // Feedback Endpoint (Async mode)
                             // UAC1 uses 9-byte isochronous sync endpoint descriptor
                             w(9, bDescriptorType::Endpoint);
@@ -962,7 +962,7 @@ class AudioInterface {
             if constexpr (HAS_MIDI_OUT) {
                 w(9, bDescriptorType::Endpoint);
                 w(EP_MIDI_OUT);
-                w(static_cast<uint8_t>(TransferType::Bulk));
+                w(static_cast<uint8_t>(TransferType::BULK));
                 w16(MidiOut::PACKET_SIZE);
                 w(0);
                 w(0);
@@ -978,7 +978,7 @@ class AudioInterface {
             if constexpr (HAS_MIDI_IN) {
                 w(9, bDescriptorType::Endpoint);
                 w(0x80 | EP_MIDI_IN);
-                w(static_cast<uint8_t>(TransferType::Bulk));
+                w(static_cast<uint8_t>(TransferType::BULK));
                 w16(MidiIn::PACKET_SIZE);
                 w(0);
                 w(0);
@@ -1303,7 +1303,7 @@ class AudioInterface {
     alignas(4) uint8_t in_packet_buf_[IN_PACKET_BYTES]{};
 
     static constexpr uint32_t FB_UPDATE_INTERVAL =
-        (SYNC_MODE == AudioSyncMode::Async) ? (1U << FB_REFRESH) : 1;
+        (SYNC_MODE == AudioSyncMode::ASYNC) ? (1U << FB_REFRESH) : 1;
     bool fb_last_valid_ = false;
     // UAC1: 3 bytes (10.14), UAC2: 4 bytes (16.16)
     std::array<uint8_t, FB_PACKET_SIZE> fb_last_bytes_{};
@@ -1394,10 +1394,10 @@ class AudioInterface {
     template <typename HalT>
     void configure_endpoints(HalT& hal) {
         if constexpr (HAS_MIDI_OUT) {
-            hal.ep_configure({EP_MIDI_OUT, Direction::Out, TransferType::Bulk, MidiOut::PACKET_SIZE});
+            hal.ep_configure({EP_MIDI_OUT, Direction::OUT, TransferType::BULK, MidiOut::PACKET_SIZE});
         }
         if constexpr (HAS_MIDI_IN) {
-            hal.ep_configure({EP_MIDI_IN, Direction::In, TransferType::Bulk, MidiIn::PACKET_SIZE});
+            hal.ep_configure({EP_MIDI_IN, Direction::IN, TransferType::BULK, MidiIn::PACKET_SIZE});
         }
         midi_configured_ = HAS_MIDI;
     }
@@ -1427,16 +1427,16 @@ class AudioInterface {
                     ++dbg_set_iface_alt_valid_;
                     current_out_alt_ = OUT_ALT_CONFIGS[alt_setting - 1];
                     hal.ep_configure(
-                        {EP_AUDIO_OUT, Direction::Out, TransferType::Isochronous, current_out_alt_.packet_size});
+                        {EP_AUDIO_OUT, Direction::OUT, TransferType::ISOCHRONOUS, current_out_alt_.packet_size});
                     dbg_out_rx_last_len_ = 0;
                     dbg_out_rx_min_len_ = 0;
                     dbg_out_rx_max_len_ = 0;
                     dbg_out_rx_short_count_ = 0;
 
-                    if constexpr (SYNC_MODE == AudioSyncMode::Async && !use_implicit_fb) {
+                    if constexpr (SYNC_MODE == AudioSyncMode::ASYNC && !use_implicit_fb) {
                         // Explicit feedback mode: configure feedback endpoint
                         constexpr uint16_t fb_size = FB_PACKET_SIZE;
-                        hal.ep_configure({EP_FEEDBACK, Direction::In, TransferType::Isochronous, fb_size});
+                        hal.ep_configure({EP_FEEDBACK, Direction::IN, TransferType::ISOCHRONOUS, fb_size});
                         hal.set_feedback_ep(EP_FEEDBACK);
 
                         // Send initial feedback immediately after EP config
@@ -1513,7 +1513,7 @@ class AudioInterface {
                 if (alt_setting >= 1 && alt_setting <= AudioIn::ALT_COUNT) {
                     current_in_alt_ = IN_ALT_CONFIGS[alt_setting - 1];
                     hal.ep_configure(
-                        {EP_AUDIO_IN, Direction::In, TransferType::Isochronous, current_in_alt_.packet_size});
+                        {EP_AUDIO_IN, Direction::IN, TransferType::ISOCHRONOUS, current_in_alt_.packet_size});
                     audio_in_streaming_ = true;
                     audio_in_pending_ = true; // Ready to send first packet on SOF
                     in_ring_buffer_.reset_and_start();
@@ -2129,7 +2129,7 @@ class AudioInterface {
                     --out_rx_blocked_frames_;
                     ++dbg_on_sof_decrement_;
                 }
-                if constexpr (SYNC_MODE == AudioSyncMode::Async && !use_implicit_fb) {
+                if constexpr (SYNC_MODE == AudioSyncMode::ASYNC && !use_implicit_fb) {
                     ++sof_count_;
                     // Update feedback value at FB_UPDATE_INTERVAL rate
                     const bool update = (!fb_last_valid_) || ((sof_count_ % FB_UPDATE_INTERVAL) == 0);
@@ -2367,7 +2367,7 @@ class AudioInterface {
             (void)frame_count;
             return 0;
         } else {
-            if constexpr (SYNC_MODE == AudioSyncMode::Sync || SYNC_MODE == AudioSyncMode::Async) {
+            if constexpr (SYNC_MODE == AudioSyncMode::SYNC || SYNC_MODE == AudioSyncMode::ASYNC) {
                 return read_audio(dest, frame_count);
             }
             if (!out_primed_) {
@@ -2394,7 +2394,7 @@ class AudioInterface {
             (void)frame_count;
             return 0;
         } else {
-            if constexpr (SYNC_MODE == AudioSyncMode::Sync || SYNC_MODE == AudioSyncMode::Async) {
+            if constexpr (SYNC_MODE == AudioSyncMode::SYNC || SYNC_MODE == AudioSyncMode::ASYNC) {
                 return read_audio(dest, frame_count);
             }
             if (!out_primed_) {
@@ -2976,35 +2976,35 @@ class AudioInterface {
 // ============================================================================
 
 // Audio OUT only
-using AudioInterface48kAsync = AudioInterface<UacVersion::Uac1, AudioStereo48k, NoAudioPort, NoMidiPort, NoMidiPort, 2>;
-using AudioInterface44kAsync = AudioInterface<UacVersion::Uac1, AudioStereo44k, NoAudioPort, NoMidiPort, NoMidiPort, 2>;
+using AudioInterface48kAsync = AudioInterface<UacVersion::UAC1, AudioStereo48k, NoAudioPort, NoMidiPort, NoMidiPort, 2>;
+using AudioInterface44kAsync = AudioInterface<UacVersion::UAC1, AudioStereo44k, NoAudioPort, NoMidiPort, NoMidiPort, 2>;
 using AudioInterface48kAsyncV2 =
-    AudioInterface<UacVersion::Uac2, AudioStereo48k, NoAudioPort, NoMidiPort, NoMidiPort, 2>;
+    AudioInterface<UacVersion::UAC2, AudioStereo48k, NoAudioPort, NoMidiPort, NoMidiPort, 2>;
 using AudioInterface96kAsyncV2 =
-    AudioInterface<UacVersion::Uac2, AudioStereo96k, NoAudioPort, NoMidiPort, NoMidiPort, 2>;
+    AudioInterface<UacVersion::UAC2, AudioStereo96k, NoAudioPort, NoMidiPort, NoMidiPort, 2>;
 
 // Audio OUT + MIDI
 using AudioMidiInterface48k =
-    AudioInterface<UacVersion::Uac1, AudioStereo48k, NoAudioPort, MidiPort<1, 3>, MidiPort<1, 3>, 2>;
+    AudioInterface<UacVersion::UAC1, AudioStereo48k, NoAudioPort, MidiPort<1, 3>, MidiPort<1, 3>, 2>;
 using AudioMidiInterface48kV2 =
-    AudioInterface<UacVersion::Uac2, AudioStereo48k, NoAudioPort, MidiPort<1, 3>, MidiPort<1, 3>, 2>;
+    AudioInterface<UacVersion::UAC2, AudioStereo48k, NoAudioPort, MidiPort<1, 3>, MidiPort<1, 3>, 2>;
 
 // MIDI only
-using MidiInterface = AudioInterface<UacVersion::Uac1, NoAudioPort, NoAudioPort, MidiPort<1, 1>, MidiPort<1, 1>, 0>;
-using MidiInterfaceV2 = AudioInterface<UacVersion::Uac2, NoAudioPort, NoAudioPort, MidiPort<1, 1>, MidiPort<1, 1>, 0>;
+using MidiInterface = AudioInterface<UacVersion::UAC1, NoAudioPort, NoAudioPort, MidiPort<1, 1>, MidiPort<1, 1>, 0>;
+using MidiInterfaceV2 = AudioInterface<UacVersion::UAC2, NoAudioPort, NoAudioPort, MidiPort<1, 1>, MidiPort<1, 1>, 0>;
 
 // Audio IN/OUT (full duplex)
 // EP1=Audio OUT, EP2=Feedback, EP3=Audio IN
 using AudioFullDuplex48k =
-    AudioInterface<UacVersion::Uac1, AudioStereo48k, AudioPort<2, 16, 48000, 3>, NoMidiPort, NoMidiPort, 2>;
+    AudioInterface<UacVersion::UAC1, AudioStereo48k, AudioPort<2, 16, 48000, 3>, NoMidiPort, NoMidiPort, 2>;
 using AudioFullDuplex48kV2 =
-    AudioInterface<UacVersion::Uac2, AudioStereo48k, AudioPort<2, 16, 48000, 3>, NoMidiPort, NoMidiPort, 2>;
+    AudioInterface<UacVersion::UAC2, AudioStereo48k, AudioPort<2, 16, 48000, 3>, NoMidiPort, NoMidiPort, 2>;
 
 // Audio IN/OUT + MIDI (full duplex with MIDI)
 // STM32 OTG FS has EP0-3, with IN and OUT being independent:
 // EP1 OUT=Audio OUT, EP1 IN=MIDI IN, EP2 IN=Feedback, EP3 OUT=MIDI OUT, EP3 IN=Audio IN
 using AudioFullDuplexMidi48k =
-    AudioInterface<UacVersion::Uac1, AudioStereo48k, AudioPort<2, 16, 48000, 3>, MidiPort<1, 3>, MidiPort<1, 1>, 2>;
+    AudioInterface<UacVersion::UAC1, AudioStereo48k, AudioPort<2, 16, 48000, 3>, MidiPort<1, 3>, MidiPort<1, 1>, 2>;
 
 // UAC1 Alt settings: expose 16-bit and 24-bit with full rate list
 using AudioAlt16_All = AudioAltSetting<16, AudioRates<44100, 48000, 96000>>;
@@ -3017,82 +3017,82 @@ using AudioAltList24Lo_16All = AudioAltList<AudioAlt16_All, AudioAlt24_Lo>;
 // Full duplex + MIDI with 96kHz max packet size support
 // Audio OUT: 16/24-bit with 44.1/48/96k. Audio IN: 16-bit 96k, 24-bit 44.1/48k only.
 using AudioFullDuplexMidi96kMaxAsync =
-    AudioInterface<UacVersion::Uac1,
+    AudioInterface<UacVersion::UAC1,
                    AudioPort<2, 24, 48000, 1, 96000, AudioRates<44100, 48000, 96000>, AudioAltList24_16>,
                    AudioPort<2, 24, 48000, 3, 96000, AudioRates<44100, 48000, 96000>, AudioAltList24Lo_16All>,
                    MidiPort<1, 3>, // MIDI OUT on EP3
                    MidiPort<1, 1>, // MIDI IN on EP1
                    2,
-                   AudioSyncMode::Async>;
+                   AudioSyncMode::ASYNC>;
 
 using AudioFullDuplexMidi96kMaxAsyncFixedEps =
-    AudioInterface<UacVersion::Uac1,
+    AudioInterface<UacVersion::UAC1,
                    AudioPort<2, 24, 48000, 1, 96000, AudioRates<44100, 48000, 96000>, AudioAltList24_16>,
                    AudioPort<2, 24, 48000, 3, 96000, AudioRates<44100, 48000, 96000>, AudioAltList24Lo_16All>,
                    MidiPort<1, 2>, // MIDI OUT on EP2 (OUT)
                    MidiPort<1, 1>, // MIDI IN on EP1 (IN)
                    2,
-                   AudioSyncMode::Async>;
+                   AudioSyncMode::ASYNC>;
 
 using AudioFullDuplexMidi96kMaxAdaptive =
-    AudioInterface<UacVersion::Uac1,
+    AudioInterface<UacVersion::UAC1,
                    AudioPort<2, 24, 48000, 1, 96000, AudioRates<44100, 48000, 96000>, AudioAltList24_16>,
                    AudioPort<2, 24, 48000, 3, 96000, AudioRates<44100, 48000, 96000>, AudioAltList24Lo_16All>,
                    MidiPort<1, 3>,
                    MidiPort<1, 1>,
                    2,
-                   AudioSyncMode::Adaptive>;
+                   AudioSyncMode::ADAPTIVE>;
 
 using AudioFullDuplexMidi96kMaxSync =
-    AudioInterface<UacVersion::Uac1,
+    AudioInterface<UacVersion::UAC1,
                    AudioPort<2, 24, 48000, 1, 96000, AudioRates<44100, 48000, 96000>, AudioAltList24_16>,
                    AudioPort<2, 24, 48000, 3, 96000, AudioRates<44100, 48000, 96000>, AudioAltList24Lo_16All>,
                    MidiPort<1, 3>,
                    MidiPort<1, 1>,
                    2,
-                   AudioSyncMode::Sync>;
+                   AudioSyncMode::SYNC>;
 
 // Audio OUT + MIDI with 96kHz max packet size support (Audio IN disabled)
 using AudioOutMidi96kMaxAdaptive =
-    AudioInterface<UacVersion::Uac1,
+    AudioInterface<UacVersion::UAC1,
                    AudioPort<2, 24, 48000, 1, 96000, AudioRates<44100, 48000, 96000>, AudioAltList24_16>,
                    NoAudioPort,
                    MidiPort<1, 3>,
                    MidiPort<1, 1>,
                    2,
-                   AudioSyncMode::Adaptive>;
+                   AudioSyncMode::ADAPTIVE>;
 
 using AudioOutMidi96kMaxAsync =
-    AudioInterface<UacVersion::Uac1,
+    AudioInterface<UacVersion::UAC1,
                    AudioPort<2, 24, 48000, 1, 96000, AudioRates<44100, 48000, 96000>, AudioAltList24_16>,
                    NoAudioPort,
                    MidiPort<1, 3>,
                    MidiPort<1, 1>,
                    2,
-                   AudioSyncMode::Async>;
+                   AudioSyncMode::ASYNC>;
 
 // Audio OUT only with 96kHz max packet size support (no MIDI)
 using AudioOut96kMaxAsync =
-    AudioInterface<UacVersion::Uac1,
+    AudioInterface<UacVersion::UAC1,
                    AudioPort<2, 24, 48000, 1, 96000, AudioRates<44100, 48000, 96000>, AudioAltList24_16>,
                    NoAudioPort,
                    NoMidiPort,
                    NoMidiPort,
                    2,
-                   AudioSyncMode::Async>;
+                   AudioSyncMode::ASYNC>;
 
 // Audio OUT only with 96kHz max packet size support (no MIDI, adaptive sync)
 using AudioOut96kMaxAdaptive =
-    AudioInterface<UacVersion::Uac1,
+    AudioInterface<UacVersion::UAC1,
                    AudioPort<2, 24, 48000, 1, 96000, AudioRates<44100, 48000, 96000>, AudioAltList24_16>,
                    NoAudioPort,
                    NoMidiPort,
                    NoMidiPort,
                    2,
-                   AudioSyncMode::Adaptive>;
+                   AudioSyncMode::ADAPTIVE>;
 
 // Audio IN only (microphone)
 using AudioInOnly48k =
-    AudioInterface<UacVersion::Uac1, NoAudioPort, AudioPort<2, 16, 48000, 1>, NoMidiPort, NoMidiPort, 0>;
+    AudioInterface<UacVersion::UAC1, NoAudioPort, AudioPort<2, 16, 48000, 1>, NoMidiPort, NoMidiPort, 0>;
 
 } // namespace umiusb

@@ -99,10 +99,10 @@ struct ShellConfig {
 
 /// System mode for firmware updates etc.
 enum class SystemMode : uint8_t {
-    Normal = 0,
-    Dfu = 1,           // Device Firmware Update
-    Bootloader = 2,
-    Safe = 3
+    NORMAL = 0,
+    DFU = 1,           // Device Firmware Update
+    BOOTLOADER = 2,
+    SAFE = 3
 };
 
 // ============================================================================
@@ -214,7 +214,7 @@ public:
 
         // Config commands (ADMIN+)
         if (cmd.is_command("config")) {
-            if (!auth_.has_access(shell::AccessLevel::Admin)) {
+            if (!auth_.has_access(shell::AccessLevel::ADMIN)) {
                 return "ERROR: ADMIN access required";
             }
             return cmd_config(cmd);
@@ -227,7 +227,7 @@ public:
 
         // Diag commands (ADMIN+)
         if (cmd.is_command("diag")) {
-            if (!auth_.has_access(shell::AccessLevel::Admin)) {
+            if (!auth_.has_access(shell::AccessLevel::ADMIN)) {
                 return "ERROR: ADMIN access required";
             }
             return cmd_diag(cmd);
@@ -235,7 +235,7 @@ public:
 
         // Factory commands (FACTORY only)
         if (cmd.is_command("factory")) {
-            if (!auth_.has_access(shell::AccessLevel::Factory)) {
+            if (!auth_.has_access(shell::AccessLevel::FACTORY)) {
                 return "ERROR: FACTORY access required";
             }
             return cmd_factory(cmd);
@@ -257,7 +257,7 @@ public:
             return cmd_show_tasks();
         }
         if (cmd.is_command("reset")) {
-            if (!auth_.has_access(shell::AccessLevel::Admin)) {
+            if (!auth_.has_access(shell::AccessLevel::ADMIN)) {
                 return "ERROR: ADMIN access required";
             }
             return "RESET_REQUESTED";
@@ -309,7 +309,7 @@ private:
         out_.put_str("  mode          - Show current mode\n");
         out_.put_str("  mode <name>   - Switch mode (ADMIN)\n");
 
-        if (auth_.has_access(shell::AccessLevel::Admin)) {
+        if (auth_.has_access(shell::AccessLevel::ADMIN)) {
             out_.put_line();
             out_.put_str("Config commands (ADMIN):\n");
             out_.put_str("  config midi channel <1-16>\n");
@@ -323,7 +323,7 @@ private:
             out_.put_str("  diag reset [soft|hard]\n");
         }
 
-        if (auth_.has_access(shell::AccessLevel::Factory)) {
+        if (auth_.has_access(shell::AccessLevel::FACTORY)) {
             out_.put_line();
             out_.put_str("Factory commands (FACTORY):\n");
             out_.put_str("  factory info\n");
@@ -360,9 +360,9 @@ private:
     const char* cmd_whoami() {
         out_.put_str("Access level: ");
         switch (auth_.level()) {
-            case shell::AccessLevel::User: out_.put_str("USER"); break;
-            case shell::AccessLevel::Admin: out_.put_str("ADMIN"); break;
-            case shell::AccessLevel::Factory: out_.put_str("FACTORY"); break;
+            case shell::AccessLevel::USER: out_.put_str("USER"); break;
+            case shell::AccessLevel::ADMIN: out_.put_str("ADMIN"); break;
+            case shell::AccessLevel::FACTORY: out_.put_str("FACTORY"); break;
         }
         return out_.c_str();
     }
@@ -380,11 +380,11 @@ private:
             return out_.c_str();
         }
 
-        shell::AccessLevel target = shell::AccessLevel::User;
+        shell::AccessLevel target = shell::AccessLevel::USER;
         if (std::strcmp(cmd.arg(1), "admin") == 0) {
-            target = shell::AccessLevel::Admin;
+            target = shell::AccessLevel::ADMIN;
         } else if (std::strcmp(cmd.arg(1), "factory") == 0) {
-            target = shell::AccessLevel::Factory;
+            target = shell::AccessLevel::FACTORY;
         } else {
             return "Usage: auth <admin|factory> <password>";
         }
@@ -392,7 +392,7 @@ private:
         if (auth_.authenticate(target, cmd.arg(2), now,
                                shell::simple_password_check, nullptr)) {
             out_.put_str("Authenticated as ");
-            out_.put_str(target == shell::AccessLevel::Admin ? "ADMIN" : "FACTORY");
+            out_.put_str(target == shell::AccessLevel::ADMIN ? "ADMIN" : "FACTORY");
             return out_.c_str();
         }
         return "ERROR: Authentication failed";
@@ -656,10 +656,10 @@ private:
         out_.put_str("===========\n");
         out_.put_str("  Current: ");
         switch (mode) {
-            case SystemMode::Normal: out_.put_str("NORMAL"); break;
-            case SystemMode::Dfu: out_.put_str("DFU (Firmware Update)"); break;
-            case SystemMode::Bootloader: out_.put_str("BOOTLOADER"); break;
-            case SystemMode::Safe: out_.put_str("SAFE MODE"); break;
+            case SystemMode::NORMAL: out_.put_str("NORMAL"); break;
+            case SystemMode::DFU: out_.put_str("DFU (Firmware Update)"); break;
+            case SystemMode::BOOTLOADER: out_.put_str("BOOTLOADER"); break;
+            case SystemMode::SAFE: out_.put_str("SAFE MODE"); break;
         }
         out_.put_line();
         out_.put_str("\nAvailable modes:\n");
@@ -899,31 +899,31 @@ private:
             return cmd_show_mode();
         }
 
-        if (!auth_.has_access(shell::AccessLevel::Admin)) {
+        if (!auth_.has_access(shell::AccessLevel::ADMIN)) {
             return "ERROR: ADMIN access required to change mode";
         }
 
         const char* target = cmd.arg(1);
 
         if (std::strcmp(target, "normal") == 0) {
-            mode = SystemMode::Normal;
+            mode = SystemMode::NORMAL;
             return "Mode set to NORMAL";
         }
         if (std::strcmp(target, "dfu") == 0) {
-            mode = SystemMode::Dfu;
+            mode = SystemMode::DFU;
             out_.put_str("Mode set to DFU.\n");
             out_.put_str("Device is ready for firmware update.\n");
             out_.put_str("Use 'mode normal' to exit DFU mode.");
             return out_.c_str();
         }
         if (std::strcmp(target, "bootloader") == 0 || std::strcmp(target, "boot") == 0) {
-            mode = SystemMode::Bootloader;
+            mode = SystemMode::BOOTLOADER;
             out_.put_str("Mode set to BOOTLOADER.\n");
             out_.put_str("Use 'mode normal' to return to normal mode.");
             return out_.c_str();
         }
         if (std::strcmp(target, "safe") == 0) {
-            mode = SystemMode::Safe;
+            mode = SystemMode::SAFE;
             out_.put_str("Mode set to SAFE.\n");
             out_.put_str("Running with minimal features.\n");
             out_.put_str("Use 'mode normal' to return to normal operation.");

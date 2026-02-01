@@ -79,7 +79,7 @@ inline uint32_t get_time_ms() {
 // Driver operations table
 inline const Ops kOps = {
     .name = "systick",
-    .category = Category::Timer,
+    .category = Category::TIMER,
     .init = init,
     .deinit = deinit,
     .irq = irq,

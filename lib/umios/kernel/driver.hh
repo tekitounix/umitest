@@ -11,14 +11,14 @@ namespace umi::driver {
 // ============================================================================
 
 enum class Category : uint8_t {
-    Audio = 0,    // Audio I/O (codec, I2S, etc.)
-    Midi = 1,     // MIDI I/O
-    Timer = 2,    // System timer
-    Uart = 3,     // Serial communication
-    Storage = 4,  // Flash/SD card
-    Display = 5,  // LCD/OLED
-    Input = 6,    // Buttons, encoders
-    Custom = 255, // Application-defined
+    AUDIO = 0,    // Audio I/O (codec, I2S, etc.)
+    MIDI = 1,     // MIDI I/O
+    TIMER = 2,    // System timer
+    UART = 3,     // Serial communication
+    STORAGE = 4,  // Flash/SD card
+    DISPLAY = 5,  // LCD/OLED
+    INPUT = 6,    // Buttons, encoders
+    CUSTOM = 255, // Application-defined
 };
 
 // ============================================================================

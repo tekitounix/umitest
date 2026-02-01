@@ -81,7 +81,7 @@ static void dwt_init() {
 
 namespace current {
 
-enum class EventType : uint8_t { Midi, Param, Raw };
+enum class EventType : uint8_t { MIDI, PARAM, RAW };
 
 struct MidiData {
     uint8_t bytes[3] = {0, 0, 0};
@@ -109,7 +109,7 @@ struct ParamData {
 struct Event {
     uint8_t port_id = 0;
     uint32_t sample_pos = 0;
-    EventType type = EventType::Midi;
+    EventType type = EventType::MIDI;
     union {
         MidiData midi;
         ParamData param;
@@ -133,7 +133,7 @@ public:
 
         out.port_id = 0;
         out.sample_pos = pos;
-        out.type = EventType::Midi;
+        out.type = EventType::MIDI;
         out.midi.bytes[0] = running_status_;
         out.midi.bytes[1] = data_[0];
         out.midi.bytes[2] = (needed > 1) ? data_[1] : 0;
@@ -149,7 +149,7 @@ private:
 
 // Serialize: Event → MIDI 1.0 bytes
 inline size_t serialize(const Event& e, uint8_t* out) {
-    if (e.type != EventType::Midi) return 0;
+    if (e.type != EventType::MIDI) return 0;
     out[0] = e.midi.bytes[0];
     out[1] = e.midi.bytes[1];
     if (e.midi.size > 2) {
@@ -171,7 +171,7 @@ inline size_t serialize(const Event& e, uint8_t* out) {
 
 namespace current_opt {
 
-enum class EventType : uint8_t { Midi, Param, Raw };
+enum class EventType : uint8_t { MIDI, PARAM, RAW };
 
 struct MidiData {
     uint8_t bytes[3] = {0, 0, 0};
@@ -203,7 +203,7 @@ struct ParamData {
 struct Event {
     uint8_t port_id = 0;
     uint32_t sample_pos = 0;
-    EventType type = EventType::Midi;
+    EventType type = EventType::MIDI;
     union {
         MidiData midi;
         ParamData param;
@@ -229,7 +229,7 @@ public:
             if (is_2byte_) {
                 out.port_id = 0;
                 out.sample_pos = pos;
-                out.type = EventType::Midi;
+                out.type = EventType::MIDI;
                 out.midi.bytes[0] = running_status_;
                 out.midi.bytes[1] = data0_;
                 out.midi.bytes[2] = 0;
@@ -241,7 +241,7 @@ public:
 
         out.port_id = 0;
         out.sample_pos = pos;
-        out.type = EventType::Midi;
+        out.type = EventType::MIDI;
         out.midi.bytes[0] = running_status_;
         out.midi.bytes[1] = data0_;
         out.midi.bytes[2] = byte;
@@ -258,7 +258,7 @@ private:
 
 // 最適化Serialize
 inline size_t serialize(const Event& e, uint8_t* out) {
-    if (e.type != EventType::Midi) return 0;
+    if (e.type != EventType::MIDI) return 0;
     out[0] = e.midi.bytes[0];
     out[1] = e.midi.bytes[1];
     uint8_t cmd = out[0] & 0xF0;
@@ -494,7 +494,7 @@ uint32_t bench_current() {
 
     for (size_t i = 0; i < event_count; ++i) {
         current::Event& e = events[i];
-        if (e.type == current::EventType::Midi) {
+        if (e.type == current::EventType::MIDI) {
             if (e.midi.is_note_on()) {
                 e.midi.bytes[2] = (e.midi.bytes[2] * 3) / 4;
             }
@@ -522,7 +522,7 @@ uint32_t bench_current_opt() {
 
     for (size_t i = 0; i < event_count; ++i) {
         current_opt::Event& e = events[i];
-        if (e.type == current_opt::EventType::Midi) {
+        if (e.type == current_opt::EventType::MIDI) {
             if (e.midi.is_note_on()) {
                 e.midi.bytes[2] = (e.midi.bytes[2] * 3) / 4;
             }
@@ -553,7 +553,7 @@ __attribute__((noinline, used))
 size_t bench_current_opt_dispatch(current_opt::Event* events, size_t count) {
     size_t note_on_count = 0;
     for (size_t i = 0; i < count; ++i) {
-        if (events[i].type == current_opt::EventType::Midi) {
+        if (events[i].type == current_opt::EventType::MIDI) {
             if (events[i].midi.is_note_on()) {
                 note_on_count = note_on_count + 1;
             }
@@ -593,7 +593,7 @@ __attribute__((noinline, used))
 size_t bench_current_dispatch(current::Event* events, size_t count) {
     size_t note_on_count = 0;
     for (size_t i = 0; i < count; ++i) {
-        if (events[i].type == current::EventType::Midi) {
+        if (events[i].type == current::EventType::MIDI) {
             if (events[i].midi.is_note_on()) {
                 note_on_count = note_on_count + 1;
             }
@@ -835,7 +835,7 @@ extern "C" [[noreturn]] void _start() {
         }
         size_t out_pos = 0;
         for (size_t i = 0; i < event_count; ++i) {
-            if (events[i].type == current::EventType::Midi) {
+            if (events[i].type == current::EventType::MIDI) {
                 if (events[i].midi.is_note_on()) {
                     events[i].midi.bytes[2] = (events[i].midi.bytes[2] * 3) / 4;
                 }
@@ -857,7 +857,7 @@ extern "C" [[noreturn]] void _start() {
         }
         size_t out_pos = 0;
         for (size_t i = 0; i < event_count; ++i) {
-            if (events[i].type == current_opt::EventType::Midi) {
+            if (events[i].type == current_opt::EventType::MIDI) {
                 if (events[i].midi.is_note_on()) {
                     events[i].midi.bytes[2] = (events[i].midi.bytes[2] * 3) / 4;
                 }
@@ -973,7 +973,7 @@ extern "C" [[noreturn]] void _start() {
     for (size_t i = 0; i < LARGE_COUNT; ++i) {
         cur_large[i].port_id = 0;
         cur_large[i].sample_pos = i;
-        cur_large[i].type = current_opt::EventType::Midi;
+        cur_large[i].type = current_opt::EventType::MIDI;
         cur_large[i].midi.bytes[0] = (i % 2) ? 0x80 : 0x90;
         cur_large[i].midi.bytes[1] = 60 + (i % 12);
         cur_large[i].midi.bytes[2] = 100;

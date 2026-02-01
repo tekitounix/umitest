@@ -12,10 +12,10 @@ namespace umi::modules {
 
 /// USB Audio state machine
 enum class UsbAudioState {
-    Disconnected,   // USB not connected
-    Connected,      // USB connected, not streaming
-    Streaming,      // Audio streaming active
-    Suspended,      // USB suspended (low power)
+    DISCONNECTED,   // USB not connected
+    CONNECTED,      // USB connected, not streaming
+    STREAMING,      // Audio streaming active
+    SUSPENDED,      // USB suspended (low power)
 };
 
 /// USB Audio module configuration

@@ -20,28 +20,28 @@ using namespace bsp::io;
 
 constexpr auto inputs = make_inputs(
     // Volume: 0-100%
-    adc("Master Volume", "VOL", 0, 0, 100, ValueType::Percent, Curve::Linear, "%"),
-    
+    adc("Master Volume", "VOL", 0, 0, 100, ValueType::PERCENT, Curve::LINEAR, "%"),
+
     // Filter: 20Hz〜20000Hz (対数レスポンス)
-    adc("Filter Cutoff", "CUT", 1, 20, 20000, ValueType::Frequency, Curve::Log, "Hz"),
-    
+    adc("Filter Cutoff", "CUT", 1, 20, 20000, ValueType::FREQUENCY, Curve::LOG, "Hz"),
+
     // Resonance: 0-100%
-    adc("Resonance", "RES", 2, 0, 100, ValueType::Percent, Curve::Linear),
-    
+    adc("Resonance", "RES", 2, 0, 100, ValueType::PERCENT, Curve::LINEAR),
+
     // Envelope times: 1ms〜2000ms, 10ms〜5000ms (対数)
-    adc("Attack",  "ATK", 3, 1, 2000, ValueType::Time, Curve::Log, "ms"),
-    adc("Release", "REL", 4, 10, 5000, ValueType::Time, Curve::Log, "ms"),
-    
+    adc("Attack",  "ATK", 3, 1, 2000, ValueType::TIME, Curve::LOG, "ms"),
+    adc("Release", "REL", 4, 10, 5000, ValueType::TIME, Curve::LOG, "ms"),
+
     // Pitch: -24〜+24 semitones (バイポーラー)
-    adc_bipolar("Pitch Bend", "PIT", 5, -24, 24, 0, ValueType::Note, Curve::Linear),
-    
+    adc_bipolar("Pitch Bend", "PIT", 5, -24, 24, 0, ValueType::NOTE, Curve::LINEAR),
+
     // Pan: -100〜+100 (バイポーラー、L-C-R表示)
-    adc_bipolar("Pan", "PAN", 6, -100, 100, 0, ValueType::Bipolar, Curve::Linear),
-    
+    adc_bipolar("Pan", "PAN", 6, -100, 100, 0, ValueType::BIPOLAR, Curve::LINEAR),
+
     // Buttons
     button("Trigger", "TRG", 0),
     button("Mode",    "MOD", 1),
-    
+
     // Encoder: 0-127
     encoder("Menu", "ENC", 0, 0, 127, 1.0f, false, 0)
 );
@@ -65,11 +65,11 @@ namespace in {
 // ============================================================================
 
 constexpr auto outputs = make_outputs(
-    led("Volume", "VOL", 0, Animation::Smooth),    // Smooth volume indicator
+    led("Volume", "VOL", 0, Animation::SMOOTH),    // Smooth volume indicator
     led_meter("Level L", "L", 1, -600, 0),          // Left level meter (-60.0〜0.0 dB)
     led_meter("Level R", "R", 2, -600, 0),          // Right level meter
     led_blink("Status", "ST", 0),                    // Blinking status LED
-    rgb("Mode", "RGB", 0, Animation::Smooth)         // Mode indicator with smooth
+    rgb("Mode", "RGB", 0, Animation::SMOOTH)         // Mode indicator with smooth
 );
 
 namespace out {
@@ -86,7 +86,7 @@ namespace out {
 // ============================================================================
 
 constexpr CanvasConfig canvas = {
-    .hw_type = HwType::SpiOled,
+    .hw_type = HwType::SPI_OLED,
     .hw_id = 0,
     .width = 128,
     .height = 64,

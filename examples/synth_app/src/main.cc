@@ -82,7 +82,7 @@ class SynthProcessor {
 
         // Process input events (MIDI notes via ROUTE_AUDIO)
         for (const auto& ev : ctx.input_events) {
-            if (ev.type == EventType::Midi) {
+            if (ev.type == EventType::MIDI) {
                 synth_.handle_midi(ev.midi.bytes, ev.midi.size);
             }
         }

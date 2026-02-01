@@ -86,8 +86,8 @@ using DefaultAltList = AudioAltList<AudioAltSetting<BitDepth_, Rates_>>;
 // ============================================================================
 
 enum class UacVersion : uint8_t {
-    Uac1 = 1, // USB Audio Class 1.0 - widest compatibility
-    Uac2 = 2, // USB Audio Class 2.0 - high sample rates, low latency
+    UAC1 = 1, // USB Audio Class 1.0 - widest compatibility
+    UAC2 = 2, // USB Audio Class 2.0 - high sample rates, low latency
 };
 
 // ============================================================================
@@ -95,9 +95,9 @@ enum class UacVersion : uint8_t {
 // ============================================================================
 
 enum class AudioSyncMode : uint8_t {
-    Async = 0x05,    // Asynchronous - device clock master, feedback EP required
-    Adaptive = 0x09, // Adaptive - device adapts to host rate
-    Sync = 0x0D,     // Synchronous - locked to SOF (not recommended)
+    ASYNC = 0x05,    // Asynchronous - device clock master, feedback EP required
+    ADAPTIVE = 0x09, // Adaptive - device adapts to host rate
+    SYNC = 0x0D,     // Synchronous - locked to SOF (not recommended)
 };
 
 // ============================================================================
@@ -105,9 +105,9 @@ enum class AudioSyncMode : uint8_t {
 // ============================================================================
 
 enum class AudioDirection : uint8_t {
-    Out = 0,  // Host -> Device (speaker/playback)
-    In = 1,   // Device -> Host (microphone/recording)
-    Both = 2, // Bidirectional
+    OUT = 0,  // Host -> Device (speaker/playback)
+    IN = 1,   // Device -> Host (microphone/recording)
+    BOTH = 2, // Bidirectional
 };
 
 // ============================================================================
@@ -128,7 +128,7 @@ using PllRateController = umidsp::PiRateController;
 ///
 /// The host adjusts its packet size based on the feedback value to keep the
 /// device's ring buffer at ~50% fill level.
-template <UacVersion Version = UacVersion::Uac1>
+template <UacVersion Version = UacVersion::UAC1>
 class FeedbackCalculator {
   public:
     // FS feedback: always 10.14 format, 3 bytes

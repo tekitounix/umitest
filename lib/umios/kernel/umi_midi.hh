@@ -14,29 +14,29 @@ namespace umi::midi {
 
 enum class Status : std::uint8_t {
     // Channel Voice Messages (high nibble, low nibble = channel)
-    NoteOff         = 0x80,
-    NoteOn          = 0x90,
-    PolyPressure    = 0xA0,  // Polyphonic Aftertouch
-    ControlChange   = 0xB0,
-    ProgramChange   = 0xC0,
-    ChannelPressure = 0xD0,  // Monophonic Aftertouch
-    PitchBend       = 0xE0,
-    
+    NOTE_OFF         = 0x80,
+    NOTE_ON          = 0x90,
+    POLY_PRESSURE    = 0xA0,  // Polyphonic Aftertouch
+    CONTROL_CHANGE   = 0xB0,
+    PROGRAM_CHANGE   = 0xC0,
+    CHANNEL_PRESSURE = 0xD0,  // Monophonic Aftertouch
+    PITCH_BEND       = 0xE0,
+
     // System Messages
-    SysEx           = 0xF0,
-    TimeCode        = 0xF1,
-    SongPosition    = 0xF2,
-    SongSelect      = 0xF3,
-    TuneRequest     = 0xF6,
-    SysExEnd        = 0xF7,
-    
+    SYSEX            = 0xF0,
+    TIME_CODE        = 0xF1,
+    SONG_POSITION    = 0xF2,
+    SONG_SELECT      = 0xF3,
+    TUNE_REQUEST     = 0xF6,
+    SYSEX_END        = 0xF7,
+
     // System Real-Time
-    TimingClock     = 0xF8,
-    Start           = 0xFA,
-    Continue        = 0xFB,
-    Stop            = 0xFC,
-    ActiveSensing   = 0xFE,
-    Reset           = 0xFF,
+    TIMING_CLOCK     = 0xF8,
+    START            = 0xFA,
+    CONTINUE         = 0xFB,
+    STOP             = 0xFC,
+    ACTIVE_SENSING   = 0xFE,
+    RESET            = 0xFF,
 };
 
 // =====================================

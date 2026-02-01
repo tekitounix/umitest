@@ -27,11 +27,11 @@ struct SharedMemory;
 
 /// Application execution state
 enum class AppState : uint8_t {
-    None = 0,       ///< No application loaded
-    Loaded,         ///< Application loaded, not yet started
-    Running,        ///< Application running
-    Suspended,      ///< Application suspended
-    Terminated,     ///< Application terminated
+    NONE = 0,       ///< No application loaded
+    LOADED,         ///< Application loaded, not yet started
+    RUNNING,        ///< Application running
+    SUSPENDED,      ///< Application suspended
+    TERMINATED,     ///< Application terminated
 };
 
 /// Processor function signature (called from audio ISR)
@@ -39,7 +39,7 @@ using ProcessFn = void (*)(void* processor, AudioContext& ctx);
 
 /// Application runtime information
 struct AppRuntime {
-    AppState state = AppState::None;
+    AppState state = AppState::NONE;
     
     // Memory layout
     void* base = nullptr;           ///< Application base address
@@ -65,7 +65,7 @@ struct AppRuntime {
     
     /// Clear all state
     void clear() noexcept {
-        state = AppState::None;
+        state = AppState::NONE;
         base = nullptr;
         text_start = nullptr;
         data_start = nullptr;
@@ -136,7 +136,7 @@ public:
     /// This runs the app's initialization code synchronously
     /// @return true if entry was called, false if not ready
     bool call_entry() noexcept {
-        if (runtime_.state != AppState::Running || runtime_.entry == nullptr) {
+        if (runtime_.state != AppState::RUNNING || runtime_.entry == nullptr) {
             return false;
         }
         runtime_.entry();
@@ -175,7 +175,7 @@ public:
     /// @param ctx Audio context
     /// @note This is called from ISR context, must be fast and non-blocking
     void call_process(AudioContext& ctx) noexcept {
-        if (runtime_.has_processor() && runtime_.state == AppState::Running) {
+        if (runtime_.has_processor() && runtime_.state == AppState::RUNNING) {
             runtime_.process_fn(runtime_.processor, ctx);
         }
     }
@@ -189,7 +189,7 @@ public:
     void call_process(std::span<float> output, std::span<const float> input, 
                      uint64_t sample_pos, uint32_t frames, float dt) noexcept {
         (void)sample_pos;
-        if (simple_process_fn_ != nullptr && runtime_.state == AppState::Running) {
+        if (simple_process_fn_ != nullptr && runtime_.state == AppState::RUNNING) {
             simple_process_fn_(output.data(), input.data(), frames, dt);
         }
     }
@@ -201,7 +201,7 @@ public:
     
     /// Check if an application is loaded
     [[nodiscard]] bool is_loaded() const noexcept { 
-        return runtime_.state != AppState::None; 
+        return runtime_.state != AppState::NONE; 
     }
     
     /// Check if processor is available
@@ -218,7 +218,7 @@ public:
     /// Set entry point and mark as running (for direct XIP execution)
     void set_entry(void (*entry)()) noexcept {
         runtime_.entry = entry;
-        runtime_.state = AppState::Running;
+        runtime_.state = AppState::RUNNING;
     }
 
 private:

@@ -12,11 +12,11 @@ namespace umi {
 
 /// Event type discriminator
 enum class EventType : uint8_t {
-    Midi,         ///< MIDI message
-    Param,        ///< Parameter change
-    Raw,          ///< Raw data
-    ButtonDown,   ///< Button pressed
-    ButtonUp,     ///< Button released
+    MIDI,         ///< MIDI message
+    PARAM,        ///< Parameter change
+    RAW,          ///< Raw data
+    BUTTON_DOWN,  ///< Button pressed
+    BUTTON_UP,    ///< Button released
 };
 
 /// MIDI event data
@@ -76,7 +76,7 @@ struct ButtonData {
 struct Event {
     port_id_t port_id = 0;          ///< Port this event belongs to
     uint32_t sample_pos = 0;        ///< Sample position within buffer
-    EventType type = EventType::Midi;
+    EventType type = EventType::MIDI;
     
     union {
         MidiData midi;
@@ -86,14 +86,14 @@ struct Event {
     };
     
     Event() noexcept : midi{} {}
-    
+
     /// Create MIDI event
-    static Event make_midi(port_id_t port, uint32_t pos, 
+    static Event make_midi(port_id_t port, uint32_t pos,
                            uint8_t status, uint8_t d1, uint8_t d2 = 0) noexcept {
         Event e;
         e.port_id = port;
         e.sample_pos = pos;
-        e.type = EventType::Midi;
+        e.type = EventType::MIDI;
         e.midi.bytes[0] = status;
         e.midi.bytes[1] = d1;
         e.midi.bytes[2] = d2;
@@ -106,7 +106,7 @@ struct Event {
         Event e;
         e.port_id = 0;  // Param events don't use port
         e.sample_pos = pos;
-        e.type = EventType::Param;
+        e.type = EventType::PARAM;
         e.param.id = id;
         e.param.value = value;
         return e;
@@ -135,7 +135,7 @@ struct Event {
         Event e;
         e.port_id = 0;
         e.sample_pos = pos;
-        e.type = EventType::ButtonDown;
+        e.type = EventType::BUTTON_DOWN;
         e.button.button_id = button_id;
         return e;
     }
@@ -145,7 +145,7 @@ struct Event {
         Event e;
         e.port_id = 0;
         e.sample_pos = pos;
-        e.type = EventType::ButtonUp;
+        e.type = EventType::BUTTON_UP;
         e.button.button_id = button_id;
         return e;
     }

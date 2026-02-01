@@ -429,7 +429,7 @@ TEST(template_decoder_reject_unsupported) {
     // CC is not supported by SynthDecoder
     auto r = decoder.decode_byte(0xB0, ump);
     ASSERT(!r.has_value());  // Error
-    ASSERT(r.error().code == umidi::ErrorCode::NotSupported);
+    ASSERT(r.error().code == umidi::ErrorCode::NOT_SUPPORTED);
 }
 
 TEST(template_decoder_channel_filtering) {
@@ -441,7 +441,7 @@ TEST(template_decoder_channel_filtering) {
     // Channel 0 should be filtered
     auto r1 = decoder.decode_byte(0x90, ump);
     ASSERT(!r1.has_value());
-    ASSERT(r1.error().code == umidi::ErrorCode::ChannelFiltered);
+    ASSERT(r1.error().code == umidi::ErrorCode::CHANNEL_FILTERED);
 
     // Channel 5 should be accepted
     decoder.reset();

@@ -28,67 +28,67 @@ namespace umi {
 
 /// System-wide error codes
 enum class Error : std::uint8_t {
-    None = 0,
-    
+    NONE = 0,
+
     // Resource errors
-    OutOfMemory,        ///< Heap allocation failed
-    OutOfTasks,         ///< No free task slots
-    OutOfTimers,        ///< No free timer slots
-    OutOfBuffers,       ///< No free buffer slots
-    
+    OUT_OF_MEMORY,      ///< Heap allocation failed
+    OUT_OF_TASKS,       ///< No free task slots
+    OUT_OF_TIMERS,      ///< No free timer slots
+    OUT_OF_BUFFERS,     ///< No free buffer slots
+
     // State errors
-    InvalidTask,        ///< TaskId is invalid or deleted
-    InvalidState,       ///< Operation not allowed in current state
-    AlreadyRunning,     ///< Already started
-    NotRunning,         ///< Not yet started
-    
+    INVALID_TASK,       ///< TaskId is invalid or deleted
+    INVALID_STATE,      ///< Operation not allowed in current state
+    ALREADY_RUNNING,    ///< Already started
+    NOT_RUNNING,        ///< Not yet started
+
     // Parameter errors
-    InvalidParam,       ///< Invalid parameter value
-    NullPointer,        ///< Required pointer is null
-    BufferTooSmall,     ///< Buffer size insufficient
-    
+    INVALID_PARAM,      ///< Invalid parameter value
+    NULL_POINTER,       ///< Required pointer is null
+    BUFFER_TOO_SMALL,   ///< Buffer size insufficient
+
     // Timeout errors
-    Timeout,            ///< Operation timed out
-    WouldBlock,         ///< Non-blocking operation would block
-    
+    TIMEOUT,            ///< Operation timed out
+    WOULD_BLOCK,        ///< Non-blocking operation would block
+
     // Hardware errors
-    HardwareFault,      ///< Hardware error detected
-    DmaError,           ///< DMA transfer error
-    
+    HARDWARE_FAULT,     ///< Hardware error detected
+    DMA_ERROR,          ///< DMA transfer error
+
     // Audio-specific errors
-    BufferOverrun,      ///< Audio buffer overrun (DSP too slow)
-    BufferUnderrun,     ///< Audio buffer underrun
-    SampleRateError,    ///< Unsupported sample rate
-    
+    BUFFER_OVERRUN,     ///< Audio buffer overrun (DSP too slow)
+    BUFFER_UNDERRUN,    ///< Audio buffer underrun
+    SAMPLE_RATE_ERROR,  ///< Unsupported sample rate
+
     // MIDI-specific errors
-    MidiParseError,     ///< MIDI message parse error
-    MidiBufferFull,     ///< MIDI event buffer full
+    MIDI_PARSE_ERROR,   ///< MIDI message parse error
+    MIDI_BUFFER_FULL,   ///< MIDI event buffer full
 };
 
 /// Convert error to string (for debugging)
 constexpr const char* error_to_string(Error e) {
     switch (e) {
-        case Error::None:           return "None";
-        case Error::OutOfMemory:    return "OutOfMemory";
-        case Error::OutOfTasks:     return "OutOfTasks";
-        case Error::OutOfTimers:    return "OutOfTimers";
-        case Error::OutOfBuffers:   return "OutOfBuffers";
-        case Error::InvalidTask:    return "InvalidTask";
-        case Error::InvalidState:   return "InvalidState";
-        case Error::AlreadyRunning: return "AlreadyRunning";
-        case Error::NotRunning:     return "NotRunning";
-        case Error::InvalidParam:   return "InvalidParam";
-        case Error::NullPointer:    return "NullPointer";
-        case Error::BufferTooSmall: return "BufferTooSmall";
-        case Error::Timeout:        return "Timeout";
-        case Error::WouldBlock:     return "WouldBlock";
-        case Error::HardwareFault:  return "HardwareFault";
-        case Error::DmaError:       return "DmaError";
-        case Error::BufferOverrun:  return "BufferOverrun";
-        case Error::BufferUnderrun: return "BufferUnderrun";
-        case Error::SampleRateError: return "SampleRateError";
-        case Error::MidiParseError: return "MidiParseError";
-        case Error::MidiBufferFull: return "MidiBufferFull";
+        case Error::NONE:             return "None";
+        case Error::OUT_OF_MEMORY:    return "OutOfMemory";
+        case Error::OUT_OF_TASKS:     return "OutOfTasks";
+        case Error::OUT_OF_TIMERS:    return "OutOfTimers";
+        case Error::OUT_OF_BUFFERS:   return "OutOfBuffers";
+        case Error::INVALID_TASK:     return "InvalidTask";
+        case Error::INVALID_STATE:    return "InvalidState";
+        case Error::ALREADY_RUNNING:  return "AlreadyRunning";
+        case Error::NOT_RUNNING:      return "NotRunning";
+        case Error::INVALID_PARAM:    return "InvalidParam";
+        case Error::NULL_POINTER:     return "NullPointer";
+        case Error::BUFFER_TOO_SMALL: return "BufferTooSmall";
+        case Error::TIMEOUT:          return "Timeout";
+        case Error::WOULD_BLOCK:      return "WouldBlock";
+        case Error::HARDWARE_FAULT:   return "HardwareFault";
+        case Error::DMA_ERROR:        return "DmaError";
+        case Error::BUFFER_OVERRUN:   return "BufferOverrun";
+        case Error::BUFFER_UNDERRUN:  return "BufferUnderrun";
+        case Error::SAMPLE_RATE_ERROR: return "SampleRateError";
+        case Error::MIDI_PARSE_ERROR: return "MidiParseError";
+        case Error::MIDI_BUFFER_FULL: return "MidiBufferFull";
         default:                    return "Unknown";
     }
 }
@@ -128,10 +128,10 @@ constexpr auto Err(E error) {
 /// Check if error is recoverable (can retry)
 constexpr bool is_recoverable(Error e) {
     switch (e) {
-        case Error::Timeout:
-        case Error::WouldBlock:
-        case Error::BufferOverrun:
-        case Error::BufferUnderrun:
+        case Error::TIMEOUT:
+        case Error::WOULD_BLOCK:
+        case Error::BUFFER_OVERRUN:
+        case Error::BUFFER_UNDERRUN:
             return true;
         default:
             return false;
@@ -141,9 +141,9 @@ constexpr bool is_recoverable(Error e) {
 /// Check if error is fatal (should panic)
 constexpr bool is_fatal(Error e) {
     switch (e) {
-        case Error::OutOfMemory:
-        case Error::HardwareFault:
-        case Error::DmaError:
+        case Error::OUT_OF_MEMORY:
+        case Error::HARDWARE_FAULT:
+        case Error::DMA_ERROR:
             return true;
         default:
             return false;

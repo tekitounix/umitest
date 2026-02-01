@@ -48,12 +48,12 @@ int main() {
         MockHw::context_switch_requests = 0;
 
         umi::TaskConfig idle_cfg{
-            .prio = umi::Priority::Idle,
+            .prio = umi::Priority::IDLE,
             .uses_fpu = true,
             .name = "idle_fpu",
         };
         umi::TaskConfig audio_cfg{
-            .prio = umi::Priority::Realtime,
+            .prio = umi::Priority::REALTIME,
             .uses_fpu = true,
             .name = "audio_fpu",
         };
@@ -97,7 +97,7 @@ int main() {
     SECTION("Notifications");
     {
         Kernel k;
-        auto t = k.create_task({.prio = umi::Priority::Realtime, .name = "notify_test"});
+        auto t = k.create_task({.prio = umi::Priority::REALTIME, .name = "notify_test"});
 
         k.notify(t, 0x1);
         auto v = k.wait(t, 0x1);
@@ -114,8 +114,8 @@ int main() {
         Kernel k;
         MockHw::core_id = 0;
 
-        auto t_rt = k.create_task({.prio = umi::Priority::Realtime, .name = "audio"});
-        auto t_srv = k.create_task({.prio = umi::Priority::Server, .name = "server"});
+        auto t_rt = k.create_task({.prio = umi::Priority::REALTIME, .name = "audio"});
+        auto t_srv = k.create_task({.prio = umi::Priority::SERVER, .name = "server"});
 
         // Simulate: audio task is Running
         auto next = k.get_next_task();
@@ -164,7 +164,7 @@ int main() {
     SECTION("delete_task");
     {
         Kernel k;
-        auto t = k.create_task({.prio = umi::Priority::User, .name = "temp"});
+        auto t = k.create_task({.prio = umi::Priority::USER, .name = "temp"});
         check(t.valid(), "temp task created");
 
         bool deleted = k.delete_task(t);
@@ -173,7 +173,7 @@ int main() {
         deleted = k.delete_task(t);
         check(!deleted, "delete invalid task fails");
 
-        auto t_reuse = k.create_task({.prio = umi::Priority::User, .name = "reuse"});
+        auto t_reuse = k.create_task({.prio = umi::Priority::USER, .name = "reuse"});
         check(t_reuse.valid(), "task slot reused after delete");
     }
 
@@ -288,7 +288,7 @@ int main() {
     SECTION("suspend_task");
     {
         Kernel k;
-        auto tid = k.create_task({.prio = umi::Priority::User, .name = "suspend_test"});
+        auto tid = k.create_task({.prio = umi::Priority::USER, .name = "suspend_test"});
         k.resume_task(tid);
 
         check(std::string_view(k.get_task_state_str(tid)) == "Running" ||
@@ -310,10 +310,10 @@ int main() {
         umi::Kernel<8, 4, HW> k;
         MockHw::core_id = 0;
 
-        auto t_idle = k.create_task({.prio = umi::Priority::Idle, .name = "idle"});
-        auto t_user = k.create_task({.prio = umi::Priority::User, .name = "user"});
-        auto t_server = k.create_task({.prio = umi::Priority::Server, .name = "server"});
-        auto t_rt = k.create_task({.prio = umi::Priority::Realtime, .name = "realtime"});
+        auto t_idle = k.create_task({.prio = umi::Priority::IDLE, .name = "idle"});
+        auto t_user = k.create_task({.prio = umi::Priority::USER, .name = "user"});
+        auto t_server = k.create_task({.prio = umi::Priority::SERVER, .name = "server"});
+        auto t_rt = k.create_task({.prio = umi::Priority::REALTIME, .name = "realtime"});
 
         k.resume_task(t_idle);
         k.resume_task(t_user);
@@ -337,9 +337,9 @@ int main() {
         umi::Kernel<8, 4, HW> k;
         MockHw::core_id = 0;
 
-        auto u1 = k.create_task({.prio = umi::Priority::User, .name = "user1"});
-        auto u2 = k.create_task({.prio = umi::Priority::User, .name = "user2"});
-        auto u3 = k.create_task({.prio = umi::Priority::User, .name = "user3"});
+        auto u1 = k.create_task({.prio = umi::Priority::USER, .name = "user1"});
+        auto u2 = k.create_task({.prio = umi::Priority::USER, .name = "user2"});
+        auto u3 = k.create_task({.prio = umi::Priority::USER, .name = "user3"});
 
         k.resume_task(u1);
         k.resume_task(u2);
@@ -359,7 +359,7 @@ int main() {
     SECTION("Core Affinity");
     {
         Kernel k;
-        auto t_core1 = k.create_task({.prio = umi::Priority::User, .core_affinity = 1, .name = "core1_task"});
+        auto t_core1 = k.create_task({.prio = umi::Priority::USER, .core_affinity = 1, .name = "core1_task"});
         k.resume_task(t_core1);
 
         MockHw::core_id = 0;
@@ -379,8 +379,8 @@ int main() {
     SECTION("Task Iteration");
     {
         Kernel k;
-        k.create_task({.prio = umi::Priority::User, .name = "iter1"});
-        k.create_task({.prio = umi::Priority::Idle, .name = "iter2"});
+        k.create_task({.prio = umi::Priority::USER, .name = "iter1"});
+        k.create_task({.prio = umi::Priority::IDLE, .name = "iter2"});
 
         int count = 0;
         k.for_each_task([&](umi::TaskId, const umi::TaskConfig& cfg, auto) {

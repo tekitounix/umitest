@@ -26,9 +26,9 @@ namespace umi::shell {
 
 /// Shell access levels (least to most privileged)
 enum class AccessLevel : uint8_t {
-    User = 0,     // Basic commands only
-    Admin = 1,    // Configuration allowed
-    Factory = 2,  // Full access including production tests
+    USER = 0,     // Basic commands only
+    ADMIN = 1,    // Configuration allowed
+    FACTORY = 2,  // Full access including production tests
 };
 
 // ============================================================================
@@ -84,7 +84,7 @@ public:
 
     /// Logout - return to USER level
     void logout() {
-        level_ = AccessLevel::User;
+        level_ = AccessLevel::USER;
     }
 
     /// Update activity timestamp (call on each command)
@@ -94,9 +94,9 @@ public:
 
     /// Check and apply session timeout
     void check_timeout(uint64_t now_us) {
-        if (level_ != AccessLevel::User) {
+        if (level_ != AccessLevel::USER) {
             if (now_us - last_activity_us_ > config_.session_timeout_us) {
-                level_ = AccessLevel::User;
+                level_ = AccessLevel::USER;
             }
         }
     }
@@ -129,7 +129,7 @@ private:
     }
 
     AuthConfig config_;
-    AccessLevel level_ = AccessLevel::User;
+    AccessLevel level_ = AccessLevel::USER;
     uint64_t last_activity_us_ = 0;
     uint8_t failed_attempts_ = 0;
     uint64_t lockout_until_us_ = 0;
@@ -143,9 +143,9 @@ private:
 /// Admin: "admin", Factory: "factory"
 inline bool simple_password_check(AccessLevel level, const char* password, void* /*ctx*/) {
     switch (level) {
-        case AccessLevel::Admin:
+        case AccessLevel::ADMIN:
             return std::strcmp(password, "admin") == 0;
-        case AccessLevel::Factory:
+        case AccessLevel::FACTORY:
             return std::strcmp(password, "factory") == 0;
         default:
             return false;

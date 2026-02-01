@@ -18,31 +18,31 @@ namespace umi::kernel {
 
 /// FS operation type
 enum class FsOp : uint8_t {
-    Open,
-    Read,
-    Write,
-    Close,
-    Seek,
-    Stat,
-    DirOpen,
-    DirRead,
-    DirClose,
+    OPEN,
+    READ,
+    WRITE,
+    CLOSE,
+    SEEK,
+    STAT,
+    DIR_OPEN,
+    DIR_READ,
+    DIR_CLOSE,
 };
 
 /// File open flags
 enum class FileFlags : uint8_t {
-    Read = 0x01,
-    Write = 0x02,
-    Create = 0x04,
-    Append = 0x08,
-    Truncate = 0x10,
+    READ = 0x01,
+    WRITE = 0x02,
+    CREATE = 0x04,
+    APPEND = 0x08,
+    TRUNCATE = 0x10,
 };
 
 /// Seek whence
 enum class SeekWhence : uint8_t {
-    Set = 0,
-    Cur = 1,
-    End = 2,
+    SET = 0,
+    CUR = 1,
+    END = 2,
 };
 
 /// File stat info
@@ -155,15 +155,15 @@ public:
 private:
     FsResponse dispatch(const FsRequest& req) noexcept {
         switch (req.op) {
-            case FsOp::Open: return do_open(req);
-            case FsOp::Read: return do_read(req);
-            case FsOp::Write: return do_write(req);
-            case FsOp::Close: return do_close(req);
-            case FsOp::Seek: return do_seek(req);
-            case FsOp::Stat: return do_stat(req);
-            case FsOp::DirOpen: return do_dir_open(req);
-            case FsOp::DirRead: return do_dir_read(req);
-            case FsOp::DirClose: return do_dir_close(req);
+            case FsOp::OPEN: return do_open(req);
+            case FsOp::READ: return do_read(req);
+            case FsOp::WRITE: return do_write(req);
+            case FsOp::CLOSE: return do_close(req);
+            case FsOp::SEEK: return do_seek(req);
+            case FsOp::STAT: return do_stat(req);
+            case FsOp::DIR_OPEN: return do_dir_open(req);
+            case FsOp::DIR_READ: return do_dir_read(req);
+            case FsOp::DIR_CLOSE: return do_dir_close(req);
         }
         return {-1};
     }

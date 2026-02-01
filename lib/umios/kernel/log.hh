@@ -24,13 +24,13 @@ namespace umi {
 // ============================================================================
 
 enum class LogLevel : uint8_t {
-    Trace = 0,  ///< Verbose debug (DSP sample values, etc.)
-    Debug = 1,  ///< Debug information
-    Info  = 2,  ///< Normal operation info
-    Warn  = 3,  ///< Warnings (recoverable)
-    Error = 4,  ///< Errors (may affect operation)
-    Fatal = 5,  ///< Fatal errors (system halt)
-    Off   = 6,  ///< Logging disabled
+    TRACE = 0,  ///< Verbose debug (DSP sample values, etc.)
+    DEBUG = 1,  ///< Debug information
+    INFO  = 2,  ///< Normal operation info
+    WARN  = 3,  ///< Warnings (recoverable)
+    ERROR = 4,  ///< Errors (may affect operation)
+    FATAL = 5,  ///< Fatal errors (system halt)
+    OFF   = 6,  ///< Logging disabled
 };
 
 // ============================================================================
@@ -51,7 +51,7 @@ inline void default_log_handler(LogLevel level, const char* tag, const char* msg
 inline UMI_ATOMIC_PTR(LogHandler) g_log_handler{default_log_handler};
 
 /// Global minimum log level (thread-safe on supported platforms)
-inline UMI_ATOMIC_PTR(LogLevel) g_log_level{LogLevel::Info};
+inline UMI_ATOMIC_PTR(LogLevel) g_log_level{LogLevel::INFO};
 
 /// Set log handler
 inline void set_log_handler(LogHandler handler) {
@@ -88,17 +88,17 @@ inline void log(LogLevel level, const char* tag, const char* msg) {
     #define UMI_LOG_TRACE(tag, msg) ((void)0)
     #define UMI_LOG_DEBUG(tag, msg) ((void)0)
     #define UMI_LOG_INFO(tag, msg)  ((void)0)
-    #define UMI_LOG_WARN(tag, msg)  ::umi::detail::log(::umi::LogLevel::Warn, tag, msg)
-    #define UMI_LOG_ERROR(tag, msg) ::umi::detail::log(::umi::LogLevel::Error, tag, msg)
-    #define UMI_LOG_FATAL(tag, msg) ::umi::detail::log(::umi::LogLevel::Fatal, tag, msg)
+    #define UMI_LOG_WARN(tag, msg)  ::umi::detail::log(::umi::LogLevel::WARN, tag, msg)
+    #define UMI_LOG_ERROR(tag, msg) ::umi::detail::log(::umi::LogLevel::ERROR, tag, msg)
+    #define UMI_LOG_FATAL(tag, msg) ::umi::detail::log(::umi::LogLevel::FATAL, tag, msg)
 #else
     // Debug: full logging
-    #define UMI_LOG_TRACE(tag, msg) ::umi::detail::log(::umi::LogLevel::Trace, tag, msg)
-    #define UMI_LOG_DEBUG(tag, msg) ::umi::detail::log(::umi::LogLevel::Debug, tag, msg)
-    #define UMI_LOG_INFO(tag, msg)  ::umi::detail::log(::umi::LogLevel::Info, tag, msg)
-    #define UMI_LOG_WARN(tag, msg)  ::umi::detail::log(::umi::LogLevel::Warn, tag, msg)
-    #define UMI_LOG_ERROR(tag, msg) ::umi::detail::log(::umi::LogLevel::Error, tag, msg)
-    #define UMI_LOG_FATAL(tag, msg) ::umi::detail::log(::umi::LogLevel::Fatal, tag, msg)
+    #define UMI_LOG_TRACE(tag, msg) ::umi::detail::log(::umi::LogLevel::TRACE, tag, msg)
+    #define UMI_LOG_DEBUG(tag, msg) ::umi::detail::log(::umi::LogLevel::DEBUG, tag, msg)
+    #define UMI_LOG_INFO(tag, msg)  ::umi::detail::log(::umi::LogLevel::INFO, tag, msg)
+    #define UMI_LOG_WARN(tag, msg)  ::umi::detail::log(::umi::LogLevel::WARN, tag, msg)
+    #define UMI_LOG_ERROR(tag, msg) ::umi::detail::log(::umi::LogLevel::ERROR, tag, msg)
+    #define UMI_LOG_FATAL(tag, msg) ::umi::detail::log(::umi::LogLevel::FATAL, tag, msg)
 #endif
 
 // ============================================================================

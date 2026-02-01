@@ -17,12 +17,12 @@ namespace umi::kernel::mpu {
 
 /// MPU region numbers
 enum class Region : uint8_t {
-    Kernel      = 0,  ///< Kernel code/data (privileged only)
-    AppText     = 1,  ///< Application .text (read-only, executable)
-    AppData     = 2,  ///< Application .data/.bss (read-write, non-executable)
-    AppStack    = 3,  ///< Application stack (read-write, non-executable)
-    Shared      = 4,  ///< Shared memory (read-write, non-executable)
-    Peripherals = 5,  ///< Peripheral region (device memory)
+    KERNEL      = 0,  ///< Kernel code/data (privileged only)
+    APP_TEXT    = 1,  ///< Application .text (read-only, executable)
+    APP_DATA   = 2,  ///< Application .data/.bss (read-write, non-executable)
+    APP_STACK  = 3,  ///< Application stack (read-write, non-executable)
+    SHARED     = 4,  ///< Shared memory (read-write, non-executable)
+    PERIPHERALS = 5,  ///< Peripheral region (device memory)
     // Regions 6-7 available for future use
 };
 
@@ -243,7 +243,7 @@ inline void configure_app_regions(
     disable();
     
     // Region 0: Kernel (privileged only)
-    configure_region(Region::Kernel, {
+    configure_region(Region::KERNEL, {
         .base = kernel_base,
         .size = static_cast<uint32_t>(kernel_size),
         .readable = true,
@@ -254,7 +254,7 @@ inline void configure_app_regions(
     });
     
     // Region 1: Application .text (read-only, executable)
-    configure_region(Region::AppText, {
+    configure_region(Region::APP_TEXT, {
         .base = runtime.text_start,
         .size = 32 * 1024,  // TODO: Get from header
         .readable = true,
@@ -266,7 +266,7 @@ inline void configure_app_regions(
     
     // Region 2: Application .data/.bss (read-write, non-executable)
     // AppData = 32KB (0x2000C000–0x20014000)
-    configure_region(Region::AppData, {
+    configure_region(Region::APP_DATA, {
         .base = runtime.data_start,
         .size = 32 * 1024,
         .readable = true,
@@ -278,7 +278,7 @@ inline void configure_app_regions(
 
     // Region 3: Application stack+heap (read-write, non-executable)
     // AppStack = 16KB (0x20014000–0x20018000)
-    configure_region(Region::AppStack, {
+    configure_region(Region::APP_STACK, {
         .base = runtime.stack_base,
         .size = 16 * 1024,
         .readable = true,
@@ -289,7 +289,7 @@ inline void configure_app_regions(
     });
     
     // Region 4: Shared memory (read-write, non-executable)
-    configure_region(Region::Shared, {
+    configure_region(Region::SHARED, {
         .base = shared_base,
         .size = static_cast<uint32_t>(shared_size),
         .readable = true,

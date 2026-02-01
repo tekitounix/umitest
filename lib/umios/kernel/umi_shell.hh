@@ -123,9 +123,9 @@ private:
             const char* prio_str = "?";
             using Priority = typename Kernel::Priority;
             switch (cfg.prio) {
-                case Priority::Realtime: prio_str = "RT"; break;
-                case Priority::User:     prio_str = "User"; break;
-                case Priority::Idle:     prio_str = "Idle"; break;
+                case Priority::REALTIME: prio_str = "RT"; break;
+                case Priority::USER:     prio_str = "User"; break;
+                case Priority::IDLE:     prio_str = "Idle"; break;
             }
             
             const char* state_str = "?";

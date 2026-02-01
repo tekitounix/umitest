@@ -69,7 +69,7 @@ private:
     KernelStateView cached_state_;
     ShellConfig config_;
     ErrorLog<16> error_log_;
-    SystemMode system_mode_ = SystemMode::Normal;
+    SystemMode system_mode_ = SystemMode::NORMAL;
 };
 
 } // namespace umi::os

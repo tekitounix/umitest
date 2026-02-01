@@ -10,20 +10,20 @@ namespace umidi {
 
 // Error codes for MIDI operations
 enum class ErrorCode : uint8_t {
-    Ok,
-    IncompleteMessage,
-    InvalidStatus,
-    BufferOverflow,
-    InvalidData,
-    InvalidMessageType,
-    ChannelFiltered,
-    NotImplemented,
-    NotSupported
+    OK,
+    INCOMPLETE_MESSAGE,
+    INVALID_STATUS,
+    BUFFER_OVERFLOW,
+    INVALID_DATA,
+    INVALID_MESSAGE_TYPE,
+    CHANNEL_FILTERED,
+    NOT_IMPLEMENTED,
+    NOT_SUPPORTED
 };
 
 // Lightweight error type (no heap allocation)
 struct Error {
-    ErrorCode code = ErrorCode::IncompleteMessage;
+    ErrorCode code = ErrorCode::INCOMPLETE_MESSAGE;
     uint8_t context = 0;  // Optional context byte
 
     constexpr Error() noexcept = default;
@@ -32,31 +32,31 @@ struct Error {
 
     // Factory methods
     static constexpr Error incomplete() noexcept {
-        return {ErrorCode::IncompleteMessage};
+        return {ErrorCode::INCOMPLETE_MESSAGE};
     }
 
     static constexpr Error incomplete(uint8_t byte) noexcept {
-        return {ErrorCode::IncompleteMessage, byte};
+        return {ErrorCode::INCOMPLETE_MESSAGE, byte};
     }
 
     static constexpr Error invalid_status(uint8_t status) noexcept {
-        return {ErrorCode::InvalidStatus, status};
+        return {ErrorCode::INVALID_STATUS, status};
     }
 
     static constexpr Error buffer_overflow() noexcept {
-        return {ErrorCode::BufferOverflow};
+        return {ErrorCode::BUFFER_OVERFLOW};
     }
 
     static constexpr Error invalid_data(uint8_t data) noexcept {
-        return {ErrorCode::InvalidData, data};
+        return {ErrorCode::INVALID_DATA, data};
     }
 
     static constexpr Error channel_filtered(uint8_t ch) noexcept {
-        return {ErrorCode::ChannelFiltered, ch};
+        return {ErrorCode::CHANNEL_FILTERED, ch};
     }
 
     static constexpr Error not_implemented() noexcept {
-        return {ErrorCode::NotImplemented};
+        return {ErrorCode::NOT_IMPLEMENTED};
     }
 };
 

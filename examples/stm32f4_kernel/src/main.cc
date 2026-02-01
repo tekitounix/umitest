@@ -89,7 +89,7 @@ int main() {
 
     if (app_entry != nullptr) {
         // Configure MPU for app execution
-        mpu::configure_region(mpu::Region::Kernel,
+        mpu::configure_region(mpu::Region::KERNEL,
                               {
                                   .base = reinterpret_cast<void*>(bsp::memory::sram_base),
                                   .size = bsp::memory::kernel_ram_size,
@@ -100,7 +100,7 @@ int main() {
                                   .device_memory = false,
                               });
 
-        mpu::configure_region(mpu::Region::AppText,
+        mpu::configure_region(mpu::Region::APP_TEXT,
                               {
                                   .base = const_cast<uint8_t*>(_app_image_start),
                                   .size = bsp::memory::app_text_size,
@@ -111,7 +111,7 @@ int main() {
                                   .device_memory = false,
                               });
 
-        mpu::configure_region(mpu::Region::AppData,
+        mpu::configure_region(mpu::Region::APP_DATA,
                               {
                                   .base = _app_ram_start,
                                   .size = bsp::memory::app_data_size,
@@ -122,7 +122,7 @@ int main() {
                                   .device_memory = false,
                               });
 
-        mpu::configure_region(mpu::Region::AppStack,
+        mpu::configure_region(mpu::Region::APP_STACK,
                               {
                                   .base = reinterpret_cast<uint8_t*>(_app_ram_start) + bsp::memory::app_data_size,
                                   .size = bsp::memory::app_stack_size,
@@ -133,7 +133,7 @@ int main() {
                                   .device_memory = false,
                               });
 
-        mpu::configure_region(mpu::Region::Shared,
+        mpu::configure_region(mpu::Region::SHARED,
                               {
                                   .base = reinterpret_cast<void*>(bsp::memory::shared_base),
                                   .size = bsp::memory::shared_size,
@@ -144,7 +144,7 @@ int main() {
                                   .device_memory = false,
                               });
 
-        mpu::configure_region(mpu::Region::Peripherals,
+        mpu::configure_region(mpu::Region::PERIPHERALS,
                               {
                                   .base = reinterpret_cast<void*>(bsp::memory::peripheral_base),
                                   .size = bsp::memory::peripheral_size,

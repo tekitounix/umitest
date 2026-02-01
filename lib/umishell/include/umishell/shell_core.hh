@@ -341,10 +341,10 @@ private:
 
 /// Command result
 enum class CmdResult {
-    Ok,           // Command executed successfully
-    Error,        // Command failed
-    NotFound,     // Unknown command
-    AccessDenied, // Insufficient permissions
+    OK,            // Command executed successfully
+    ERROR,         // Command failed
+    NOT_FOUND,     // Unknown command
+    ACCESS_DENIED, // Insufficient permissions
 };
 
 /// Command handler function type

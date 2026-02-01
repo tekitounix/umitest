@@ -310,7 +310,7 @@ private:
     void handle_class_request(const SetupPacket& setup) {
         std::span<uint8_t> response(ep0_buf_, EP0_SIZE);
         if (class_.handle_request(setup, response)) {
-            if (setup.direction() == Direction::In) {
+            if (setup.direction() == Direction::IN) {
                 // GET request - send data
                 if (!response.empty()) {
                     send_response(response.data(),

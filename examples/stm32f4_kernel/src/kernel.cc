@@ -218,7 +218,7 @@ class Stm32StateProvider {
     umi::os::KernelStateView state_{};
     umi::os::ShellConfig config_{};
     umi::os::ErrorLog<16> error_log_{};
-    umi::os::SystemMode mode_ = umi::os::SystemMode::Normal;
+    umi::os::SystemMode mode_ = umi::os::SystemMode::NORMAL;
 };
 
 Stm32StateProvider g_state_provider;
@@ -534,7 +534,7 @@ static void process_audio_frame(uint16_t* buf) {
     uint32_t t3 = dwt_cyccnt();
 
     // --- Section 3: App process + synth output ---
-    if (g_loader.state() == AppState::Running) {
+    if (g_loader.state() == AppState::RUNNING) {
         for (uint32_t i = 0; i < mcu::audio::buffer_size; ++i) {
             synth_out_mono[i] = 0.0f;
         }
@@ -800,28 +800,8 @@ void on_pdm_buffer_ready(uint16_t* buf) {
 // Syscall Handler
 // ============================================================================
 
-// Syscall numbers — must match lib/umios/app/syscall.hh nr::*
-namespace app_syscall {
-// Group 0: Process Control
-inline constexpr uint32_t exit = 0;
-inline constexpr uint32_t yield = 1;
-inline constexpr uint32_t register_proc = 2;
-// Group 1: Time / Scheduling
-inline constexpr uint32_t wait_event = 10;
-inline constexpr uint32_t get_time = 11;
-inline constexpr uint32_t sleep = 12;
-// Group 2: Configuration
-inline constexpr uint32_t set_app_config = 20;
-inline constexpr uint32_t set_route_table = 21;
-inline constexpr uint32_t set_param_mapping = 22;
-inline constexpr uint32_t set_input_mapping = 23;
-inline constexpr uint32_t configure_input = 24;
-inline constexpr uint32_t send_param_request = 25;
-// Group 4: Info
-inline constexpr uint32_t get_shared = 40;
-// Group 5: I/O
-inline constexpr uint32_t log = 50;
-} // namespace app_syscall
+// Syscall numbers from lib/umios/app/syscall.hh
+namespace app_syscall = umi::syscall::nr;
 
 static void svc_handler_impl(uint32_t* sp) {
     // Cortex-M exception frame: {r0, r1, r2, r3, r12, lr, pc, xpsr}
@@ -983,7 +963,7 @@ void setup_usb_callbacks() {
         uint64_t buffer_start = g_shared.sample_position * 1'000'000ULL / g_shared.sample_rate;
         g_event_router.receive(raw, buffer_start, g_shared.sample_rate);
 
-        g_kernel.notify(g_control_task_id, umi::syscall::event::Midi);
+        g_kernel.notify(g_control_task_id, umi::syscall::event::midi);
     });
 
     mcu::usb_audio().set_sysex_callback([](const uint8_t* data, uint16_t len) {
@@ -1169,7 +1149,7 @@ static void tick_callback() {
     g_kernel.resume_task(g_system_task_id);
 
     // Timer event (ControlTask)
-    g_kernel.notify(g_control_task_id, umi::syscall::event::Timer);
+    g_kernel.notify(g_control_task_id, umi::syscall::event::timer);
 
     // Control task: timed wakeup or periodic poll when no timeout is set.
     // This matches the old behavior where control ran regularly to drive coroutines.
@@ -1212,7 +1192,7 @@ void start_rtos(void* app_entry) {
     g_audio_task_id = g_kernel.create_task({
         .entry = audio_task_entry,
         .arg = nullptr,
-        .prio = umi::Priority::Realtime,
+        .prio = umi::Priority::REALTIME,
         .uses_fpu = fpu_decl.audio,
         .name = "audio",
     });
@@ -1220,7 +1200,7 @@ void start_rtos(void* app_entry) {
     g_system_task_id = g_kernel.create_task({
         .entry = system_task_entry,
         .arg = nullptr,
-        .prio = umi::Priority::Server,
+        .prio = umi::Priority::SERVER,
         .uses_fpu = fpu_decl.system,
         .name = "system",
     });
@@ -1228,7 +1208,7 @@ void start_rtos(void* app_entry) {
     g_control_task_id = g_kernel.create_task({
         .entry = control_task_entry,
         .arg = app_entry,
-        .prio = umi::Priority::User,
+        .prio = umi::Priority::USER,
         .uses_fpu = fpu_decl.control,
         .name = "control",
     });
@@ -1236,7 +1216,7 @@ void start_rtos(void* app_entry) {
     g_idle_task_id = g_kernel.create_task({
         .entry = idle_task_entry,
         .arg = nullptr,
-        .prio = umi::Priority::Idle,
+        .prio = umi::Priority::IDLE,
         .uses_fpu = fpu_decl.idle,
         .name = "idle",
     });

@@ -21,31 +21,31 @@ enum class GPIOPort : uint32_t {
 
 /// GPIO mode
 enum class GPIOMode : uint8_t {
-    Input    = 0b00,
-    Output   = 0b01,
-    AltFunc  = 0b10,
-    Analog   = 0b11,
+    INPUT    = 0b00,
+    OUTPUT   = 0b01,
+    ALT_FUNC = 0b10,
+    ANALOG   = 0b11,
 };
 
 /// GPIO output type
 enum class GPIOOutputType : uint8_t {
-    PushPull  = 0,
-    OpenDrain = 1,
+    PUSH_PULL  = 0,
+    OPEN_DRAIN = 1,
 };
 
 /// GPIO speed
 enum class GPIOSpeed : uint8_t {
-    Low      = 0b00,
-    Medium   = 0b01,
-    High     = 0b10,
-    VeryHigh = 0b11,
+    LOW       = 0b00,
+    MEDIUM    = 0b01,
+    HIGH      = 0b10,
+    VERY_HIGH = 0b11,
 };
 
 /// GPIO pull-up/pull-down
 enum class GPIOPull : uint8_t {
-    None     = 0b00,
-    PullUp   = 0b01,
-    PullDown = 0b10,
+    NONE      = 0b00,
+    PULL_UP   = 0b01,
+    PULL_DOWN = 0b10,
 };
 
 /// STM32F4 GPIO register access
@@ -68,9 +68,9 @@ struct GPIO {
 
     /// Configure a pin
     static void configure(GPIOPort p, uint8_t pin, GPIOMode mode, 
-                         GPIOOutputType otype = GPIOOutputType::PushPull,
-                         GPIOSpeed speed = GPIOSpeed::High,
-                         GPIOPull pull = GPIOPull::None) {
+                         GPIOOutputType otype = GPIOOutputType::PUSH_PULL,
+                         GPIOSpeed speed = GPIOSpeed::HIGH,
+                         GPIOPull pull = GPIOPull::NONE) {
         auto* regs = port(p);
         
         // Mode

@@ -273,35 +273,35 @@ static void test_adsr() {
     // set_params takes milliseconds: attack, decay, sustain level, release
     env.set_params(10.0f, 20.0f, 0.5f, 50.0f);
 
-    check(env.state() == umi::dsp::ADSR::State::Idle, "initial state is Idle");
+    check(env.state() == umi::dsp::ADSR::State::IDLE, "initial state is Idle");
 
     // Trigger
     env.trigger();
-    check(env.state() == umi::dsp::ADSR::State::Attack, "trigger enters Attack");
+    check(env.state() == umi::dsp::ADSR::State::ATTACK, "trigger enters Attack");
 
     // Run through attack (10ms = 480 samples at 48kHz, but uses tau so needs more)
     float dt = 1.0f / 48000.0f;
     for (int i = 0; i < 2400; ++i) { // ~50ms to fully complete attack
         (void)env.tick(dt);
     }
-    check(env.state() == umi::dsp::ADSR::State::Decay || env.state() == umi::dsp::ADSR::State::Sustain,
+    check(env.state() == umi::dsp::ADSR::State::DECAY || env.state() == umi::dsp::ADSR::State::SUSTAIN,
           "enters Decay after Attack");
 
     // Run through decay
     for (int i = 0; i < 4800; ++i) { // ~100ms
         (void)env.tick(dt);
     }
-    check(env.state() == umi::dsp::ADSR::State::Sustain, "enters Sustain after Decay");
+    check(env.state() == umi::dsp::ADSR::State::SUSTAIN, "enters Sustain after Decay");
     check(near(env.value(), 0.5f, 0.15f), "sustain level correct");
 
     // Release
     env.release();
-    check(env.state() == umi::dsp::ADSR::State::Release, "release enters Release");
+    check(env.state() == umi::dsp::ADSR::State::RELEASE, "release enters Release");
 
     for (int i = 0; i < 12000; ++i) { // ~250ms
         (void)env.tick(dt);
     }
-    check(env.state() == umi::dsp::ADSR::State::Idle, "returns to Idle after Release");
+    check(env.state() == umi::dsp::ADSR::State::IDLE, "returns to Idle after Release");
 }
 
 static void test_ramp() {

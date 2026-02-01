@@ -32,10 +32,10 @@ namespace umi {
 
 /// Assert action to take on failure
 enum class AssertAction : uint8_t {
-    Ignore,     ///< Continue execution (dangerous, release only)
-    Log,        ///< Log and continue
-    Trap,       ///< Breakpoint/trap (debug)
-    Halt,       ///< System halt with diagnostics
+    IGNORE,     ///< Continue execution (dangerous, release only)
+    LOG,        ///< Log and continue
+    TRAP,       ///< Breakpoint/trap (debug)
+    HALT,       ///< System halt with diagnostics
 };
 
 /// Assert handler function type

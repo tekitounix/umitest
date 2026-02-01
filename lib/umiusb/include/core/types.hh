@@ -14,21 +14,21 @@ namespace umiusb {
 // ============================================================================
 
 enum class Speed : uint8_t {
-    Low = 0,    // 1.5 Mbps
-    Full = 1,   // 12 Mbps
-    High = 2,   // 480 Mbps
+    LOW = 0,    // 1.5 Mbps
+    FULL = 1,   // 12 Mbps
+    HIGH = 2,   // 480 Mbps
 };
 
 enum class TransferType : uint8_t {
-    Control = 0,
-    Isochronous = 1,
-    Bulk = 2,
-    Interrupt = 3,
+    CONTROL = 0,
+    ISOCHRONOUS = 1,
+    BULK = 2,
+    INTERRUPT = 3,
 };
 
 enum class Direction : uint8_t {
-    Out = 0,  // Host to Device
-    In = 1,   // Device to Host
+    OUT = 0,  // Host to Device
+    IN = 1,   // Device to Host
 };
 
 // Standard request codes
@@ -139,7 +139,7 @@ struct EndpointDescriptor {
 
     [[nodiscard]] constexpr uint8_t number() const { return bEndpointAddress & 0x0F; }
     [[nodiscard]] constexpr Direction direction() const {
-        return (bEndpointAddress & 0x80) ? Direction::In : Direction::Out;
+        return (bEndpointAddress & 0x80) ? Direction::IN : Direction::OUT;
     }
     [[nodiscard]] constexpr TransferType transfer_type() const {
         return static_cast<TransferType>(bmAttributes & 0x03);
@@ -175,7 +175,7 @@ struct SetupPacket {
     uint16_t wLength;
 
     [[nodiscard]] constexpr Direction direction() const {
-        return (bmRequestType & 0x80) ? Direction::In : Direction::Out;
+        return (bmRequestType & 0x80) ? Direction::IN : Direction::OUT;
     }
 
     [[nodiscard]] constexpr uint8_t type() const {
@@ -203,7 +203,7 @@ struct EndpointConfig {
     uint16_t max_packet_size;
 
     [[nodiscard]] constexpr uint8_t address() const {
-        return number | (direction == Direction::In ? 0x80 : 0x00);
+        return number | (direction == Direction::IN ? 0x80 : 0x00);
     }
 };
 

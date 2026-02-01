@@ -95,12 +95,12 @@ inline FaultLogEntry g_pending_fault{};
 
 /// エラー LED パターン
 enum class ErrorLedPattern : uint8_t {
-    None = 0,
-    StackOverflow,      ///< 赤 点滅
-    AccessViolation,    ///< 赤 2回点滅
-    InvalidInstruction, ///< 赤 3回点滅
-    BusFault,           ///< 赤 4回点滅
-    Unknown,            ///< 赤 高速点滅
+    NONE = 0,
+    STACK_OVERFLOW,      ///< 赤 点滅
+    ACCESS_VIOLATION,    ///< 赤 2回点滅
+    INVALID_INSTRUCTION, ///< 赤 3回点滅
+    BUS_FAULT,           ///< 赤 4回点滅
+    UNKNOWN,             ///< 赤 高速点滅
 };
 
 // ============================================================================
@@ -153,23 +153,23 @@ inline ErrorLedPattern classify_fault(const backend::cm::FaultInfo& info) noexce
 
     // MemManage Fault
     if (info.cfsr & cfsr::MSTKERR) {
-        return ErrorLedPattern::StackOverflow;
+        return ErrorLedPattern::STACK_OVERFLOW;
     }
     if (info.cfsr & (cfsr::IACCVIOL | cfsr::DACCVIOL)) {
-        return ErrorLedPattern::AccessViolation;
+        return ErrorLedPattern::ACCESS_VIOLATION;
     }
 
     // UsageFault
     if (info.cfsr & cfsr::UNDEFINSTR) {
-        return ErrorLedPattern::InvalidInstruction;
+        return ErrorLedPattern::INVALID_INSTRUCTION;
     }
 
     // BusFault
     if (info.cfsr & (cfsr::IBUSERR | cfsr::PRECISERR | cfsr::IMPRECISERR)) {
-        return ErrorLedPattern::BusFault;
+        return ErrorLedPattern::BUS_FAULT;
     }
 
-    return ErrorLedPattern::Unknown;
+    return ErrorLedPattern::UNKNOWN;
 }
 
 /// Fault が保留中かどうか

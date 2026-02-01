@@ -100,10 +100,10 @@ using AudioCallback = void (*)(
 // =====================================
 
 enum class EngineState : std::uint8_t {
-    Stopped,
-    Running,
-    Suspended,
-    Standby,    // Auto-suspended due to silence
+    STOPPED,
+    RUNNING,
+    SUSPENDED,
+    STANDBY,    // Auto-suspended due to silence
 };
 
 // =====================================
@@ -131,7 +131,7 @@ public:
     
     // Change sample rate (must be stopped)
     bool set_sample_rate(std::uint32_t rate) {
-        if (state_ != EngineState::Stopped) return false;
+        if (state_ != EngineState::STOPPED) return false;
         config_.sample_rate = rate;
         update_budget_cycles();
         return true;
@@ -139,7 +139,7 @@ public:
     
     // Change buffer size (must be stopped)
     bool set_buffer_size(std::uint16_t size) {
-        if (state_ != EngineState::Stopped) return false;
+        if (state_ != EngineState::STOPPED) return false;
         config_.buffer_size = size;
         update_budget_cycles();
         return true;
@@ -150,37 +150,37 @@ public:
     // =====================================
     
     void start() {
-        if (state_ == EngineState::Running) return;
+        if (state_ == EngineState::RUNNING) return;
         consecutive_drops_ = 0;
         frame_count_ = 0;
         silence_counter_ = 0;
         processing_ = false;
         AudioIO::unmute_output();
         AudioIO::start_dma();
-        state_ = EngineState::Running;
+        state_ = EngineState::RUNNING;
     }
     
     void stop() {
         AudioIO::stop_dma();
         AudioIO::mute_output();
-        state_ = EngineState::Stopped;
+        state_ = EngineState::STOPPED;
     }
     
     void suspend() {
-        if (state_ != EngineState::Running) return;
+        if (state_ != EngineState::RUNNING) return;
         AudioIO::mute_output();
-        state_ = EngineState::Suspended;
+        state_ = EngineState::SUSPENDED;
     }
     
     void resume() {
-        if (state_ != EngineState::Suspended && state_ != EngineState::Standby) return;
+        if (state_ != EngineState::SUSPENDED && state_ != EngineState::STANDBY) return;
         silence_counter_ = 0;
         AudioIO::unmute_output();
-        state_ = EngineState::Running;
+        state_ = EngineState::RUNNING;
     }
     
     EngineState state() const { return state_; }
-    bool is_running() const { return state_ == EngineState::Running; }
+    bool is_running() const { return state_ == EngineState::RUNNING; }
 
     // =====================================
     // Callback Registration
@@ -332,7 +332,7 @@ public:
 
 private:
     AudioConfig config_;
-    EngineState state_ {EngineState::Stopped};
+    EngineState state_ {EngineState::STOPPED};
     
     Callback callback_ {nullptr};
     
@@ -373,7 +373,7 @@ private:
     
     void enter_standby() {
         AudioIO::mute_output();
-        state_ = EngineState::Standby;
+        state_ = EngineState::STANDBY;
     }
     
     // Common buffer processing logic (called by both on_buffer_complete overloads)
@@ -430,7 +430,7 @@ private:
         }
         
         // Auto-standby detection
-        if (state_ == EngineState::Running) {
+        if (state_ == EngineState::RUNNING) {
             if (output.is_silent(config_.silence_threshold)) {
                 silence_counter_ += config_.buffer_size;
                 if (silence_counter_ >= config_.silence_frames) {

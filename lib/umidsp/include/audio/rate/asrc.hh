@@ -38,7 +38,7 @@ public:
 
     AsrcProcessor() = default;
     
-    explicit AsrcProcessor(const PiConfig& cfg, AsrcQuality quality = AsrcQuality::CubicHermite)
+    explicit AsrcProcessor(const PiConfig& cfg, AsrcQuality quality = AsrcQuality::CUBIC_HERMITE)
         : pi_controller_(cfg), quality_(quality) {}
 
     void set_config(const PiConfig& cfg) { pi_controller_.set_config(cfg); }
@@ -72,7 +72,7 @@ public:
         uint32_t rate = PiRateController::ppm_to_rate_q16(ppm);
 
         // Need at least 4 frames for 4-point interpolation
-        const uint32_t min_frames = (quality_ == AsrcQuality::Linear) ? 2 : 4;
+        const uint32_t min_frames = (quality_ == AsrcQuality::LINEAR) ? 2 : 4;
         if (available < min_frames) {
             __builtin_memset(dest, 0, frame_count * Channels * sizeof(int16_t));
             return 0;
@@ -146,7 +146,7 @@ public:
 
 private:
     PiRateController pi_controller_{PiConfig::default_config()};
-    AsrcQuality quality_ = AsrcQuality::CubicHermite;
+    AsrcQuality quality_ = AsrcQuality::CUBIC_HERMITE;
     uint32_t read_frac_ = 0;
     uint64_t frames_in_ = 0;
     uint64_t frames_out_ = 0;

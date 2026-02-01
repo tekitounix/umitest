@@ -15,9 +15,9 @@ namespace umidsp {
 // ============================================================================
 
 enum class InterpolateQuality {
-    Linear,       // 2-point linear (fastest, lowest quality)
-    CubicHermite, // 4-point Catmull-Rom (balanced, recommended)
-    Sinc4,        // 4-point windowed sinc (highest quality)
+    LINEAR,       // 2-point linear (fastest, lowest quality)
+    CUBIC_HERMITE, // 4-point Catmull-Rom (balanced, recommended)
+    SINC4,        // 4-point windowed sinc (highest quality)
 };
 
 // ============================================================================
@@ -192,11 +192,11 @@ inline int16_t dispatch_i16(InterpolateQuality quality,
                             int16_t y0, int16_t y1, int16_t y2, int16_t y3,
                             uint32_t t_q16) {
     switch (quality) {
-        case InterpolateQuality::Linear:
+        case InterpolateQuality::LINEAR:
             return linear_i16(y1, y2, t_q16);
-        case InterpolateQuality::CubicHermite:
+        case InterpolateQuality::CUBIC_HERMITE:
             return cubic_i16(y0, y1, y2, y3, t_q16);
-        case InterpolateQuality::Sinc4:
+        case InterpolateQuality::SINC4:
             return sinc4_i16(y0, y1, y2, y3, t_q16);
     }
     return cubic_i16(y0, y1, y2, y3, t_q16);
@@ -206,11 +206,11 @@ inline int32_t dispatch_i32(InterpolateQuality quality,
                             int32_t y0, int32_t y1, int32_t y2, int32_t y3,
                             uint32_t t_q16) {
     switch (quality) {
-        case InterpolateQuality::Linear:
+        case InterpolateQuality::LINEAR:
             return linear_i32(y0, y1, t_q16);
-        case InterpolateQuality::CubicHermite:
+        case InterpolateQuality::CUBIC_HERMITE:
             return cubic_i32(y0, y1, y2, y3, t_q16);
-        case InterpolateQuality::Sinc4:
+        case InterpolateQuality::SINC4:
             return sinc4_i32(y0, y1, y2, y3, t_q16);
     }
     return cubic_i32(y0, y1, y2, y3, t_q16);

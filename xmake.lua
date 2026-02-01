@@ -85,9 +85,9 @@ end
 
 -- Set UMIOS_BUILD_TYPE based on build_type option
 if is_config("build_type", "release") then
-    add_defines("UMIOS_BUILD_TYPE=umi::kernel::BuildType::Release", {public = true})
+    add_defines("UMIOS_BUILD_TYPE=umi::kernel::BuildType::RELEASE", {public = true})
 else
-    add_defines("UMIOS_BUILD_TYPE=umi::kernel::BuildType::Development", {public = true})
+    add_defines("UMIOS_BUILD_TYPE=umi::kernel::BuildType::DEVELOPMENT", {public = true})
 end
 
 -- =====================================================================
@@ -130,6 +130,27 @@ for _, test in ipairs({
         add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
     target_end()
 end
+
+-- Filesystem tests (littlefs and FATfs)
+target("test_littlefs")
+    add_rules("host.test")
+    set_default(true)
+    add_deps("umi.fs.littlefs")
+    add_files("tests/test_littlefs.cc")
+    add_includedirs("tests")
+    add_includedirs("lib")
+    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
+target_end()
+
+target("test_fatfs")
+    add_rules("host.test")
+    set_default(true)
+    add_deps("umi.fs.fatfs")
+    add_files("tests/test_fatfs.cc")
+    add_includedirs("tests")
+    add_includedirs("lib")
+    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
+target_end()
 
 -- Crypto/signature test (requires crypto source files)
 target("test_signature")

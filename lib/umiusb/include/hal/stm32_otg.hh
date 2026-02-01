@@ -318,7 +318,7 @@ class Stm32OtgHal : public HalBase<Stm32OtgHal<BaseAddr, MaxEndpoints>> {
         Regs::reg(Regs::DOEPTSIZ(ep)) &= ~(0x3FFU << 19);  // Clear PKTCNT
         Regs::reg(Regs::DOEPTSIZ(ep)) |= (1U << 19) | mps; // PKTCNT=1, XFRSIZ=mps
 
-        if (out_ep_type_[ep] == TransferType::Isochronous) {
+        if (out_ep_type_[ep] == TransferType::ISOCHRONOUS) {
             if ((Regs::reg(Regs::DSTS) & otg::DSTS_FNSOF_ODD) == 0) {
                 Regs::reg(Regs::DOEPCTL(ep)) |= otg::DEPCTL_SODDFRM;
             } else {
@@ -352,7 +352,7 @@ class Stm32OtgHal : public HalBase<Stm32OtgHal<BaseAddr, MaxEndpoints>> {
     // Ensure isochronous OUT EP has correct frame parity for next frame.
     // Call from SOF handler to prevent incomplete ISO OUT transfers.
     void update_iso_out_ep(uint8_t ep) {
-        if (out_ep_type_[ep] != TransferType::Isochronous) {
+        if (out_ep_type_[ep] != TransferType::ISOCHRONOUS) {
             return;
         }
 
@@ -477,7 +477,7 @@ class Stm32OtgHal : public HalBase<Stm32OtgHal<BaseAddr, MaxEndpoints>> {
         uint8_t ep = config.number;
         uint32_t type = transfer_type_to_hw(config.type);
 
-        if (config.direction == Direction::In) {
+        if (config.direction == Direction::IN) {
             // Cache IN endpoint type for frame parity in ep_write
             in_ep_type_[ep] = config.type;
 
@@ -515,7 +515,7 @@ class Stm32OtgHal : public HalBase<Stm32OtgHal<BaseAddr, MaxEndpoints>> {
     [[nodiscard]] bool is_ep_busy(uint8_t ep) const {
         if (ep == 0 || ep >= MAX_EP)
             return false;
-        if (in_ep_type_[ep] == TransferType::Isochronous) {
+        if (in_ep_type_[ep] == TransferType::ISOCHRONOUS) {
             return (Regs::reg(Regs::DIEPCTL(ep)) & otg::DEPCTL_EPENA) != 0;
         }
         return false;
@@ -532,7 +532,7 @@ class Stm32OtgHal : public HalBase<Stm32OtgHal<BaseAddr, MaxEndpoints>> {
         } else {
             // Non-EP0: Single transfer
             // For isochronous IN: STM32Cube HAL compatible approach
-            if (in_ep_type_[ep] == TransferType::Isochronous) {
+            if (in_ep_type_[ep] == TransferType::ISOCHRONOUS) {
                 // If endpoint is still enabled, previous transfer hasn't completed.
                 // Avoid reprogramming ISO IN EP while busy (prevents feedback overwrite).
                 if (Regs::reg(Regs::DIEPCTL(ep)) & otg::DEPCTL_EPENA) {
@@ -816,7 +816,7 @@ class Stm32OtgHal : public HalBase<Stm32OtgHal<BaseAddr, MaxEndpoints>> {
             const uint32_t odd_now = (Regs::reg(Regs::DSTS) & otg::DSTS_FNSOF_ODD) ? 1 : 0;
 
             for (uint8_t ep : {1, 3}) {
-                if (in_ep_type_[ep] != TransferType::Isochronous) {
+                if (in_ep_type_[ep] != TransferType::ISOCHRONOUS) {
                     continue;
                 }
 
@@ -1145,13 +1145,13 @@ class Stm32OtgHal : public HalBase<Stm32OtgHal<BaseAddr, MaxEndpoints>> {
 
     static constexpr uint32_t transfer_type_to_hw(TransferType type) {
         switch (type) {
-        case TransferType::Control:
+        case TransferType::CONTROL:
             return otg::EPTYP_CONTROL;
-        case TransferType::Isochronous:
+        case TransferType::ISOCHRONOUS:
             return otg::EPTYP_ISOCHRONOUS;
-        case TransferType::Bulk:
+        case TransferType::BULK:
             return otg::EPTYP_BULK;
-        case TransferType::Interrupt:
+        case TransferType::INTERRUPT:
             return otg::EPTYP_INTERRUPT;
         default:
             return otg::EPTYP_BULK;

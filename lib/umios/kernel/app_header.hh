@@ -21,9 +21,9 @@ inline constexpr uint32_t APP_ABI_VERSION = 1;
 
 /// Application target type (determines compatibility)
 enum class AppTarget : uint32_t {
-    User        = 0,  ///< User app (unsigned, runs on both dev/release kernel)
-    Development = 1,  ///< Development app (dev kernel only)
-    Release     = 2,  ///< Release app (release kernel only, signature required)
+    USER        = 0,  ///< User app (unsigned, runs on both dev/release kernel)
+    DEVELOPMENT = 1,  ///< Development app (dev kernel only)
+    RELEASE     = 2,  ///< Release app (release kernel only, signature required)
 };
 
 /// Application header (placed at the beginning of .umia binary)
@@ -133,12 +133,12 @@ constexpr const char* load_result_str(LoadResult r) noexcept {
 
 /// Kernel build type (set at compile time)
 enum class BuildType : uint8_t {
-    Development = 0,  ///< Development build (allows unsigned apps)
-    Release     = 1,  ///< Release build (requires signatures for Release apps)
+    DEVELOPMENT = 0,  ///< Development build (allows unsigned apps)
+    RELEASE     = 1,  ///< Release build (requires signatures for Release apps)
 };
 
 #ifndef UMIOS_BUILD_TYPE
-#define UMIOS_BUILD_TYPE BuildType::Development
+#define UMIOS_BUILD_TYPE BuildType::DEVELOPMENT
 #endif
 
 inline constexpr BuildType KERNEL_BUILD_TYPE = UMIOS_BUILD_TYPE;

@@ -20,53 +20,53 @@ namespace umi {
 
 /// Port direction
 enum class PortDirection : uint8_t {
-    In,
-    Out,
+    IN,
+    OUT,
 };
 
 /// Port kind
 enum class PortKind : uint8_t {
-    Continuous,  ///< Audio, CV - fixed sample rate
-    Event,       ///< MIDI, OSC, Parameters - variable timing
+    CONTINUOUS,  ///< Audio, CV - fixed sample rate
+    EVENT,       ///< MIDI, OSC, Parameters - variable timing
 };
 
 /// Event type hint for event ports
 enum class TypeHint : uint16_t {
-    Unknown      = 0x0000,
-    
+    UNKNOWN      = 0x0000,
+
     // MIDI
-    MidiBytes    = 0x0100,
-    MidiUmp      = 0x0101,
-    MidiSysex    = 0x0102,
-    
+    MIDI_BYTES   = 0x0100,
+    MIDI_UMP     = 0x0101,
+    MIDI_SYSEX   = 0x0102,
+
     // Parameters
-    ParamChange  = 0x0200,
-    ParamGesture = 0x0201,
-    
+    PARAM_CHANGE  = 0x0200,
+    PARAM_GESTURE = 0x0201,
+
     // Network/Serial
-    Osc          = 0x0300,
-    Serial       = 0x0301,
-    
+    OSC          = 0x0300,
+    SERIAL       = 0x0301,
+
     // System
-    Clock        = 0x0400,
-    Transport    = 0x0401,
-    
+    CLOCK        = 0x0400,
+    TRANSPORT    = 0x0401,
+
     // User defined (0x8000+)
-    UserDefined  = 0x8000,
+    USER_DEFINED  = 0x8000,
 };
 
 /// Port descriptor
 struct PortDescriptor {
     port_id_t id = 0;
     std::string_view name;
-    PortKind kind = PortKind::Continuous;
-    PortDirection dir = PortDirection::In;
+    PortKind kind = PortKind::CONTINUOUS;
+    PortDirection dir = PortDirection::IN;
     
     // For Continuous ports
     uint32_t channels = 1;
     
     // For Event ports
-    TypeHint type_hint = TypeHint::Unknown;
+    TypeHint type_hint = TypeHint::UNKNOWN;
 };
 
 // ============================================================================
@@ -75,10 +75,10 @@ struct PortDescriptor {
 
 /// Parameter curve type for UI scaling
 enum class ParamCurve : uint8_t {
-    Linear = 0,  // Linear mapping (default)
-    Log,         // Logarithmic (good for frequency, gain, time)
-    Exp,         // Exponential (inverse of log)
-    Auto = 255,  // Auto-detect based on name and range
+    LINEAR = 0,  // Linear mapping (default)
+    LOG,         // Logarithmic (good for frequency, gain, time)
+    EXP,         // Exponential (inverse of log)
+    AUTO = 255,  // Auto-detect based on name and range
 };
 
 /// Infer optimal curve from parameter characteristics
@@ -112,7 +112,7 @@ enum class ParamCurve : uint8_t {
     // Frequency parameters (typically 20-20000 Hz range)
     if (contains(name, "freq") || contains(name, "cutoff") ||
         contains(name, "pitch") || contains(name, "hz")) {
-        return ParamCurve::Log;
+        return ParamCurve::LOG;
     }
 
     // Time parameters (typically ms range)
@@ -121,19 +121,19 @@ enum class ParamCurve : uint8_t {
         contains(name, "delay") || contains(name, "rate")) {
         // Only use log for time ranges > 10x
         if (max_val > min_val * 10.0f && min_val > 0) {
-            return ParamCurve::Log;
+            return ParamCurve::LOG;
         }
     }
 
     // Gain/volume with large range
     if (contains(name, "gain") || contains(name, "level")) {
         if (max_val > min_val * 10.0f && min_val > 0) {
-            return ParamCurve::Log;
+            return ParamCurve::LOG;
         }
     }
 
     // Default: linear for normalized 0-1 params, percentages, etc.
-    return ParamCurve::Linear;
+    return ParamCurve::LINEAR;
 }
 
 /// Parameter descriptor
@@ -143,11 +143,11 @@ struct ParamDescriptor {
     float default_value = 0.0f;
     float min_value = 0.0f;
     float max_value = 1.0f;
-    ParamCurve curve = ParamCurve::Auto;  // Auto-detect by default
+    ParamCurve curve = ParamCurve::AUTO;  // Auto-detect by default
 
     /// Get effective curve (resolves Auto)
     [[nodiscard]] constexpr ParamCurve effective_curve() const noexcept {
-        if (curve == ParamCurve::Auto) {
+        if (curve == ParamCurve::AUTO) {
             return infer_param_curve(name, min_value, max_value);
         }
         return curve;
@@ -159,7 +159,7 @@ struct ParamDescriptor {
 
         const auto c = effective_curve();
         switch (c) {
-        case ParamCurve::Log: {
+        case ParamCurve::LOG: {
             // Log scale: map [min, max] to [0, 1] logarithmically
             // Avoid log(0) by using small offset
             const float min_log = (min_value > 0) ? min_value : 1.0f;
@@ -168,7 +168,7 @@ struct ParamDescriptor {
             const float log_val = log_approx(value > min_log ? value : min_log);
             return (log_val - log_min) / (log_max - log_min);
         }
-        case ParamCurve::Exp: {
+        case ParamCurve::EXP: {
             // Exponential: square the linear value
             float linear = (value - min_value) / (max_value - min_value);
             return linear * linear;
@@ -182,7 +182,7 @@ struct ParamDescriptor {
     [[nodiscard]] constexpr float denormalize(float normalized) const noexcept {
         const auto c = effective_curve();
         switch (c) {
-        case ParamCurve::Log: {
+        case ParamCurve::LOG: {
             // Log scale: exponential mapping
             const float min_log = (min_value > 0) ? min_value : 1.0f;
             const float log_min = log_approx(min_log);
@@ -190,7 +190,7 @@ struct ParamDescriptor {
             const float log_val = log_min + normalized * (log_max - log_min);
             return exp_approx(log_val);
         }
-        case ParamCurve::Exp: {
+        case ParamCurve::EXP: {
             // Exponential: sqrt of normalized value
             float linear = (normalized > 0) ? sqrt_approx(normalized) : 0.0f;
             return min_value + linear * (max_value - min_value);

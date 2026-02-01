@@ -30,9 +30,9 @@ public:
     using Handler = void(*)();
     
     enum class Exc : std::uint8_t {
-        Reset = 1, NMI = 2, HardFault = 3, MemManage = 4,
-        BusFault = 5, UsageFault = 6, SVCall = 11,
-        DebugMon = 12, PendSV = 14, SysTick = 15,
+        RESET = 1, NMI = 2, HARD_FAULT = 3, MEM_MANAGE = 4,
+        BUS_FAULT = 5, USAGE_FAULT = 6, SV_CALL = 11,
+        DEBUG_MON = 12, PEND_SV = 14, SYS_TICK = 15,
     };
 
 private:

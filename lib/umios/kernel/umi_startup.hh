@@ -99,8 +99,8 @@ struct Bootstrap {
                 }
             },
             .arg = nullptr,
-            .prio = Priority::Idle,
-            .core_affinity = static_cast<std::uint8_t>(Core::Any),
+            .prio = Priority::IDLE,
+            .core_affinity = static_cast<std::uint8_t>(Core::ANY),
             .uses_fpu = false,
         });
         
@@ -108,8 +108,8 @@ struct Bootstrap {
         main_task = kernel.create_task({
             .entry = app_main,
             .arg = nullptr,
-            .prio = Priority::User,
-            .core_affinity = static_cast<std::uint8_t>(Core::Any),
+            .prio = Priority::USER,
+            .core_affinity = static_cast<std::uint8_t>(Core::ANY),
             .uses_fpu = true,
         });
     }

@@ -93,13 +93,13 @@ struct AudioContext {
 
     /// Get input channel buffer with error handling
     [[nodiscard]] umi::Result<const sample_t*> input_checked(size_t ch) const noexcept {
-        if (ch >= inputs.size()) return umi::Err(Error::InvalidParam);
+        if (ch >= inputs.size()) return umi::Err(Error::INVALID_PARAM);
         return umi::Ok(inputs[ch]);
     }
 
     /// Get output channel buffer with error handling
     [[nodiscard]] umi::Result<sample_t*> output_checked(size_t ch) const noexcept {
-        if (ch >= outputs.size()) return umi::Err(Error::InvalidParam);
+        if (ch >= outputs.size()) return umi::Err(Error::INVALID_PARAM);
         return umi::Ok(outputs[ch]);
     }
 

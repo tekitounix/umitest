@@ -18,23 +18,23 @@ namespace umi {
 
 /// Application event type (Control Task events)
 enum class AppEventType : uint8_t {
-    None = 0,
-    Shutdown,           ///< Application should terminate
-    MidiNoteOn,
-    MidiNoteOff,
-    MidiCC,
-    MidiPitchBend,
-    ParamChange,
-    EncoderRotate,
-    ButtonPress,
-    ButtonRelease,
-    DisplayUpdate,
-    Meter,
+    NONE = 0,
+    SHUTDOWN,           ///< Application should terminate
+    MIDI_NOTE_ON,
+    MIDI_NOTE_OFF,
+    MIDI_CC,
+    MIDI_PITCH_BEND,
+    PARAM_CHANGE,
+    ENCODER_ROTATE,
+    BUTTON_PRESS,
+    BUTTON_RELEASE,
+    DISPLAY_UPDATE,
+    METER,
 };
 
 /// Application event (for Control Task)
 struct AppEvent {
-    AppEventType type = AppEventType::None;
+    AppEventType type = AppEventType::NONE;
 
     union {
         struct {
@@ -63,11 +63,11 @@ struct AppEvent {
         } meter;
     };
 
-    AppEvent() noexcept : type(AppEventType::None) {}
+    AppEvent() noexcept : type(AppEventType::NONE) {}
 
     /// Check if event indicates shutdown
     [[nodiscard]] bool is_shutdown() const noexcept {
-        return type == AppEventType::Shutdown;
+        return type == AppEventType::SHUTDOWN;
     }
 };
 

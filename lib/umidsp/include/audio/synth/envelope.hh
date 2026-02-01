@@ -20,11 +20,11 @@ namespace umi::dsp {
 class ADSR {
 public:
     enum class State : uint8_t {
-        Idle,
-        Attack,
-        Decay,
-        Sustain,
-        Release
+        IDLE,
+        ATTACK,
+        DECAY,
+        SUSTAIN,
+        RELEASE
     };
     
     ADSR() = default;
@@ -53,19 +53,19 @@ public:
     
     /// Trigger envelope (gate on)
     void trigger() noexcept {
-        state_ = State::Attack;
+        state_ = State::ATTACK;
     }
     
     /// Release envelope (gate off)
     void release() noexcept {
-        if (state_ != State::Idle) {
-            state_ = State::Release;
+        if (state_ != State::IDLE) {
+            state_ = State::RELEASE;
         }
     }
     
     /// Force envelope to idle
     void reset() noexcept {
-        state_ = State::Idle;
+        state_ = State::IDLE;
         value_ = 0.0f;
     }
     
@@ -73,40 +73,40 @@ public:
     /// @param dt Time step in seconds (1.0/sample_rate)
     [[nodiscard]] float tick(float dt) noexcept {
         switch (state_) {
-            case State::Idle:
+            case State::IDLE:
                 value_ = 0.0f;
                 break;
                 
-            case State::Attack: {
+            case State::ATTACK: {
                 float rate = dt / attack_tau_;
                 value_ += rate * (1.0f - value_);
                 if (value_ >= 0.999f) {
                     value_ = 1.0f;
-                    state_ = State::Decay;
+                    state_ = State::DECAY;
                 }
                 break;
             }
                 
-            case State::Decay: {
+            case State::DECAY: {
                 float rate = dt / decay_tau_;
                 value_ += rate * (sustain_ - value_);
                 if (value_ <= sustain_ + 0.001f) {
                     value_ = sustain_;
-                    state_ = State::Sustain;
+                    state_ = State::SUSTAIN;
                 }
                 break;
             }
                 
-            case State::Sustain:
+            case State::SUSTAIN:
                 value_ = sustain_;
                 break;
                 
-            case State::Release: {
+            case State::RELEASE: {
                 float rate = dt / release_tau_;
                 value_ += rate * (0.0f - value_);
                 if (value_ <= 0.001f) {
                     value_ = 0.0f;
-                    state_ = State::Idle;
+                    state_ = State::IDLE;
                 }
                 break;
             }
@@ -137,10 +137,10 @@ public:
     [[nodiscard]] float value() const noexcept { return value_; }
     
     /// Is envelope active (not idle)?
-    [[nodiscard]] bool active() const noexcept { return state_ != State::Idle; }
+    [[nodiscard]] bool active() const noexcept { return state_ != State::IDLE; }
     
 private:
-    State state_ = State::Idle;
+    State state_ = State::IDLE;
     float value_ = 0.0f;
     float sustain_ = 0.5f;
     float attack_tau_ = 0.002f;   // ~10ms default

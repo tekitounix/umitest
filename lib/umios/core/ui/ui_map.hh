@@ -27,27 +27,27 @@ namespace umi {
 // ============================================================================
 
 enum class Curve : uint8_t {
-    Linear,     // Direct mapping
-    Log,        // Logarithmic (good for frequency, gain)
-    Exp,        // Exponential
-    Square,     // Quadratic
-    SquareRoot, // Square root
+    LINEAR,      // Direct mapping
+    LOG,         // Logarithmic (good for frequency, gain)
+    EXP,         // Exponential
+    SQUARE,      // Quadratic
+    SQUARE_ROOT, // Square root
 };
 
 /// Apply curve transform: normalized [0,1] -> normalized [0,1]
 constexpr float apply_curve(float normalized, Curve curve) noexcept {
     switch (curve) {
-        case Curve::Linear:
+        case Curve::LINEAR:
             return normalized;
-        case Curve::Log:
+        case Curve::LOG:
             // Log curve: more resolution at low end
             return std::log10(1.0f + normalized * 9.0f) / std::log10(10.0f);
-        case Curve::Exp:
+        case Curve::EXP:
             // Exp curve: more resolution at high end
             return (std::pow(10.0f, normalized) - 1.0f) / 9.0f;
-        case Curve::Square:
+        case Curve::SQUARE:
             return normalized * normalized;
-        case Curve::SquareRoot:
+        case Curve::SQUARE_ROOT:
             return std::sqrt(normalized);
     }
     return normalized;
@@ -56,15 +56,15 @@ constexpr float apply_curve(float normalized, Curve curve) noexcept {
 /// Inverse curve transform: normalized [0,1] -> normalized [0,1]
 constexpr float apply_curve_inverse(float normalized, Curve curve) noexcept {
     switch (curve) {
-        case Curve::Linear:
+        case Curve::LINEAR:
             return normalized;
-        case Curve::Log:
+        case Curve::LOG:
             return (std::pow(10.0f, normalized) - 1.0f) / 9.0f;
-        case Curve::Exp:
+        case Curve::EXP:
             return std::log10(1.0f + normalized * 9.0f) / std::log10(10.0f);
-        case Curve::Square:
+        case Curve::SQUARE:
             return std::sqrt(normalized);
-        case Curve::SquareRoot:
+        case Curve::SQUARE_ROOT:
             return normalized * normalized;
     }
     return normalized;
@@ -79,7 +79,7 @@ struct ControlMapping {
     uint32_t param_id;            // Processor parameter ID
     
     // Value transformation
-    Curve curve = Curve::Linear;
+    Curve curve = Curve::LINEAR;
     float display_min = 0.0f;
     float display_max = 1.0f;
     

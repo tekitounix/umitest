@@ -30,13 +30,13 @@ namespace umi::synth {
 //   Cutoff: Log (frequency param)
 //   Sustain/Resonance/Volume: Linear (0-1 normalized)
 inline constexpr std::array<umi::ParamDescriptor, PARAM_COUNT> kParamDescriptors = {{
-    { static_cast<uint32_t>(ParamId::Attack),    "Attack",    10.0f,   1.0f,   1000.0f },
-    { static_cast<uint32_t>(ParamId::Decay),     "Decay",    100.0f,   1.0f,   2000.0f },
-    { static_cast<uint32_t>(ParamId::Sustain),   "Sustain",    0.7f,   0.0f,      1.0f },
-    { static_cast<uint32_t>(ParamId::Release),   "Release",  200.0f,   1.0f,   3000.0f },
-    { static_cast<uint32_t>(ParamId::Cutoff),    "Cutoff",  2000.0f,  20.0f,  20000.0f },
-    { static_cast<uint32_t>(ParamId::Resonance), "Resonance",  0.3f,   0.0f,      1.0f },
-    { static_cast<uint32_t>(ParamId::Volume),    "Volume",     1.0f,   0.0f,      1.0f },
+    { static_cast<uint32_t>(ParamId::ATTACK),    "Attack",    10.0f,   1.0f,   1000.0f },
+    { static_cast<uint32_t>(ParamId::DECAY),     "Decay",    100.0f,   1.0f,   2000.0f },
+    { static_cast<uint32_t>(ParamId::SUSTAIN),   "Sustain",    0.7f,   0.0f,      1.0f },
+    { static_cast<uint32_t>(ParamId::RELEASE),   "Release",  200.0f,   1.0f,   3000.0f },
+    { static_cast<uint32_t>(ParamId::CUTOFF),    "Cutoff",  2000.0f,  20.0f,  20000.0f },
+    { static_cast<uint32_t>(ParamId::RESONANCE), "Resonance",  0.3f,   0.0f,      1.0f },
+    { static_cast<uint32_t>(ParamId::VOLUME),    "Volume",     1.0f,   0.0f,      1.0f },
 }};
 
 /// ProcessorLike wrapper for PolySynth.
@@ -56,7 +56,7 @@ public:
     void process(umi::AudioContext& ctx) {
         // Process input events (MIDI)
         for (const auto& ev : ctx.input_events) {
-            if (ev.type == umi::EventType::Midi) {
+            if (ev.type == umi::EventType::MIDI) {
                 const auto& midi = ev.midi;
 
                 if (midi.is_note_on()) {

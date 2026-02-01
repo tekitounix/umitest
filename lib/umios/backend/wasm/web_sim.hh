@@ -66,18 +66,18 @@ namespace umi::web {
 //   System Monitor (lowest)  - watchdog, anomaly detection, WFI
 
 enum class TaskId : uint8_t {
-    Idle = 0,        // System Monitor / Idle (lowest priority)
-    DriverServer,    // Driver Server (medium)
-    ControlRunner,   // Control Runner (medium)
-    AudioRunner,     // Audio Runner (highest priority)
-    Count
+    IDLE = 0,        // System Monitor / Idle (lowest priority)
+    DRIVER_SERVER,   // Driver Server (medium)
+    CONTROL_RUNNER,  // Control Runner (medium)
+    AUDIO_RUNNER,    // Audio Runner (highest priority)
+    COUNT
 };
 
 enum class TaskState : uint8_t {
-    Ready = 0,
-    Running,
-    Blocked,
-    Suspended
+    READY = 0,
+    RUNNING,
+    BLOCKED,
+    SUSPENDED
 };
 
 // =====================================================================
@@ -87,21 +87,21 @@ enum class TaskState : uint8_t {
 // This models the actual ISR → notification → task wake pattern.
 
 enum class IrqFlag : uint8_t {
-    DmaHalfTransfer = 0,  // I2S DMA half-transfer complete
-    DmaComplete,          // I2S DMA transfer complete
-    SysTick,              // SysTick timer (1ms)
-    Timer2,               // General purpose timer 2
-    Timer3,               // General purpose timer 3
-    AdcComplete,          // ADC conversion complete
-    GpioExti,             // External GPIO interrupt
-    Usart1Rx,             // UART receive
-    Usart1Tx,             // UART transmit complete
-    UsbSof,               // USB Start of Frame
-    Count
+    DMA_HALF_TRANSFER = 0,  // I2S DMA half-transfer complete
+    DMA_COMPLETE,            // I2S DMA transfer complete
+    SYS_TICK,                // SysTick timer (1ms)
+    TIMER2,                  // General purpose timer 2
+    TIMER3,                  // General purpose timer 3
+    ADC_COMPLETE,            // ADC conversion complete
+    GPIO_EXTI,               // External GPIO interrupt
+    USART1_RX,               // UART receive
+    USART1_TX,               // UART transmit complete
+    USB_SOF,                 // USB Start of Frame
+    COUNT
 };
 
 struct IrqFlagState {
-    static constexpr uint8_t FLAG_COUNT = static_cast<uint8_t>(IrqFlag::Count);
+    static constexpr uint8_t FLAG_COUNT = static_cast<uint8_t>(IrqFlag::COUNT);
     std::array<bool, FLAG_COUNT> pending{};      // ISR sets, task clears
     std::array<uint32_t, FLAG_COUNT> count{};    // Total IRQ counts per type
 
@@ -140,7 +140,7 @@ inline IrqFlagState g_irq_flags;
 // Similar to FreeRTOS xTaskNotify mechanism.
 
 struct TaskNotification {
-    static constexpr uint8_t TASK_COUNT = static_cast<uint8_t>(TaskId::Count);
+    static constexpr uint8_t TASK_COUNT = static_cast<uint8_t>(TaskId::COUNT);
 
     // Notification bits (can be used as event flags)
     static constexpr uint32_t NOTIFY_AUDIO_READY   = (1 << 0);
@@ -298,7 +298,7 @@ struct HwStateShared {
 };
 
 struct TaskStats {
-    TaskState state = TaskState::Blocked;
+    TaskState state = TaskState::BLOCKED;
     uint64_t run_time_us = 0;       // Total CPU time consumed
     uint64_t last_run_us = 0;       // Last execution start time
     uint32_t run_count = 0;         // Number of times task ran
@@ -412,13 +412,13 @@ struct MemoryRegion {
 };
 
 enum class MemoryWarning : uint8_t {
-    None = 0,
-    HeapLow,            // Heap < 25% free
-    StackLow,           // Stack < 25% free
-    HeapCritical,       // Heap < 10% free
-    StackCritical,      // Stack < 10% free
-    Collision,          // Stack and Heap regions would overlap
-    Overflow,           // Actual collision detected
+    NONE = 0,
+    HEAP_LOW,           // Heap < 25% free
+    STACK_LOW,          // Stack < 25% free
+    HEAP_CRITICAL,      // Heap < 10% free
+    STACK_CRITICAL,     // Stack < 10% free
+    COLLISION,          // Stack and Heap regions would overlap
+    OVERFLOW,           // Actual collision detected
 };
 
 struct MemoryLayout {
@@ -439,12 +439,12 @@ struct MemoryLayout {
     uint32_t free_between_heap_stack = 0;  // Gap between heap top and stack bottom
 
     // Warning state
-    MemoryWarning warning = MemoryWarning::None;
+    MemoryWarning warning = MemoryWarning::NONE;
     bool collision_possible = false;
 
     // Check for potential collision
     void update_warning() {
-        warning = MemoryWarning::None;
+        warning = MemoryWarning::NONE;
         collision_possible = false;
 
         // Calculate gap
@@ -452,7 +452,7 @@ struct MemoryLayout {
         uint32_t stack_bottom = task_stacks.base;  // Lowest stack address
 
         if (heap_top >= stack_bottom) {
-            warning = MemoryWarning::Overflow;
+            warning = MemoryWarning::OVERFLOW;
             collision_possible = true;
             free_between_heap_stack = 0;
             return;
@@ -474,15 +474,15 @@ struct MemoryLayout {
             ((task_stacks.size - task_stacks.used) * 100 / task_stacks.size) : 100;
 
         if (heap_free_percent < 10) {
-            warning = MemoryWarning::HeapCritical;
+            warning = MemoryWarning::HEAP_CRITICAL;
         } else if (stack_free_percent < 10) {
-            warning = MemoryWarning::StackCritical;
+            warning = MemoryWarning::STACK_CRITICAL;
         } else if (heap_free_percent < 25) {
-            warning = MemoryWarning::HeapLow;
+            warning = MemoryWarning::HEAP_LOW;
         } else if (stack_free_percent < 25) {
-            warning = MemoryWarning::StackLow;
+            warning = MemoryWarning::STACK_LOW;
         } else if (collision_possible) {
-            warning = MemoryWarning::Collision;
+            warning = MemoryWarning::COLLISION;
         }
     }
 
@@ -673,14 +673,14 @@ struct KernelState {
     uint32_t watchdog_reset_count = 0; // Watchdog reset count
 
     // --- Tasks ---
-    static constexpr uint8_t MAX_TASKS = static_cast<uint8_t>(TaskId::Count);
+    static constexpr uint8_t MAX_TASKS = static_cast<uint8_t>(TaskId::COUNT);
     TaskStats tasks[MAX_TASKS] = {
-        { TaskState::Ready, 0, 0, 0, 128, 512, 0, "Idle" },           // Idle/Monitor
-        { TaskState::Ready, 0, 0, 0, 256, 1024, 1, "DriverSrv" },     // Driver Server
-        { TaskState::Ready, 0, 0, 0, 512, 2048, 2, "CtrlRunner" },    // Control Runner
-        { TaskState::Ready, 0, 0, 0, 256, 1024, 3, "AudioRunner" },   // Audio Runner
+        { TaskState::READY, 0, 0, 0, 128, 512, 0, "Idle" },           // Idle/Monitor
+        { TaskState::READY, 0, 0, 0, 256, 1024, 1, "DriverSrv" },     // Driver Server
+        { TaskState::READY, 0, 0, 0, 512, 2048, 2, "CtrlRunner" },    // Control Runner
+        { TaskState::READY, 0, 0, 0, 256, 1024, 3, "AudioRunner" },   // Audio Runner
     };
-    TaskId current_task = TaskId::Idle;
+    TaskId current_task = TaskId::IDLE;
     uint32_t context_switches = 0;
     uint64_t idle_time_us = 0;      // Time spent in idle (WFI)
     uint64_t total_run_time_us = 0; // Total non-idle time
@@ -716,7 +716,7 @@ struct KernelState {
     uint8_t task_ready_count() const {
         uint8_t count = 0;
         for (uint8_t i = 0; i < MAX_TASKS; ++i) {
-            if (tasks[i].state == TaskState::Ready || tasks[i].state == TaskState::Running) {
+            if (tasks[i].state == TaskState::READY || tasks[i].state == TaskState::RUNNING) {
                 ++count;
             }
         }
@@ -725,7 +725,7 @@ struct KernelState {
     uint8_t task_blocked_count() const {
         uint8_t count = 0;
         for (uint8_t i = 0; i < MAX_TASKS; ++i) {
-            if (tasks[i].state == TaskState::Blocked) {
+            if (tasks[i].state == TaskState::BLOCKED) {
                 ++count;
             }
         }
@@ -881,7 +881,7 @@ inline umi::os::ShellConfig g_shell_config = {
 // ============================================================================
 
 inline umi::os::ErrorLog<16> g_error_log;
-inline umi::os::SystemMode g_system_mode = umi::os::SystemMode::Normal;
+inline umi::os::SystemMode g_system_mode = umi::os::SystemMode::NORMAL;
 
 // ============================================================================
 // Shell Input Buffer (thin wrapper for WASM exports)
@@ -1156,12 +1156,12 @@ struct WebHwImpl {
         if (prev_task != task) {
             // End previous task's run
             auto& prev = g_kernel_state.tasks[static_cast<uint8_t>(prev_task)];
-            if (prev.state == TaskState::Running) {
-                prev.state = TaskState::Ready;
+            if (prev.state == TaskState::RUNNING) {
+                prev.state = TaskState::READY;
             }
             // Start new task
             auto& next = g_kernel_state.tasks[static_cast<uint8_t>(task)];
-            next.state = TaskState::Running;
+            next.state = TaskState::RUNNING;
             next.last_run_us = current_time_us_;
             next.run_count++;
             g_kernel_state.current_task = task;
@@ -1172,16 +1172,16 @@ struct WebHwImpl {
     // Block a task waiting for notification
     static void block_task(TaskId task, uint32_t wait_mask) {
         auto& t = g_kernel_state.tasks[static_cast<uint8_t>(task)];
-        t.state = TaskState::Blocked;
+        t.state = TaskState::BLOCKED;
         t.wait_reason = wait_mask;
     }
 
     // Wake a task if it has pending notifications
     static void try_wake_task(TaskId task) {
         auto& t = g_kernel_state.tasks[static_cast<uint8_t>(task)];
-        if (t.state == TaskState::Blocked) {
+        if (t.state == TaskState::BLOCKED) {
             if (g_task_notify.has_pending(task, t.wait_reason)) {
-                t.state = TaskState::Ready;
+                t.state = TaskState::READY;
                 t.wait_reason = 0;
             }
         }
@@ -1211,20 +1211,20 @@ struct WebHwImpl {
 
         // Simulate DMA half-transfer IRQ
         // 1. ISR sets flag
-        g_irq_flags.set(IrqFlag::DmaHalfTransfer);
+        g_irq_flags.set(IrqFlag::DMA_HALF_TRANSFER);
         g_kernel_state.irq_count++;
         g_kernel_state.audio_irq_count++;
         g_kernel_state.dma_irq_count++;
 
         // 2. ISR notifies AudioRunner
-        g_task_notify.notify(TaskId::AudioRunner, TaskNotification::NOTIFY_AUDIO_READY);
+        g_task_notify.notify(TaskId::AUDIO_RUNNER, TaskNotification::NOTIFY_AUDIO_READY);
 
         // 3. AudioRunner wakes and preempts (highest priority)
-        try_wake_task(TaskId::AudioRunner);
-        switch_to_task(TaskId::AudioRunner);
+        try_wake_task(TaskId::AUDIO_RUNNER);
+        switch_to_task(TaskId::AUDIO_RUNNER);
 
         // 4. AudioRunner clears the flag
-        g_irq_flags.test_and_clear(IrqFlag::DmaHalfTransfer);
+        g_irq_flags.test_and_clear(IrqFlag::DMA_HALF_TRANSFER);
     }
 
     // Set number of active voices for DSP load simulation
@@ -1263,13 +1263,13 @@ struct WebHwImpl {
         simulated_process_us_ = static_cast<uint32_t>(total_cycles / hw.cpu_freq_mhz);
 
         // Record Audio Runner task execution time
-        record_task_time(TaskId::AudioRunner, simulated_process_us_);
+        record_task_time(TaskId::AUDIO_RUNNER, simulated_process_us_);
 
         // Calculate idle time (budget - processing time)
         if (budget_us > simulated_process_us_) {
             uint32_t idle_us = budget_us - simulated_process_us_;
             g_kernel_state.idle_time_us += idle_us;
-            g_kernel_state.tasks[static_cast<uint8_t>(TaskId::Idle)].run_time_us += idle_us;
+            g_kernel_state.tasks[static_cast<uint8_t>(TaskId::IDLE)].run_time_us += idle_us;
         }
 
         // Calculate load percentage (x100 for 0.01% precision)
@@ -1294,7 +1294,7 @@ struct WebHwImpl {
         }
 
         // Return to Control Runner (or Idle if nothing to do)
-        switch_to_task(TaskId::ControlRunner);
+        switch_to_task(TaskId::CONTROL_RUNNER);
     }
 
     // Simulate Control Runner tick (1ms timeslice)
@@ -1304,7 +1304,7 @@ struct WebHwImpl {
 
         // Simulate some control processing
         uint32_t ctrl_time = CTRL_OVERHEAD_US;
-        record_task_time(TaskId::ControlRunner, ctrl_time);
+        record_task_time(TaskId::CONTROL_RUNNER, ctrl_time);
 
         // Remaining time goes to idle
         if (elapsed_us > ctrl_time) {
@@ -1324,21 +1324,21 @@ struct WebHwImpl {
         constexpr uint32_t DRIVER_OVERHEAD_US = 30;
 
         // Timer IRQ triggers
-        g_irq_flags.set(IrqFlag::Timer2);
+        g_irq_flags.set(IrqFlag::TIMER2);
         g_kernel_state.timer_irq_count++;
         g_kernel_state.irq_count++;
 
         // Notify DriverServer
-        g_task_notify.notify(TaskId::DriverServer, TaskNotification::NOTIFY_TIMER);
-        try_wake_task(TaskId::DriverServer);
+        g_task_notify.notify(TaskId::DRIVER_SERVER, TaskNotification::NOTIFY_TIMER);
+        try_wake_task(TaskId::DRIVER_SERVER);
 
         // Context switch to Driver Server
-        switch_to_task(TaskId::DriverServer);
+        switch_to_task(TaskId::DRIVER_SERVER);
 
         // DriverServer reads HW and updates shared memory
         if (hw_state_ptr_) {
             // Simulate ADC conversion complete
-            g_irq_flags.set(IrqFlag::AdcComplete);
+            g_irq_flags.set(IrqFlag::ADC_COMPLETE);
 
             // Update HW state in shared memory
             hw_state_ptr_->update_tick = static_cast<uint32_t>(current_time_us_ / 1000);
@@ -1352,33 +1352,33 @@ struct WebHwImpl {
                 (g_kernel_state.battery_percent < 20 ? 0x02 : 0);
         }
 
-        record_task_time(TaskId::DriverServer, DRIVER_OVERHEAD_US);
+        record_task_time(TaskId::DRIVER_SERVER, DRIVER_OVERHEAD_US);
 
         // Notify ControlRunner that HW state was updated
-        g_task_notify.notify(TaskId::ControlRunner, TaskNotification::NOTIFY_HW_UPDATE);
-        try_wake_task(TaskId::ControlRunner);
+        g_task_notify.notify(TaskId::CONTROL_RUNNER, TaskNotification::NOTIFY_HW_UPDATE);
+        try_wake_task(TaskId::CONTROL_RUNNER);
 
         // Clear timer flag
-        g_irq_flags.test_and_clear(IrqFlag::Timer2);
-        g_irq_flags.test_and_clear(IrqFlag::AdcComplete);
+        g_irq_flags.test_and_clear(IrqFlag::TIMER2);
+        g_irq_flags.test_and_clear(IrqFlag::ADC_COMPLETE);
 
         // Return to Idle (or ControlRunner if it has work)
-        if (g_kernel_state.tasks[static_cast<uint8_t>(TaskId::ControlRunner)].state == TaskState::Ready) {
-            switch_to_task(TaskId::ControlRunner);
+        if (g_kernel_state.tasks[static_cast<uint8_t>(TaskId::CONTROL_RUNNER)].state == TaskState::READY) {
+            switch_to_task(TaskId::CONTROL_RUNNER);
         } else {
-            switch_to_task(TaskId::Idle);
+            switch_to_task(TaskId::IDLE);
         }
     }
 
     // Simulate SysTick handler (1ms tick)
     static void tick_systick() {
         // SysTick IRQ
-        g_irq_flags.set(IrqFlag::SysTick);
+        g_irq_flags.set(IrqFlag::SYS_TICK);
         g_kernel_state.systick_count++;
         g_kernel_state.irq_count++;
 
         // Clear SysTick flag (typically done immediately in ISR)
-        g_irq_flags.test_and_clear(IrqFlag::SysTick);
+        g_irq_flags.test_and_clear(IrqFlag::SYS_TICK);
 
         // Every 10ms, run DriverServer for HW updates
         if (g_kernel_state.systick_count % 10 == 0) {
@@ -1388,12 +1388,12 @@ struct WebHwImpl {
 
     // Simulate GPIO external interrupt
     static void trigger_gpio_irq(uint32_t pin_mask) {
-        g_irq_flags.set(IrqFlag::GpioExti);
+        g_irq_flags.set(IrqFlag::GPIO_EXTI);
         g_kernel_state.irq_count++;
 
         // Notify ControlRunner for button/switch handling
-        g_task_notify.notify(TaskId::ControlRunner, TaskNotification::NOTIFY_HW_UPDATE);
-        try_wake_task(TaskId::ControlRunner);
+        g_task_notify.notify(TaskId::CONTROL_RUNNER, TaskNotification::NOTIFY_HW_UPDATE);
+        try_wake_task(TaskId::CONTROL_RUNNER);
 
         // Update GPIO input state in shared memory
         if (hw_state_ptr_) {
@@ -2021,29 +2021,29 @@ private:
     \
     /* --- IRQ Flags --- */ \
     UMI_WEB_EXPORT uint8_t umi_irq_flag_pending(uint8_t flag) { \
-        if (flag >= static_cast<uint8_t>(umi::web::IrqFlag::Count)) return 0; \
+        if (flag >= static_cast<uint8_t>(umi::web::IrqFlag::COUNT)) return 0; \
         return umi::web::g_irq_flags.test(static_cast<umi::web::IrqFlag>(flag)) ? 1 : 0; \
     } \
     UMI_WEB_EXPORT uint32_t umi_irq_flag_count(uint8_t flag) { \
-        if (flag >= static_cast<uint8_t>(umi::web::IrqFlag::Count)) return 0; \
+        if (flag >= static_cast<uint8_t>(umi::web::IrqFlag::COUNT)) return 0; \
         return umi::web::g_irq_flags.get_count(static_cast<umi::web::IrqFlag>(flag)); \
     } \
     UMI_WEB_EXPORT void umi_irq_trigger(uint8_t flag) { \
-        if (flag >= static_cast<uint8_t>(umi::web::IrqFlag::Count)) return; \
+        if (flag >= static_cast<uint8_t>(umi::web::IrqFlag::COUNT)) return; \
         umi::web::g_irq_flags.set(static_cast<umi::web::IrqFlag>(flag)); \
     } \
     \
     /* --- Task Notifications --- */ \
     UMI_WEB_EXPORT uint32_t umi_notify_pending(uint8_t task) { \
-        if (task >= static_cast<uint8_t>(umi::web::TaskId::Count)) return 0; \
+        if (task >= static_cast<uint8_t>(umi::web::TaskId::COUNT)) return 0; \
         return umi::web::g_task_notify.values[task]; \
     } \
     UMI_WEB_EXPORT void umi_notify_send(uint8_t task, uint32_t bits) { \
-        if (task >= static_cast<uint8_t>(umi::web::TaskId::Count)) return; \
+        if (task >= static_cast<uint8_t>(umi::web::TaskId::COUNT)) return; \
         umi::web::g_task_notify.notify(static_cast<umi::web::TaskId>(task), bits); \
     } \
     UMI_WEB_EXPORT uint32_t umi_task_wait_reason(uint8_t task) { \
-        if (task >= static_cast<uint8_t>(umi::web::TaskId::Count)) return 0; \
+        if (task >= static_cast<uint8_t>(umi::web::TaskId::COUNT)) return 0; \
         return umi::web::g_kernel_state.tasks[task].wait_reason; \
     } \
     \

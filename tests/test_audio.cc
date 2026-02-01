@@ -106,7 +106,7 @@ int main() {
         Engine engine(cfg);
         check(engine.config().sample_rate == 44100, "sample rate");
         check(engine.config().buffer_size == 64, "buffer size");
-        check(engine.state() == umi::audio::EngineState::Stopped, "initial state");
+        check(engine.state() == umi::audio::EngineState::STOPPED, "initial state");
     }
     
     // ========================================
@@ -118,20 +118,20 @@ int main() {
         Engine engine;
         
         engine.start();
-        check(engine.state() == umi::audio::EngineState::Running, "start -> running");
+        check(engine.state() == umi::audio::EngineState::RUNNING, "start -> running");
         check(MockAudioIO::dma_running, "DMA started");
         check(!MockAudioIO::muted, "unmuted on start");
         
         engine.suspend();
-        check(engine.state() == umi::audio::EngineState::Suspended, "suspend");
+        check(engine.state() == umi::audio::EngineState::SUSPENDED, "suspend");
         check(MockAudioIO::muted, "muted on suspend");
         
         engine.resume();
-        check(engine.state() == umi::audio::EngineState::Running, "resume");
+        check(engine.state() == umi::audio::EngineState::RUNNING, "resume");
         check(!MockAudioIO::muted, "unmuted on resume");
         
         engine.stop();
-        check(engine.state() == umi::audio::EngineState::Stopped, "stop");
+        check(engine.state() == umi::audio::EngineState::STOPPED, "stop");
         check(!MockAudioIO::dma_running, "DMA stopped");
     }
     
@@ -277,20 +277,20 @@ int main() {
         std::array<float, 256> output_buf{};
         umi::midi::EventBuffer<16> midi_events;
         
-        check(engine.state() == umi::audio::EngineState::Running, "running initially");
+        check(engine.state() == umi::audio::EngineState::RUNNING, "running initially");
         
         // First buffer (128 frames) - not enough for standby
         engine.on_buffer_complete(kernel, input_buf.data(), output_buf.data(), midi_events);
-        check(engine.state() == umi::audio::EngineState::Running, "still running after 128");
+        check(engine.state() == umi::audio::EngineState::RUNNING, "still running after 128");
         
         // Second buffer (256 frames total) - should enter standby
         engine.on_buffer_complete(kernel, input_buf.data(), output_buf.data(), midi_events);
-        check(engine.state() == umi::audio::EngineState::Standby, "standby after 256 silent frames");
+        check(engine.state() == umi::audio::EngineState::STANDBY, "standby after 256 silent frames");
         check(MockAudioIO::muted, "muted in standby");
         
         // Resume
         engine.resume();
-        check(engine.state() == umi::audio::EngineState::Running, "resume from standby");
+        check(engine.state() == umi::audio::EngineState::RUNNING, "resume from standby");
     }
     
     // ========================================

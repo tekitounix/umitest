@@ -21,17 +21,17 @@ enum class ProtectionMode : std::uint8_t {
     /// MPU enabled, unprivileged mode execution
     /// Maximum security, some overhead
     /// Use for: Production on MPU-capable MCUs
-    Full,
+    FULL,
 
     /// MPU disabled, privileged mode execution
     /// For MCUs without MPU, or when protection not needed
     /// Use for: MPU-less MCUs, trusted single-app systems
-    Privileged,
+    PRIVILEGED,
 
     /// MPU enabled, privileged mode execution
     /// MPU faults but no mode switch - useful for debugging
     /// Use for: Development, debugging memory issues
-    PrivilegedWithMpu,
+    PRIVILEGED_WITH_MPU,
 };
 
 // ============================================================================
@@ -51,14 +51,14 @@ struct MemoryRegion {
 
 /// Standard region indices for kernel layout
 enum class RegionIndex : std::uint8_t {
-    Kernel = 0,        ///< Kernel code and data (privileged only)
-    AppText = 1,       ///< Application .text (RX, unprivileged)
-    AppData = 2,       ///< Application .data/.bss (RW, unprivileged)
-    AppStack = 3,      ///< Application stack (RW, unprivileged)
-    Shared = 4,        ///< Shared memory (RW, both)
-    Peripherals = 5,   ///< Peripheral space (device, privileged only)
-    Reserved1 = 6,
-    Reserved2 = 7,
+    KERNEL = 0,        ///< Kernel code and data (privileged only)
+    APP_TEXT = 1,      ///< Application .text (RX, unprivileged)
+    APP_DATA = 2,      ///< Application .data/.bss (RW, unprivileged)
+    APP_STACK = 3,     ///< Application stack (RW, unprivileged)
+    SHARED = 4,        ///< Shared memory (RW, both)
+    PERIPHERALS = 5,   ///< Peripheral space (device, privileged only)
+    RESERVED1 = 6,
+    RESERVED2 = 7,
 };
 
 // ============================================================================
@@ -183,7 +183,7 @@ inline void disable_region(std::uint8_t region) {
 /// Memory protection abstraction
 /// @tparam HW Hardware abstraction layer
 /// @tparam Mode Protection mode (compile-time selection)
-template <class HW, ProtectionMode Mode = ProtectionMode::Full>
+template <class HW, ProtectionMode Mode = ProtectionMode::FULL>
 class Protection {
 public:
     /// Initialize memory protection
@@ -202,7 +202,7 @@ public:
             if (!mpu::is_available()) return;
 
             mpu::configure_region(
-                static_cast<std::uint8_t>(RegionIndex::Kernel),
+                static_cast<std::uint8_t>(RegionIndex::KERNEL),
                 base, size,
                 mpu::AP_PRIV_RW,  // Privileged only
                 mpu::ATTR_NORMAL_CACHED,
@@ -217,7 +217,7 @@ public:
             if (!mpu::is_available()) return;
 
             mpu::configure_region(
-                static_cast<std::uint8_t>(RegionIndex::Peripherals),
+                static_cast<std::uint8_t>(RegionIndex::PERIPHERALS),
                 base, size,
                 mpu::AP_PRIV_RW,  // Privileged only
                 mpu::ATTR_DEVICE,
@@ -235,7 +235,7 @@ public:
 
             // App .text (RX)
             mpu::configure_region(
-                static_cast<std::uint8_t>(RegionIndex::AppText),
+                static_cast<std::uint8_t>(RegionIndex::APP_TEXT),
                 text_base, text_size,
                 mpu::AP_FULL_ACCESS,  // Both can read
                 mpu::ATTR_NORMAL_CACHED,
@@ -244,7 +244,7 @@ public:
 
             // App .data/.bss (RW)
             mpu::configure_region(
-                static_cast<std::uint8_t>(RegionIndex::AppData),
+                static_cast<std::uint8_t>(RegionIndex::APP_DATA),
                 data_base, data_size,
                 mpu::AP_FULL_ACCESS,  // Both RW
                 mpu::ATTR_NORMAL_CACHED,
@@ -253,7 +253,7 @@ public:
 
             // App stack (RW)
             mpu::configure_region(
-                static_cast<std::uint8_t>(RegionIndex::AppStack),
+                static_cast<std::uint8_t>(RegionIndex::APP_STACK),
                 stack_base, stack_size,
                 mpu::AP_FULL_ACCESS,  // Both RW
                 mpu::ATTR_NORMAL_CACHED,
@@ -268,7 +268,7 @@ public:
             if (!mpu::is_available()) return;
 
             mpu::configure_region(
-                static_cast<std::uint8_t>(RegionIndex::Shared),
+                static_cast<std::uint8_t>(RegionIndex::SHARED),
                 base, size,
                 mpu::AP_FULL_ACCESS,  // Both RW
                 mpu::ATTR_NORMAL_CACHED,
@@ -288,25 +288,25 @@ public:
 
     /// Check if syscall is needed for kernel calls
     static constexpr bool needs_syscall() noexcept {
-        return Mode == ProtectionMode::Full;
+        return Mode == ProtectionMode::FULL;
     }
 
     /// Check if running in privileged mode
     static constexpr bool is_privileged() noexcept {
-        return Mode != ProtectionMode::Full;
+        return Mode != ProtectionMode::FULL;
     }
 
     /// Check if MPU is used in this mode
     static constexpr bool uses_mpu() noexcept {
-        return Mode == ProtectionMode::Full || Mode == ProtectionMode::PrivilegedWithMpu;
+        return Mode == ProtectionMode::FULL || Mode == ProtectionMode::PRIVILEGED_WITH_MPU;
     }
 
     /// Get protection mode name for debugging
     static constexpr const char* mode_name() noexcept {
         switch (Mode) {
-            case ProtectionMode::Full: return "Full";
-            case ProtectionMode::Privileged: return "Privileged";
-            case ProtectionMode::PrivilegedWithMpu: return "PrivilegedWithMpu";
+            case ProtectionMode::FULL: return "Full";
+            case ProtectionMode::PRIVILEGED: return "Privileged";
+            case ProtectionMode::PRIVILEGED_WITH_MPU: return "PrivilegedWithMpu";
             default: return "Unknown";
         }
     }
@@ -318,12 +318,12 @@ public:
 
 /// Default protection mode based on platform
 #if defined(__ARM_ARCH) && defined(UMIOS_USE_MPU)
-    inline constexpr ProtectionMode DEFAULT_PROTECTION_MODE = ProtectionMode::Full;
+    inline constexpr ProtectionMode DEFAULT_PROTECTION_MODE = ProtectionMode::FULL;
 #elif defined(__ARM_ARCH)
-    inline constexpr ProtectionMode DEFAULT_PROTECTION_MODE = ProtectionMode::Privileged;
+    inline constexpr ProtectionMode DEFAULT_PROTECTION_MODE = ProtectionMode::PRIVILEGED;
 #else
     // Non-ARM or simulation
-    inline constexpr ProtectionMode DEFAULT_PROTECTION_MODE = ProtectionMode::Privileged;
+    inline constexpr ProtectionMode DEFAULT_PROTECTION_MODE = ProtectionMode::PRIVILEGED;
 #endif
 
 }  // namespace umi::kernel

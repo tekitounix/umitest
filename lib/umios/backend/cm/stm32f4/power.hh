@@ -58,18 +58,18 @@ struct SCB {
 
 /// Clock profile for power management
 enum class ClockProfile : std::uint8_t {
-    Full,      ///< 168MHz - Audio processing active
-    Medium,    ///< 84MHz  - Light load
-    Low,       ///< 24MHz  - Idle, minimal processing
-    Sleep,     ///< Stop mode - minimal power
+    FULL,      ///< 168MHz - Audio processing active
+    MEDIUM,    ///< 84MHz  - Light load
+    LOW,       ///< 24MHz  - Idle, minimal processing
+    SLEEP,     ///< Stop mode - minimal power
 };
 
 /// Sleep mode depth
 enum class SleepMode : std::uint8_t {
     WFI,       ///< Wait For Interrupt - quick wakeup (~1us)
     WFE,       ///< Wait For Event
-    Stop,      ///< Stop mode - slower wakeup (~5us), lower power
-    Standby,   ///< Standby mode - RAM lost, lowest power
+    STOP,      ///< Stop mode - slower wakeup (~5us), lower power
+    STANDBY,   ///< Standby mode - RAM lost, lowest power
 };
 
 /// Power management for STM32F4
@@ -140,7 +140,7 @@ public:
         // Stop mode only worthwhile if sleeping > 100us
         // (wakeup latency ~5us, clock stabilization ~10us)
         if (sleep_time_us > 100) {
-            return SleepMode::Stop;
+            return SleepMode::STOP;
         }
 
         return SleepMode::WFI;
@@ -155,10 +155,10 @@ public:
             case SleepMode::WFE:
                 wfe();
                 break;
-            case SleepMode::Stop:
+            case SleepMode::STOP:
                 enter_stop_mode();
                 break;
-            case SleepMode::Standby:
+            case SleepMode::STANDBY:
                 // Not implemented - RAM would be lost
                 wfi();
                 break;
@@ -194,7 +194,7 @@ public:
             next_timer_expiry, now, audio_active_);
 
         // If using stop mode, need to reconfigure clocks after wakeup
-        bool use_stop = (mode == SleepMode::Stop);
+        bool use_stop = (mode == SleepMode::STOP);
 
         PowerManager::enter_sleep(mode);
 
