@@ -34,6 +34,9 @@ target("daisy_pod_kernel")
     -- Defines
     add_defines("UMI_CM_NUM_IRQS=150")
     add_defines("STM32H7", "BOARD_DAISY_SEED")
+    if is_mode("debug") then
+        add_defines("UMI_DEBUG=1")
+    end
 
     -- Include paths (umiport layers)
     add_includedirs("src")
@@ -44,6 +47,40 @@ target("daisy_pod_kernel")
     add_includedirs(path.join(os.projectdir(), "lib/umiusb/include"))
     add_includedirs(path.join(os.projectdir(), "lib/umidsp/include"))
     add_includedirs(path.join(os.projectdir(), "lib/umios/core"))
+    add_includedirs(path.join(os.projectdir(), "lib/umios"))
     add_includedirs(board_dir)
     add_includedirs(pod_board_dir)
 target_end()
+
+-- Flash kernel to internal flash via pyOCD (STLINK-V3)
+task("flash-h7-kernel")
+    set_category("action")
+    on_run(function ()
+        print("Building daisy_pod_kernel...")
+        os.exec("xmake build daisy_pod_kernel")
+        local hexfile = path.join(os.projectdir(), "build", "daisy_pod_kernel", "debug", "daisy_pod_kernel.hex")
+        if not os.isfile(hexfile) then
+            raise(".hex not found: " .. hexfile)
+        end
+        print("Flashing kernel to STM32H750 internal flash...")
+        os.execv("pyocd", {"flash", "-t", "stm32h750xx", hexfile})
+    end)
+    set_menu {usage = "xmake flash-h7-kernel", description = "Build and flash H7 kernel via pyOCD"}
+task_end()
+
+-- Flash synth app to QSPI (0x90000000) via pyOCD
+task("flash-h7-app")
+    set_category("action")
+    on_run(function ()
+        print("Building daisy_pod_synth_h7...")
+        os.exec("xmake build daisy_pod_synth_h7")
+        local binfile = path.join(os.projectdir(), "build", "daisy_pod_synth_h7", "debug", "daisy_pod_synth_h7.bin")
+        if not os.isfile(binfile) then
+            raise(".bin not found: " .. binfile)
+        end
+        print("Flashing app to QSPI flash at 0x90000000...")
+        -- Note: requires pyOCD QSPI flash algorithm pack for W25Q64JV
+        os.execv("pyocd", {"flash", "-t", "stm32h750xx", "-a", "0x90000000", "--format", "bin", binfile})
+    end)
+    set_menu {usage = "xmake flash-h7-app", description = "Build and flash H7 synth app to QSPI via pyOCD"}
+task_end()

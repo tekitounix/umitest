@@ -163,4 +163,23 @@ SECTIONS
         . = ALIGN(4);
         PROVIDE(__heap_end = .);
     } > SRAM_D1
+
+    /* Shared memory (kernel ↔ app communication) */
+    /* Located at end of SRAM_D1: 0x24070000, 64KB */
+    .shared 0x24070000 (NOLOAD) :
+    {
+        . = ALIGN(4);
+        _shared_start = .;
+        *(.shared)
+        *(.shared*)
+        . = ALIGN(4);
+        _shared_end = .;
+    } > SRAM_D1
+
+    /* Application image entry point (QSPI XIP) */
+    _app_image_start = ORIGIN(QSPIFLASH);
+
+    /* Application RAM region: 0x24040000, 192KB */
+    _app_ram_start = 0x24040000;
+    _app_ram_size  = 192K;
 }

@@ -95,9 +95,12 @@ end
 -- =====================================================================
 
 includes("lib/umi")
+includes("lib/umimock")
 includes("lib/umifs")
 includes("lib/umifs/test")
 includes("lib/umiusb/test")
+includes("lib/umiport")
+includes("lib/umiport/test")
 
 -- Legacy umios target for backward compatibility
 target("umios")
@@ -284,6 +287,20 @@ stm32f4_target("umidi_test_renode", {
     renode_script = "umidi_test.resc"
 })
 
+target("umimock_renode")
+    set_group("tests/umimock")
+    set_default(false)
+    add_rules("embedded")
+    set_values("embedded.mcu", "stm32f407vg")
+    set_values("embedded.linker_script", stm32f4_linker)
+    set_values("embedded.optimize", "size")
+    add_deps("umi.embedded.full")
+    add_defines("STM32F4", "BOARD_STM32F4")
+    add_files(stm32f4_syscalls)
+    add_files("lib/umimock/test/test_mock_renode.cc")
+    add_includedirs("lib/umimock/include")
+target_end()
+
 -- Note: synth_example and synth_renode moved to examples/_archive
 -- These targets are now part of headless_webhost project
 
@@ -301,6 +318,24 @@ if has_emscripten then
 -- Include headless_webhost subproject
 includes("examples/headless_webhost")
 
+-- umimock WASM test
+target("umimock_wasm")
+    set_kind("binary")
+    set_default(false)
+    set_group("wasm")
+    set_languages("c++23")
+    set_plat("wasm")
+    set_arch("wasm32")
+    set_toolchains("emcc")
+    set_filename("umimock_wasm.js")
+    add_files("lib/umimock/test/test_mock_wasm.cc")
+    add_includedirs("lib/umimock/include")
+    add_cxflags("-fno-exceptions", "-fno-rtti", {force = true})
+    add_ldflags("-sEXPORTED_FUNCTIONS=['_main','_umimock_constant','_umimock_ramp_first','_umimock_set_and_get','_umimock_reset_value','_umimock_fill_buffer_check']", {force = true})
+    add_ldflags("-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap']", {force = true})
+    add_ldflags("-sMODULARIZE=1", "-sEXPORT_NAME='createUmimock'", {force = true})
+target_end()
+
 end  -- if has_emscripten
 
 -- =====================================================================
@@ -310,6 +345,7 @@ end  -- if has_emscripten
 includes("examples/stm32f4_kernel")
 includes("examples/synth_app")
 includes("examples/daisy_pod_kernel")
+includes("examples/daisy_pod_synth_h7")
 
 -- =====================================================================
 -- Tasks
@@ -573,3 +609,127 @@ task("waveshaper-py")
 task_end()
 
 end  -- if has_python
+
+-- =====================================================================
+-- Filesystem check: tests + benchmarks + size comparison
+-- =====================================================================
+
+task("fs-check")
+    set_category("action")
+    on_run(function ()
+        import("core.project.project")
+        local sep = string.rep("=", 70)
+
+        -- ---------------------------------------------------------------
+        -- 1. Host unit tests
+        -- ---------------------------------------------------------------
+        local tests = {"test_fs_fat", "test_fs_slim"}
+        for _, name in ipairs(tests) do
+            os.exec("xmake build " .. name)
+        end
+        print("\n" .. sep)
+        print("  1. Host Unit Tests")
+        print(sep .. "\n")
+        local failed = {}
+        for _, name in ipairs(tests) do
+            print(">>> " .. name)
+            local ok = os.execv("xmake", {"run", name}, {try = true})
+            if ok ~= 0 then table.insert(failed, name) end
+            print("")
+        end
+        if #failed > 0 then
+            print("FAILED: " .. table.concat(failed, ", "))
+            os.exit(1)
+        end
+        print("All unit tests passed!\n")
+
+        -- ---------------------------------------------------------------
+        -- 2. Renode benchmarks (slim + fat_cr, then lfs_ref + fat_ref)
+        -- ---------------------------------------------------------------
+        print(sep)
+        print("  2. Renode Benchmarks (DWT cycles, ARM Cortex-M4)")
+        print(sep .. "\n")
+
+        local renode = "/Applications/Renode.app/Contents/MacOS/Renode"
+        if not os.isfile(renode) then renode = "renode" end
+        local test_dir = "lib/umifs/test"
+        local resc = path.join(test_dir, "fs_test.resc")
+        local log = "build/renode_fs_uart.log"
+
+        -- slim + fat(cr)
+        os.exec("xmake build renode_fs_test")
+        os.execv(renode, {"--console", "--disable-xwt", "-e", "include @" .. resc})
+        local log_cr = ""
+        if os.isfile(log) then
+            log_cr = io.readfile(log)
+        end
+
+        -- lfs(ref) + fat(ref)
+        os.exec("xmake build renode_fs_test_ref")
+        -- Generate .resc pointing to ref ELF
+        local resc_ref = "build/fs_test_ref.resc"
+        local resc_content = io.readfile(resc)
+        resc_content = resc_content:gsub(
+            "renode_fs_test/release/renode_fs_test%.elf",
+            "renode_fs_test_ref/release/renode_fs_test_ref.elf")
+        io.writefile(resc_ref, resc_content)
+        os.execv(renode, {"--console", "--disable-xwt", "-e", "include @" .. resc_ref})
+        local log_ref = ""
+        if os.isfile(log) then
+            log_ref = io.readfile(log)
+        end
+
+        -- Print both results
+        if #log_cr > 0 then
+            print("\n--- fat(cr) + slim ---")
+            print(log_cr)
+        end
+        if #log_ref > 0 then
+            print("--- lfs(ref) + fat(ref) ---")
+            print(log_ref)
+        end
+
+        -- ---------------------------------------------------------------
+        -- 3. ARM binary size comparison
+        -- ---------------------------------------------------------------
+        print("\n" .. sep)
+        print("  3. ARM Binary Size Comparison (Cortex-M4, -Oz)")
+        print(sep .. "\n")
+
+        local size_targets = {"size_fs_slim", "size_fs_lfs_ref", "size_fs_fat", "size_fs_fat_ref"}
+        for _, name in ipairs(size_targets) do
+            os.exec("xmake build " .. name)
+        end
+
+        local size_cmd = "arm-none-eabi-size"
+        local labels = {
+            size_fs_slim    = "slim",
+            size_fs_lfs_ref = "lfs(ref)",
+            size_fs_fat     = "fat(cr)",
+            size_fs_fat_ref = "fat(ref)",
+        }
+        -- Print header
+        printf("  %-10s %8s %8s %8s %8s\n", "", ".text", ".data", ".bss", "total")
+        printf("  %-10s %8s %8s %8s %8s\n", "----------", "--------", "--------", "--------", "--------")
+        for _, name in ipairs(size_targets) do
+            local target = project.target(name)
+            local elf = target:targetfile()
+            local output = os.iorunv(size_cmd, {elf})
+            -- Parse second line: text data bss dec hex filename
+            for line in output:gmatch("[^\n]+") do
+                local t, d, b, dec = line:match("^%s*(%d+)%s+(%d+)%s+(%d+)%s+(%d+)")
+                if t then
+                    printf("  %-10s %8s %8s %8s %8s\n", labels[name], t, d, b, dec)
+                end
+            end
+        end
+
+        -- ---------------------------------------------------------------
+        -- Summary
+        -- ---------------------------------------------------------------
+        print("\n" .. sep)
+        print("  fs-check complete")
+        print(sep)
+    end)
+    set_menu {usage = "xmake fs-check", description = "Run FS tests, Renode benchmarks, and ARM size comparison"}
+task_end()
