@@ -65,9 +65,6 @@ target("umi.embedded")
     add_deps("umi.core")
     add_deps("umi.port.embedded.stm32f4_disco")
 
-    -- Legacy paths (bsp/hal not yet migrated to umiport)
-    add_includedirs(path.join(lib_dir, "bsp/stm32f4-disco"), {public = true})
-    add_includedirs(path.join(lib_dir, "hal/stm32"), {public = true})
 target_end()
 
 -- =====================================================================

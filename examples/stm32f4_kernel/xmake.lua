@@ -22,7 +22,7 @@ target("stm32f4_kernel")
     
     -- Source files
     add_files("src/*.cc")
-    add_files("$(projectdir)/lib/bsp/stm32f4-disco/syscalls.cc")
+    add_files("$(projectdir)/lib/umiport/mcu/stm32f4/syscalls.cc")
     add_files("$(projectdir)/lib/umios/kernel/loader.cc")
     add_files("$(projectdir)/lib/umiport/common/common/irq.cc")
 

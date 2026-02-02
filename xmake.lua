@@ -203,9 +203,8 @@ end
 -- ARM Firmware Targets (using embedded rule from arm-embedded)
 -- =====================================================================
 
-local stm32f4_bsp = "lib/bsp/stm32f4-disco"
-local stm32f4_linker = stm32f4_bsp .. "/linker.ld"
-local stm32f4_syscalls = stm32f4_bsp .. "/syscalls.cc"
+local stm32f4_linker = "lib/umiport/mcu/stm32f4/linker.ld"
+local stm32f4_syscalls = "lib/umiport/mcu/stm32f4/syscalls.cc"
 
 -- Helper: Create STM32F4 embedded target
 local function stm32f4_target(name, opts)
