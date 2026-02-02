@@ -2,7 +2,9 @@
 // AudioDriver concept sequence tests
 // Tests start/stop/configure flow using stub implementation
 
-#include "test_common.hh"
+#include <umitest.hh>
+
+using namespace umitest;
 
 #include <cstdint>
 #include <expected>
@@ -88,8 +90,8 @@ static_assert(hal::AudioCodec<TestCodec>);
 
 } // namespace
 
-int main() {
-    SECTION("AudioDevice configure → start → stop sequence");
+static void test_configure_start_stop(Suite& s) {
+    s.section("AudioDevice configure → start → stop sequence");
     {
         TestAudioDev dev;
         hal::audio::Config cfg{};
@@ -97,48 +99,56 @@ int main() {
         cfg.buffer_size = 256;
         cfg.channels = 2;
 
-        CHECK(dev.configure(cfg).has_value(), "configure");
-        CHECK_EQ(static_cast<int>(dev.get_state()), static_cast<int>(hal::audio::State::STOPPED), "stopped after configure");
-        CHECK(dev.start().has_value(), "start");
-        CHECK_EQ(static_cast<int>(dev.get_state()), static_cast<int>(hal::audio::State::RUNNING), "running after start");
-        CHECK(dev.stop().has_value(), "stop");
-        CHECK_EQ(static_cast<int>(dev.get_state()), static_cast<int>(hal::audio::State::STOPPED), "stopped after stop");
+        s.check(dev.configure(cfg).has_value(), "configure");
+        s.check_eq(static_cast<int>(dev.get_state()), static_cast<int>(hal::audio::State::STOPPED));
+        s.check(dev.start().has_value(), "start");
+        s.check_eq(static_cast<int>(dev.get_state()), static_cast<int>(hal::audio::State::RUNNING));
+        s.check(dev.stop().has_value(), "stop");
+        s.check_eq(static_cast<int>(dev.get_state()), static_cast<int>(hal::audio::State::STOPPED));
     }
+}
 
-    SECTION("AudioDevice pause → resume");
+static void test_pause_resume(Suite& s) {
+    s.section("AudioDevice pause → resume");
     {
         TestAudioDev dev;
         hal::audio::Config cfg{};
         dev.configure(cfg);
         dev.start();
-        CHECK(dev.pause().has_value(), "pause");
-        CHECK_EQ(static_cast<int>(dev.get_state()), static_cast<int>(hal::audio::State::PAUSED), "paused");
-        CHECK(dev.resume().has_value(), "resume");
-        CHECK_EQ(static_cast<int>(dev.get_state()), static_cast<int>(hal::audio::State::RUNNING), "running");
+        s.check(dev.pause().has_value(), "pause");
+        s.check_eq(static_cast<int>(dev.get_state()), static_cast<int>(hal::audio::State::PAUSED));
+        s.check(dev.resume().has_value(), "resume");
+        s.check_eq(static_cast<int>(dev.get_state()), static_cast<int>(hal::audio::State::RUNNING));
     }
+}
 
-    SECTION("AudioDevice config supported check");
+static void test_config_supported(Suite& s) {
+    s.section("AudioDevice config supported check");
     {
         TestAudioDev dev;
         hal::audio::Config cfg48k{};
         cfg48k.sample_rate = 48000;
-        CHECK(dev.is_config_supported(cfg48k), "48kHz supported");
+        s.check(dev.is_config_supported(cfg48k), "48kHz supported");
 
         hal::audio::Config cfg96k{};
         cfg96k.sample_rate = 96000;
-        CHECK(!dev.is_config_supported(cfg96k), "96kHz not supported");
+        s.check(!dev.is_config_supported(cfg96k), "96kHz not supported");
     }
+}
 
-    SECTION("AudioDevice buffer sizes");
+static void test_buffer_sizes(Suite& s) {
+    s.section("AudioDevice buffer sizes");
     {
         TestAudioDev dev;
         auto sizes = dev.get_available_buffer_sizes();
-        CHECK_EQ(static_cast<int>(sizes.size()), 4, "4 buffer sizes");
-        CHECK_EQ(static_cast<int>(sizes[0]), 64, "min 64");
-        CHECK_EQ(static_cast<int>(sizes[3]), 512, "max 512");
+        s.check_eq(static_cast<int>(sizes.size()), 4);
+        s.check_eq(static_cast<int>(sizes[0]), 64);
+        s.check_eq(static_cast<int>(sizes[3]), 512);
     }
+}
 
-    SECTION("AudioDevice latency calculation");
+static void test_latency(Suite& s) {
+    s.section("AudioDevice latency calculation");
     {
         TestAudioDev dev;
         hal::audio::Config cfg{};
@@ -146,10 +156,12 @@ int main() {
         cfg.buffer_size = 256;
         dev.configure(cfg);
         // 256 / 48000 ≈ 5333us
-        CHECK_EQ(static_cast<int>(dev.get_latency()), 5333, "latency ~5.3ms");
+        s.check_eq(static_cast<int>(dev.get_latency()), 5333);
     }
+}
 
-    SECTION("AudioDevice call counts");
+static void test_call_counts(Suite& s) {
+    s.section("AudioDevice call counts");
     {
         TestAudioDev dev;
         hal::audio::Config cfg{};
@@ -158,28 +170,42 @@ int main() {
         dev.start();
         dev.stop();
         dev.start();
-        CHECK_EQ(dev.configure_count, 2, "configured twice");
-        CHECK_EQ(dev.start_count, 2, "started twice");
-        CHECK_EQ(dev.stop_count, 1, "stopped once");
+        s.check_eq(dev.configure_count, 2);
+        s.check_eq(dev.start_count, 2);
+        s.check_eq(dev.stop_count, 1);
     }
+}
 
-    SECTION("AudioCodec init → power_on → set_volume → mute");
+static void test_audio_codec(Suite& s) {
+    s.section("AudioCodec init → power_on → set_volume → mute");
     {
         TestCodec codec;
-        CHECK(!codec.initialized_, "not initialized");
-        CHECK(codec.init(), "init returns true");
-        CHECK(codec.initialized_, "initialized");
+        s.check(!codec.initialized_, "not initialized");
+        s.check(codec.init(), "init returns true");
+        s.check(codec.initialized_, "initialized");
         codec.power_on();
-        CHECK(codec.powered_, "powered on");
+        s.check(codec.powered_, "powered on");
         codec.set_volume(-6);
-        CHECK_EQ(codec.volume_db_, -6, "volume = -6dB");
+        s.check_eq(codec.volume_db_, -6);
         codec.mute(true);
-        CHECK(codec.muted_, "muted");
+        s.check(codec.muted_, "muted");
         codec.mute(false);
-        CHECK(!codec.muted_, "unmuted");
+        s.check(!codec.muted_, "unmuted");
         codec.power_off();
-        CHECK(!codec.powered_, "powered off");
+        s.check(!codec.powered_, "powered off");
     }
+}
 
-    TEST_SUMMARY();
+int main() {
+    Suite s("port_audio");
+
+    test_configure_start_stop(s);
+    test_pause_resume(s);
+    test_config_supported(s);
+    test_buffer_sizes(s);
+    test_latency(s);
+    test_call_counts(s);
+    test_audio_codec(s);
+
+    return s.summary();
 }

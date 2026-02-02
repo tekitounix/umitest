@@ -2,7 +2,9 @@
 // umiport concept satisfaction tests
 // Verifies that stub implementations satisfy all HAL concepts
 
-#include "test_common.hh"
+#include <umitest.hh>
+
+using namespace umitest;
 
 #include <cstdint>
 #include <expected>
@@ -265,22 +267,24 @@ static_assert(hal::audio::BlockingAudioDevice<stub::AudioDev, std::int16_t>);
 // Runtime tests — verify stub behavior and Result<T>
 // ============================================================================
 
-int main() {
-    SECTION("Result<T> basics");
+static void test_result_basics(Suite& s) {
+    s.section("Result<T> basics");
     {
         hal::Result<int> ok = 42;
-        CHECK(ok.has_value(), "Result<int> has value");
-        CHECK_EQ(*ok, 42, "Result<int> value is 42");
+        s.check(ok.has_value(), "Result<int> has value");
+        s.check_eq(*ok, 42);
 
         hal::Result<void> ok_void{};
-        CHECK(ok_void.has_value(), "Result<void> has value");
+        s.check(ok_void.has_value(), "Result<void> has value");
 
         hal::Result<int> err = std::unexpected(hal::ErrorCode::TIMEOUT);
-        CHECK(!err.has_value(), "Error result has no value");
-        CHECK_EQ(static_cast<int>(err.error()), static_cast<int>(hal::ErrorCode::TIMEOUT), "Error code is TIMEOUT");
+        s.check(!err.has_value(), "Error result has no value");
+        s.check_eq(static_cast<int>(err.error()), static_cast<int>(hal::ErrorCode::TIMEOUT));
     }
+}
 
-    SECTION("CacheOps satisfaction");
+static void test_cache_ops(Suite& s) {
+    s.section("CacheOps satisfaction");
     {
         stub::Cache cache;
         cache.enable_icache();
@@ -290,119 +294,162 @@ int main() {
         int dummy = 0;
         cache.invalidate_dcache(&dummy, sizeof(dummy));
         cache.clean_dcache(&dummy, sizeof(dummy));
-        CHECK(true, "CacheOps stub callable");
+        s.check(true, "CacheOps stub callable");
     }
+}
 
-    SECTION("ArchTraits satisfaction");
-    CHECK(stub::Arch::has_dcache, "has_dcache");
-    CHECK(stub::Arch::has_icache, "has_icache");
-    CHECK(stub::Arch::has_fpu, "has_fpu");
-    CHECK(!stub::Arch::has_double_fpu, "no double FPU");
-    CHECK_EQ(static_cast<int>(stub::Arch::mpu_regions), 8, "mpu_regions == 8");
+static void test_arch_traits(Suite& s) {
+    s.section("ArchTraits satisfaction");
+    s.check(stub::Arch::has_dcache, "has_dcache");
+    s.check(stub::Arch::has_icache, "has_icache");
+    s.check(stub::Arch::has_fpu, "has_fpu");
+    s.check(!stub::Arch::has_double_fpu, "no double FPU");
+    s.check_eq(static_cast<int>(stub::Arch::mpu_regions), 8);
+}
 
-    SECTION("BoardSpec satisfaction");
-    CHECK_EQ(static_cast<int>(stub::Board::system_clock_hz / 1'000'000), 480, "480 MHz");
-    CHECK_EQ(static_cast<int>(stub::Board::hse_clock_hz / 1'000'000), 25, "25 MHz HSE");
+static void test_board_spec(Suite& s) {
+    s.section("BoardSpec satisfaction");
+    s.check_eq(static_cast<int>(stub::Board::system_clock_hz / 1'000'000), 480);
+    s.check_eq(static_cast<int>(stub::Board::hse_clock_hz / 1'000'000), 25);
+}
 
-    SECTION("AudioCodec satisfaction");
+static void test_audio_codec(Suite& s) {
+    s.section("AudioCodec satisfaction");
     {
         stub::Codec codec;
-        CHECK(codec.init(), "Codec init returns true");
+        s.check(codec.init(), "Codec init returns true");
         codec.power_on();
         codec.set_volume(-6);
         codec.mute(true);
         codec.power_off();
-        CHECK(true, "AudioCodec stub callable");
+        s.check(true, "AudioCodec stub callable");
     }
+}
 
-    SECTION("FaultReport satisfaction");
+static void test_fault_report(Suite& s) {
+    s.section("FaultReport satisfaction");
     {
         stub::Fault fault;
-        CHECK_EQ(static_cast<int>(fault.fault_type()), 0, "fault_type == 0");
-        CHECK_EQ(static_cast<int>(fault.fault_address()), 0, "fault_address == 0");
-        CHECK_EQ(static_cast<int>(fault.stack_pointer()), 0, "stack_pointer == 0");
+        s.check_eq(static_cast<int>(fault.fault_type()), 0);
+        s.check_eq(static_cast<int>(fault.fault_address()), 0);
+        s.check_eq(static_cast<int>(fault.stack_pointer()), 0);
     }
+}
 
-    SECTION("GpioPin satisfaction");
+static void test_gpio_pin(Suite& s) {
+    s.section("GpioPin satisfaction");
     {
         stub::Pin pin;
-        CHECK(pin.set_direction(hal::gpio::Direction::OUTPUT).has_value(), "set_direction");
-        CHECK(pin.write(hal::gpio::State::HIGH).has_value(), "write HIGH");
+        s.check(pin.set_direction(hal::gpio::Direction::OUTPUT).has_value(), "set_direction");
+        s.check(pin.write(hal::gpio::State::HIGH).has_value(), "write HIGH");
         auto state = pin.read();
-        CHECK(state.has_value(), "read returns value");
-        CHECK(pin.toggle().has_value(), "toggle");
+        s.check(state.has_value(), "read returns value");
+        s.check(pin.toggle().has_value(), "toggle");
     }
+}
 
-    SECTION("InterruptController satisfaction");
+static void test_interrupt_controller(Suite& s) {
+    s.section("InterruptController satisfaction");
     {
         stub::Intc intc;
-        CHECK(intc.register_handler(0, nullptr).has_value(), "register_handler");
-        CHECK(intc.enable_irq(0).has_value(), "enable_irq");
+        s.check(intc.register_handler(0, nullptr).has_value(), "register_handler");
+        s.check(intc.enable_irq(0).has_value(), "enable_irq");
         intc.enable_global();
         intc.disable_global();
-        CHECK(!intc.is_enabled(0), "irq not enabled (stub)");
+        s.check(!intc.is_enabled(0), "irq not enabled (stub)");
     }
+}
 
-    SECTION("CriticalSection RAII");
+static void test_critical_section(Suite& s) {
+    s.section("CriticalSection RAII");
     {
         stub::Intc intc;
         { hal::CriticalSection cs(intc); }
-        CHECK(true, "CriticalSection construct/destruct");
+        s.check(true, "CriticalSection construct/destruct");
     }
+}
 
-    SECTION("Timer satisfaction");
+static void test_timer(Suite& s) {
+    s.section("Timer satisfaction");
     {
         stub::Tim tim;
-        CHECK(tim.start().has_value(), "start");
-        CHECK(tim.stop().has_value(), "stop");
-        CHECK(tim.set_period_us(1000).has_value(), "set_period_us");
-        CHECK(!tim.is_running(), "not running (stub)");
-        CHECK_EQ(static_cast<int>(tim.get_error()), 0, "no error");
+        s.check(tim.start().has_value(), "start");
+        s.check(tim.stop().has_value(), "stop");
+        s.check(tim.set_period_us(1000).has_value(), "set_period_us");
+        s.check(!tim.is_running(), "not running (stub)");
+        s.check_eq(static_cast<int>(tim.get_error()), 0);
     }
+}
 
-    SECTION("Uart satisfaction");
+static void test_uart(Suite& s) {
+    s.section("Uart satisfaction");
     {
         stub::UartDev uart;
         hal::uart::Config cfg{};
-        CHECK(uart.init(cfg).has_value(), "init");
-        CHECK(uart.write_byte(0x55).has_value(), "write_byte");
+        s.check(uart.init(cfg).has_value(), "init");
+        s.check(uart.write_byte(0x55).has_value(), "write_byte");
         auto byte = uart.read_byte();
-        CHECK(byte.has_value(), "read_byte");
-        CHECK(uart.is_writable(), "is_writable");
-        CHECK(uart.deinit().has_value(), "deinit");
+        s.check(byte.has_value(), "read_byte");
+        s.check(uart.is_writable(), "is_writable");
+        s.check(uart.deinit().has_value(), "deinit");
     }
+}
 
-    SECTION("I2cMaster satisfaction");
+static void test_i2c_master(Suite& s) {
+    s.section("I2cMaster satisfaction");
     {
         stub::I2c i2c;
-        CHECK(i2c.init(hal::i2c::Speed::FAST).has_value(), "init");
+        s.check(i2c.init(hal::i2c::Speed::FAST).has_value(), "init");
         std::uint8_t buf[4]{};
-        CHECK(i2c.write(0x50, std::span{buf}).has_value(), "write");
-        CHECK(i2c.read(0x50, std::span{buf}).has_value(), "read");
-        CHECK(!i2c.is_busy(), "not busy");
+        s.check(i2c.write(0x50, std::span{buf}).has_value(), "write");
+        s.check(i2c.read(0x50, std::span{buf}).has_value(), "read");
+        s.check(!i2c.is_busy(), "not busy");
     }
+}
 
-    SECTION("I2sMaster satisfaction");
+static void test_i2s_master(Suite& s) {
+    s.section("I2sMaster satisfaction");
     {
         stub::I2s i2s;
         hal::i2s::Config cfg{};
-        CHECK(i2s.init(cfg).has_value(), "init");
+        s.check(i2s.init(cfg).has_value(), "init");
         std::uint16_t buf[8]{};
-        CHECK(i2s.transmit(std::span{buf}).has_value(), "transmit");
-        CHECK(i2s.receive(std::span{buf}).has_value(), "receive");
-        CHECK(!i2s.is_busy(), "not busy");
+        s.check(i2s.transmit(std::span{buf}).has_value(), "transmit");
+        s.check(i2s.receive(std::span{buf}).has_value(), "receive");
+        s.check(!i2s.is_busy(), "not busy");
     }
+}
 
-    SECTION("AudioDevice satisfaction");
+static void test_audio_device(Suite& s) {
+    s.section("AudioDevice satisfaction");
     {
         stub::AudioDev dev;
         hal::audio::Config cfg{};
-        CHECK(dev.configure(cfg).has_value(), "configure");
-        CHECK(dev.is_config_supported(cfg), "config supported");
-        CHECK(dev.start().has_value(), "start");
-        CHECK_EQ(static_cast<int>(dev.get_state()), static_cast<int>(hal::audio::State::STOPPED), "state STOPPED (stub)");
-        CHECK_EQ(static_cast<int>(dev.get_buffer_size()), 256, "buffer_size 256");
+        s.check(dev.configure(cfg).has_value(), "configure");
+        s.check(dev.is_config_supported(cfg), "config supported");
+        s.check(dev.start().has_value(), "start");
+        s.check_eq(static_cast<int>(dev.get_state()), static_cast<int>(hal::audio::State::STOPPED));
+        s.check_eq(static_cast<int>(dev.get_buffer_size()), 256);
     }
+}
 
-    TEST_SUMMARY();
+int main() {
+    Suite s("port_concepts");
+
+    test_result_basics(s);
+    test_cache_ops(s);
+    test_arch_traits(s);
+    test_board_spec(s);
+    test_audio_codec(s);
+    test_fault_report(s);
+    test_gpio_pin(s);
+    test_interrupt_controller(s);
+    test_critical_section(s);
+    test_timer(s);
+    test_uart(s);
+    test_i2c_master(s);
+    test_i2s_master(s);
+    test_audio_device(s);
+
+    return s.summary();
 }
