@@ -1,8 +1,9 @@
 // =============================================================================
-// UMI-OS Renode Filesystem Test — Reference C Implementation
+// UMI-OS Renode Unified Benchmark — lfs(ref) + fat(ref)
 // =============================================================================
-// Same tests as renode_fs_test.cc but using original C littlefs and FatFs.
-// Used for size/performance comparison against C++23 port.
+// DWT cycle counter benchmark on Cortex-M4 via Renode emulation.
+// Uses identical operation set and iterations as renode_fs_test.cc
+// for fair comparison across all 4 FS implementations.
 // =============================================================================
 
 #ifdef __clang__
@@ -11,7 +12,7 @@
 #pragma GCC diagnostic ignored "-Wsection"
 #endif
 
-#include <umios/backend/cm/common/vector_table.hh>
+#include <common/vector_table.hh>
 
 extern "C" {
 #include "lfs.h"
@@ -23,7 +24,7 @@ extern "C" {
 #include <cstring>
 
 // =============================================================================
-// Linker symbol aliases (picolibc expects __heap_start/__heap_end)
+// Heap symbol aliases (picolibc)
 // =============================================================================
 
 extern "C" {
@@ -42,15 +43,17 @@ extern "C" int _write(int, const void*, int);
 namespace {
 
 void print(const char* s) {
-    while (*s) {
-        _write(1, s, 1);
-        ++s;
-    }
+    while (*s) { _write(1, s, 1); ++s; }
 }
 
-void println(const char* s) {
-    print(s);
-    print("\r\n");
+void println(const char* s) { print(s); print("\r\n"); }
+
+void print_uint32(uint32_t val) {
+    if (val == 0) { print("0"); return; }
+    char buf[12];
+    int i = 0;
+    while (val > 0) { buf[i++] = '0' + (val % 10); val /= 10; }
+    while (i > 0) { char c[2] = {buf[--i], 0}; print(c); }
 }
 
 void print_int(int val) {
@@ -62,258 +65,263 @@ void print_int(int val) {
     while (i > 0) { char c[2] = {buf[--i], 0}; print(c); }
 }
 
-void print_uint32(uint32_t val) {
-    if (val == 0) { print("0"); return; }
-    char buf[12];
-    int i = 0;
-    while (val > 0) { buf[i++] = '0' + (val % 10); val /= 10; }
-    while (i > 0) { char c[2] = {buf[--i], 0}; print(c); }
-}
-
 } // namespace
-
-// =============================================================================
-// Test Framework (minimal)
-// =============================================================================
-
-namespace test {
-
-int tests_run = 0;
-int tests_passed = 0;
-
-void run(const char* name, bool result) {
-    ++tests_run;
-    if (result) {
-        ++tests_passed;
-        print("[PASS] ");
-    } else {
-        print("[FAIL] ");
-    }
-    println(name);
-}
-
-void summary() {
-    println("");
-    println("========================================");
-    print("Tests: ");
-    print_int(tests_passed);
-    print("/");
-    print_int(tests_run);
-    println(" passed");
-    if (tests_passed == tests_run) {
-        println("*** ALL TESTS PASSED ***");
-    } else {
-        println("SOME TESTS FAILED");
-    }
-    println("========================================");
-    println("TEST_COMPLETE");
-}
-
-} // namespace test
 
 // =============================================================================
 // DWT Cycle Counter
 // =============================================================================
 
-static volatile uint32_t* const DWT_CTRL = reinterpret_cast<volatile uint32_t*>(0xE0001000);
-static volatile uint32_t* const DWT_CYCCNT = reinterpret_cast<volatile uint32_t*>(0xE0001004);
-static volatile uint32_t* const CoreDebug_DEMCR = reinterpret_cast<volatile uint32_t*>(0xE000EDFC);
+static volatile uint32_t* const DWT_CTRL_REG = reinterpret_cast<volatile uint32_t*>(0xE0001000);
+static volatile uint32_t* const DWT_CYCCNT_REG = reinterpret_cast<volatile uint32_t*>(0xE0001004);
+static volatile uint32_t* const DEMCR_REG = reinterpret_cast<volatile uint32_t*>(0xE000EDFC);
 
 static void dwt_init() {
-    *CoreDebug_DEMCR |= (1u << 24);  // TRCENA
-    *DWT_CYCCNT = 0;
-    *DWT_CTRL |= 1u;                  // CYCCNTENA
+    *DEMCR_REG |= (1u << 24);
+    *DWT_CYCCNT_REG = 0;
+    *DWT_CTRL_REG |= 1u;
 }
 
-static uint32_t dwt_get() {
-    return *DWT_CYCCNT;
-}
+static uint32_t dwt_get() { return *DWT_CYCCNT_REG; }
 
-static void report_cycles(const char* op, uint32_t cycles) {
-    print("  [cycles] ");
+// =============================================================================
+// Benchmark parameters — must match renode_fs_test.cc
+// =============================================================================
+
+static constexpr int BENCH_ITERATIONS = 20;
+static constexpr int BENCH_WARMUP = 2;
+static constexpr int N_DIRS = 5;
+static constexpr int N_FILES = 10;
+
+// =============================================================================
+// Shared storage geometry
+// =============================================================================
+
+static constexpr uint32_t BLK_SZ = 512;
+static constexpr uint32_t BLK_CNT = 128; // 64KB
+
+// =============================================================================
+// Result reporting
+// =============================================================================
+
+static void report(const char* fs, const char* op, uint32_t total_cycles, int iters) {
+    uint32_t avg = total_cycles / static_cast<uint32_t>(iters);
+    print("  ");
+    print(fs);
+    print(" | ");
     print(op);
-    print(": ");
-    print_uint32(cycles);
+    print(" | avg ");
+    print_uint32(avg);
+    print(" cycles (");
+    print_int(iters);
+    print(" iters, total ");
+    print_uint32(total_cycles);
+    print(")");
     println("");
 }
 
 // =============================================================================
-// RAM Block Device for littlefs (reference C)
+// littlefs reference C
 // =============================================================================
 
-static constexpr uint32_t LFS_BLOCK_SIZE = 256;
-static constexpr uint32_t LFS_BLOCK_COUNT = 64;
-static uint8_t lfs_storage[LFS_BLOCK_SIZE * LFS_BLOCK_COUNT];
+// Single shared storage — lfs and fat run sequentially
+static uint8_t shared_storage[BLK_SZ * BLK_CNT];
+static uint8_t lfs_rd[BLK_SZ], lfs_pr[BLK_SZ], lfs_la[16], lfs_fb[BLK_SZ];
 
-static int ram_read(const struct lfs_config* c, lfs_block_t block,
-                    lfs_off_t off, void* buffer, lfs_size_t size) {
-    (void)c;
-    if (block >= LFS_BLOCK_COUNT || off + size > LFS_BLOCK_SIZE) return LFS_ERR_IO;
-    std::memcpy(buffer, &lfs_storage[block * LFS_BLOCK_SIZE + off], size);
+static int lfs_ram_read(const lfs_config* c, lfs_block_t b, lfs_off_t o, void* buf, lfs_size_t sz) {
+    std::memcpy(buf, &static_cast<uint8_t*>(c->context)[b * BLK_SZ + o], sz);
     return 0;
 }
-
-static int ram_prog(const struct lfs_config* c, lfs_block_t block,
-                    lfs_off_t off, const void* buffer, lfs_size_t size) {
-    (void)c;
-    if (block >= LFS_BLOCK_COUNT || off + size > LFS_BLOCK_SIZE) return LFS_ERR_IO;
-    std::memcpy(&lfs_storage[block * LFS_BLOCK_SIZE + off], buffer, size);
+static int lfs_ram_prog(const lfs_config* c, lfs_block_t b, lfs_off_t o, const void* buf, lfs_size_t sz) {
+    std::memcpy(&static_cast<uint8_t*>(c->context)[b * BLK_SZ + o], buf, sz);
     return 0;
 }
-
-static int ram_erase(const struct lfs_config* c, lfs_block_t block) {
-    (void)c;
-    if (block >= LFS_BLOCK_COUNT) return LFS_ERR_IO;
-    std::memset(&lfs_storage[block * LFS_BLOCK_SIZE], 0xFF, LFS_BLOCK_SIZE);
+static int lfs_ram_erase(const lfs_config* c, lfs_block_t b) {
+    std::memset(&static_cast<uint8_t*>(c->context)[b * BLK_SZ], 0xFF, BLK_SZ);
     return 0;
 }
+static int lfs_ram_sync(const lfs_config*) { return 0; }
 
-static int ram_sync(const struct lfs_config* c) {
-    (void)c;
-    return 0;
-}
-
-static uint8_t lfs_read_buf[LFS_BLOCK_SIZE];
-static uint8_t lfs_prog_buf[LFS_BLOCK_SIZE];
-static uint8_t lfs_lookahead_buf[16];
-static uint8_t lfs_file_buf[LFS_BLOCK_SIZE];
-
-// =============================================================================
-// littlefs Tests (reference C)
-// =============================================================================
-
-static void test_lfs() {
-    println("--- littlefs Tests (ref C) ---");
-
-    std::memset(lfs_storage, 0xFF, sizeof(lfs_storage));
-
-    struct lfs_config cfg{};
-    cfg.read = ram_read;
-    cfg.prog = ram_prog;
-    cfg.erase = ram_erase;
-    cfg.sync = ram_sync;
-    cfg.read_size = LFS_BLOCK_SIZE;
-    cfg.prog_size = LFS_BLOCK_SIZE;
-    cfg.block_size = LFS_BLOCK_SIZE;
-    cfg.block_count = LFS_BLOCK_COUNT;
-    cfg.cache_size = LFS_BLOCK_SIZE;
+static lfs_config make_lfs_cfg() {
+    lfs_config cfg{};
+    cfg.context = shared_storage;
+    cfg.read = lfs_ram_read;
+    cfg.prog = lfs_ram_prog;
+    cfg.erase = lfs_ram_erase;
+    cfg.sync = lfs_ram_sync;
+    cfg.read_size = 16;
+    cfg.prog_size = 16;
+    cfg.block_size = BLK_SZ;
+    cfg.block_count = BLK_CNT;
+    cfg.cache_size = BLK_SZ;
     cfg.lookahead_size = 16;
-    cfg.read_buffer = lfs_read_buf;
-    cfg.prog_buffer = lfs_prog_buf;
-    cfg.lookahead_buffer = lfs_lookahead_buf;
+    cfg.block_cycles = 500;
+    cfg.read_buffer = lfs_rd;
+    cfg.prog_buffer = lfs_pr;
+    cfg.lookahead_buffer = lfs_la;
+    return cfg;
+}
 
-    lfs_t lfs{};
+static void bench_lfs() {
+    println("--- lfs(ref) benchmark ---");
 
-    // Format and mount
-    int err = lfs_format(&lfs, &cfg);
-    test::run("lfs: format", err == 0);
+    uint32_t t0, t1, total;
+    char data[BLK_SZ];
+    std::memset(data, 'A', sizeof(data));
 
-    err = lfs_mount(&lfs, &cfg);
-    test::run("lfs: mount", err == 0);
+    // format+mount
+    total = 0;
+    for (int i = 0; i < BENCH_WARMUP + BENCH_ITERATIONS; i++) {
+        std::memset(shared_storage, 0xFF, sizeof(shared_storage));
+        auto cfg = make_lfs_cfg();
+        lfs_t lfs{};
+        t0 = dwt_get();
+        lfs_format(&lfs, &cfg);
+        lfs_mount(&lfs, &cfg);
+        t1 = dwt_get();
+        if (i >= BENCH_WARMUP) total += (t1 - t0);
+        lfs_unmount(&lfs);
+    }
+    report("lfs(ref)", "format+mount", total, BENCH_ITERATIONS);
 
-    // Write file
-    lfs_file_t file{};
-    struct lfs_file_config fcfg{};
-    fcfg.buffer = lfs_file_buf;
-    err = lfs_file_opencfg(&lfs, &file, "hello.txt",
-        LFS_O_WRONLY | LFS_O_CREAT | LFS_O_TRUNC, &fcfg);
-    test::run("lfs: file open write", err == 0);
+    // write 1KB
+    total = 0;
+    for (int i = 0; i < BENCH_WARMUP + BENCH_ITERATIONS; i++) {
+        std::memset(shared_storage, 0xFF, sizeof(shared_storage));
+        auto cfg = make_lfs_cfg();
+        lfs_t lfs{}; lfs_format(&lfs, &cfg); lfs_mount(&lfs, &cfg);
+        lfs_file_t f{}; lfs_file_config fc{}; fc.buffer = lfs_fb;
+        lfs_file_opencfg(&lfs, &f, "B.DAT", LFS_O_WRONLY | LFS_O_CREAT, &fc);
+        t0 = dwt_get();
+        for (int c = 0; c < 2; c++) lfs_file_write(&lfs, &f, data, BLK_SZ);
+        t1 = dwt_get();
+        lfs_file_close(&lfs, &f);
+        if (i >= BENCH_WARMUP) total += (t1 - t0);
+        lfs_unmount(&lfs);
+    }
+    report("lfs(ref)", "write 1KB", total, BENCH_ITERATIONS);
 
-    const char* msg = "Hello from Cortex-M4!";
-    auto len = static_cast<lfs_size_t>(std::strlen(msg));
-    lfs_ssize_t written = lfs_file_write(&lfs, &file, msg, len);
-    test::run("lfs: file write", written == static_cast<lfs_ssize_t>(len));
-    lfs_file_close(&lfs, &file);
+    // write 4KB
+    total = 0;
+    for (int i = 0; i < BENCH_WARMUP + BENCH_ITERATIONS; i++) {
+        std::memset(shared_storage, 0xFF, sizeof(shared_storage));
+        auto cfg = make_lfs_cfg();
+        lfs_t lfs{}; lfs_format(&lfs, &cfg); lfs_mount(&lfs, &cfg);
+        lfs_file_t f{}; lfs_file_config fc{}; fc.buffer = lfs_fb;
+        lfs_file_opencfg(&lfs, &f, "B.DAT", LFS_O_WRONLY | LFS_O_CREAT, &fc);
+        t0 = dwt_get();
+        for (int c = 0; c < 8; c++) lfs_file_write(&lfs, &f, data, BLK_SZ);
+        t1 = dwt_get();
+        lfs_file_close(&lfs, &f);
+        if (i >= BENCH_WARMUP) total += (t1 - t0);
+        lfs_unmount(&lfs);
+    }
+    report("lfs(ref)", "write 4KB", total, BENCH_ITERATIONS);
 
-    // Read back
-    lfs_file_t file2{};
-    struct lfs_file_config fcfg2{};
-    fcfg2.buffer = lfs_file_buf;
-    err = lfs_file_opencfg(&lfs, &file2, "hello.txt", LFS_O_RDONLY, &fcfg2);
-    test::run("lfs: file open read", err == 0);
+    // read 1KB
+    total = 0;
+    for (int i = 0; i < BENCH_WARMUP + BENCH_ITERATIONS; i++) {
+        std::memset(shared_storage, 0xFF, sizeof(shared_storage));
+        auto cfg = make_lfs_cfg();
+        lfs_t lfs{}; lfs_format(&lfs, &cfg); lfs_mount(&lfs, &cfg);
+        lfs_file_t f{}; lfs_file_config fc{}; fc.buffer = lfs_fb;
+        lfs_file_opencfg(&lfs, &f, "B.DAT", LFS_O_WRONLY | LFS_O_CREAT, &fc);
+        for (int c = 0; c < 2; c++) lfs_file_write(&lfs, &f, data, BLK_SZ);
+        lfs_file_close(&lfs, &f);
+        fc = {}; fc.buffer = lfs_fb;
+        lfs_file_opencfg(&lfs, &f, "B.DAT", LFS_O_RDONLY, &fc);
+        char rd[BLK_SZ];
+        t0 = dwt_get();
+        for (int c = 0; c < 2; c++) lfs_file_read(&lfs, &f, rd, BLK_SZ);
+        t1 = dwt_get();
+        lfs_file_close(&lfs, &f);
+        if (i >= BENCH_WARMUP) total += (t1 - t0);
+        lfs_unmount(&lfs);
+    }
+    report("lfs(ref)", "read 1KB", total, BENCH_ITERATIONS);
 
-    char buf[64]{};
-    lfs_ssize_t nread = lfs_file_read(&lfs, &file2, buf, sizeof(buf));
-    test::run("lfs: file read size", nread == static_cast<lfs_ssize_t>(len));
-    test::run("lfs: file content", std::memcmp(buf, msg, len) == 0);
-    lfs_file_close(&lfs, &file2);
+    // read 4KB
+    total = 0;
+    for (int i = 0; i < BENCH_WARMUP + BENCH_ITERATIONS; i++) {
+        std::memset(shared_storage, 0xFF, sizeof(shared_storage));
+        auto cfg = make_lfs_cfg();
+        lfs_t lfs{}; lfs_format(&lfs, &cfg); lfs_mount(&lfs, &cfg);
+        lfs_file_t f{}; lfs_file_config fc{}; fc.buffer = lfs_fb;
+        lfs_file_opencfg(&lfs, &f, "B.DAT", LFS_O_WRONLY | LFS_O_CREAT, &fc);
+        for (int c = 0; c < 8; c++) lfs_file_write(&lfs, &f, data, BLK_SZ);
+        lfs_file_close(&lfs, &f);
+        fc = {}; fc.buffer = lfs_fb;
+        lfs_file_opencfg(&lfs, &f, "B.DAT", LFS_O_RDONLY, &fc);
+        char rd[BLK_SZ];
+        t0 = dwt_get();
+        for (int c = 0; c < 8; c++) lfs_file_read(&lfs, &f, rd, BLK_SZ);
+        t1 = dwt_get();
+        lfs_file_close(&lfs, &f);
+        if (i >= BENCH_WARMUP) total += (t1 - t0);
+        lfs_unmount(&lfs);
+    }
+    report("lfs(ref)", "read 4KB", total, BENCH_ITERATIONS);
 
-    // Mkdir and stat
-    err = lfs_mkdir(&lfs, "testdir");
-    test::run("lfs: mkdir", err == 0);
+    // mkdir+stat x5
+    total = 0;
+    for (int i = 0; i < BENCH_WARMUP + BENCH_ITERATIONS; i++) {
+        std::memset(shared_storage, 0xFF, sizeof(shared_storage));
+        auto cfg = make_lfs_cfg();
+        lfs_t lfs{}; lfs_format(&lfs, &cfg); lfs_mount(&lfs, &cfg);
+        const char* dirs[] = {"D0", "D1", "D2", "D3", "D4"};
+        t0 = dwt_get();
+        for (int d = 0; d < N_DIRS; d++) lfs_mkdir(&lfs, dirs[d]);
+        lfs_info info{};
+        for (int d = 0; d < N_DIRS; d++) lfs_stat(&lfs, dirs[d], &info);
+        t1 = dwt_get();
+        if (i >= BENCH_WARMUP) total += (t1 - t0);
+        lfs_unmount(&lfs);
+    }
+    report("lfs(ref)", "mkdir+stat x5", total, BENCH_ITERATIONS);
 
-    struct lfs_info info{};
-    err = lfs_stat(&lfs, "testdir", &info);
-    test::run("lfs: stat dir", err == 0 && info.type == LFS_TYPE_DIR);
-
-    // Rename
-    err = lfs_rename(&lfs, "hello.txt", "renamed.txt");
-    test::run("lfs: rename", err == 0);
-    test::run("lfs: old gone", lfs_stat(&lfs, "hello.txt", &info) != 0);
-    test::run("lfs: new exists", lfs_stat(&lfs, "renamed.txt", &info) == 0);
-
-    // Remove
-    err = lfs_remove(&lfs, "renamed.txt");
-    test::run("lfs: remove file", err == 0);
-
-    // Persistence: unmount and remount
-    lfs_unmount(&lfs);
-    lfs = lfs_t{};
-    err = lfs_mount(&lfs, &cfg);
-    test::run("lfs: remount", err == 0);
-
-    err = lfs_stat(&lfs, "testdir", &info);
-    test::run("lfs: dir persists", err == 0);
-
-    lfs_unmount(&lfs);
+    // create+delete x10
+    total = 0;
+    for (int i = 0; i < BENCH_WARMUP + BENCH_ITERATIONS; i++) {
+        std::memset(shared_storage, 0xFF, sizeof(shared_storage));
+        auto cfg = make_lfs_cfg();
+        lfs_t lfs{}; lfs_format(&lfs, &cfg); lfs_mount(&lfs, &cfg);
+        const char* files[] = {"F0","F1","F2","F3","F4","F5","F6","F7","F8","F9"};
+        t0 = dwt_get();
+        for (int f = 0; f < N_FILES; f++) {
+            lfs_file_t sf{}; lfs_file_config fc{}; fc.buffer = lfs_fb;
+            lfs_file_opencfg(&lfs, &sf, files[f], LFS_O_WRONLY | LFS_O_CREAT, &fc);
+            lfs_file_write(&lfs, &sf, "x", 1);
+            lfs_file_close(&lfs, &sf);
+        }
+        for (int f = 0; f < N_FILES; f++) lfs_remove(&lfs, files[f]);
+        t1 = dwt_get();
+        if (i >= BENCH_WARMUP) total += (t1 - t0);
+        lfs_unmount(&lfs);
+    }
+    report("lfs(ref)", "create+del x10", total, BENCH_ITERATIONS);
 }
 
 // =============================================================================
-// FATfs RAM Block Device (reference C)
+// FATfs reference C
 // =============================================================================
 
-static constexpr uint32_t FAT_BLOCK_SIZE = 512;
-static constexpr uint32_t FAT_BLOCK_COUNT = 128;
-static uint8_t fat_storage[FAT_BLOCK_SIZE * FAT_BLOCK_COUNT];
-
-// FatFs reference C needs global disk_* functions
 extern "C" {
 
-DSTATUS disk_status(BYTE pdrv) {
-    (void)pdrv;
-    return 0;
-}
+DSTATUS disk_status(BYTE) { return 0; }
+DSTATUS disk_initialize(BYTE) { return 0; }
 
-DSTATUS disk_initialize(BYTE pdrv) {
-    (void)pdrv;
-    return 0;
-}
-
-DRESULT disk_read(BYTE pdrv, BYTE* buff, LBA_t sector, UINT count) {
-    (void)pdrv;
-    for (UINT i = 0; i < count; i++) {
-        if (sector + i >= FAT_BLOCK_COUNT) return RES_PARERR;
-        std::memcpy(buff + i * FAT_BLOCK_SIZE,
-                     &fat_storage[(sector + i) * FAT_BLOCK_SIZE],
-                     FAT_BLOCK_SIZE);
-    }
+DRESULT disk_read(BYTE, BYTE* buff, LBA_t sector, UINT count) {
+    for (UINT i = 0; i < count; i++)
+        std::memcpy(buff + i * BLK_SZ, &shared_storage[(sector + i) * BLK_SZ], BLK_SZ);
     return RES_OK;
 }
 
-DRESULT disk_write(BYTE pdrv, const BYTE* buff, LBA_t sector, UINT count) {
-    (void)pdrv;
-    for (UINT i = 0; i < count; i++) {
-        if (sector + i >= FAT_BLOCK_COUNT) return RES_PARERR;
-        std::memcpy(&fat_storage[(sector + i) * FAT_BLOCK_SIZE],
-                     buff + i * FAT_BLOCK_SIZE,
-                     FAT_BLOCK_SIZE);
-    }
+DRESULT disk_write(BYTE, const BYTE* buff, LBA_t sector, UINT count) {
+    for (UINT i = 0; i < count; i++)
+        std::memcpy(&shared_storage[(sector + i) * BLK_SZ], buff + i * BLK_SZ, BLK_SZ);
     return RES_OK;
 }
 
-DRESULT disk_ioctl(BYTE pdrv, BYTE cmd, void* buff) {
-    (void)pdrv;
-    (void)buff;
+DRESULT disk_ioctl(BYTE, BYTE cmd, void*) {
     if (cmd == CTRL_SYNC) return RES_OK;
     return RES_PARERR;
 }
@@ -325,245 +333,147 @@ DWORD get_fattime(void) {
 } // extern "C"
 
 static void format_fat12() {
-    std::memset(fat_storage, 0, sizeof(fat_storage));
-    uint8_t* bs = fat_storage;
+    std::memset(shared_storage, 0, sizeof(shared_storage));
+    uint8_t* bs = shared_storage;
     bs[0] = 0xEB; bs[1] = 0x3C; bs[2] = 0x90;
     std::memcpy(&bs[3], "MSDOS5.0", 8);
     bs[11] = 0x00; bs[12] = 0x02;
-    bs[13] = 1;
-    bs[14] = 1; bs[15] = 0;
-    bs[16] = 2;
+    bs[13] = 1; bs[14] = 1; bs[15] = 0; bs[16] = 2;
     bs[17] = 0x40; bs[18] = 0x00;
-    bs[19] = 128; bs[20] = 0;
-    bs[21] = 0xF8;
-    bs[22] = 1; bs[23] = 0;
-    bs[24] = 0x3F; bs[25] = 0;
-    bs[26] = 0xFF; bs[27] = 0;
-    bs[38] = 0x29;
+    bs[19] = 128; bs[20] = 0; bs[21] = 0xF8;
+    bs[22] = 1; bs[23] = 0; bs[24] = 0x3F; bs[25] = 0;
+    bs[26] = 0xFF; bs[27] = 0; bs[38] = 0x29;
     bs[39] = 0x12; bs[40] = 0x34; bs[41] = 0x56; bs[42] = 0x78;
     std::memcpy(&bs[43], "NO NAME    ", 11);
     std::memcpy(&bs[54], "FAT12   ", 8);
     bs[510] = 0x55; bs[511] = 0xAA;
-    uint8_t* fat1 = &fat_storage[512];
+    uint8_t* fat1 = &shared_storage[512];
     fat1[0] = 0xF8; fat1[1] = 0xFF; fat1[2] = 0xFF;
-    uint8_t* fat2 = &fat_storage[512 * 2];
+    uint8_t* fat2 = &shared_storage[512 * 2];
     fat2[0] = 0xF8; fat2[1] = 0xFF; fat2[2] = 0xFF;
 }
 
-// =============================================================================
-// FATfs Tests (reference C)
-// =============================================================================
-
-static void test_fat() {
-    println("--- FATfs Tests (ref C) ---");
-
-    format_fat12();
-
-    FATFS fs{};
-    FRESULT res = f_mount(&fs, "", 1);
-    test::run("fat: mount", res == FR_OK);
-
-    // Write file
-    FIL fp{};
-    UINT bw = 0;
-    res = f_open(&fp, "TEST.TXT", FA_WRITE | FA_CREATE_ALWAYS);
-    test::run("fat: file create", res == FR_OK);
-
-    const char* msg = "Hello from Cortex-M4!";
-    res = f_write(&fp, msg, std::strlen(msg), &bw);
-    test::run("fat: file write", res == FR_OK && bw == std::strlen(msg));
-    f_close(&fp);
-
-    // Read back
-    FIL fp2{};
-    res = f_open(&fp2, "TEST.TXT", FA_READ);
-    test::run("fat: file open read", res == FR_OK);
-
-    char buf[64]{};
-    UINT br = 0;
-    res = f_read(&fp2, buf, sizeof(buf), &br);
-    test::run("fat: file read", res == FR_OK && br == std::strlen(msg));
-    test::run("fat: file content", std::memcmp(buf, msg, std::strlen(msg)) == 0);
-    f_close(&fp2);
-
-    // Mkdir and stat
-    res = f_mkdir("MYDIR");
-    test::run("fat: mkdir", res == FR_OK);
-
-    FILINFO fno{};
-    res = f_stat("MYDIR", &fno);
-    test::run("fat: stat dir", res == FR_OK && (fno.fattrib & AM_DIR) != 0);
-
-    // Rename
-    res = f_rename("TEST.TXT", "NEW.TXT");
-    test::run("fat: rename", res == FR_OK);
-    test::run("fat: old gone", f_stat("TEST.TXT", &fno) != FR_OK);
-    test::run("fat: new exists", f_stat("NEW.TXT", &fno) == FR_OK);
-
-    // Unlink
-    res = f_unlink("NEW.TXT");
-    test::run("fat: unlink", res == FR_OK);
-
-    // Getfree
-    DWORD nclst = 0;
-    FATFS* fs_ptr = nullptr;
-    res = f_getfree("", &nclst, &fs_ptr);
-    test::run("fat: getfree", res == FR_OK && nclst > 0);
-
-    f_mount(nullptr, "", 0);
-}
-
-// =============================================================================
-// Benchmarks
-// =============================================================================
-
-static void bench_lfs() {
-    println("");
-    println("--- littlefs Benchmarks (ref C) ---");
-
-    struct lfs_config cfg{};
-    cfg.read = ram_read;
-    cfg.prog = ram_prog;
-    cfg.erase = ram_erase;
-    cfg.sync = ram_sync;
-    cfg.read_size = LFS_BLOCK_SIZE;
-    cfg.prog_size = LFS_BLOCK_SIZE;
-    cfg.block_size = LFS_BLOCK_SIZE;
-    cfg.block_count = LFS_BLOCK_COUNT;
-    cfg.cache_size = LFS_BLOCK_SIZE;
-    cfg.lookahead_size = 16;
-    cfg.read_buffer = lfs_read_buf;
-    cfg.prog_buffer = lfs_prog_buf;
-    cfg.lookahead_buffer = lfs_lookahead_buf;
-
-    lfs_t lfs{};
-    uint32_t t0, t1;
-
-    // Format + mount
-    std::memset(lfs_storage, 0xFF, sizeof(lfs_storage));
-    t0 = dwt_get();
-    lfs_format(&lfs, &cfg);
-    lfs_mount(&lfs, &cfg);
-    t1 = dwt_get();
-    report_cycles("format+mount", t1 - t0);
-
-    // Write 1KB
-    {
-        lfs_file_t f{};
-        struct lfs_file_config fc{};
-        fc.buffer = lfs_file_buf;
-        char data[256];
-        std::memset(data, 'A', sizeof(data));
-
-        lfs_file_opencfg(&lfs, &f, "bench.dat",
-            LFS_O_WRONLY | LFS_O_CREAT | LFS_O_TRUNC, &fc);
-
-        t0 = dwt_get();
-        for (int i = 0; i < 4; i++) {
-            lfs_file_write(&lfs, &f, data, sizeof(data));
-        }
-        lfs_file_close(&lfs, &f);
-        t1 = dwt_get();
-        report_cycles("write 1KB", t1 - t0);
-    }
-
-    // Read 1KB
-    {
-        lfs_file_t f{};
-        struct lfs_file_config fc{};
-        fc.buffer = lfs_file_buf;
-        char data[256];
-
-        lfs_file_opencfg(&lfs, &f, "bench.dat", LFS_O_RDONLY, &fc);
-
-        t0 = dwt_get();
-        for (int i = 0; i < 4; i++) {
-            lfs_file_read(&lfs, &f, data, sizeof(data));
-        }
-        lfs_file_close(&lfs, &f);
-        t1 = dwt_get();
-        report_cycles("read 1KB", t1 - t0);
-    }
-
-    // mkdir + stat x5
-    {
-        t0 = dwt_get();
-        lfs_mkdir(&lfs, "d1");
-        lfs_mkdir(&lfs, "d2");
-        lfs_mkdir(&lfs, "d3");
-        lfs_mkdir(&lfs, "d4");
-        lfs_mkdir(&lfs, "d5");
-        struct lfs_info info;
-        lfs_stat(&lfs, "d1", &info);
-        lfs_stat(&lfs, "d2", &info);
-        lfs_stat(&lfs, "d3", &info);
-        lfs_stat(&lfs, "d4", &info);
-        lfs_stat(&lfs, "d5", &info);
-        t1 = dwt_get();
-        report_cycles("mkdir+stat x5", t1 - t0);
-    }
-
-    lfs_unmount(&lfs);
-}
-
 static void bench_fat() {
-    println("");
-    println("--- FATfs Benchmarks (ref C) ---");
+    println("--- fat(ref) benchmark ---");
 
-    format_fat12();
-    FATFS fs{};
-    f_mount(&fs, "", 1);
+    uint32_t t0, t1, total;
+    char data[BLK_SZ];
+    std::memset(data, 'A', sizeof(data));
 
-    uint32_t t0, t1;
-
-    // Write 4KB
-    {
-        FIL fp{};
-        f_open(&fp, "BENCH.DAT", FA_WRITE | FA_CREATE_ALWAYS);
-        char data[512];
-        std::memset(data, 'A', sizeof(data));
-
+    // format+mount
+    total = 0;
+    for (int i = 0; i < BENCH_WARMUP + BENCH_ITERATIONS; i++) {
+        format_fat12();
+        FATFS fs{};
         t0 = dwt_get();
-        for (int i = 0; i < 8; i++) {
-            UINT bw;
-            f_write(&fp, data, sizeof(data), &bw);
-        }
+        f_mount(&fs, "", 1);
+        t1 = dwt_get();
+        if (i >= BENCH_WARMUP) total += (t1 - t0);
+        f_mount(nullptr, "", 0);
+    }
+    report("fat(ref)", "format+mount", total, BENCH_ITERATIONS);
+
+    // write 1KB
+    total = 0;
+    for (int i = 0; i < BENCH_WARMUP + BENCH_ITERATIONS; i++) {
+        format_fat12();
+        FATFS fs{}; f_mount(&fs, "", 1);
+        FIL fp{}; f_open(&fp, "B.DAT", FA_WRITE | FA_CREATE_ALWAYS);
+        t0 = dwt_get();
+        for (int c = 0; c < 2; c++) { UINT bw; f_write(&fp, data, BLK_SZ, &bw); }
+        t1 = dwt_get();
         f_close(&fp);
-        t1 = dwt_get();
-        report_cycles("write 4KB", t1 - t0);
+        if (i >= BENCH_WARMUP) total += (t1 - t0);
+        f_mount(nullptr, "", 0);
     }
+    report("fat(ref)", "write 1KB", total, BENCH_ITERATIONS);
 
-    // Read 4KB
-    {
-        FIL fp{};
-        f_open(&fp, "BENCH.DAT", FA_READ);
-        char data[512];
-
+    // write 4KB
+    total = 0;
+    for (int i = 0; i < BENCH_WARMUP + BENCH_ITERATIONS; i++) {
+        format_fat12();
+        FATFS fs{}; f_mount(&fs, "", 1);
+        FIL fp{}; f_open(&fp, "B.DAT", FA_WRITE | FA_CREATE_ALWAYS);
         t0 = dwt_get();
-        for (int i = 0; i < 8; i++) {
-            UINT br;
-            f_read(&fp, data, sizeof(data), &br);
-        }
+        for (int c = 0; c < 8; c++) { UINT bw; f_write(&fp, data, BLK_SZ, &bw); }
+        t1 = dwt_get();
         f_close(&fp);
-        t1 = dwt_get();
-        report_cycles("read 4KB", t1 - t0);
+        if (i >= BENCH_WARMUP) total += (t1 - t0);
+        f_mount(nullptr, "", 0);
     }
+    report("fat(ref)", "write 4KB", total, BENCH_ITERATIONS);
 
-    // mkdir + stat
-    {
+    // read 1KB
+    total = 0;
+    for (int i = 0; i < BENCH_WARMUP + BENCH_ITERATIONS; i++) {
+        format_fat12();
+        FATFS fs{}; f_mount(&fs, "", 1);
+        FIL fp{}; f_open(&fp, "B.DAT", FA_WRITE | FA_CREATE_ALWAYS);
+        for (int c = 0; c < 2; c++) { UINT bw; f_write(&fp, data, BLK_SZ, &bw); }
+        f_close(&fp);
+        f_open(&fp, "B.DAT", FA_READ);
+        char rd[BLK_SZ];
         t0 = dwt_get();
-        f_mkdir("D1");
-        f_mkdir("D2");
-        f_mkdir("D3");
-        FILINFO fno;
-        f_stat("D1", &fno);
-        f_stat("D2", &fno);
-        f_stat("D3", &fno);
+        for (int c = 0; c < 2; c++) { UINT br; f_read(&fp, rd, BLK_SZ, &br); }
         t1 = dwt_get();
-        report_cycles("mkdir+stat x3", t1 - t0);
+        f_close(&fp);
+        if (i >= BENCH_WARMUP) total += (t1 - t0);
+        f_mount(nullptr, "", 0);
     }
+    report("fat(ref)", "read 1KB", total, BENCH_ITERATIONS);
 
-    f_mount(nullptr, "", 0);
+    // read 4KB
+    total = 0;
+    for (int i = 0; i < BENCH_WARMUP + BENCH_ITERATIONS; i++) {
+        format_fat12();
+        FATFS fs{}; f_mount(&fs, "", 1);
+        FIL fp{}; f_open(&fp, "B.DAT", FA_WRITE | FA_CREATE_ALWAYS);
+        for (int c = 0; c < 8; c++) { UINT bw; f_write(&fp, data, BLK_SZ, &bw); }
+        f_close(&fp);
+        f_open(&fp, "B.DAT", FA_READ);
+        char rd[BLK_SZ];
+        t0 = dwt_get();
+        for (int c = 0; c < 8; c++) { UINT br; f_read(&fp, rd, BLK_SZ, &br); }
+        t1 = dwt_get();
+        f_close(&fp);
+        if (i >= BENCH_WARMUP) total += (t1 - t0);
+        f_mount(nullptr, "", 0);
+    }
+    report("fat(ref)", "read 4KB", total, BENCH_ITERATIONS);
+
+    // mkdir+stat x5
+    total = 0;
+    for (int i = 0; i < BENCH_WARMUP + BENCH_ITERATIONS; i++) {
+        format_fat12();
+        FATFS fs{}; f_mount(&fs, "", 1);
+        const char* dirs[] = {"D0", "D1", "D2", "D3", "D4"};
+        t0 = dwt_get();
+        for (int d = 0; d < N_DIRS; d++) f_mkdir(dirs[d]);
+        FILINFO fno{};
+        for (int d = 0; d < N_DIRS; d++) f_stat(dirs[d], &fno);
+        t1 = dwt_get();
+        if (i >= BENCH_WARMUP) total += (t1 - t0);
+        f_mount(nullptr, "", 0);
+    }
+    report("fat(ref)", "mkdir+stat x5", total, BENCH_ITERATIONS);
+
+    // create+delete x10
+    total = 0;
+    for (int i = 0; i < BENCH_WARMUP + BENCH_ITERATIONS; i++) {
+        format_fat12();
+        FATFS fs{}; f_mount(&fs, "", 1);
+        const char* files[] = {"F0","F1","F2","F3","F4","F5","F6","F7","F8","F9"};
+        t0 = dwt_get();
+        for (int f = 0; f < N_FILES; f++) {
+            FIL fp{}; f_open(&fp, files[f], FA_WRITE | FA_CREATE_ALWAYS);
+            UINT bw; f_write(&fp, "x", 1, &bw); f_close(&fp);
+        }
+        for (int f = 0; f < N_FILES; f++) f_unlink(files[f]);
+        t1 = dwt_get();
+        if (i >= BENCH_WARMUP) total += (t1 - t0);
+        f_mount(nullptr, "", 0);
+    }
+    report("fat(ref)", "create+del x10", total, BENCH_ITERATIONS);
 }
 
 // =============================================================================
@@ -574,17 +484,16 @@ extern "C" [[noreturn]] void _start() {
     dwt_init();
 
     println("");
-    println("================================");
-    println("  UMI-OS FS Renode Test (ref C)");
-    println("================================");
-
-    test_lfs();
-    test_fat();
+    println("========================================");
+    println("  Renode FS Benchmark: lfs(ref)+fat(ref)");
+    println("  DWT cycles, 20 iterations");
+    println("========================================");
 
     bench_lfs();
     bench_fat();
 
-    test::summary();
+    println("");
+    println("BENCH_COMPLETE");
 
     while (true) { __asm volatile("wfi"); }
 }

@@ -19,7 +19,7 @@ namespace umi::fs {
 ///   fs.open(&fil, "test.txt", FA_READ);
 ///   ...
 class FatFs {
-public:
+  public:
     /// Set the disk I/O function table. Must be called before mount.
     void set_diskio(DiskIo* io) noexcept { diskio = io; }
 
@@ -63,7 +63,7 @@ public:
 
     FatResult getfree(const char* path, uint32_t* nclst, FatFsVolume** fatfs) noexcept;
 
-private:
+  private:
     DiskIo* diskio = nullptr;
 
     // Volume table (single volume)

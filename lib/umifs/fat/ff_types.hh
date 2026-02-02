@@ -88,12 +88,12 @@ using FSIZE_t = uint32_t;
 // ============================================================================
 
 struct FatObjId {
-    FatFsVolume* fs;    ///< Pointer to the hosting volume
-    uint16_t id;        ///< Volume mount ID when this object was opened
-    uint8_t attr;       ///< Object attribute
-    uint8_t stat;       ///< Object chain status
-    uint32_t sclust;    ///< Object data start cluster (0: no data or root dir)
-    FSIZE_t objsize;    ///< Object size (valid when sclust != 0)
+    FatFsVolume* fs; ///< Pointer to the hosting volume
+    uint16_t id;     ///< Volume mount ID when this object was opened
+    uint8_t attr;    ///< Object attribute
+    uint8_t stat;    ///< Object chain status
+    uint32_t sclust; ///< Object data start cluster (0: no data or root dir)
+    FSIZE_t objsize; ///< Object size (valid when sclust != 0)
 };
 
 // ============================================================================
@@ -115,16 +115,16 @@ struct FatFsVolume {
     uint16_t* lfnbuf;
 
     // Write tracking
-    uint32_t last_clst;  ///< Last allocated cluster
-    uint32_t free_clst;  ///< Number of free clusters
+    uint32_t last_clst; ///< Last allocated cluster
+    uint32_t free_clst; ///< Number of free clusters
 
-    uint32_t n_fatent;   ///< Number of FAT entries (clusters + 2)
-    uint32_t fsize;      ///< Sectors per FAT
-    LBA_t winsect;       ///< Current sector in win[]
-    LBA_t volbase;       ///< Volume base sector
-    LBA_t fatbase;       ///< FAT base sector
-    LBA_t dirbase;       ///< Root directory base (sector for FAT12/16, cluster for FAT32)
-    LBA_t database;      ///< Data base sector
+    uint32_t n_fatent; ///< Number of FAT entries (clusters + 2)
+    uint32_t fsize;    ///< Sectors per FAT
+    LBA_t winsect;     ///< Current sector in win[]
+    LBA_t volbase;     ///< Volume base sector
+    LBA_t fatbase;     ///< FAT base sector
+    LBA_t dirbase;     ///< Root directory base (sector for FAT12/16, cluster for FAT32)
+    LBA_t database;    ///< Data base sector
 
     uint8_t win[SECTOR_SIZE]; ///< Disk access window
 };
@@ -134,14 +134,14 @@ struct FatFsVolume {
 // ============================================================================
 
 struct FatFile {
-    FatObjId obj;       ///< Object identifier
-    uint8_t flag;       ///< File status flags
-    uint8_t err;        ///< Abort flag (error code)
-    FSIZE_t fptr;       ///< File read/write pointer
-    uint32_t clust;     ///< Current cluster of fptr
-    LBA_t sect;         ///< Current sector in buf[]
-    LBA_t dir_sect;     ///< Sector containing the directory entry
-    uint8_t* dir_ptr;   ///< Pointer to the directory entry in win[]
+    FatObjId obj;     ///< Object identifier
+    uint8_t flag;     ///< File status flags
+    uint8_t err;      ///< Abort flag (error code)
+    FSIZE_t fptr;     ///< File read/write pointer
+    uint32_t clust;   ///< Current cluster of fptr
+    LBA_t sect;       ///< Current sector in buf[]
+    LBA_t dir_sect;   ///< Sector containing the directory entry
+    uint8_t* dir_ptr; ///< Pointer to the directory entry in win[]
 
     uint8_t buf[SECTOR_SIZE]; ///< File private data window
 };
@@ -151,15 +151,15 @@ struct FatFile {
 // ============================================================================
 
 struct FatDir {
-    FatObjId obj;       ///< Object identifier
-    uint32_t dptr;      ///< Current read/write offset
-    uint32_t clust;     ///< Current cluster
-    LBA_t sect;         ///< Current sector
-    uint8_t* dir;       ///< Pointer to directory item in win[]
-    uint8_t fn[12];     ///< SFN {body[0-7], ext[8-10], status[11]}
+    FatObjId obj;   ///< Object identifier
+    uint32_t dptr;  ///< Current read/write offset
+    uint32_t clust; ///< Current cluster
+    LBA_t sect;     ///< Current sector
+    uint8_t* dir;   ///< Pointer to directory item in win[]
+    uint8_t fn[12]; ///< SFN {body[0-7], ext[8-10], status[11]}
 
     // LFN support (FF_USE_LFN == 1)
-    uint32_t blk_ofs;   ///< Offset of current entry block
+    uint32_t blk_ofs; ///< Offset of current entry block
 };
 
 // ============================================================================
@@ -170,12 +170,12 @@ constexpr int LFN_BUF = 255;
 constexpr int SFN_BUF = 12;
 
 struct FatFileInfo {
-    FSIZE_t fsize;                  ///< File size
-    uint16_t fdate;                 ///< Modification date
-    uint16_t ftime;                 ///< Modification time
-    uint8_t fattrib;                ///< Attributes
-    char altname[SFN_BUF + 1];     ///< Alternative (short) name
-    char fname[LFN_BUF + 1];       ///< Primary (long) name
+    FSIZE_t fsize;             ///< File size
+    uint16_t fdate;            ///< Modification date
+    uint16_t ftime;            ///< Modification time
+    uint8_t fattrib;           ///< Attributes
+    char altname[SFN_BUF + 1]; ///< Alternative (short) name
+    char fname[LFN_BUF + 1];   ///< Primary (long) name
 };
 
 } // namespace umi::fs

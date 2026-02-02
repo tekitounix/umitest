@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025, tekitounix
-// Clean-room FAT12/16/32 implementation for the UMI framework
-// Based on Microsoft FAT specification (no reference to FatFs by ChaN)
+// FAT12/16/32 implementation for the UMI framework
+// Implemented from Microsoft FAT specification
+
+#include <cstring>
 
 #include "ff.hh"
 #include "ff_unicode.hh"
-
-#include <cstring>
 
 namespace umi::fs {
 
@@ -35,9 +35,9 @@ static constexpr uint8_t AM_VOL = 0x08;
 
 // Directory entry constants
 static constexpr uint32_t DIR_ENTRY_SIZE = 32;
-static constexpr uint8_t DDEM = 0xE5;    // Deleted directory entry marker
-static constexpr uint8_t RDDEM = 0x05;   // Replacement for 0xE5 as first char
-static constexpr uint8_t LLEF = 0x40;    // Last Long Entry Flag
+static constexpr uint8_t DDEM = 0xE5;  // Deleted directory entry marker
+static constexpr uint8_t RDDEM = 0x05; // Replacement for 0xE5 as first char
+static constexpr uint8_t LLEF = 0x40;  // Last Long Entry Flag
 
 // LFN character offsets within a directory entry
 static constexpr uint8_t LFN_OFFSETS[] = {1, 3, 5, 7, 9, 14, 16, 18, 20, 22, 24, 28, 30};
@@ -55,8 +55,8 @@ static constexpr int BPB_TOT_SEC32 = 32;
 static constexpr int BPB_FAT_SZ32 = 36;
 static constexpr int BPB_ROOT_CLUS32 = 44;
 static constexpr int BPB_FSINFO32 = 48;
-static constexpr int BS_FILESYSTYPE = 54;     // FAT12/16
-static constexpr int BS_FILESYSTYPE32 = 82;   // FAT32
+static constexpr int BS_FILESYSTYPE = 54;   // FAT12/16
+static constexpr int BS_FILESYSTYPE32 = 82; // FAT32
 
 // Directory entry field offsets
 static constexpr int DIR_NAME = 0;
@@ -86,15 +86,13 @@ static constexpr int FSI_TRAIL_SIG = 508;
 
 // ExCvt table for CP437 upper-case conversion (0x80-0xFF)
 static constexpr uint8_t EXCVT[] = {
-    0x80,0x9A,0x45,0x41,0x8E,0x41,0x8F,0x80,0x45,0x45,0x45,0x49,0x49,0x49,0x8E,0x8F,
-    0x90,0x92,0x92,0x4F,0x99,0x4F,0x55,0x55,0x59,0x99,0x9A,0x9B,0x9C,0x9D,0x9E,0x9F,
-    0x41,0x49,0x4F,0x55,0xA5,0xA5,0xA6,0xA7,0xA8,0xA9,0xAA,0xAB,0xAC,0xAD,0xAE,0xAF,
-    0xB0,0xB1,0xB2,0xB3,0xB4,0xB5,0xB6,0xB7,0xB8,0xB9,0xBA,0xBB,0xBC,0xBD,0xBE,0xBF,
-    0xC0,0xC1,0xC2,0xC3,0xC4,0xC5,0xC6,0xC7,0xC8,0xC9,0xCA,0xCB,0xCC,0xCD,0xCE,0xCF,
-    0xD0,0xD1,0xD2,0xD3,0xD4,0xD5,0xD6,0xD7,0xD8,0xD9,0xDA,0xDB,0xDC,0xDD,0xDE,0xDF,
-    0xE0,0xE1,0xE2,0xE3,0xE4,0xE5,0xE6,0xE7,0xE8,0xE9,0xEA,0xEB,0xEC,0xED,0xEE,0xEF,
-    0xF0,0xF1,0xF2,0xF3,0xF4,0xF5,0xF6,0xF7,0xF8,0xF9,0xFA,0xFB,0xFC,0xFD,0xFE,0xFF
-};
+    0x80, 0x9A, 0x45, 0x41, 0x8E, 0x41, 0x8F, 0x80, 0x45, 0x45, 0x45, 0x49, 0x49, 0x49, 0x8E, 0x8F, 0x90, 0x92, 0x92,
+    0x4F, 0x99, 0x4F, 0x55, 0x55, 0x59, 0x99, 0x9A, 0x9B, 0x9C, 0x9D, 0x9E, 0x9F, 0x41, 0x49, 0x4F, 0x55, 0xA5, 0xA5,
+    0xA6, 0xA7, 0xA8, 0xA9, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF, 0xB0, 0xB1, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6, 0xB7, 0xB8,
+    0xB9, 0xBA, 0xBB, 0xBC, 0xBD, 0xBE, 0xBF, 0xC0, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8, 0xC9, 0xCA, 0xCB,
+    0xCC, 0xCD, 0xCE, 0xCF, 0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7, 0xD8, 0xD9, 0xDA, 0xDB, 0xDC, 0xDD, 0xDE,
+    0xDF, 0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, 0xE9, 0xEA, 0xEB, 0xEC, 0xED, 0xEE, 0xEF, 0xF0, 0xF1,
+    0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF};
 
 // ============================================================================
 // Little-endian load/store helpers
@@ -125,27 +123,32 @@ static inline void st32(uint8_t* p, uint32_t v) {
 // ============================================================================
 
 uint8_t FatFs::disk_initialize(uint8_t /*pdrv*/) noexcept {
-    if (!diskio || !diskio->initialize) return STA_NOINIT;
+    if (!diskio || !diskio->initialize)
+        return STA_NOINIT;
     return diskio->initialize(diskio->context);
 }
 
 uint8_t FatFs::disk_status(uint8_t /*pdrv*/) noexcept {
-    if (!diskio || !diskio->status) return STA_NOINIT;
+    if (!diskio || !diskio->status)
+        return STA_NOINIT;
     return diskio->status(diskio->context);
 }
 
 DiskResult FatFs::disk_read(uint8_t /*pdrv*/, uint8_t* buff, LBA_t sector, uint32_t count) noexcept {
-    if (!diskio || !diskio->read) return DiskResult::NOTRDY;
+    if (!diskio || !diskio->read)
+        return DiskResult::NOTRDY;
     return diskio->read(diskio->context, buff, sector, count);
 }
 
 DiskResult FatFs::disk_write(uint8_t /*pdrv*/, const uint8_t* buff, LBA_t sector, uint32_t count) noexcept {
-    if (!diskio || !diskio->write) return DiskResult::NOTRDY;
+    if (!diskio || !diskio->write)
+        return DiskResult::NOTRDY;
     return diskio->write(diskio->context, buff, sector, count);
 }
 
 DiskResult FatFs::disk_ioctl(uint8_t /*pdrv*/, uint8_t cmd, void* buff) noexcept {
-    if (!diskio || !diskio->ioctl) return DiskResult::NOTRDY;
+    if (!diskio || !diskio->ioctl)
+        return DiskResult::NOTRDY;
     return diskio->ioctl(diskio->context, cmd, buff);
 }
 
@@ -154,9 +157,8 @@ DiskResult FatFs::disk_ioctl(uint8_t /*pdrv*/, uint8_t cmd, void* buff) noexcept
 // ============================================================================
 
 uint32_t FatFs::get_fattime() noexcept {
-    return (static_cast<uint32_t>(config::NORTC_YEAR - 1980) << 25)
-         | (static_cast<uint32_t>(config::NORTC_MON) << 21)
-         | (static_cast<uint32_t>(config::NORTC_MDAY) << 16);
+    return (static_cast<uint32_t>(config::NORTC_YEAR - 1980) << 25) | (static_cast<uint32_t>(config::NORTC_MON) << 21) |
+           (static_cast<uint32_t>(config::NORTC_MDAY) << 16);
 }
 
 // ============================================================================
@@ -185,7 +187,8 @@ FatResult FatFs::sync_window(FatFsVolume* fs) noexcept {
 FatResult FatFs::move_window(FatFsVolume* fs, LBA_t sect) noexcept {
     if (sect != fs->winsect) {
         auto res = sync_window(fs);
-        if (res != FatResult::OK) return res;
+        if (res != FatResult::OK)
+            return res;
         if (disk_read(fs->pdrv, fs->win, sect, 1) != DiskResult::OK) {
             fs->winsect = 0xFFFFFFFF;
             return FatResult::DISK_ERR;
@@ -200,7 +203,8 @@ FatResult FatFs::move_window(FatFsVolume* fs, LBA_t sect) noexcept {
 // ============================================================================
 
 LBA_t FatFs::clst2sect(FatFsVolume* fs, uint32_t clst) noexcept {
-    if (clst < 2 || clst >= fs->n_fatent) return 0;
+    if (clst < 2 || clst >= fs->n_fatent)
+        return 0;
     return fs->database + static_cast<LBA_t>(clst - 2) * fs->csize;
 }
 
@@ -210,7 +214,8 @@ LBA_t FatFs::clst2sect(FatFsVolume* fs, uint32_t clst) noexcept {
 
 uint32_t FatFs::get_fat(FatObjId* obj, uint32_t clst) noexcept {
     auto* fs = obj->fs;
-    if (clst < 2 || clst >= fs->n_fatent) return 1; // error value
+    if (clst < 2 || clst >= fs->n_fatent)
+        return 1; // error value
 
     switch (fs->fs_type) {
     case FS_FAT12: {
@@ -218,12 +223,14 @@ uint32_t FatFs::get_fat(FatObjId* obj, uint32_t clst) noexcept {
         LBA_t sect = fs->fatbase + (byte_ofs / SS_VAL);
         uint32_t ofs = byte_ofs % SS_VAL;
 
-        if (move_window(fs, sect) != FatResult::OK) return 1;
+        if (move_window(fs, sect) != FatResult::OK)
+            return 1;
         uint32_t val = fs->win[ofs];
 
         // May cross sector boundary
         if (ofs == SS_VAL - 1) {
-            if (move_window(fs, sect + 1) != FatResult::OK) return 1;
+            if (move_window(fs, sect + 1) != FatResult::OK)
+                return 1;
             val |= static_cast<uint32_t>(fs->win[0]) << 8;
         } else {
             val |= static_cast<uint32_t>(fs->win[ofs + 1]) << 8;
@@ -234,13 +241,15 @@ uint32_t FatFs::get_fat(FatObjId* obj, uint32_t clst) noexcept {
     case FS_FAT16: {
         LBA_t sect = fs->fatbase + (clst * 2 / SS_VAL);
         uint32_t ofs = (clst * 2) % SS_VAL;
-        if (move_window(fs, sect) != FatResult::OK) return 1;
+        if (move_window(fs, sect) != FatResult::OK)
+            return 1;
         return ld16(&fs->win[ofs]);
     }
     case FS_FAT32: {
         LBA_t sect = fs->fatbase + (clst * 4 / SS_VAL);
         uint32_t ofs = (clst * 4) % SS_VAL;
-        if (move_window(fs, sect) != FatResult::OK) return 1;
+        if (move_window(fs, sect) != FatResult::OK)
+            return 1;
         return ld32(&fs->win[ofs]) & 0x0FFFFFFF;
     }
     default:
@@ -249,7 +258,8 @@ uint32_t FatFs::get_fat(FatObjId* obj, uint32_t clst) noexcept {
 }
 
 FatResult FatFs::put_fat(FatFsVolume* fs, uint32_t clst, uint32_t val) noexcept {
-    if (clst < 2 || clst >= fs->n_fatent) return FatResult::INT_ERR;
+    if (clst < 2 || clst >= fs->n_fatent)
+        return FatResult::INT_ERR;
 
     switch (fs->fs_type) {
     case FS_FAT12: {
@@ -257,7 +267,8 @@ FatResult FatFs::put_fat(FatFsVolume* fs, uint32_t clst, uint32_t val) noexcept 
         LBA_t sect = fs->fatbase + (byte_ofs / SS_VAL);
         uint32_t ofs = byte_ofs % SS_VAL;
 
-        if (move_window(fs, sect) != FatResult::OK) return FatResult::DISK_ERR;
+        if (move_window(fs, sect) != FatResult::OK)
+            return FatResult::DISK_ERR;
 
         if (clst & 1) {
             fs->win[ofs] = static_cast<uint8_t>((fs->win[ofs] & 0x0F) | ((val & 0x0F) << 4));
@@ -268,7 +279,8 @@ FatResult FatFs::put_fat(FatFsVolume* fs, uint32_t clst, uint32_t val) noexcept 
 
         // Second byte — may cross sector boundary
         if (ofs == SS_VAL - 1) {
-            if (move_window(fs, sect + 1) != FatResult::OK) return FatResult::DISK_ERR;
+            if (move_window(fs, sect + 1) != FatResult::OK)
+                return FatResult::DISK_ERR;
             ofs = 0;
         } else {
             ofs++;
@@ -285,7 +297,8 @@ FatResult FatFs::put_fat(FatFsVolume* fs, uint32_t clst, uint32_t val) noexcept 
     case FS_FAT16: {
         LBA_t sect = fs->fatbase + (clst * 2 / SS_VAL);
         uint32_t ofs = (clst * 2) % SS_VAL;
-        if (move_window(fs, sect) != FatResult::OK) return FatResult::DISK_ERR;
+        if (move_window(fs, sect) != FatResult::OK)
+            return FatResult::DISK_ERR;
         st16(&fs->win[ofs], static_cast<uint16_t>(val));
         fs->wflag = 1;
         break;
@@ -293,7 +306,8 @@ FatResult FatFs::put_fat(FatFsVolume* fs, uint32_t clst, uint32_t val) noexcept 
     case FS_FAT32: {
         LBA_t sect = fs->fatbase + (clst * 4 / SS_VAL);
         uint32_t ofs = (clst * 4) % SS_VAL;
-        if (move_window(fs, sect) != FatResult::OK) return FatResult::DISK_ERR;
+        if (move_window(fs, sect) != FatResult::OK)
+            return FatResult::DISK_ERR;
         val = (ld32(&fs->win[ofs]) & 0xF0000000) | (val & 0x0FFFFFFF);
         st32(&fs->win[ofs], val);
         fs->wflag = 1;
@@ -311,23 +325,26 @@ FatResult FatFs::put_fat(FatFsVolume* fs, uint32_t clst, uint32_t val) noexcept 
 
 FatResult FatFs::remove_chain(FatObjId* obj, uint32_t clst, uint32_t pclst) noexcept {
     auto* fs = obj->fs;
-    if (clst < 2 || clst >= fs->n_fatent) return FatResult::INT_ERR;
+    if (clst < 2 || clst >= fs->n_fatent)
+        return FatResult::INT_ERR;
 
     // If previous cluster specified, terminate it
     if (pclst != 0) {
-        uint32_t eoc = (fs->fs_type == FS_FAT12) ? 0xFFF :
-                        (fs->fs_type == FS_FAT16) ? 0xFFFF : 0x0FFFFFFF;
+        uint32_t eoc = (fs->fs_type == FS_FAT12) ? 0xFFF : (fs->fs_type == FS_FAT16) ? 0xFFFF : 0x0FFFFFFF;
         auto res = put_fat(fs, pclst, eoc);
-        if (res != FatResult::OK) return res;
+        if (res != FatResult::OK)
+            return res;
     }
 
     // Walk and free the chain
     uint32_t limit = fs->n_fatent;
     while (clst >= 2 && clst < fs->n_fatent && limit > 0) {
         uint32_t nxt = get_fat(obj, clst);
-        if (nxt == 1) return FatResult::INT_ERR;
+        if (nxt == 1)
+            return FatResult::INT_ERR;
         auto res = put_fat(fs, clst, 0);
-        if (res != FatResult::OK) return res;
+        if (res != FatResult::OK)
+            return res;
         if (fs->free_clst < fs->n_fatent - 2) {
             fs->free_clst++;
             fs->fsi_flag |= 1;
@@ -345,13 +362,16 @@ uint32_t FatFs::create_chain(FatObjId* obj, uint32_t clst) noexcept {
     if (clst == 0) {
         // Start a new chain — scan from last_clst hint
         ncl = fs->last_clst;
-        if (ncl == 0 || ncl >= fs->n_fatent) ncl = 1;
+        if (ncl == 0 || ncl >= fs->n_fatent)
+            ncl = 1;
     } else {
         // Extend existing chain
         uint32_t cs = get_fat(obj, clst);
-        if (cs < 2) return 1; // error
-        if (cs < fs->n_fatent) return cs; // already has next
-        ncl = clst; // start scan from current
+        if (cs < 2)
+            return 1; // error
+        if (cs < fs->n_fatent)
+            return cs; // already has next
+        ncl = clst;    // start scan from current
     }
 
     // Scan for free cluster
@@ -360,24 +380,29 @@ uint32_t FatFs::create_chain(FatObjId* obj, uint32_t clst) noexcept {
         ncl++;
         if (ncl >= fs->n_fatent) {
             ncl = 2;
-            if (ncl > scl) return 0; // no free cluster
+            if (ncl > scl)
+                return 0; // no free cluster
         }
         uint32_t cs = get_fat(obj, ncl);
-        if (cs == 0) break; // free
-        if (cs == 1) return 1; // error
-        if (ncl == scl) return 0; // full scan, no free
+        if (cs == 0)
+            break; // free
+        if (cs == 1)
+            return 1; // error
+        if (ncl == scl)
+            return 0; // full scan, no free
     }
 
     // Mark new cluster as end-of-chain
-    uint32_t eoc = (fs->fs_type == FS_FAT12) ? 0xFFF :
-                    (fs->fs_type == FS_FAT16) ? 0xFFFF : 0x0FFFFFFF;
+    uint32_t eoc = (fs->fs_type == FS_FAT12) ? 0xFFF : (fs->fs_type == FS_FAT16) ? 0xFFFF : 0x0FFFFFFF;
     auto res = put_fat(fs, ncl, eoc);
-    if (res != FatResult::OK) return 1;
+    if (res != FatResult::OK)
+        return 1;
 
     // Link from previous cluster
     if (clst != 0) {
         res = put_fat(fs, clst, ncl);
-        if (res != FatResult::OK) return 1;
+        if (res != FatResult::OK)
+            return 1;
     }
 
     fs->last_clst = ncl;
@@ -401,7 +426,8 @@ FatResult FatFs::dir_sdi(FatDir* dp, uint32_t ofs) noexcept {
 
     if (dp->obj.sclust == 0 && fs->fs_type != FS_FAT32) {
         // FAT12/16 root directory — fixed area
-        if (ofs / DIR_ENTRY_SIZE >= fs->n_rootdir) return FatResult::INT_ERR;
+        if (ofs / DIR_ENTRY_SIZE >= fs->n_rootdir)
+            return FatResult::INT_ERR;
         dp->sect = fs->dirbase + ofs / SS_VAL;
         dp->clust = 0;
     } else {
@@ -415,7 +441,8 @@ FatResult FatFs::dir_sdi(FatDir* dp, uint32_t ofs) noexcept {
         uint32_t ic = ofs / csz;
         while (ic > 0) {
             clst = get_fat(&dp->obj, clst);
-            if (clst < 2 || clst >= fs->n_fatent) return FatResult::INT_ERR;
+            if (clst < 2 || clst >= fs->n_fatent)
+                return FatResult::INT_ERR;
             ic--;
         }
         dp->clust = clst;
@@ -432,7 +459,8 @@ FatResult FatFs::dir_next(FatDir* dp, int stretch) noexcept {
 
     if (dp->obj.sclust == 0 && fs->fs_type != FS_FAT32) {
         // FAT12/16 root directory — fixed size
-        if (ofs / DIR_ENTRY_SIZE >= fs->n_rootdir) return FatResult::NO_FILE;
+        if (ofs / DIR_ENTRY_SIZE >= fs->n_rootdir)
+            return FatResult::NO_FILE;
         // Advance sector when crossing boundary
         if (ofs % SS_VAL == 0) {
             dp->sect++;
@@ -443,15 +471,20 @@ FatResult FatFs::dir_next(FatDir* dp, int stretch) noexcept {
         if (ofs % csz == 0) {
             // Crossed cluster boundary
             uint32_t clst = get_fat(&dp->obj, dp->clust);
-            if (clst < 2) return FatResult::INT_ERR;
+            if (clst < 2)
+                return FatResult::INT_ERR;
             if (clst >= fs->n_fatent) {
-                if (!stretch) return FatResult::NO_FILE;
+                if (!stretch)
+                    return FatResult::NO_FILE;
                 clst = create_chain(&dp->obj, dp->clust);
-                if (clst == 0) return FatResult::DENIED;
-                if (clst == 1) return FatResult::INT_ERR;
+                if (clst == 0)
+                    return FatResult::DENIED;
+                if (clst == 1)
+                    return FatResult::INT_ERR;
                 // Clear new cluster
                 auto res = dir_clear(fs, clst);
-                if (res != FatResult::OK) return res;
+                if (res != FatResult::OK)
+                    return res;
             }
             dp->clust = clst;
             dp->sect = clst2sect(fs, clst);
@@ -467,22 +500,26 @@ FatResult FatFs::dir_next(FatDir* dp, int stretch) noexcept {
 
 FatResult FatFs::dir_alloc(FatDir* dp, uint32_t n_ent) noexcept {
     auto res = dir_sdi(dp, 0);
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
 
     uint32_t n = 0;
     for (;;) {
         res = move_window(dp->obj.fs, dp->sect);
-        if (res != FatResult::OK) return res;
+        if (res != FatResult::OK)
+            return res;
 
         if (dp->dir[DIR_NAME] == 0x00 || dp->dir[DIR_NAME] == DDEM) {
-            if (++n == n_ent) break;
+            if (++n == n_ent)
+                break;
         } else {
             n = 0;
         }
 
         res = dir_next(dp, 1);
         if (res != FatResult::OK) {
-            if (res == FatResult::NO_FILE) res = FatResult::DENIED;
+            if (res == FatResult::NO_FILE)
+                res = FatResult::DENIED;
             return res;
         }
     }
@@ -500,10 +537,12 @@ FatResult FatFs::dir_read(FatDir* dp, int vol) noexcept {
 
     while (dp->sect) {
         auto res = move_window(fs, dp->sect);
-        if (res != FatResult::OK) return res;
+        if (res != FatResult::OK)
+            return res;
 
         uint8_t b = dp->dir[DIR_NAME];
-        if (b == 0x00) return FatResult::NO_FILE; // end of directory
+        if (b == 0x00)
+            return FatResult::NO_FILE; // end of directory
 
         if (b != DDEM) {
             uint8_t attr = dp->dir[DIR_ATTR];
@@ -518,7 +557,8 @@ FatResult FatFs::dir_read(FatDir* dp, int vol) noexcept {
                     // Pick LFN characters
                     pick_lfn(fs->lfnbuf, dp->dir);
                     res = dir_next(dp, 0);
-                    if (res != FatResult::OK) return (res == FatResult::NO_FILE) ? FatResult::NO_FILE : res;
+                    if (res != FatResult::OK)
+                        return (res == FatResult::NO_FILE) ? FatResult::NO_FILE : res;
                     continue;
                 }
             }
@@ -533,10 +573,12 @@ FatResult FatFs::dir_read(FatDir* dp, int vol) noexcept {
 
         // Move to next entry
         auto res2 = dir_next(dp, 0);
-        if (res2 != FatResult::OK) return (res2 == FatResult::NO_FILE) ? FatResult::NO_FILE : res2;
+        if (res2 != FatResult::OK)
+            return (res2 == FatResult::NO_FILE) ? FatResult::NO_FILE : res2;
     }
 
-    if (!dp->sect) return FatResult::NO_FILE;
+    if (!dp->sect)
+        return FatResult::NO_FILE;
     return FatResult::OK;
 }
 
@@ -545,7 +587,8 @@ FatResult FatFs::dir_read(FatDir* dp, int vol) noexcept {
 // ============================================================================
 
 int FatFs::cmp_lfn(const uint16_t* lfnbuf, uint8_t* dir) noexcept {
-    if (dir[LDIR_ATTR] != AM_LFN) return 0;
+    if (dir[LDIR_ATTR] != AM_LFN)
+        return 0;
 
     uint8_t ord = dir[LDIR_ORD];
     int idx = ((ord & 0x1F) - 1) * LFN_CHARS_PER_ENTRY;
@@ -559,19 +602,24 @@ int FatFs::cmp_lfn(const uint16_t* lfnbuf, uint8_t* dir) noexcept {
                 // Check remaining LFN chars are 0xFFFF padding
                 // This is fine — they should be padding
             }
-            if (lc == 0 && uc == 0) return 1;
-            if (lc == 0 && uc == 0xFFFF) return 1;
-            if (lc != 0 || (uc != 0 && uc != 0xFFFF)) return 0;
+            if (lc == 0 && uc == 0)
+                return 1;
+            if (lc == 0 && uc == 0xFFFF)
+                return 1;
+            if (lc != 0 || (uc != 0 && uc != 0xFFFF))
+                return 0;
             return 1;
         }
         // Case-insensitive compare
-        if (ff_wtoupper(uc) != ff_wtoupper(lc)) return 0;
+        if (ff_wtoupper(uc) != ff_wtoupper(lc))
+            return 0;
     }
     return 1;
 }
 
 int FatFs::pick_lfn(uint16_t* lfnbuf, uint8_t* dir) noexcept {
-    if (dir[LDIR_ATTR] != AM_LFN) return 0;
+    if (dir[LDIR_ATTR] != AM_LFN)
+        return 0;
 
     uint8_t ord = dir[LDIR_ORD];
     int idx = ((ord & 0x1F) - 1) * LFN_CHARS_PER_ENTRY;
@@ -589,7 +637,8 @@ int FatFs::pick_lfn(uint16_t* lfnbuf, uint8_t* dir) noexcept {
         if (idx + i <= config::MAX_LFN) {
             if (uc == 0 || uc == 0xFFFF) {
                 lfnbuf[idx + i] = 0;
-                if (uc == 0) break;
+                if (uc == 0)
+                    break;
             } else {
                 lfnbuf[idx + i] = uc;
             }
@@ -621,7 +670,8 @@ void FatFs::put_lfn(const uint16_t* lfn, uint8_t* dir, uint8_t ord, uint8_t sum)
             }
         }
         st16(&dir[LFN_OFFSETS[i]], wc);
-        if (!past_end && wc == 0) past_end = true;
+        if (!past_end && wc == 0)
+            past_end = true;
     }
 }
 
@@ -657,7 +707,8 @@ void FatFs::gen_numname(uint8_t* dst, const uint8_t* src, const uint16_t* /*lfn*
 
     // Find insert position — as far right as possible in 8-char body
     int pos = 8 - nlen;
-    if (pos < 1) pos = 1;
+    if (pos < 1)
+        pos = 1;
 
     for (int i = 0; i < nlen && pos + i < 8; i++) {
         dst[pos + i] = static_cast<uint8_t>(num[i]);
@@ -676,7 +727,8 @@ FatResult FatFs::create_name(FatDir* dp, const char** path) noexcept {
     uint8_t ns_flag = 0;
 
     // Skip leading separators
-    while (*p == '/' || *p == '\\') p++;
+    while (*p == '/' || *p == '\\')
+        p++;
 
     // Collect characters until separator or end
     while (*p && *p != '/' && *p != '\\') {
@@ -688,7 +740,8 @@ FatResult FatFs::create_name(FatDir* dp, const char** path) noexcept {
     lfn_buf[lfn_idx] = 0;
     *path = p;
 
-    if (lfn_idx == 0) return FatResult::INVALID_NAME;
+    if (lfn_idx == 0)
+        return FatResult::INVALID_NAME;
 
     // Initialize SFN to spaces
     std::memset(sfn, ' ', 11);
@@ -701,7 +754,8 @@ FatResult FatFs::create_name(FatDir* dp, const char** path) noexcept {
         return FatResult::OK;
     }
     if (lfn_idx == 2 && lfn_buf[0] == '.' && lfn_buf[1] == '.') {
-        sfn[0] = '.'; sfn[1] = '.';
+        sfn[0] = '.';
+        sfn[1] = '.';
         sfn[NSFLAG] = NS_DOT;
         return FatResult::OK;
     }
@@ -743,11 +797,13 @@ FatResult FatFs::create_name(FatDir* dp, const char** path) noexcept {
             oem = static_cast<uint8_t>(c);
         } else {
             oem = EXCVT[wc - 0x80];
-            if (oem != wc) need_lfn = true;
+            if (oem != wc)
+                need_lfn = true;
         }
         sfn[si++] = static_cast<uint8_t>(oem);
     }
-    if (body_end > 8) need_lfn = true;
+    if (body_end > 8)
+        need_lfn = true;
     if (si == 0) {
         sfn[NSFLAG] = NS_NONAME;
         return FatResult::INVALID_NAME;
@@ -772,11 +828,13 @@ FatResult FatFs::create_name(FatDir* dp, const char** path) noexcept {
                 oem = static_cast<uint8_t>(c);
             } else {
                 oem = EXCVT[wc - 0x80];
-                if (oem != wc) need_lfn = true;
+                if (oem != wc)
+                    need_lfn = true;
             }
             sfn[8 + ei++] = static_cast<uint8_t>(oem);
         }
-        if (lfn_idx - (last_dot + 1) > 3) need_lfn = true;
+        if (lfn_idx - (last_dot + 1) > 3)
+            need_lfn = true;
     }
 
     // Check case mismatches — if any lower case chars exist, we need LFN
@@ -804,17 +862,20 @@ FatResult FatFs::create_name(FatDir* dp, const char** path) noexcept {
 FatResult FatFs::dir_find(FatDir* dp) noexcept {
     auto* fs = dp->obj.fs;
     auto res = dir_sdi(dp, 0);
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
 
     uint8_t ord = 0xFF;
     uint8_t sum = 0;
 
     do {
         res = move_window(fs, dp->sect);
-        if (res != FatResult::OK) return res;
+        if (res != FatResult::OK)
+            return res;
 
         uint8_t b = dp->dir[DIR_NAME];
-        if (b == 0x00) return FatResult::NO_FILE;
+        if (b == 0x00)
+            return FatResult::NO_FILE;
 
         if (b == DDEM) {
             ord = 0xFF;
@@ -854,7 +915,7 @@ FatResult FatFs::dir_find(FatDir* dp) noexcept {
                             }
                         }
                         if (match) {
-                            dp->blk_ofs = dp->dptr;  // No LFN for this entry
+                            dp->blk_ofs = dp->dptr; // No LFN for this entry
                             break;
                         }
                     }
@@ -869,7 +930,8 @@ FatResult FatFs::dir_find(FatDir* dp) noexcept {
                             break;
                         }
                     }
-                    if (match) break;
+                    if (match)
+                        break;
                 }
             }
         }
@@ -893,13 +955,15 @@ FatResult FatFs::dir_register(FatDir* dp) noexcept {
         if (dp->fn[NSFLAG] & NS_LFN) {
             // Count LFN entries needed
             int lfn_len = 0;
-            while (fs->lfnbuf[lfn_len] != 0) lfn_len++;
+            while (fs->lfnbuf[lfn_len] != 0)
+                lfn_len++;
             n_ent = static_cast<uint32_t>((lfn_len + LFN_CHARS_PER_ENTRY - 1) / LFN_CHARS_PER_ENTRY) + 1;
         }
     }
 
     auto res = dir_alloc(dp, n_ent);
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
 
     if constexpr (config::USE_LFN != 0) {
         if (n_ent > 1) {
@@ -931,32 +995,38 @@ FatResult FatFs::dir_register(FatDir* dp) noexcept {
             uint32_t ne = n_ent - 1; // number of LFN entries
 
             res = dir_sdi(dp, dp->dptr);
-            if (res != FatResult::OK) return res;
+            if (res != FatResult::OK)
+                return res;
 
             for (uint32_t i = ne; i >= 1; i--) {
                 res = move_window(fs, dp->sect);
-                if (res != FatResult::OK) return res;
+                if (res != FatResult::OK)
+                    return res;
 
                 uint8_t ord = static_cast<uint8_t>(i);
-                if (i == ne) ord |= LLEF;
+                if (i == ne)
+                    ord |= LLEF;
 
                 put_lfn(fs->lfnbuf, dp->dir, ord, sum);
                 fs->wflag = 1;
 
                 if (i > 1) {
                     res = dir_next(dp, 1);
-                    if (res != FatResult::OK) return res;
+                    if (res != FatResult::OK)
+                        return res;
                 }
             }
             // Advance to SFN slot
             res = dir_next(dp, 1);
-            if (res != FatResult::OK) return res;
+            if (res != FatResult::OK)
+                return res;
         }
     }
 
     // Write SFN entry
     res = move_window(fs, dp->sect);
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
 
     std::memset(dp->dir, 0, DIR_ENTRY_SIZE);
     std::memcpy(dp->dir + DIR_NAME, dp->fn, 11);
@@ -978,16 +1048,20 @@ FatResult FatFs::dir_remove(FatDir* dp) noexcept {
         if (dp->blk_ofs < last) {
             // LFN entries precede the SFN entry
             auto res = dir_sdi(dp, dp->blk_ofs);
-            if (res != FatResult::OK) return res;
+            if (res != FatResult::OK)
+                return res;
 
             while (dp->dptr <= last) {
                 res = move_window(fs, dp->sect);
-                if (res != FatResult::OK) return res;
+                if (res != FatResult::OK)
+                    return res;
                 dp->dir[DIR_NAME] = DDEM;
                 fs->wflag = 1;
-                if (dp->dptr == last) break;
+                if (dp->dptr == last)
+                    break;
                 res = dir_next(dp, 0);
-                if (res != FatResult::OK) return res;
+                if (res != FatResult::OK)
+                    return res;
             }
             return FatResult::OK;
         }
@@ -995,7 +1069,8 @@ FatResult FatFs::dir_remove(FatDir* dp) noexcept {
 
     // Just mark SFN entry as deleted
     auto res = move_window(fs, dp->sect);
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
     dp->dir[DIR_NAME] = DDEM;
     fs->wflag = 1;
     return FatResult::OK;
@@ -1009,7 +1084,8 @@ void FatFs::get_fileinfo(FatDir* dp, FatFileInfo* fno) noexcept {
     auto* fs = dp->obj.fs;
 
     fno->fname[0] = '\0';
-    if (!dp->sect) return;
+    if (!dp->sect)
+        return;
 
     // Copy SFN to altname
     {
@@ -1017,9 +1093,11 @@ void FatFs::get_fileinfo(FatDir* dp, FatFileInfo* fno) noexcept {
         // Body
         for (int i = 0; i < 8 && dp->dir[DIR_NAME + i] != ' '; i++) {
             uint8_t c = dp->dir[DIR_NAME + i];
-            if (c == RDDEM) c = DDEM;
+            if (c == RDDEM)
+                c = DDEM;
             // Apply NTRes case info
-            if ((dp->dir[DIR_NTRES] & 0x08) && c >= 'A' && c <= 'Z') c += 0x20;
+            if ((dp->dir[DIR_NTRES] & 0x08) && c >= 'A' && c <= 'Z')
+                c += 0x20;
             fno->altname[di++] = static_cast<char>(c);
         }
         // Dot + extension
@@ -1027,7 +1105,8 @@ void FatFs::get_fileinfo(FatDir* dp, FatFileInfo* fno) noexcept {
             fno->altname[di++] = '.';
             for (int i = 8; i < 11 && dp->dir[DIR_NAME + i] != ' '; i++) {
                 uint8_t c = dp->dir[DIR_NAME + i];
-                if ((dp->dir[DIR_NTRES] & 0x10) && c >= 'A' && c <= 'Z') c += 0x20;
+                if ((dp->dir[DIR_NTRES] & 0x10) && c >= 'A' && c <= 'Z')
+                    c += 0x20;
                 fno->altname[di++] = static_cast<char>(c);
             }
         }
@@ -1095,7 +1174,8 @@ FatResult FatFs::follow_path(FatDir* dp, const char* path) noexcept {
     auto* fs = dp->obj.fs;
 
     // Skip leading separators
-    while (*path == '/' || *path == '\\') path++;
+    while (*path == '/' || *path == '\\')
+        path++;
 
     // Start from root directory
     dp->obj.sclust = 0;
@@ -1112,13 +1192,16 @@ FatResult FatFs::follow_path(FatDir* dp, const char* path) noexcept {
 
     for (;;) {
         auto res = create_name(dp, &path);
-        if (res != FatResult::OK) return res;
+        if (res != FatResult::OK)
+            return res;
 
         res = dir_find(dp);
-        if (res != FatResult::OK) return res;
+        if (res != FatResult::OK)
+            return res;
 
         // Skip separators
-        while (*path == '/' || *path == '\\') path++;
+        while (*path == '/' || *path == '\\')
+            path++;
 
         if (*path == '\0') {
             // Reached end of path — found
@@ -1126,7 +1209,8 @@ FatResult FatFs::follow_path(FatDir* dp, const char* path) noexcept {
         }
 
         // Must be a directory to descend
-        if (!(dp->dir[DIR_ATTR] & AM_DIR)) return FatResult::NO_PATH;
+        if (!(dp->dir[DIR_ATTR] & AM_DIR))
+            return FatResult::NO_PATH;
 
         // Descend into subdirectory
         uint32_t clst = ld_clust(fs, dp->dir);
@@ -1140,15 +1224,19 @@ FatResult FatFs::follow_path(FatDir* dp, const char* path) noexcept {
 
 uint32_t FatFs::check_fs(FatFsVolume* fs, LBA_t sect) noexcept {
     // Read boot sector
-    if (disk_read(fs->pdrv, fs->win, sect, 1) != DiskResult::OK) return 4;
+    if (disk_read(fs->pdrv, fs->win, sect, 1) != DiskResult::OK)
+        return 4;
     fs->winsect = sect;
 
     // Check boot signature
-    if (fs->win[510] != 0x55 || fs->win[511] != 0xAA) return 3;
+    if (fs->win[510] != 0x55 || fs->win[511] != 0xAA)
+        return 3;
 
     // Check for FAT filesystem type strings
-    if (std::memcmp(&fs->win[BS_FILESYSTYPE], "FAT", 3) == 0) return 0;
-    if (std::memcmp(&fs->win[BS_FILESYSTYPE32], "FAT32", 5) == 0) return 0;
+    if (std::memcmp(&fs->win[BS_FILESYSTYPE], "FAT", 3) == 0)
+        return 0;
+    if (std::memcmp(&fs->win[BS_FILESYSTYPE32], "FAT32", 5) == 0)
+        return 0;
 
     return 2;
 }
@@ -1156,7 +1244,8 @@ uint32_t FatFs::check_fs(FatFsVolume* fs, LBA_t sect) noexcept {
 uint32_t FatFs::find_volume(FatFsVolume* fs, uint32_t part) noexcept {
     // Try sector 0 first as boot sector
     uint32_t fmt = check_fs(fs, 0);
-    if (fmt <= 1) return 0; // Found at sector 0
+    if (fmt <= 1)
+        return 0; // Found at sector 0
 
     // Try as MBR — look at partition table
     if (fmt < 4) {
@@ -1165,7 +1254,8 @@ uint32_t FatFs::find_volume(FatFsVolume* fs, uint32_t part) noexcept {
         if (pt[4] != 0) {
             LBA_t bsect = ld32(&pt[8]);
             fmt = check_fs(fs, bsect);
-            if (fmt <= 1) return bsect;
+            if (fmt <= 1)
+                return bsect;
         }
     }
     return 0xFFFFFFFF;
@@ -1183,10 +1273,12 @@ FatResult FatFs::mount_volume(const char** path, FatFsVolume** rfs, uint8_t mode
     }
     *path = p;
 
-    if (vol >= config::VOLUMES) return FatResult::INVALID_DRIVE;
+    if (vol >= config::VOLUMES)
+        return FatResult::INVALID_DRIVE;
 
     auto* fs = fat_fs[vol];
-    if (!fs) return FatResult::NOT_ENABLED;
+    if (!fs)
+        return FatResult::NOT_ENABLED;
 
     *rfs = fs;
 
@@ -1194,7 +1286,8 @@ FatResult FatFs::mount_volume(const char** path, FatFsVolume** rfs, uint8_t mode
         // Already mounted — check disk status
         uint8_t stat = disk_status(fs->pdrv);
         if (!(stat & STA_NOINIT)) {
-            if (mode && (stat & STA_PROTECT)) return FatResult::WRITE_PROTECTED;
+            if (mode && (stat & STA_PROTECT))
+                return FatResult::WRITE_PROTECTED;
             return FatResult::OK;
         }
     }
@@ -1202,38 +1295,50 @@ FatResult FatFs::mount_volume(const char** path, FatFsVolume** rfs, uint8_t mode
     // Need to mount
     fs->fs_type = 0;
     uint8_t stat = disk_initialize(fs->pdrv);
-    if (stat & STA_NOINIT) return FatResult::NOT_READY;
-    if (mode && (stat & STA_PROTECT)) return FatResult::WRITE_PROTECTED;
+    if (stat & STA_NOINIT)
+        return FatResult::NOT_READY;
+    if (mode && (stat & STA_PROTECT))
+        return FatResult::WRITE_PROTECTED;
 
     // Find boot sector
     LBA_t bsect = find_volume(fs, 0);
-    if (bsect == 0xFFFFFFFF) return FatResult::NO_FILESYSTEM;
+    if (bsect == 0xFFFFFFFF)
+        return FatResult::NO_FILESYSTEM;
 
     // Read BPB
-    if (move_window(fs, bsect) != FatResult::OK) return FatResult::DISK_ERR;
+    if (move_window(fs, bsect) != FatResult::OK)
+        return FatResult::DISK_ERR;
 
     uint16_t bps = ld16(&fs->win[BPB_BYTS_PER_SEC]);
-    if (bps != SS_VAL) return FatResult::NO_FILESYSTEM;
+    if (bps != SS_VAL)
+        return FatResult::NO_FILESYSTEM;
 
     uint8_t spc = fs->win[BPB_SEC_PER_CLUS];
-    if (spc == 0 || (spc & (spc - 1)) != 0) return FatResult::NO_FILESYSTEM;
+    if (spc == 0 || (spc & (spc - 1)) != 0)
+        return FatResult::NO_FILESYSTEM;
 
     uint8_t nfats = fs->win[BPB_NUM_FATS];
-    if (nfats != 1 && nfats != 2) return FatResult::NO_FILESYSTEM;
+    if (nfats != 1 && nfats != 2)
+        return FatResult::NO_FILESYSTEM;
 
     uint16_t rsvd = ld16(&fs->win[BPB_RSVD_SEC_CNT]);
-    if (rsvd == 0) return FatResult::NO_FILESYSTEM;
+    if (rsvd == 0)
+        return FatResult::NO_FILESYSTEM;
 
     uint16_t n_rootdir = ld16(&fs->win[BPB_ROOT_ENT_CNT]);
     uint32_t root_dir_sectors = ((n_rootdir * 32) + (SS_VAL - 1)) / SS_VAL;
 
     uint32_t fat_sz = ld16(&fs->win[BPB_FAT_SZ16]);
-    if (fat_sz == 0) fat_sz = ld32(&fs->win[BPB_FAT_SZ32]);
-    if (fat_sz == 0) return FatResult::NO_FILESYSTEM;
+    if (fat_sz == 0)
+        fat_sz = ld32(&fs->win[BPB_FAT_SZ32]);
+    if (fat_sz == 0)
+        return FatResult::NO_FILESYSTEM;
 
     uint32_t tot_sec = ld16(&fs->win[BPB_TOT_SEC16]);
-    if (tot_sec == 0) tot_sec = ld32(&fs->win[BPB_TOT_SEC32]);
-    if (tot_sec == 0) return FatResult::NO_FILESYSTEM;
+    if (tot_sec == 0)
+        tot_sec = ld32(&fs->win[BPB_TOT_SEC32]);
+    if (tot_sec == 0)
+        return FatResult::NO_FILESYSTEM;
 
     uint32_t data_start = rsvd + nfats * fat_sz + root_dir_sectors;
     uint32_t data_sec = tot_sec - data_start;
@@ -1277,9 +1382,8 @@ FatResult FatFs::mount_volume(const char** path, FatFsVolume** rfs, uint8_t mode
         uint16_t fsi_sect = ld16(&fs->win[BPB_FSINFO32]);
         if (fsi_sect == 1 && config::FS_NOFSINFO != 1) {
             if (move_window(fs, bsect + fsi_sect) == FatResult::OK) {
-                if (ld32(&fs->win[FSI_LEAD_SIG]) == 0x41615252
-                    && ld32(&fs->win[FSI_STRUC_SIG]) == 0x61417272
-                    && ld32(&fs->win[FSI_TRAIL_SIG]) == 0xAA550000) {
+                if (ld32(&fs->win[FSI_LEAD_SIG]) == 0x41615252 && ld32(&fs->win[FSI_STRUC_SIG]) == 0x61417272 &&
+                    ld32(&fs->win[FSI_TRAIL_SIG]) == 0xAA550000) {
                     fs->free_clst = ld32(&fs->win[FSI_FREE_COUNT]);
                     fs->last_clst = ld32(&fs->win[FSI_NXT_FREE]);
                     fs->fsi_flag = 0;
@@ -1300,13 +1404,17 @@ FatResult FatFs::mount_volume(const char** path, FatFsVolume** rfs, uint8_t mode
 }
 
 FatResult FatFs::validate(FatObjId* obj, FatFsVolume** rfs) noexcept {
-    if (!obj || !obj->fs) return FatResult::INVALID_OBJECT;
+    if (!obj || !obj->fs)
+        return FatResult::INVALID_OBJECT;
     auto* fs = obj->fs;
-    if (fs->fs_type == 0) return FatResult::INVALID_OBJECT;
-    if (obj->id != fs->id) return FatResult::INVALID_OBJECT;
+    if (fs->fs_type == 0)
+        return FatResult::INVALID_OBJECT;
+    if (obj->id != fs->id)
+        return FatResult::INVALID_OBJECT;
 
     uint8_t stat = disk_status(fs->pdrv);
-    if (stat & STA_NOINIT) return FatResult::INVALID_OBJECT;
+    if (stat & STA_NOINIT)
+        return FatResult::INVALID_OBJECT;
 
     *rfs = fs;
     return FatResult::OK;
@@ -1314,13 +1422,13 @@ FatResult FatFs::validate(FatObjId* obj, FatFsVolume** rfs) noexcept {
 
 FatResult FatFs::sync_fs(FatFsVolume* fs) noexcept {
     auto res = sync_window(fs);
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
 
     // Update FSInfo (FAT32)
     if (fs->fs_type == FS_FAT32 && (fs->fsi_flag & 1)) {
         if (move_window(fs, fs->volbase + 1) == FatResult::OK) {
-            if (ld32(&fs->win[FSI_LEAD_SIG]) == 0x41615252
-                && ld32(&fs->win[FSI_STRUC_SIG]) == 0x61417272) {
+            if (ld32(&fs->win[FSI_LEAD_SIG]) == 0x41615252 && ld32(&fs->win[FSI_STRUC_SIG]) == 0x61417272) {
                 st32(&fs->win[FSI_FREE_COUNT], fs->free_clst);
                 st32(&fs->win[FSI_NXT_FREE], fs->last_clst);
                 fs->wflag = 1;
@@ -1330,13 +1438,15 @@ FatResult FatFs::sync_fs(FatFsVolume* fs) noexcept {
         fs->fsi_flag &= ~1;
     }
 
-    if (disk_ioctl(fs->pdrv, CTRL_SYNC, nullptr) != DiskResult::OK) return FatResult::DISK_ERR;
+    if (disk_ioctl(fs->pdrv, CTRL_SYNC, nullptr) != DiskResult::OK)
+        return FatResult::DISK_ERR;
     return FatResult::OK;
 }
 
 FatResult FatFs::dir_clear(FatFsVolume* fs, uint32_t clst) noexcept {
     LBA_t sect = clst2sect(fs, clst);
-    if (sect == 0) return FatResult::INT_ERR;
+    if (sect == 0)
+        return FatResult::INT_ERR;
 
     // Clear all sectors in this cluster
     uint8_t zero[SS_VAL];
@@ -1368,11 +1478,13 @@ FatResult FatFs::mount(FatFsVolume* fs, const char* path, uint8_t opt) noexcept 
         vol = p[0] - '0';
     }
 
-    if (vol >= config::VOLUMES) return FatResult::INVALID_DRIVE;
+    if (vol >= config::VOLUMES)
+        return FatResult::INVALID_DRIVE;
 
     // Reset volume
     auto* old_fs = fat_fs[vol];
-    if (old_fs) old_fs->fs_type = 0;
+    if (old_fs)
+        old_fs->fs_type = 0;
 
     // Register new volume
     fs->fs_type = 0;
@@ -1394,7 +1506,8 @@ FatResult FatFs::unmount(const char* path) noexcept {
     if (path[0] >= '0' && path[0] <= '9' && path[1] == ':') {
         vol = path[0] - '0';
     }
-    if (vol >= config::VOLUMES) return FatResult::INVALID_DRIVE;
+    if (vol >= config::VOLUMES)
+        return FatResult::INVALID_DRIVE;
 
     auto* fs = fat_fs[vol];
     if (fs) {
@@ -1409,13 +1522,15 @@ FatResult FatFs::unmount(const char* path) noexcept {
 // ============================================================================
 
 FatResult FatFs::open(FatFile* fp, const char* path, uint8_t mode) noexcept {
-    if (!fp) return FatResult::INVALID_OBJECT;
+    if (!fp)
+        return FatResult::INVALID_OBJECT;
 
     fp->obj.fs = nullptr;
     const char* p = path;
     FatFsVolume* fs;
     auto res = mount_volume(&p, &fs, (mode & FA_WRITE) ? 1 : 0);
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
 
     FatDir dj{};
     dj.obj.fs = fs;
@@ -1424,19 +1539,25 @@ FatResult FatFs::open(FatFile* fp, const char* path, uint8_t mode) noexcept {
 
     if (res == FatResult::OK) {
         // Found existing entry
-        if (dj.fn[NSFLAG] & NS_NONAME) return FatResult::INVALID_NAME;
-        if (dj.dir[DIR_ATTR] & AM_DIR) return FatResult::NO_FILE; // it's a directory
+        if (dj.fn[NSFLAG] & NS_NONAME)
+            return FatResult::INVALID_NAME;
+        if (dj.dir[DIR_ATTR] & AM_DIR)
+            return FatResult::NO_FILE; // it's a directory
 
-        if (mode & FA_CREATE_NEW) return FatResult::EXIST;
+        if (mode & FA_CREATE_NEW)
+            return FatResult::EXIST;
 
-        if ((mode & FA_WRITE) && (dj.dir[DIR_ATTR] & AM_RDO)) return FatResult::DENIED;
+        if ((mode & FA_WRITE) && (dj.dir[DIR_ATTR] & AM_RDO))
+            return FatResult::DENIED;
     } else if (res == FatResult::NO_FILE) {
         // Not found
-        if (!(mode & (FA_CREATE_NEW | FA_CREATE_ALWAYS | FA_OPEN_ALWAYS))) return FatResult::NO_FILE;
+        if (!(mode & (FA_CREATE_NEW | FA_CREATE_ALWAYS | FA_OPEN_ALWAYS)))
+            return FatResult::NO_FILE;
 
         // Create new entry
         res = dir_register(&dj);
-        if (res != FatResult::OK) return res;
+        if (res != FatResult::OK)
+            return res;
 
         mode |= FA_MODIFIED;
     } else {
@@ -1452,7 +1573,8 @@ FatResult FatFs::open(FatFile* fp, const char* path, uint8_t mode) noexcept {
             FatObjId tmp_obj{};
             tmp_obj.fs = fs;
             auto rres = remove_chain(&tmp_obj, cl, 0);
-            if (rres != FatResult::OK) return rres;
+            if (rres != FatResult::OK)
+                return rres;
         }
         st_clust(fs, dj.dir, 0);
         st32(&dj.dir[DIR_FILE_SIZE], 0);
@@ -1519,12 +1641,16 @@ FatResult FatFs::read(FatFile* fp, void* buff, uint32_t btr, uint32_t* br) noexc
 
     FatFsVolume* fs;
     auto res = validate(&fp->obj, &fs);
-    if (res != FatResult::OK) return res;
-    if (fp->err) return FatResult::INT_ERR;
-    if (!(fp->flag & FA_READ)) return FatResult::DENIED;
+    if (res != FatResult::OK)
+        return res;
+    if (fp->err)
+        return FatResult::INT_ERR;
+    if (!(fp->flag & FA_READ))
+        return FatResult::DENIED;
 
     FSIZE_t remain = fp->obj.objsize - fp->fptr;
-    if (btr > remain) btr = static_cast<uint32_t>(remain);
+    if (btr > remain)
+        btr = static_cast<uint32_t>(remain);
 
     auto* rbuff = static_cast<uint8_t*>(buff);
     uint32_t csz = static_cast<uint32_t>(fs->csize) * SS_VAL;
@@ -1550,7 +1676,8 @@ FatResult FatFs::read(FatFile* fp, void* buff, uint32_t btr, uint32_t* br) noexc
         }
 
         uint32_t cc = SS_VAL - static_cast<uint32_t>(fp->fptr % SS_VAL); // bytes remaining in current sector
-        if (cc > btr) cc = btr;
+        if (cc > btr)
+            cc = btr;
 
         // Optimization: direct read for full sectors
         if (cc == SS_VAL && (fp->fptr % SS_VAL) == 0) {
@@ -1608,9 +1735,12 @@ FatResult FatFs::write(FatFile* fp, const void* buff, uint32_t btw, uint32_t* bw
 
     FatFsVolume* fs;
     auto res = validate(&fp->obj, &fs);
-    if (res != FatResult::OK) return res;
-    if (fp->err) return FatResult::INT_ERR;
-    if (!(fp->flag & FA_WRITE)) return FatResult::DENIED;
+    if (res != FatResult::OK)
+        return res;
+    if (fp->err)
+        return FatResult::INT_ERR;
+    if (!(fp->flag & FA_WRITE))
+        return FatResult::DENIED;
 
     auto* wbuff = static_cast<const uint8_t*>(buff);
     uint32_t csz = static_cast<uint32_t>(fs->csize) * SS_VAL;
@@ -1626,14 +1756,18 @@ FatResult FatFs::write(FatFile* fp, const void* buff, uint32_t btw, uint32_t* bw
                     if (clst == 0) {
                         // Allocate first cluster
                         clst = create_chain(&fp->obj, 0);
-                        if (clst == 0) return FatResult::DENIED; // disk full
-                        if (clst == 1) return FatResult::INT_ERR;
+                        if (clst == 0)
+                            return FatResult::DENIED; // disk full
+                        if (clst == 1)
+                            return FatResult::INT_ERR;
                         fp->obj.sclust = clst;
                     }
                 } else {
                     clst = create_chain(&fp->obj, fp->clust);
-                    if (clst == 0) return FatResult::DENIED;
-                    if (clst == 1) return FatResult::INT_ERR;
+                    if (clst == 0)
+                        return FatResult::DENIED;
+                    if (clst == 1)
+                        return FatResult::INT_ERR;
                 }
                 fp->clust = clst;
             }
@@ -1641,7 +1775,8 @@ FatResult FatFs::write(FatFile* fp, const void* buff, uint32_t btw, uint32_t* bw
         }
 
         uint32_t cc = SS_VAL - static_cast<uint32_t>(fp->fptr % SS_VAL);
-        if (cc > btw) cc = btw;
+        if (cc > btw)
+            cc = btw;
 
         // Optimization: direct write for full sectors
         if (cc == SS_VAL && (fp->fptr % SS_VAL) == 0) {
@@ -1701,8 +1836,10 @@ FatResult FatFs::write(FatFile* fp, const void* buff, uint32_t btw, uint32_t* bw
 FatResult FatFs::lseek(FatFile* fp, FSIZE_t ofs) noexcept {
     FatFsVolume* fs;
     auto res = validate(&fp->obj, &fs);
-    if (res != FatResult::OK) return res;
-    if (fp->err) return FatResult::INT_ERR;
+    if (res != FatResult::OK)
+        return res;
+    if (fp->err)
+        return FatResult::INT_ERR;
 
     // Clamp to file size for read-only files
     if (!(fp->flag & FA_WRITE) && ofs > fp->obj.objsize) {
@@ -1718,27 +1855,31 @@ FatResult FatFs::lseek(FatFile* fp, FSIZE_t ofs) noexcept {
             if (cur % csz == 0 && cur > 0) {
                 // Need new cluster
                 uint32_t clst = create_chain(&fp->obj, fp->clust);
-                if (clst == 0 || clst == 1) break;
+                if (clst == 0 || clst == 1)
+                    break;
                 fp->clust = clst;
             } else if (cur == 0) {
                 // Need first cluster
                 if (fp->obj.sclust == 0) {
                     uint32_t clst = create_chain(&fp->obj, 0);
-                    if (clst == 0 || clst == 1) break;
+                    if (clst == 0 || clst == 1)
+                        break;
                     fp->obj.sclust = clst;
                     fp->clust = clst;
                 }
             }
             // Advance by up to remaining in cluster
             FSIZE_t advance = csz - (cur % csz);
-            if (cur + advance > ofs) advance = ofs - cur;
+            if (cur + advance > ofs)
+                advance = ofs - cur;
             fp->obj.objsize = cur + advance;
         }
         fp->flag |= FA_MODIFIED;
     }
 
     // Now walk chain to position
-    if (ofs > fp->obj.objsize) ofs = fp->obj.objsize;
+    if (ofs > fp->obj.objsize)
+        ofs = fp->obj.objsize;
 
     fp->fptr = 0;
     uint32_t clst = fp->obj.sclust;
@@ -1778,25 +1919,30 @@ FatResult FatFs::lseek(FatFile* fp, FSIZE_t ofs) noexcept {
 FatResult FatFs::truncate(FatFile* fp) noexcept {
     FatFsVolume* fs;
     auto res = validate(&fp->obj, &fs);
-    if (res != FatResult::OK) return res;
-    if (fp->err) return FatResult::INT_ERR;
-    if (!(fp->flag & FA_WRITE)) return FatResult::DENIED;
+    if (res != FatResult::OK)
+        return res;
+    if (fp->err)
+        return FatResult::INT_ERR;
+    if (!(fp->flag & FA_WRITE))
+        return FatResult::DENIED;
 
     if (fp->fptr < fp->obj.objsize) {
         if (fp->fptr == 0) {
             // Truncate to zero — free entire chain
             if (fp->obj.sclust != 0) {
                 res = remove_chain(&fp->obj, fp->obj.sclust, 0);
-                if (res != FatResult::OK) return res;
+                if (res != FatResult::OK)
+                    return res;
             }
             fp->obj.sclust = 0;
         } else {
             // Free chain after current position
             uint32_t ncl = get_fat(&fp->obj, fp->clust);
-            if (ncl < 2) { /* already at end */ }
-            else if (ncl < fs->n_fatent) {
+            if (ncl < 2) { /* already at end */
+            } else if (ncl < fs->n_fatent) {
                 res = remove_chain(&fp->obj, ncl, fp->clust);
-                if (res != FatResult::OK) return res;
+                if (res != FatResult::OK)
+                    return res;
             }
         }
         fp->obj.objsize = fp->fptr;
@@ -1809,13 +1955,15 @@ FatResult FatFs::truncate(FatFile* fp) noexcept {
 FatResult FatFs::sync(FatFile* fp) noexcept {
     FatFsVolume* fs;
     auto res = validate(&fp->obj, &fs);
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
 
     if (fp->flag & FA_MODIFIED) {
         // Write back directory entry
         if (fp->dir_sect != 0) {
             res = move_window(fs, fp->dir_sect);
-            if (res != FatResult::OK) return res;
+            if (res != FatResult::OK)
+                return res;
 
             auto* dir = fp->dir_ptr;
             dir[DIR_ATTR] |= AM_ARC;
@@ -1842,13 +1990,15 @@ FatResult FatFs::sync(FatFile* fp) noexcept {
 // ============================================================================
 
 FatResult FatFs::opendir(FatDir* dp, const char* path) noexcept {
-    if (!dp) return FatResult::INVALID_OBJECT;
+    if (!dp)
+        return FatResult::INVALID_OBJECT;
 
     dp->obj.fs = nullptr;
     const char* p = path;
     FatFsVolume* fs;
     auto res = mount_volume(&p, &fs, 0);
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
 
     dp->obj.fs = fs;
     dp->obj.id = fs->id;
@@ -1869,11 +2019,13 @@ FatResult FatFs::opendir(FatDir* dp, const char* path) noexcept {
         if (res == FatResult::OK) {
             dp->obj.id = fs->id;
             // Clear LFN buffer
-            if (fs->lfnbuf) fs->lfnbuf[0] = 0;
+            if (fs->lfnbuf)
+                fs->lfnbuf[0] = 0;
         }
     }
 
-    if (res != FatResult::OK) dp->obj.fs = nullptr;
+    if (res != FatResult::OK)
+        dp->obj.fs = nullptr;
     return res;
 }
 
@@ -1889,17 +2041,20 @@ FatResult FatFs::closedir(FatDir* dp) noexcept {
 FatResult FatFs::readdir(FatDir* dp, FatFileInfo* fno) noexcept {
     FatFsVolume* fs;
     auto res = validate(&dp->obj, &fs);
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
 
     if (!fno) {
         // Rewind
         res = dir_sdi(dp, 0);
-        if (fs->lfnbuf) fs->lfnbuf[0] = 0;
+        if (fs->lfnbuf)
+            fs->lfnbuf[0] = 0;
         return res;
     }
 
     // Clear LFN buffer for this read
-    if (fs->lfnbuf) fs->lfnbuf[0] = 0;
+    if (fs->lfnbuf)
+        fs->lfnbuf[0] = 0;
 
     res = dir_read(dp, 0);
     if (res == FatResult::OK) {
@@ -1908,7 +2063,8 @@ FatResult FatFs::readdir(FatDir* dp, FatFileInfo* fno) noexcept {
         dir_next(dp, 0);
     } else {
         fno->fname[0] = '\0';
-        if (res == FatResult::NO_FILE) res = FatResult::OK;
+        if (res == FatResult::NO_FILE)
+            res = FatResult::OK;
     }
 
     return res;
@@ -1918,67 +2074,65 @@ FatResult FatFs::mkdir(const char* path) noexcept {
     const char* p = path;
     FatFsVolume* fs;
     auto res = mount_volume(&p, &fs, 1);
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
 
     FatDir dj{};
     dj.obj.fs = fs;
     res = follow_path(&dj, p);
 
-    if (res == FatResult::OK) return FatResult::EXIST;
-    if (res != FatResult::NO_FILE) return res;
+    if (res == FatResult::OK)
+        return FatResult::EXIST;
+    if (res != FatResult::NO_FILE)
+        return res;
 
     // Allocate a cluster for the new directory
     FatObjId tmp_obj{};
     tmp_obj.fs = fs;
     uint32_t dcl = create_chain(&tmp_obj, 0);
-    if (dcl == 0) return FatResult::DENIED;
-    if (dcl == 1) return FatResult::INT_ERR;
+    if (dcl == 0)
+        return FatResult::DENIED;
+    if (dcl == 1)
+        return FatResult::INT_ERR;
 
     // Clear the directory cluster
     res = dir_clear(fs, dcl);
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
 
     // Create . and .. entries
     res = move_window(fs, clst2sect(fs, dcl));
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
 
-    // "." entry
+    // "." entry — build once, then copy to ".."
     uint8_t* dir = fs->win;
     std::memset(dir, 0, DIR_ENTRY_SIZE);
-    constexpr uint8_t dot_name[11] = {'.', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '};
-    std::memcpy(dir + DIR_NAME, dot_name, 11);
+    std::memset(dir + DIR_NAME, ' ', 11);
+    dir[DIR_NAME] = '.';
     dir[DIR_ATTR] = AM_DIR;
     uint32_t tm = get_fattime();
-    st16(&dir[DIR_WRT_TIME], static_cast<uint16_t>(tm));
-    st16(&dir[DIR_WRT_DATE], static_cast<uint16_t>(tm >> 16));
+    st32(&dir[DIR_WRT_TIME], tm);
     st_clust(fs, dir, dcl);
 
-    // ".." entry
-    dir += DIR_ENTRY_SIZE;
-    std::memset(dir, 0, DIR_ENTRY_SIZE);
-    constexpr uint8_t dotdot_name[11] = {'.', '.', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '};
-    std::memcpy(dir + DIR_NAME, dotdot_name, 11);
-    dir[DIR_ATTR] = AM_DIR;
-    st16(&dir[DIR_WRT_TIME], static_cast<uint16_t>(tm));
-    st16(&dir[DIR_WRT_DATE], static_cast<uint16_t>(tm >> 16));
+    // ".." entry — copy "." then patch
+    std::memcpy(dir + DIR_ENTRY_SIZE, dir, DIR_ENTRY_SIZE);
+    dir[DIR_ENTRY_SIZE + 1] = '.';
     uint32_t pcl = dj.obj.sclust;
     if (fs->fs_type == FS_FAT32 && pcl == static_cast<uint32_t>(fs->dirbase)) {
         pcl = 0;
     }
-    st_clust(fs, dir, pcl);
+    st_clust(fs, dir + DIR_ENTRY_SIZE, pcl);
 
     fs->wflag = 1;
 
     // Register directory entry in parent
     res = dir_register(&dj);
-    if (res != FatResult::OK) return res;
-
-    res = move_window(fs, dj.sect);
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
 
     dj.dir[DIR_ATTR] = AM_DIR;
-    st16(&dj.dir[DIR_WRT_TIME], static_cast<uint16_t>(tm));
-    st16(&dj.dir[DIR_WRT_DATE], static_cast<uint16_t>(tm >> 16));
+    st32(&dj.dir[DIR_WRT_TIME], tm);
     st_clust(fs, dj.dir, dcl);
     fs->wflag = 1;
 
@@ -1990,15 +2144,19 @@ FatResult FatFs::unlink(const char* path) noexcept {
     const char* p = path;
     FatFsVolume* fs;
     auto res = mount_volume(&p, &fs, 1);
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
 
     FatDir dj{};
     dj.obj.fs = fs;
     res = follow_path(&dj, p);
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
 
-    if (dj.fn[NSFLAG] & NS_NONAME) return FatResult::INVALID_NAME;
-    if (dj.dir[DIR_ATTR] & AM_RDO) return FatResult::DENIED;
+    if (dj.fn[NSFLAG] & NS_NONAME)
+        return FatResult::INVALID_NAME;
+    if (dj.dir[DIR_ATTR] & AM_RDO)
+        return FatResult::DENIED;
 
     uint32_t dcl = ld_clust(fs, dj.dir);
 
@@ -2008,30 +2166,37 @@ FatResult FatFs::unlink(const char* path) noexcept {
         sdj.obj.fs = fs;
         sdj.obj.sclust = dcl;
         res = dir_sdi(&sdj, 0);
-        if (res != FatResult::OK) return res;
+        if (res != FatResult::OK)
+            return res;
 
         // Skip . and ..
         res = dir_next(&sdj, 0);
-        if (res == FatResult::OK) res = dir_next(&sdj, 0);
-        if (res != FatResult::OK && res != FatResult::NO_FILE) return res;
+        if (res == FatResult::OK)
+            res = dir_next(&sdj, 0);
+        if (res != FatResult::OK && res != FatResult::NO_FILE)
+            return res;
 
         // Check for more entries
         if (res == FatResult::OK) {
             res = dir_read(&sdj, 0);
-            if (res == FatResult::OK) return FatResult::DENIED; // not empty
-            if (res != FatResult::NO_FILE) return res;
+            if (res == FatResult::OK)
+                return FatResult::DENIED; // not empty
+            if (res != FatResult::NO_FILE)
+                return res;
         }
     }
 
     res = dir_remove(&dj);
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
 
     // Free cluster chain
     if (dcl != 0) {
         FatObjId tmp_obj{};
         tmp_obj.fs = fs;
         res = remove_chain(&tmp_obj, dcl, 0);
-        if (res != FatResult::OK) return res;
+        if (res != FatResult::OK)
+            return res;
     }
 
     return sync_fs(fs);
@@ -2041,13 +2206,15 @@ FatResult FatFs::rename(const char* path_old, const char* path_new) noexcept {
     const char* p_old = path_old;
     FatFsVolume* fs;
     auto res = mount_volume(&p_old, &fs, 1);
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
 
     // Find old entry
     FatDir dj_old{};
     dj_old.obj.fs = fs;
     res = follow_path(&dj_old, p_old);
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
 
     // Save old entry info
     uint32_t old_clust = ld_clust(fs, dj_old.dir);
@@ -2081,15 +2248,18 @@ FatResult FatFs::rename(const char* path_old, const char* path_new) noexcept {
         // Destination exists — fail
         return FatResult::EXIST;
     }
-    if (res != FatResult::NO_FILE) return res;
+    if (res != FatResult::NO_FILE)
+        return res;
 
     // Register new entry
     res = dir_register(&dj_new);
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
 
     // Fill new entry with old entry's data
     res = move_window(fs, dj_new.sect);
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
 
     dj_new.dir[DIR_ATTR] = old_attr;
     st_clust(fs, dj_new.dir, old_clust);
@@ -2102,7 +2272,8 @@ FatResult FatFs::rename(const char* path_old, const char* path_new) noexcept {
 
     // Sync to minimize cross-link window
     res = sync_fs(fs);
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
 
     // Remove old entry
     dj_old.sect = old_sect;
@@ -2110,7 +2281,8 @@ FatResult FatFs::rename(const char* path_old, const char* path_new) noexcept {
     dj_old.blk_ofs = old_blk_ofs;
     dj_old.dptr = old_dptr;
     res = dir_remove(&dj_old);
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
 
     return sync_fs(fs);
 }
@@ -2119,7 +2291,8 @@ FatResult FatFs::stat(const char* path, FatFileInfo* fno) noexcept {
     const char* p = path;
     FatFsVolume* fs;
     auto res = mount_volume(&p, &fs, 0);
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
 
     FatDir dj{};
     dj.obj.fs = fs;
@@ -2146,7 +2319,8 @@ FatResult FatFs::getfree(const char* path, uint32_t* nclst, FatFsVolume** fatfs)
     const char* p = path;
     FatFsVolume* fs;
     auto res = mount_volume(&p, &fs, 0);
-    if (res != FatResult::OK) return res;
+    if (res != FatResult::OK)
+        return res;
 
     *fatfs = fs;
 
@@ -2163,8 +2337,10 @@ FatResult FatFs::getfree(const char* path, uint32_t* nclst, FatFsVolume** fatfs)
 
     for (; clst < fs->n_fatent; clst++) {
         uint32_t val = get_fat(&tmp_obj, clst);
-        if (val == 1) return FatResult::INT_ERR;
-        if (val == 0) nfree++;
+        if (val == 1)
+            return FatResult::INT_ERR;
+        if (val == 0)
+            nfree++;
     }
 
     fs->free_clst = nfree;

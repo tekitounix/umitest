@@ -2,12 +2,12 @@
 // Comprehensive unit tests for FATfs C++23 port
 // Tests all public API functions for Phase 0 regression baseline
 
-#include "test_common.hh"
-
+#include <cstdio>
+#include <cstring>
 #include <umifs/fat/ff.hh>
 #include <umifs/fat/ff_diskio.hh>
-#include <cstring>
-#include <cstdio>
+
+#include "test_common.hh"
 
 using namespace umi::fs;
 
@@ -16,26 +16,29 @@ using namespace umi::fs;
 // ============================================================================
 
 static constexpr uint32_t BLOCK_SIZE = 512;
-static constexpr uint32_t BLOCK_COUNT = 2048;  // 1MB
+static constexpr uint32_t BLOCK_COUNT = 2048; // 1MB
 static constexpr uint32_t TOTAL_SIZE = BLOCK_SIZE * BLOCK_COUNT;
 
 static uint8_t ram_storage[TOTAL_SIZE];
 
 struct RamBlockDevice {
     int read(uint32_t block, uint32_t offset, void* buffer, uint32_t size) {
-        if (block >= BLOCK_COUNT || offset + size > BLOCK_SIZE) return -1;
+        if (block >= BLOCK_COUNT || offset + size > BLOCK_SIZE)
+            return -1;
         std::memcpy(buffer, &ram_storage[block * BLOCK_SIZE + offset], size);
         return 0;
     }
 
     int write(uint32_t block, uint32_t offset, const void* buffer, uint32_t size) {
-        if (block >= BLOCK_COUNT || offset + size > BLOCK_SIZE) return -1;
+        if (block >= BLOCK_COUNT || offset + size > BLOCK_SIZE)
+            return -1;
         std::memcpy(&ram_storage[block * BLOCK_SIZE + offset], buffer, size);
         return 0;
     }
 
     int erase(uint32_t block) {
-        if (block >= BLOCK_COUNT) return -1;
+        if (block >= BLOCK_COUNT)
+            return -1;
         std::memset(&ram_storage[block * BLOCK_SIZE], 0xFF, BLOCK_SIZE);
         return 0;
     }
@@ -56,43 +59,60 @@ static void format_fat16_image() {
     uint8_t* bs = ram_storage;
 
     // Jump instruction
-    bs[0] = 0xEB; bs[1] = 0x3C; bs[2] = 0x90;
+    bs[0] = 0xEB;
+    bs[1] = 0x3C;
+    bs[2] = 0x90;
     std::memcpy(&bs[3], "MSDOS5.0", 8);
     // Bytes per sector = 512
-    bs[11] = 0x00; bs[12] = 0x02;
+    bs[11] = 0x00;
+    bs[12] = 0x02;
     // Sectors per cluster = 4
     bs[13] = 4;
     // Reserved sectors = 1
-    bs[14] = 1; bs[15] = 0;
+    bs[14] = 1;
+    bs[15] = 0;
     // Number of FATs = 2
     bs[16] = 2;
     // Root directory entries = 512
-    bs[17] = 0x00; bs[18] = 0x02;
+    bs[17] = 0x00;
+    bs[18] = 0x02;
     // Total sectors (16-bit) = 2048
-    bs[19] = 0x00; bs[20] = 0x08;
+    bs[19] = 0x00;
+    bs[20] = 0x08;
     // Media type
     bs[21] = 0xF8;
     // Sectors per FAT = 2
-    bs[22] = 2; bs[23] = 0;
+    bs[22] = 2;
+    bs[23] = 0;
     // Sectors per track
-    bs[24] = 0x3F; bs[25] = 0;
+    bs[24] = 0x3F;
+    bs[25] = 0;
     // Number of heads
-    bs[26] = 0xFF; bs[27] = 0;
+    bs[26] = 0xFF;
+    bs[27] = 0;
     // Boot signature
     bs[38] = 0x29;
-    bs[39] = 0x12; bs[40] = 0x34; bs[41] = 0x56; bs[42] = 0x78;
+    bs[39] = 0x12;
+    bs[40] = 0x34;
+    bs[41] = 0x56;
+    bs[42] = 0x78;
     std::memcpy(&bs[43], "NO NAME    ", 11);
     std::memcpy(&bs[54], "FAT16   ", 8);
-    bs[510] = 0x55; bs[511] = 0xAA;
+    bs[510] = 0x55;
+    bs[511] = 0xAA;
 
     // Initialize FAT tables
     uint8_t* fat1 = &ram_storage[512];
-    fat1[0] = 0xF8; fat1[1] = 0xFF;
-    fat1[2] = 0xFF; fat1[3] = 0xFF;
+    fat1[0] = 0xF8;
+    fat1[1] = 0xFF;
+    fat1[2] = 0xFF;
+    fat1[3] = 0xFF;
 
     uint8_t* fat2 = &ram_storage[512 * 3];
-    fat2[0] = 0xF8; fat2[1] = 0xFF;
-    fat2[2] = 0xFF; fat2[3] = 0xFF;
+    fat2[0] = 0xF8;
+    fat2[1] = 0xFF;
+    fat2[2] = 0xFF;
+    fat2[3] = 0xFF;
 }
 
 // ============================================================================
@@ -541,7 +561,8 @@ static void test_large_file() {
 
     // Write 4KB (cluster size = 4 sectors * 512 = 2KB, so 2 clusters)
     uint8_t pattern[512];
-    for (int i = 0; i < 512; i++) pattern[i] = static_cast<uint8_t>(i & 0xFF);
+    for (int i = 0; i < 512; i++)
+        pattern[i] = static_cast<uint8_t>(i & 0xFF);
 
     for (int i = 0; i < 8; i++) {
         f.fs.write(&fp, pattern, 512, &bw);
@@ -641,14 +662,16 @@ static void test_full_disk() {
         std::snprintf(name, sizeof(name), "FI%03d.BIN", i);
         FatFile fp{};
         FatResult res = f.fs.open(&fp, name, FA_WRITE | FA_CREATE_NEW);
-        if (res != FatResult::OK) break;
+        if (res != FatResult::OK)
+            break;
 
         uint8_t data[2048];
         std::memset(data, static_cast<uint8_t>(i), sizeof(data));
         uint32_t bw;
         res = f.fs.write(&fp, data, sizeof(data), &bw);
         f.fs.close(&fp);
-        if (bw < sizeof(data)) break;
+        if (bw < sizeof(data))
+            break;
         files_created++;
     }
     CHECK(files_created > 0, "created files before full");
@@ -676,7 +699,8 @@ static void test_boundary_writes() {
     f.mount();
 
     uint8_t data[BLOCK_SIZE + 1];
-    for (uint32_t i = 0; i <= BLOCK_SIZE; i++) data[i] = static_cast<uint8_t>(i);
+    for (uint32_t i = 0; i <= BLOCK_SIZE; i++)
+        data[i] = static_cast<uint8_t>(i);
 
     // Exactly one sector
     FatFile fp{};
@@ -823,6 +847,349 @@ static void test_nested_dirs() {
 }
 
 // ============================================================================
+// Interleaved writes to multiple files
+// ============================================================================
+
+static void test_interleaved_write() {
+    SECTION("FATfs Interleaved Write");
+
+    FatFixture f;
+    f.mount();
+
+    FatFile fp1{}, fp2{}, fp3{};
+    uint32_t bw;
+    f.fs.open(&fp1, "IW1.TXT", FA_WRITE | FA_CREATE_ALWAYS);
+    f.fs.open(&fp2, "IW2.TXT", FA_WRITE | FA_CREATE_ALWAYS);
+    f.fs.open(&fp3, "IW3.TXT", FA_WRITE | FA_CREATE_ALWAYS);
+
+    // Round-robin writes
+    for (int i = 0; i < 10; i++) {
+        char buf[32];
+        int len = std::snprintf(buf, sizeof(buf), "F1-%d,", i);
+        f.fs.write(&fp1, buf, static_cast<uint32_t>(len), &bw);
+        len = std::snprintf(buf, sizeof(buf), "F2-%d,", i);
+        f.fs.write(&fp2, buf, static_cast<uint32_t>(len), &bw);
+        len = std::snprintf(buf, sizeof(buf), "F3-%d,", i);
+        f.fs.write(&fp3, buf, static_cast<uint32_t>(len), &bw);
+    }
+
+    f.fs.close(&fp1);
+    f.fs.close(&fp2);
+    f.fs.close(&fp3);
+
+    // Verify each file starts with expected prefix
+    char rbuf[256]{};
+    uint32_t br;
+    f.fs.open(&fp1, "IW1.TXT", FA_READ);
+    f.fs.read(&fp1, rbuf, sizeof(rbuf), &br);
+    CHECK(br > 0, "file1 has data");
+    CHECK(std::memcmp(rbuf, "F1-0,", 5) == 0, "file1 starts correctly");
+    f.fs.close(&fp1);
+
+    f.fs.open(&fp2, "IW2.TXT", FA_READ);
+    f.fs.read(&fp2, rbuf, sizeof(rbuf), &br);
+    CHECK(std::memcmp(rbuf, "F2-0,", 5) == 0, "file2 starts correctly");
+    f.fs.close(&fp2);
+
+    f.fs.open(&fp3, "IW3.TXT", FA_READ);
+    f.fs.read(&fp3, rbuf, sizeof(rbuf), &br);
+    CHECK(std::memcmp(rbuf, "F3-0,", 5) == 0, "file3 starts correctly");
+    f.fs.close(&fp3);
+
+    f.unmount();
+}
+
+// ============================================================================
+// Seek beyond EOF
+// ============================================================================
+
+static void test_seek_beyond_eof() {
+    SECTION("FATfs Seek Beyond EOF");
+
+    FatFixture f;
+    f.mount();
+
+    FatFile fp{};
+    uint32_t bw, br;
+    f.fs.open(&fp, "SEEK.TXT", FA_WRITE | FA_READ | FA_CREATE_ALWAYS);
+    f.fs.write(&fp, "ABCDE", 5, &bw);
+
+    // Seek beyond EOF and write — creates sparse region
+    FatResult res = f.fs.lseek(&fp, 100);
+    CHECK(res == FatResult::OK, "seek beyond eof");
+
+    f.fs.write(&fp, "XY", 2, &bw);
+    CHECK(bw == 2, "write after seek");
+
+    // Verify file size
+    FatFileInfo fno{};
+    f.fs.close(&fp);
+    f.fs.stat("SEEK.TXT", &fno);
+    CHECK(fno.fsize == 102, "file size after sparse write");
+
+    // Verify original data preserved
+    f.fs.open(&fp, "SEEK.TXT", FA_READ);
+    char buf[8]{};
+    f.fs.read(&fp, buf, 5, &br);
+    CHECK(br == 5, "read original data");
+    CHECK(std::memcmp(buf, "ABCDE", 5) == 0, "original data intact");
+
+    // Read data at offset 100
+    f.fs.lseek(&fp, 100);
+    char buf2[4]{};
+    f.fs.read(&fp, buf2, 2, &br);
+    CHECK(br == 2, "read at sparse offset");
+    CHECK(std::memcmp(buf2, "XY", 2) == 0, "data at sparse offset");
+    f.fs.close(&fp);
+
+    f.unmount();
+}
+
+// ============================================================================
+// Write empty buffer (0 bytes)
+// ============================================================================
+
+static void test_write_empty_buf() {
+    SECTION("FATfs Write Empty Buffer");
+
+    FatFixture f;
+    f.mount();
+
+    FatFile fp{};
+    uint32_t bw;
+    f.fs.open(&fp, "EMPTY.TXT", FA_WRITE | FA_CREATE_ALWAYS);
+
+    FatResult res = f.fs.write(&fp, "x", 0, &bw);
+    CHECK(res == FatResult::OK, "zero-byte write ok");
+    CHECK(bw == 0, "zero bytes written");
+
+    f.fs.close(&fp);
+
+    FatFileInfo fno{};
+    f.fs.stat("EMPTY.TXT", &fno);
+    CHECK(fno.fsize == 0, "file size is 0");
+
+    f.unmount();
+}
+
+// ============================================================================
+// Double close
+// ============================================================================
+
+static void test_double_close() {
+    SECTION("FATfs Double Close");
+
+    FatFixture f;
+    f.mount();
+
+    FatFile fp{};
+    uint32_t bw;
+    f.fs.open(&fp, "DC.TXT", FA_WRITE | FA_CREATE_ALWAYS);
+    f.fs.write(&fp, "data", 4, &bw);
+    FatResult res = f.fs.close(&fp);
+    CHECK(res == FatResult::OK, "first close succeeds");
+
+    // Second close — validate() detects obj.fs == nullptr and returns error
+    res = f.fs.close(&fp);
+    CHECK(res != FatResult::OK, "second close returns error");
+
+    f.unmount();
+}
+
+// ============================================================================
+// Remove then create same name
+// ============================================================================
+
+static void test_remove_then_create() {
+    SECTION("FATfs Remove Then Create");
+
+    FatFixture f;
+    f.mount();
+
+    FatFile fp{};
+    uint32_t bw, br;
+
+    // Create and write
+    f.fs.open(&fp, "RECR.TXT", FA_WRITE | FA_CREATE_ALWAYS);
+    f.fs.write(&fp, "OLD", 3, &bw);
+    f.fs.close(&fp);
+
+    // Remove
+    FatResult res = f.fs.unlink("RECR.TXT");
+    CHECK(res == FatResult::OK, "unlink");
+
+    // Recreate with different data
+    f.fs.open(&fp, "RECR.TXT", FA_WRITE | FA_CREATE_ALWAYS);
+    f.fs.write(&fp, "NEWDATA", 7, &bw);
+    f.fs.close(&fp);
+
+    // Verify new data
+    f.fs.open(&fp, "RECR.TXT", FA_READ);
+    char buf[16]{};
+    f.fs.read(&fp, buf, sizeof(buf), &br);
+    CHECK(br == 7, "new file size");
+    CHECK(std::memcmp(buf, "NEWDATA", 7) == 0, "new file content");
+    f.fs.close(&fp);
+
+    f.unmount();
+}
+
+// ============================================================================
+// Overwrite preserves surrounding data
+// ============================================================================
+
+static void test_overwrite_preserves_surrounding() {
+    SECTION("FATfs Overwrite Preserves Surrounding");
+
+    FatFixture f;
+    f.mount();
+
+    FatFile fp{};
+    uint32_t bw, br;
+
+    // Write "AAAAABBBBBCCCCC" (15 bytes)
+    f.fs.open(&fp, "SURR.TXT", FA_WRITE | FA_READ | FA_CREATE_ALWAYS);
+    f.fs.write(&fp, "AAAAABBBBBCCCCC", 15, &bw);
+
+    // Seek to offset 5 and overwrite "BBBBB" with "XXXXX"
+    f.fs.lseek(&fp, 5);
+    f.fs.write(&fp, "XXXXX", 5, &bw);
+    CHECK(bw == 5, "overwrite middle");
+
+    // Read entire file
+    f.fs.lseek(&fp, 0);
+    char buf[32]{};
+    f.fs.read(&fp, buf, 32, &br);
+    CHECK(br == 15, "size unchanged");
+    CHECK(std::memcmp(buf, "AAAAAXXXXXCCCCC", 15) == 0, "surrounding preserved");
+    f.fs.close(&fp);
+
+    f.unmount();
+}
+
+// ============================================================================
+// Multiple writes crossing sector boundary
+// ============================================================================
+
+static void test_multi_write_cross_sector() {
+    SECTION("FATfs Multi Write Cross Sector");
+
+    FatFixture f;
+    f.mount();
+
+    FatFile fp{};
+    uint32_t bw;
+
+    f.fs.open(&fp, "CROSS.BIN", FA_WRITE | FA_READ | FA_CREATE_ALWAYS);
+
+    // Write 400 bytes, then 300 bytes — crosses 512-byte sector boundary
+    uint8_t data1[400];
+    std::memset(data1, 0xAA, sizeof(data1));
+    f.fs.write(&fp, data1, sizeof(data1), &bw);
+    CHECK(bw == 400, "first write");
+
+    uint8_t data2[300];
+    std::memset(data2, 0xBB, sizeof(data2));
+    f.fs.write(&fp, data2, sizeof(data2), &bw);
+    CHECK(bw == 300, "second write");
+
+    // Verify
+    f.fs.lseek(&fp, 0);
+    uint8_t rbuf[700]{};
+    uint32_t br;
+    f.fs.read(&fp, rbuf, 700, &br);
+    CHECK(br == 700, "read all");
+
+    bool first_ok = true;
+    for (uint32_t i = 0; i < 400; i++) {
+        if (rbuf[i] != 0xAA) {
+            first_ok = false;
+            break;
+        }
+    }
+    CHECK(first_ok, "first 400 bytes correct");
+
+    bool second_ok = true;
+    for (uint32_t i = 400; i < 700; i++) {
+        if (rbuf[i] != 0xBB) {
+            second_ok = false;
+            break;
+        }
+    }
+    CHECK(second_ok, "next 300 bytes correct");
+
+    f.fs.close(&fp);
+    f.unmount();
+}
+
+// ============================================================================
+// Multiple writes within same sector
+// ============================================================================
+
+static void test_multi_write_same_sector() {
+    SECTION("FATfs Multi Write Same Sector");
+
+    FatFixture f;
+    f.mount();
+
+    FatFile fp{};
+    uint32_t bw;
+
+    f.fs.open(&fp, "SAME.BIN", FA_WRITE | FA_READ | FA_CREATE_ALWAYS);
+
+    // Multiple small writes all within one 512-byte sector
+    f.fs.write(&fp, "AAAA", 4, &bw);
+    CHECK(bw == 4, "write 1");
+    f.fs.write(&fp, "BBBB", 4, &bw);
+    CHECK(bw == 4, "write 2");
+    f.fs.write(&fp, "CCCC", 4, &bw);
+    CHECK(bw == 4, "write 3");
+
+    f.fs.lseek(&fp, 0);
+    char buf[16]{};
+    uint32_t br;
+    f.fs.read(&fp, buf, 12, &br);
+    CHECK(br == 12, "read all");
+    CHECK(std::memcmp(buf, "AAAABBBBCCCC", 12) == 0, "concatenated correctly");
+
+    f.fs.close(&fp);
+    f.unmount();
+}
+
+// ============================================================================
+// Full disk mkdir
+// ============================================================================
+
+static void test_full_disk_mkdir() {
+    SECTION("FATfs Full Disk Mkdir");
+
+    FatFixture f;
+    f.mount();
+
+    // Fill disk with large file first
+    FatFile fp{};
+    uint32_t bw;
+    f.fs.open(&fp, "BIG.BIN", FA_WRITE | FA_CREATE_ALWAYS);
+    uint8_t block[2048];
+    std::memset(block, 0xFF, sizeof(block));
+    int blocks_written = 0;
+    for (int i = 0; i < 600; i++) {
+        FatResult res = f.fs.write(&fp, block, sizeof(block), &bw);
+        if (res != FatResult::OK || bw < sizeof(block))
+            break;
+        blocks_written++;
+    }
+    f.fs.close(&fp);
+    CHECK(blocks_written > 0, "filled disk");
+
+    // Try mkdir on full disk — should fail
+    FatResult res = f.fs.mkdir("NEWDIR");
+    CHECK(res != FatResult::OK, "mkdir on full disk fails");
+
+    f.unmount();
+}
+
+// ============================================================================
 // Entry point
 // ============================================================================
 
@@ -851,6 +1218,15 @@ int main() {
     test_overwrite();
     test_fragmentation();
     test_nested_dirs();
+    test_interleaved_write();
+    test_seek_beyond_eof();
+    test_write_empty_buf();
+    test_double_close();
+    test_remove_then_create();
+    test_overwrite_preserves_surrounding();
+    test_multi_write_cross_sector();
+    test_multi_write_same_sector();
+    test_full_disk_mkdir();
 
     TEST_SUMMARY();
 }
