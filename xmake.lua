@@ -373,7 +373,7 @@ task("test")
     set_category("action")
     on_run(function ()
         import("core.project.project")
-        local tests = {"test_dsp", "test_kernel", "test_audio", "test_midi"}
+        local tests = {"test_dsp", "test_kernel", "test_audio", "test_midi", "test_syscall_context"}
         for _, name in ipairs(tests) do
             os.exec("xmake build " .. name)
         end
@@ -383,9 +383,8 @@ task("test")
         local failed = {}
         for _, name in ipairs(tests) do
             print(">>> " .. name)
-            local target = project.target(name)
-            local ok = os.execv(target:targetfile(), {}, {try = true})
-            if ok ~= 0 then table.insert(failed, name) end
+            local ok = try { function() os.exec("xmake run " .. name) return true end }
+            if not ok then table.insert(failed, name) end
             print("")
         end
         print(string.rep("=", 60))
