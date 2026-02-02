@@ -538,6 +538,48 @@ SAI1 経由でオーディオ出力。外部コーデックは device/ レイヤ
 
 ---
 
+## Phase 6: umios統合 + 全I/O対応
+
+- [x] umios AudioContext / EventRouter / SharedState 統合
+    - float audio buffers、DMA int32↔float変換
+    - AudioContext構築 → 登録済みProcessor呼び出し → フォールバック(シンセ/パススルー)
+    - EventRouter: MIDI callback → RawInput → audio queue / shared state
+- [x] `lib/umiport/mcu/stm32h7/mcu/usart.hh` — USART1 mmioレジスタ定義
+- [x] `lib/umiport/board/daisy_seed/board/midi_uart.hh` — MIDI UART ドライバ
+    - PB6=TX AF7, PB7=RX AF7, 31250 baud, 8N1
+    - RXNE割り込み → MidiUartParser → on_midi_message
+    - 送信: blocking TXE待ち
+- [x] `lib/umiport/mcu/stm32h7/mcu/sdmmc.hh` — SDMMC1 mmioレジスタ定義
+- [x] `lib/umiport/board/daisy_seed/board/sdcard.hh` — microSD ドライバ
+    - PC8-12=D0-D3+CLK, PD2=CMD, AF12
+    - 4-bit bus, SDHC対応, blocking FIFO polling
+    - タイムアウト付きコマンド送信
+- [ ] microSD実機検証 — 要: D1CCIPR.SDMMCSEL クロックソース設定
+
+### テスト・検証
+
+**L3 (実機 Daisy Pod):**
+- [x] CFSR=0（フォールトなし）、スケジューラ稼動
+- [x] SDRAM検証 — sdram_result=1 (PASS), sdram_read=0xDEADBEEF
+- [x] MIDI UART初期化完了（USART1 IRQ登録済み, IRQ37）
+- [ ] MIDI UART送受信検証（外部MIDIデバイス接続時）
+- [ ] microSD読み書き検証（カード挿入 + クロック設定後）
+
+### 対応済み全I/O一覧
+
+| I/O | 状態 | 備考 |
+|-----|------|------|
+| RGB LED ×2 | ✅ | ソフトウェアPWM 120Hz |
+| ボタン ×2 | ✅ | 8bit シフトレジスタデバウンス |
+| ノブ ×2 | ✅ | ADC1 DMA + ワンポールフィルタ |
+| プッシュエンコーダ | ✅ | 2bit 遷移検出 |
+| オーディオ IN/OUT | ✅ | SAI DMA全二重 48kHz/24bit |
+| USB Audio+MIDI | ✅ | HS内蔵PHY, macOS認識済み |
+| MIDI UART IN/OUT | ✅ | USART1 31250baud, IRQ RX |
+| microSD | ⚠️ | ドライバ完成、クロック設定未完 |
+
+---
+
 ## フェーズ間の依存
 
 ```
@@ -554,6 +596,8 @@ Phase 0a (port/リファクタリング)
   │    │              └→ Phase 4 (USB + Pod HID)
   │    │                   │
   │    │                   └→ Phase 5 (QSPI + SDRAM)
+  │    │                        │
+  │    │                        └→ Phase 6 (umios統合 + 全I/O)
   │    │
   │    └→ 既存mcu/のmmio化（Phase 1以降で段階的に）
   │

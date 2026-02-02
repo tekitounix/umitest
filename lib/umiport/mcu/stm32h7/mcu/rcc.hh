@@ -139,8 +139,9 @@ struct RCC : mm::Device<mm::RW, mm::DirectTransportTag> {
 
     /// AHB3 peripheral clock enable register (FMC, QSPI)
     struct AHB3ENR : mm::Register<RCC, 0xD4, 32> {
-        struct FMCEN : mm::Field<AHB3ENR, 12, 1> {};
-        struct QSPIEN : mm::Field<AHB3ENR, 14, 1> {};
+        struct SDMMC1EN : mm::Field<AHB3ENR, 16, 1> {};
+        struct FMCEN    : mm::Field<AHB3ENR, 12, 1> {};
+        struct QSPIEN   : mm::Field<AHB3ENR, 14, 1> {};
     };
 
     /// AHB4 peripheral clock enable register (GPIO clocks)
@@ -176,8 +177,9 @@ struct RCC : mm::Device<mm::RW, mm::DirectTransportTag> {
 
     /// APB2 peripheral clock enable register
     struct APB2ENR : mm::Register<RCC, 0xF0, 32> {
-        struct SAI1EN : mm::Field<APB2ENR, 22, 1> {};
-        struct SAI2EN : mm::Field<APB2ENR, 23, 1> {};
+        struct USART1EN : mm::Field<APB2ENR, 4, 1> {};
+        struct SAI1EN   : mm::Field<APB2ENR, 22, 1> {};
+        struct SAI2EN   : mm::Field<APB2ENR, 23, 1> {};
     };
 
     /// Domain 2 kernel clock configuration register (peripheral clock mux)

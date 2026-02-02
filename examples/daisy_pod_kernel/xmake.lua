@@ -1,5 +1,5 @@
 -- Daisy Pod Kernel (STM32H750)
--- Phase 4: Audio + RTOS + USB MIDI
+-- Phase 6: Audio + RTOS + USB Audio/MIDI + Synth + EventRouter
 
 local board_dir = path.join(os.projectdir(), "lib/umiport/board/daisy_seed")
 local pod_board_dir = path.join(os.projectdir(), "lib/umiport/board/daisy_pod")
@@ -43,6 +43,7 @@ target("daisy_pod_kernel")
     add_includedirs(path.join(os.projectdir(), "lib"))
     add_includedirs(path.join(os.projectdir(), "lib/umiusb/include"))
     add_includedirs(path.join(os.projectdir(), "lib/umidsp/include"))
+    add_includedirs(path.join(os.projectdir(), "lib/umios/core"))
     add_includedirs(board_dir)
     add_includedirs(pod_board_dir)
 target_end()

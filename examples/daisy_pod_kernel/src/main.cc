@@ -15,6 +15,8 @@
 #include <board/usb.hh>
 #include <board/sdram.hh>
 #include <board/qspi.hh>
+#include <board/midi_uart.hh>
+#include <board/sdcard.hh>
 
 // Pod HID
 #include <board/hid.hh>
@@ -24,6 +26,12 @@
 #include <audio/audio_interface.hh>
 #include <core/device.hh>
 #include <core/descriptor.hh>
+
+// umios: AudioContext, EventRouter, SharedState
+#include <audio_context.hh>
+#include <event.hh>
+#include <event_router.hh>
+#include <shared_state.hh>
 
 // Linker-provided symbols
 extern "C" {
@@ -112,12 +120,21 @@ umiusb::Device<umiusb::Stm32HsHal, UsbAudioMidi> usb_device(usb_hal, usb_audio, 
 
 umi::daisy::pod::PodHid pod_hid;
 
-// Debug: SDRAM/QSPI test results (read via GDB)
+// MIDI UART parser and state
+umi::daisy::MidiUartParser midi_uart_parser;
+
+} // namespace (reopened below after DbgMemTest)
+
+// Debug: SDRAM/QSPI/SD test results (read via GDB, outside anonymous namespace for LTO visibility)
 struct DbgMemTest {
     volatile std::uint32_t sdram_result = 0;  // 0=untested, 1=pass, 2=fail
     volatile std::uint32_t sdram_read = 0;
     volatile std::uint32_t qspi_byte0 = 0;
+    volatile std::uint32_t sd_result = 0;     // 0=untested, 1=pass, 2=fail
+    volatile std::uint32_t sd_byte0 = 0;
 } dbg_mem;
+
+namespace {
 
 // ============================================================================
 // DMA audio buffers
@@ -132,6 +149,46 @@ std::int32_t audio_rx_buf[AUDIO_BUFFER_SIZE];
 // Pending audio buffer pointers (set by ISR, consumed by audio task)
 volatile std::int32_t* pending_tx = nullptr;
 volatile std::int32_t* pending_rx = nullptr;
+
+// ============================================================================
+// umios: AudioContext infrastructure
+// ============================================================================
+
+// Float audio buffers for AudioContext (converted from/to int32 DMA buffers)
+float audio_float_in[2][AUDIO_BLOCK_SIZE];
+float audio_float_out[2][AUDIO_BLOCK_SIZE];
+
+// AudioContext state
+umi::EventQueue<> audio_event_queue;
+umi::EventQueue<> audio_output_events;
+umi::SharedParamState shared_params;
+umi::SharedChannelState shared_channel;
+umi::SharedInputState shared_input;
+umi::EventRouter event_router;
+
+// Sample position counter (monotonically increasing)
+umi::sample_position_t audio_sample_pos = 0;
+
+// Current registered processor (set via register_processor or directly)
+void* registered_processor = nullptr;
+void (*registered_process_fn)(void*, umi::AudioContext&) = nullptr;
+
+// Int32 (24-bit SAI) ↔ float conversion
+void int32_to_float_stereo(const std::int32_t* src, float* left, float* right, std::uint32_t frames) {
+    constexpr float scale = 1.0f / static_cast<float>(1 << 23);
+    for (std::uint32_t i = 0; i < frames; ++i) {
+        left[i] = static_cast<float>(src[i * 2]) * scale;
+        right[i] = static_cast<float>(src[i * 2 + 1]) * scale;
+    }
+}
+
+void float_to_int32_stereo(const float* left, const float* right, std::int32_t* dst, std::uint32_t frames) {
+    constexpr float scale = static_cast<float>(1 << 23);
+    for (std::uint32_t i = 0; i < frames; ++i) {
+        dst[i * 2] = static_cast<std::int32_t>(left[i] * scale);
+        dst[i * 2 + 1] = static_cast<std::int32_t>(right[i] * scale);
+    }
+}
 
 // ============================================================================
 // Simple Event Queue (HID → audio/control event bridge)
@@ -240,11 +297,13 @@ constexpr std::uint32_t midi_note_to_phase_inc(std::uint8_t note) {
 volatile float synth_volume = 0.5f;     // knob1: master volume
 
 // MIDI callback — called from USB poll context
-void on_midi_message(std::uint8_t /*cable*/, const std::uint8_t* data, std::uint8_t len) {
+// Routes to both local synth event queue AND umios EventRouter
+void on_midi_message(std::uint8_t cable, const std::uint8_t* data, std::uint8_t len) {
     if (len < 2) return;
     std::uint8_t status = data[0] & 0xF0;
     std::uint8_t ch = data[0] & 0x0F;
 
+    // Route to local synth event queue
     Event ev;
     ev.channel = ch;
 
@@ -264,6 +323,16 @@ void on_midi_message(std::uint8_t /*cable*/, const std::uint8_t* data, std::uint
         ev.value = data[2];
         midi_event_queue.push(ev);
     }
+
+    // Route through umios EventRouter (for registered processors)
+    umi::RawInput raw;
+    raw.hw_timestamp = 0;  // TODO: capture actual timestamp
+    raw.source_id = cable;
+    raw.size = len;
+    for (std::uint8_t i = 0; i < len && i < 6; ++i) {
+        raw.payload[i] = data[i];
+    }
+    event_router.receive(raw, 0, AUDIO_SAMPLE_RATE);
 }
 
 // Process MIDI events in audio task (voice allocation)
@@ -345,6 +414,7 @@ void render_synth(std::int32_t* out, std::uint32_t frames) {
 // ============================================================================
 
 /// Audio task: waits for DMA notification, bridges USB Audio ↔ SAI DMA + synth
+/// Also constructs AudioContext and invokes registered processor if any
 void audio_task_entry(void* /*arg*/) {
     while (true) {
         while (!(task_notifications[TASK_AUDIO].load(std::memory_order_acquire) & NOTIFY_AUDIO_READY)) {
@@ -358,26 +428,62 @@ void audio_task_entry(void* /*arg*/) {
         auto* out = const_cast<std::int32_t*>(pending_tx);
         auto* in = const_cast<std::int32_t*>(pending_rx);
 
-        if (out != nullptr) {
-            // USB Audio OUT → SAI TX (DAC): read from USB host ringbuffer
+        // Convert DMA int32 → float for AudioContext
+        if (in != nullptr) {
+            int32_to_float_stereo(in, audio_float_in[0], audio_float_in[1], AUDIO_BLOCK_SIZE);
+        }
+
+        // Build AudioContext
+        const umi::sample_t* in_ptrs[2] = {audio_float_in[0], audio_float_in[1]};
+        umi::sample_t* out_ptrs[2] = {audio_float_out[0], audio_float_out[1]};
+
+        // Drain audio_event_queue into a span for AudioContext
+        umi::Event event_buf[64];
+        std::uint32_t event_count = 0;
+        {
+            umi::Event ev;
+            while (event_count < 64 && audio_event_queue.pop(ev)) {
+                event_buf[event_count++] = ev;
+            }
+        }
+
+        umi::AudioContext ctx{
+            .inputs = std::span<const umi::sample_t* const>(in_ptrs, 2),
+            .outputs = std::span<umi::sample_t* const>(out_ptrs, 2),
+            .input_events = std::span<const umi::Event>(event_buf, event_count),
+            .output_events = audio_output_events,
+            .sample_rate = AUDIO_SAMPLE_RATE,
+            .buffer_size = AUDIO_BLOCK_SIZE,
+            .dt = 1.0f / static_cast<float>(AUDIO_SAMPLE_RATE),
+            .sample_position = audio_sample_pos,
+            .params = &shared_params,
+            .channel = &shared_channel,
+            .input_state = &shared_input,
+        };
+
+        // Invoke registered processor if any
+        if (registered_processor != nullptr && registered_process_fn != nullptr) {
+            registered_process_fn(registered_processor, ctx);
+            // Convert float output → int32 DMA
+            if (out != nullptr) {
+                float_to_int32_stereo(audio_float_out[0], audio_float_out[1], out, AUDIO_BLOCK_SIZE);
+            }
+        } else if (out != nullptr) {
+            // No registered processor: use built-in synth/passthrough/USB audio
             auto frames = usb_audio.read_audio(out, AUDIO_BLOCK_SIZE);
             if (frames == 0) {
-                // No USB audio playback: use synth output or passthrough
                 bool has_active_voice = false;
                 for (const auto& v : voices) {
                     if (v.active) { has_active_voice = true; break; }
                 }
 
                 if (has_active_voice) {
-                    // Render MIDI synth
                     render_synth(out, AUDIO_BLOCK_SIZE);
                 } else if (in != nullptr) {
-                    // Passthrough: copy ADC input → DAC output
                     for (std::uint32_t i = 0; i < AUDIO_BLOCK_SIZE * 2; ++i) {
                         out[i] = in[i];
                     }
                 } else {
-                    // Silence
                     for (std::uint32_t i = 0; i < AUDIO_BLOCK_SIZE * 2; ++i) {
                         out[i] = 0;
                     }
@@ -386,9 +492,10 @@ void audio_task_entry(void* /*arg*/) {
         }
 
         if (in != nullptr) {
-            // SAI RX (ADC) → USB Audio IN: write to USB host ringbuffer
             usb_audio.write_audio_in(in, AUDIO_BLOCK_SIZE);
         }
+
+        audio_sample_pos += AUDIO_BLOCK_SIZE;
     }
 }
 
@@ -510,6 +617,30 @@ void DMA1_Stream1_IRQHandler() {
     transport.write(DMA1::LIFCR::value(dma_flags::S1_ALL));
 }
 
+/// USART1 IRQ: MIDI UART receive (31250 baud)
+void USART1_IRQHandler() {
+    using namespace umi::stm32h7;
+    mm::DirectTransportT<> t;
+    auto isr = t.read(USART1::ISR{});
+
+    // Clear errors
+    if (isr & ((1U << 3) | (1U << 1))) {  // ORE | FE
+        umi::daisy::midi_uart_clear_errors();
+    }
+
+    // Read data
+    if (isr & (1U << 5)) {  // RXNE
+        auto byte = umi::daisy::midi_uart_read_byte();
+        if (midi_uart_parser.feed(byte)) {
+            // Complete MIDI message — route to synth + EventRouter
+            std::uint8_t msg[3] = {midi_uart_parser.running_status,
+                                    midi_uart_parser.data[0],
+                                    midi_uart_parser.data[1]};
+            on_midi_message(0, msg, midi_uart_parser.expected + 1);
+        }
+    }
+}
+
 } // extern "C"
 
 // Fault handlers
@@ -599,6 +730,27 @@ int main() {
         pod_hid.init(transport, update_rate);
     }
 
+    // MIDI UART (USART1, 31250 baud)
+    umi::daisy::init_midi_uart();
+
+    // microSD card (SDMMC1, 4-bit bus) — disabled until clock source configured
+    // TODO: configure D1CCIPR.SDMMCSEL before enabling
+    // {
+    //     bool sd_ok = umi::daisy::init_sdcard();
+    //     if (sd_ok) {
+    //         alignas(4) std::uint8_t mbr[512];
+    //         bool read_ok = umi::daisy::sdcard_read_block(0, mbr);
+    //         dbg_mem.sd_result = read_ok ? 1 : 2;
+    //         if (read_ok) dbg_mem.sd_byte0 = mbr[0];
+    //     } else {
+    //         dbg_mem.sd_result = 2;
+    //     }
+    // }
+
+    // Configure umios EventRouter
+    event_router.set_shared_state(&shared_params, &shared_channel);
+    event_router.set_audio_queue(&audio_event_queue);
+
     // Initialize task stacks
     umi::port::cm7::init_task_context(task_contexts[TASK_AUDIO],
         audio_stack, AUDIO_STACK_SIZE, audio_task_entry, nullptr, true);
@@ -684,6 +836,11 @@ extern "C" [[noreturn]] void Reset_Handler() {
     umi::irq::set_priority(12, 0x00);
     umi::irq::enable(11);
     umi::irq::enable(12);
+
+    // USART1 (MIDI UART RX)
+    umi::irq::set_handler(37, USART1_IRQHandler);
+    umi::irq::set_priority(37, 0x40);  // Lower priority than DMA
+    umi::irq::enable(37);
 
     for (void (**p)(void) = __init_array_start; p < __init_array_end; ++p) {
         (*p)();
