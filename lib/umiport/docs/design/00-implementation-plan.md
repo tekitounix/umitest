@@ -495,8 +495,13 @@ SAI1 経由でオーディオ出力。外部コーデックは device/ レイヤ
     - `AudioFullDuplexMidi48k` で Audio IN/OUT + MIDI 統合
     - DMA ISR → audio task → `read_audio()` / `write_audio_in()` でリングバッファ接続
     - macOSで "Daisy Pod Audio" として認識（2ch IN/OUT, 48kHz）
-    - USB未接続時はサイン波テスト信号にフォールバック
-- [ ] HID → UMI Event 変換 — 要: OS EventQueue/EventRouter基盤
+    - USB未接続時はシンセ出力またはパススルー（RX→TX）にフォールバック
+- [x] MIDI→シンセ発音（8ボイスポリ、ノコギリ波、AR エンベロープ）
+    - MIDI Note On/Off → lock-free EventQueue → audio task でボイス割り当て
+    - knob1 → マスターボリューム制御
+- [x] HID → Event Queue 基盤（SPSC lock-free ring buffer、EventType定義）
+    - エンコーダクリック/回転、ボタン、ノブ変更をEvent化
+- [ ] HID → UMI Event 統合 — 要: OS EventRouter基盤（現在はローカルEventQueue）
 
 ### テスト・検証
 
@@ -508,7 +513,8 @@ SAI1 経由でオーディオ出力。外部コーデックは device/ レイヤ
 - [x] USB Audio デバイス認識確認（macOS Audio MIDI Setup: 2ch IN/OUT, 48kHz）
 - [x] ADCキャリブレーション通過、HID初期化完了確認（GDB: control_task_entry到達）
 - [x] ノブ→LED デモ動作（knob1→LED1赤、knob2→LED2青、エンコーダクリック→Seed LEDトグル）
-- [ ] USB MIDI 受信→シンセ発音、ノブでパラメータ変更
+- [x] USB MIDI 受信→シンセ発音、ノブでパラメータ変更（knob1→volume）
+- [x] パススルー動作（USB未接続 + シンセ無音時: SAI RX→TX コピー）
 
 ---
 

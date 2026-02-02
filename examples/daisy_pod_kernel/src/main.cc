@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
-// Daisy Pod Kernel - Phase 5: Audio + RTOS + USB MIDI + QSPI + SDRAM
+// Daisy Pod Kernel - Phase 6: Audio + RTOS + USB Audio/MIDI + Synth + HID Events
 // 4-task architecture: Audio (REALTIME), System (SERVER), Control (USER), Idle
 #include <cstdint>
+#include <cstring>
 #include <atomic>
 #include <common/irq.hh>
 
@@ -133,79 +134,258 @@ volatile std::int32_t* pending_tx = nullptr;
 volatile std::int32_t* pending_rx = nullptr;
 
 // ============================================================================
-// Sine wave test signal
+// Simple Event Queue (HID → audio/control event bridge)
 // ============================================================================
 
-constexpr int SINE_TABLE_SIZE = 256;
-constexpr std::int32_t sine_table[SINE_TABLE_SIZE] = {
-    0, 205887, 411239, 615526, 818221, 1018805, 1216764, 1411594,
-    1602801, 1789903, 1972429, 2149924, 2321947, 2488073, 2647898, 2801033,
-    2947114, 3085797, 3216762, 3339715, 3454384, 3560525, 3657918, 3746371,
-    3825717, 3895821, 3956571, 3907885, 4048703, 4078990, 4099736, 4110959,
-    4112599, 4104725, 4087427, 4060822, 4025050, 3980274, 3926680, 3864475,
-    3793888, 3715168, 3628582, 3534416, 3432972, 3324572, 3209548, 3088251,
-    2961040, 2828289, 2690381, 2547712, 2400688, 2249720, 2095233, 1937651,
-    1777406, 1614935, 1450679, 1285082, 1118590, 951646, 784695, 618178,
-    452536, 288203, 125610, -35016, -193350, -349073, -501872, -651441,
-    -797481, -939705, -1077833, -1211601, -1340755, -1465053, -1584269, -1698189,
-    -1806611, -1909349, -2006230, -2097097, -2181812, -2260246, -2332289, -2397848,
-    -2456843, -2509213, -2554908, -2593896, -2626161, -2651698, -2670523, -2682660,
-    -2688150, -2687049, -2679427, -2665369, -2644970, -2618339, -2585595, -2546868,
-    -2502297, -2452032, -2396234, -2335067, -2268706, -2197331, -2121127, -2040286,
-    -1955005, -1865487, -1771936, -1674563, -1573582, -1469210, -1361669, -1251183,
-    -1137978, -1022284, -904331, -784352, -662581, -539253, -414602, -288864,
-    -162273, -35062, 92537, 220293, 347972, 475342, 602172, 728230,
-    853289, 977121, 1099500, 1220205, 1339015, 1455715, 1570094, 1681945,
-    1791068, 1897266, 2000350, 2100138, 2196454, 2289131, 2378009, 2462939,
-    2543777, 2620387, 2692641, 2760421, 2823617, 2882128, 2935862, 2984736,
-    3028677, 3067621, 3101514, 3130312, 3153980, 3172494, 3185838, 3194007,
-    3197005, 3194845, 3187547, 3175141, 3157666, 3135167, 3107700, 3075330,
-    3038128, 2996175, 2949557, 2898370, 2842715, 2782701, 2718441, 2650056,
-    2577672, 2501421, 2421440, 2337872, 2250865, 2160572, 2067148, 1970754,
-    1871553, 1769712, 1665400, 1558790, 1450055, 1339372, 1226917, 1112873,
-    997419, 880740, 763019, 644440, 525189, 405451, 285413, 165260,
-    45180, -74641, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0,
+enum class EventType : std::uint8_t {
+    NONE = 0,
+    NOTE_ON,
+    NOTE_OFF,
+    CC,
+    KNOB,
+    BUTTON_DOWN,
+    BUTTON_UP,
+    ENCODER_INCREMENT,
 };
 
-std::uint32_t phase_acc = 0;
-constexpr std::uint32_t phase_inc = (440 * SINE_TABLE_SIZE) / AUDIO_SAMPLE_RATE * 65536;
+struct Event {
+    EventType type = EventType::NONE;
+    std::uint8_t channel = 0;
+    std::uint8_t param = 0;    // note number or CC number or knob index
+    std::uint8_t value = 0;    // velocity or CC value
+};
+
+// Lock-free SPSC ring buffer for events (ISR/callback → audio task)
+struct EventQueue {
+    static constexpr std::uint32_t CAPACITY = 64;
+    Event events[CAPACITY] = {};
+    std::atomic<std::uint32_t> head{0};
+    std::atomic<std::uint32_t> tail{0};
+
+    bool push(const Event& e) {
+        auto h = head.load(std::memory_order_relaxed);
+        auto next = (h + 1) % CAPACITY;
+        if (next == tail.load(std::memory_order_acquire)) return false;  // full
+        events[h] = e;
+        head.store(next, std::memory_order_release);
+        return true;
+    }
+
+    bool pop(Event& e) {
+        auto t = tail.load(std::memory_order_relaxed);
+        if (t == head.load(std::memory_order_acquire)) return false;  // empty
+        e = events[t];
+        tail.store((t + 1) % CAPACITY, std::memory_order_release);
+        return true;
+    }
+};
+
+EventQueue midi_event_queue;
+
+// ============================================================================
+// Minimal Polyphonic Synth (8 voices, saw oscillator)
+// ============================================================================
+
+struct Voice {
+    std::uint32_t phase = 0;
+    std::uint32_t phase_inc = 0;
+    std::int32_t amplitude = 0;  // 0 = off, 24-bit scale
+    std::uint8_t note = 0;
+    bool active = false;
+
+    // Simple AR envelope state
+    std::int32_t env_level = 0;     // current level (24-bit)
+    std::int32_t env_target = 0;    // target level
+    std::int32_t env_rate = 0;      // increment per sample (positive=attack, negative=release)
+};
+
+constexpr int NUM_VOICES = 8;
+Voice voices[NUM_VOICES];
+
+// MIDI note → phase increment (for 48kHz, 32-bit phase accumulator)
+// phase_inc = (freq * 2^32) / 48000
+constexpr std::uint32_t midi_note_to_phase_inc(std::uint8_t note) {
+    // A4 (69) = 440 Hz → phase_inc = 440 * 4294967296 / 48000 = 39370534
+    // Each semitone: multiply by 2^(1/12) ≈ 1.05946
+    // Pre-compute using integer approximation
+    constexpr std::uint32_t a4_inc = 39370534U;
+    if (note == 69) return a4_inc;
+    // Use lookup or compute: inc = a4_inc * 2^((note-69)/12)
+    // Simple shift-based approximation for real-time:
+    // We'll use a table for the 12 semitones within an octave
+    constexpr std::uint32_t semitone_ratio[12] = {
+        // Ratios * 65536 for notes 0..11 relative to C
+        // C=65536, C#=69433, D=73562, D#=77936, E=82570, F=87480,
+        // F#=92682, G=98193, G#=104032, A=110218, A#=116772, B=123715
+        65536, 69433, 73562, 77936, 82570, 87480,
+        92682, 98193, 104032, 110218, 116772, 123715,
+    };
+    // C0 = note 12, A4 = note 69
+    // C in octave: note % 12, octave = note / 12
+    int semitone = note % 12;
+    int octave = note / 12;
+    // Base: C0 phase_inc = a4_inc / 2^(69/12 - 0) ... too complex
+    // Simpler: A in octave 'oct' = a4_inc * 2^(oct - 5) (A4 is octave 5 in MIDI note/12 scheme, 69/12=5)
+    // note 69 = octave 5, semitone 9 (A)
+    // For any note: inc = (a4_inc * semitone_ratio[semitone]) / semitone_ratio[9]
+    // Then shift by (octave - 5)
+    std::uint64_t inc = static_cast<std::uint64_t>(a4_inc) * semitone_ratio[semitone] / semitone_ratio[9];
+    int shift = octave - 5;
+    if (shift > 0) inc <<= shift;
+    else if (shift < 0) inc >>= (-shift);
+    return static_cast<std::uint32_t>(inc);
+}
+
+// Synth parameters (controlled by knobs)
+volatile float synth_volume = 0.5f;     // knob1: master volume
+
+// MIDI callback — called from USB poll context
+void on_midi_message(std::uint8_t /*cable*/, const std::uint8_t* data, std::uint8_t len) {
+    if (len < 2) return;
+    std::uint8_t status = data[0] & 0xF0;
+    std::uint8_t ch = data[0] & 0x0F;
+
+    Event ev;
+    ev.channel = ch;
+
+    if (status == 0x90 && len >= 3 && data[2] > 0) {
+        ev.type = EventType::NOTE_ON;
+        ev.param = data[1];
+        ev.value = data[2];
+        midi_event_queue.push(ev);
+    } else if (status == 0x80 || (status == 0x90 && len >= 3 && data[2] == 0)) {
+        ev.type = EventType::NOTE_OFF;
+        ev.param = data[1];
+        ev.value = 0;
+        midi_event_queue.push(ev);
+    } else if (status == 0xB0 && len >= 3) {
+        ev.type = EventType::CC;
+        ev.param = data[1];
+        ev.value = data[2];
+        midi_event_queue.push(ev);
+    }
+}
+
+// Process MIDI events in audio task (voice allocation)
+void process_midi_events() {
+    Event ev;
+    while (midi_event_queue.pop(ev)) {
+        if (ev.type == EventType::NOTE_ON) {
+            // Find free voice or steal oldest
+            Voice* target = nullptr;
+            for (auto& v : voices) {
+                if (!v.active) { target = &v; break; }
+            }
+            if (target == nullptr) target = &voices[0];  // simple steal
+
+            target->note = ev.param;
+            target->phase = 0;
+            target->phase_inc = midi_note_to_phase_inc(ev.param);
+            target->amplitude = static_cast<std::int32_t>(ev.value) << 16;  // velocity → 24-bit
+            target->active = true;
+            target->env_level = 0;
+            target->env_target = target->amplitude;
+            target->env_rate = target->amplitude / 48;  // ~1ms attack at 48kHz
+        } else if (ev.type == EventType::NOTE_OFF) {
+            for (auto& v : voices) {
+                if (v.active && v.note == ev.param) {
+                    v.env_target = 0;
+                    v.env_rate = -(v.env_level / 480);  // ~10ms release
+                    if (v.env_rate == 0) v.env_rate = -1;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+// Render synth voices into buffer (interleaved stereo, 24-bit in 32-bit)
+void render_synth(std::int32_t* out, std::uint32_t frames) {
+    // Clear buffer
+    for (std::uint32_t i = 0; i < frames * 2; ++i) {
+        out[i] = 0;
+    }
+
+    float vol = synth_volume;
+
+    for (auto& v : voices) {
+        if (!v.active) continue;
+
+        for (std::uint32_t i = 0; i < frames; ++i) {
+            // Update envelope
+            if (v.env_rate > 0 && v.env_level < v.env_target) {
+                v.env_level += v.env_rate;
+                if (v.env_level > v.env_target) v.env_level = v.env_target;
+            } else if (v.env_rate < 0) {
+                v.env_level += v.env_rate;
+                if (v.env_level <= 0) {
+                    v.env_level = 0;
+                    v.active = false;
+                    break;
+                }
+            }
+
+            // Saw wave: phase is 0..2^32, map to -2^23..+2^23
+            std::int32_t saw = static_cast<std::int32_t>(v.phase >> 8) - (1 << 23);
+
+            // Apply envelope and volume
+            std::int32_t sample = static_cast<std::int32_t>(
+                (static_cast<std::int64_t>(saw) * v.env_level >> 24) * static_cast<std::int64_t>(vol * 256) >> 8
+            );
+
+            out[i * 2] += sample;
+            out[i * 2 + 1] += sample;
+            v.phase += v.phase_inc;
+        }
+    }
+}
 
 // ============================================================================
 // Task entry functions
 // ============================================================================
 
-/// Audio task: waits for DMA notification, bridges USB Audio ↔ SAI DMA
-void audio_task_entry(void*) {
+/// Audio task: waits for DMA notification, bridges USB Audio ↔ SAI DMA + synth
+void audio_task_entry(void* /*arg*/) {
     while (true) {
         while (!(task_notifications[TASK_AUDIO].load(std::memory_order_acquire) & NOTIFY_AUDIO_READY)) {
             asm volatile("wfe");
         }
         task_notifications[TASK_AUDIO].fetch_and(~NOTIFY_AUDIO_READY, std::memory_order_release);
 
+        // Process pending MIDI events into voice state
+        process_midi_events();
+
         auto* out = const_cast<std::int32_t*>(pending_tx);
         auto* in = const_cast<std::int32_t*>(pending_rx);
 
-        if (out) {
+        if (out != nullptr) {
             // USB Audio OUT → SAI TX (DAC): read from USB host ringbuffer
             auto frames = usb_audio.read_audio(out, AUDIO_BLOCK_SIZE);
             if (frames == 0) {
-                // No USB audio: fallback to sine wave test signal
-                for (std::uint32_t i = 0; i < AUDIO_BLOCK_SIZE; ++i) {
-                    auto idx = (phase_acc >> 16) % SINE_TABLE_SIZE;
-                    std::int32_t sample = sine_table[idx];
-                    out[i * 2] = sample;
-                    out[i * 2 + 1] = sample;
-                    phase_acc += phase_inc;
+                // No USB audio playback: use synth output or passthrough
+                bool has_active_voice = false;
+                for (const auto& v : voices) {
+                    if (v.active) { has_active_voice = true; break; }
+                }
+
+                if (has_active_voice) {
+                    // Render MIDI synth
+                    render_synth(out, AUDIO_BLOCK_SIZE);
+                } else if (in != nullptr) {
+                    // Passthrough: copy ADC input → DAC output
+                    for (std::uint32_t i = 0; i < AUDIO_BLOCK_SIZE * 2; ++i) {
+                        out[i] = in[i];
+                    }
+                } else {
+                    // Silence
+                    for (std::uint32_t i = 0; i < AUDIO_BLOCK_SIZE * 2; ++i) {
+                        out[i] = 0;
+                    }
                 }
             }
         }
 
-        if (in) {
+        if (in != nullptr) {
             // SAI RX (ADC) → USB Audio IN: write to USB host ringbuffer
             usb_audio.write_audio_in(in, AUDIO_BLOCK_SIZE);
         }
@@ -220,8 +400,8 @@ void system_task_entry(void*) {
     }
 }
 
-/// Control task: HID polling + USB polling (user application task)
-void control_task_entry(void*) {
+/// Control task: HID polling + USB polling + knob→synth parameter mapping
+void control_task_entry(void* /*arg*/) {
     mm::DirectTransportT<> transport;
     constexpr float hid_rate = 1000.0f;  // ~1 kHz update rate
     std::uint32_t loop_counter = 0;
@@ -230,18 +410,28 @@ void control_task_entry(void*) {
         usb_device.poll();
 
         // Update digital controls + LED PWM at ~1 kHz
-        // (rough timing via loop counter — will be replaced with SysTick)
         if (++loop_counter >= 100) {
             loop_counter = 0;
             pod_hid.update_controls(transport, hid_rate);
 
-            // Knob-driven LED demo: knob1 → LED1 red, knob2 → LED2 blue
-            pod_hid.led1.set(pod_hid.knobs.value(0), 0.0f, 0.0f);
+            // Knob1 → synth master volume
+            synth_volume = pod_hid.knobs.value(0);
+            // Knob2 → LED2 blue (visual feedback)
+            pod_hid.led1.set(synth_volume, 0.0f, 0.0f);
             pod_hid.led2.set(0.0f, 0.0f, pod_hid.knobs.value(1));
 
             // Encoder click → toggle Seed board LED
             if (pod_hid.encoder.click_just_pressed()) {
                 umi::daisy::toggle_led();
+            }
+
+            // Push HID events to event queue
+            if (pod_hid.encoder.click_just_pressed()) {
+                midi_event_queue.push({EventType::BUTTON_DOWN, 0, 0, 127});
+            }
+            if (pod_hid.encoder.increment() != 0) {
+                midi_event_queue.push({EventType::ENCODER_INCREMENT, 0, 0,
+                    static_cast<std::uint8_t>(pod_hid.encoder.increment() > 0 ? 1 : 0xFF)});
             }
         }
 
@@ -383,6 +573,7 @@ int main() {
     // USB MIDI
     umi::daisy::init_usb();
     umiusb::configure_hs_internal_phy();
+    usb_audio.set_midi_callback(on_midi_message);
     usb_device.set_strings(usb_strings);
     usb_device.init();
     usb_hal.connect();
