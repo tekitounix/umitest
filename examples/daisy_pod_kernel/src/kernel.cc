@@ -447,7 +447,7 @@ void audio_task_entry(void*) {
             auto addr = reinterpret_cast<std::uintptr_t>(out);
             auto end = addr + (AUDIO_BLOCK_SIZE * 2) * sizeof(std::int32_t);
             for (; addr < end; addr += 32) {
-                *umi::cm7::scb::DCCMVAC = static_cast<std::uint32_t>(addr);
+                umi::cm7::detail::reg(umi::cm7::scb::DCCMVAC_ADDR) = static_cast<std::uint32_t>(addr);
             }
             __asm__ volatile("dsb sy" ::: "memory");
         }

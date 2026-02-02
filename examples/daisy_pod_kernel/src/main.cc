@@ -85,7 +85,7 @@ void DMA1_Stream0_IRQHandler() {
             auto addr = reinterpret_cast<std::uintptr_t>(rx);
             auto end = addr + (AUDIO_BUFFER_SIZE / 2) * sizeof(std::int32_t);
             for (; addr < end; addr += 32) {
-                *umi::cm7::scb::DCIMVAC = static_cast<std::uint32_t>(addr);
+                umi::cm7::detail::reg(umi::cm7::scb::DCIMVAC_ADDR) = static_cast<std::uint32_t>(addr);
             }
             __asm__ volatile("dsb sy" ::: "memory");
         }
@@ -120,6 +120,7 @@ extern volatile std::uint32_t d2_dbg[16];
 
 extern "C" {
 void HardFault_Handler() {
+#if UMI_DEBUG
     uint32_t* sp;
     __asm__ volatile("tst lr, #4\n"
                      "ite eq\n"
@@ -127,13 +128,14 @@ void HardFault_Handler() {
                      "mrsne %0, psp\n"
                      : "=r"(sp));
     DBG(0, 0xDEAD0001);
-    DBG(1, sp[5]);
-    DBG(2, sp[6]);
-    DBG(3, sp[7]);
-    DBG(4, *reinterpret_cast<volatile uint32_t*>(0xE000ED28));
-    DBG(5, *reinterpret_cast<volatile uint32_t*>(0xE000ED38));
+    DBG(1, sp[5]);  // LR
+    DBG(2, sp[6]);  // PC
+    DBG(3, sp[7]);  // xPSR
+    DBG(4, *reinterpret_cast<volatile uint32_t*>(0xE000ED28));  // CFSR
+    DBG(5, *reinterpret_cast<volatile uint32_t*>(0xE000ED38));  // MMFAR
     DBG(6, reinterpret_cast<uint32_t>(sp));
-    DBG(7, sp[0]);
+    DBG(7, sp[0]);  // R0
+#endif
     umi::daisy::set_led(true);
     while (true) {}
 }
@@ -161,6 +163,10 @@ int main() {
     // Initialize clocks
     umi::daisy::init_clocks();
     umi::daisy::init_pll3();
+
+    // SDMMC clock source = PLL1Q (D1CCIPR.SDMMCSEL bit 16 = 0)
+    umi::cm7::detail::reg(0x5802'4400 + 0x4C) &= ~(1U << 16);
+
     umi::daisy::init_led();
 
     // External memory
@@ -235,33 +241,11 @@ extern "C" void PendSV_Handler();
 extern "C" void SVC_Handler();
 extern "C" void SysTick_Handler();
 
-extern "C" [[noreturn]] void Reset_Handler() {
-    umi::cm7::enable_fpu();
-    asm volatile("dsb\nisb" ::: "memory");
-
-    // AXI SRAM workaround (STM32H7 errata for Rev Y silicon)
-    if ((*reinterpret_cast<volatile std::uint32_t*>(0x5C001000) & 0xFFFF0000U) < 0x20000000U) {
-        *reinterpret_cast<volatile std::uint32_t*>(0x51008108) = 0x00000001U;
-    }
-
-    umi::cm7::configure_mpu();
-    umi::cm7::enable_icache();
-
-    std::uint32_t* src = &_sidata;
-    std::uint32_t* dst = &_sdata;
-    while (dst < &_edata) {
-        *dst++ = *src++;
-    }
-
-    dst = &_sbss;
-    while (dst < &_ebss) {
-        *dst++ = 0;
-    }
-
-    dst = &_sdtcm_bss;
-    while (dst < &_edtcm_bss) {
-        *dst++ = 0;
-    }
+// Post-.data initialization — separated to prevent compiler from
+// reordering D-Cache enable before .data/.bss copy
+namespace {
+void post_data_init() {
+    umi::cm7::enable_dcache();
 
     umi::irq::init();
 
@@ -293,5 +277,42 @@ extern "C" [[noreturn]] void Reset_Handler() {
     }
 
     main();
+}
+} // anonymous namespace
+
+extern "C" [[noreturn]] void Reset_Handler() {
+    umi::cm7::enable_fpu();
+    asm volatile("dsb\nisb" ::: "memory");
+
+    // AXI SRAM workaround (STM32H7 errata for Rev Y silicon)
+    if ((*reinterpret_cast<volatile std::uint32_t*>(0x5C001000) & 0xFFFF0000U) < 0x20000000U) {
+        *reinterpret_cast<volatile std::uint32_t*>(0x51008108) = 0x00000001U;
+    }
+
+    umi::cm7::configure_mpu();
+    umi::cm7::enable_icache();
+
+    // .data copy (FLASH → SRAM)
+    std::uint32_t* src = &_sidata;
+    std::uint32_t* dst = &_sdata;
+    while (dst < &_edata) {
+        *dst++ = *src++;
+    }
+
+    // .bss zero
+    dst = &_sbss;
+    while (dst < &_ebss) {
+        *dst++ = 0;
+    }
+
+    // DTCM .bss zero
+    dst = &_sdtcm_bss;
+    while (dst < &_edtcm_bss) {
+        *dst++ = 0;
+    }
+
+    // D-Cache + IRQ + main — in separate noinline function
+    // to guarantee ordering after .data/.bss initialization
+    post_data_init();
     while (true) {}
 }
