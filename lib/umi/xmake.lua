@@ -10,6 +10,9 @@
 -- Get the lib directory (parent of this package)
 local lib_dir = path.directory(os.scriptdir())
 
+-- Include umiport (hardware abstraction layer)
+includes(path.join(lib_dir, "umiport"))
+
 -- =====================================================================
 -- UMI Shell Library (platform-independent shell primitives)
 -- =====================================================================
@@ -45,7 +48,9 @@ target("umi.wasm")
     set_kind("headeronly")
     set_group("umi")
     add_deps("umi.core")
+    add_deps("umi.port.wasm")
 
+    -- Legacy path (kept during migration, to be removed)
     add_includedirs(path.join(lib_dir, "umios/backend/wasm"), {public = true})
 target_end()
 
@@ -57,7 +62,9 @@ target("umi.embedded")
     set_kind("headeronly")
     set_group("umi")
     add_deps("umi.core")
+    add_deps("umi.port.embedded.stm32f4_disco")
 
+    -- Legacy paths (kept during migration, to be removed)
     add_includedirs(path.join(lib_dir, "umios/backend/cm"), {public = true})
     add_includedirs(path.join(lib_dir, "bsp/stm32f4-disco"), {public = true})
     add_includedirs(path.join(lib_dir, "hal/stm32"), {public = true})
