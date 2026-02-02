@@ -373,28 +373,36 @@ mmio Device/Register 定義を使用し、DirectTransport でアクセス。
 
 ### HAL 実装 (mmio形式)
 
-- [ ] `lib/umiport/mcu/stm32h7/mcu/rcc.hh` — mmio Register定義 + RCC操作
+- [x] `lib/umiport/mcu/stm32h7/mcu/rcc.hh` — mmio Register定義 + RCC操作
     - HSE 16MHz → PLL1 → 480MHz (boost mode)、PWR VOS0
-- [ ] `lib/umiport/mcu/stm32h7/mcu/pwr.hh` — 電源設定、SMPS
-- [ ] `lib/umiport/mcu/stm32h7/mcu/gpio.hh` — mmio Register定義 + GPIO操作
+    - HSI48 は CR bit12/13（CRRCRではない。CRRCR offset=0x08 は読み取り専用キャリブレーション）
+- [x] `lib/umiport/mcu/stm32h7/mcu/pwr.hh` — 電源設定（VOS1→VOS0 boost）
+- [x] `lib/umiport/mcu/stm32h7/mcu/gpio.hh` — mmio Register定義 + GPIO操作
+- [x] `lib/umiport/mcu/stm32h7/mcu/flash.hh` — Flash wait state設定
 
 ### PAL 実装
 
-- [ ] `lib/umiport/arch/cm7/arch/cache.hh` — D-Cache / I-Cache 有効化
-- [ ] `lib/umiport/arch/cm7/arch/fpu.hh` — 倍精度FPU
-- [ ] `lib/umiport/arch/cm7/arch/context.hh` — コンテキストスイッチ
-- [ ] `lib/umiport/arch/cm7/arch/traits.hh` — M7特性定数
+- [x] `lib/umiport/arch/cm7/arch/cache.hh` — D-Cache / I-Cache 有効化
+- [x] `lib/umiport/arch/cm7/arch/fpu.hh` — FPU有効化（CPACR）
+- [x] `lib/umiport/arch/cm7/arch/context.hh` — コンテキストスイッチ（init_task_stack, EXC_RETURN）
+- [x] `lib/umiport/arch/cm7/arch/handlers.hh` — SVC_Handler, PendSV_Handler, start_first_task
+- [x] `lib/umiport/arch/cm7/arch/switch.hh` — request_context_switch (PendSV trigger)
 
 ### Driver 実装
 
-- [ ] `lib/umiport/board/daisy_seed/board/bsp.hh` — Seed LED (PC7)、基本クロック定数
-- [ ] `lib/umiport/board/daisy_seed/board/mcu_init.cc` — `init_clocks()`, `init_gpio()` 最小実装
+- [x] `lib/umiport/board/daisy_seed/board/bsp.hh` — Seed LED (PC7)、基本クロック定数
+- [x] `lib/umiport/board/daisy_seed/board/mcu_init.hh` — `init_clocks()`, `init_led()`, `toggle_led()`
 
 ### カーネル
 
-- [ ] `examples/daisy_pod_kernel/kernel.ld` — リンカスクリプト（内蔵Flash実行）
-- [ ] `examples/daisy_pod_kernel/src/main.cc` — Reset_Handler、最小エントリ
-- [ ] xmake.lua に daisy_pod_kernel ターゲット追加
+- [x] `examples/daisy_pod_kernel/kernel.ld` — リンカスクリプト（内蔵Flash実行、DTCM BSS対応）
+- [x] `examples/daisy_pod_kernel/src/main.cc` — Reset_Handler、4タスクRTOS
+- [x] xmake.lua に daisy_pod_kernel ターゲット追加
+
+### 実装メモ
+
+- g_vector_table を DTCM に配置（D-Cache coherency問題を回避）
+- Reset_Handler で DTCM BSS をゼロ初期化（VectorTableRAM::initialized_ が未初期化だと init() がスキップされる）
 
 ### テスト・検証
 
@@ -404,10 +412,9 @@ mmio Device/Register 定義を使用し、DirectTransport でアクセス。
 - [ ] `xmake test` パス
 
 **L3 (実機 Daisy Seed):**
-- [ ] `xmake build daisy_pod_kernel` パス
-- [ ] `xmake flash-daisy-pod-kernel` → LED (PC7) 点滅
-- [ ] SysTick 動作確認
-- [ ] デバッガ (pyOCD) 接続確認
+- [x] `xmake build daisy_pod_kernel` パス
+- [x] pyOCD flash → LED (PC7) 点滅確認
+- [x] デバッガ (pyOCD + GDB) 接続確認、control_task_entry 到達確認
 
 ---
 
@@ -419,21 +426,20 @@ SAI1 経由でオーディオ出力。外部コーデックは device/ レイヤ
 
 ### HAL 実装 (mmio形式)
 
-- [ ] `lib/umiport/mcu/stm32h7/mcu/sai.hh` — SAI1 Block A: Master TX
-- [ ] `lib/umiport/mcu/stm32h7/mcu/dma.hh` — DMA + DMAMUX、Circular mode
-- [ ] `lib/umiport/mcu/stm32h7/mcu/i2c.hh` — I2Cドライバ（I2cMaster concept実装）
+- [x] `lib/umiport/mcu/stm32h7/mcu/sai.hh` — SAI1 Block A/B: Master TX + Slave RX
+- [x] `lib/umiport/mcu/stm32h7/mcu/dma.hh` — DMA + DMAMUX、Circular mode
+- [x] `lib/umiport/mcu/stm32h7/mcu/i2c.hh` — I2Cドライバ（ポーリング）
 
 ### Device 実装
 
-- [ ] `lib/umiport/device/ak4556/ak4556.hh` — AK4556 リセットピン制御（レジスタなし）
-- [ ] `lib/umiport/device/wm8731/wm8731_regs.hh` — mmio Register定義 (I2CTransportTag)
-- [ ] `lib/umiport/device/wm8731/wm8731.hh` — AudioCodec concept実装
+- [x] `lib/umiport/device/ak4556/ak4556.hh` — AK4556 リセットピン制御（レジスタなし）
+- [x] `lib/umiport/device/wm8731/wm8731.hh` — WM8731 I2C制御
+- [x] `lib/umiport/device/pcm3060/pcm3060.hh` — PCM3060 I2C制御
 
 ### Driver 実装
 
-- [ ] `lib/umiport/board/daisy_seed/board/audio.hh` — SAI1構成 + コーデック結線
-- [ ] `lib/umiport/board/daisy_seed/board/audio_driver.hh` — AudioDriver Concept実装
-- [ ] MPU設定: SRAM_D2 non-cacheable（DMAバッファ用）
+- [x] `lib/umiport/board/daisy_seed/board/audio.hh` — SAI1構成 + コーデック自動検出 + DMA
+- [x] DMAバッファを `.dma_buffer` セクション (SRAM_D1) に配置
 
 ### テスト・検証
 
@@ -443,7 +449,7 @@ SAI1 経由でオーディオ出力。外部コーデックは device/ レイヤ
 - [ ] `xmake test` パス
 
 **L3 (実機 Daisy Seed):**
-- [ ] ヘッドフォンからサイン波出力
+- [ ] ヘッドフォンからサイン波出力確認（DMA動作中、要検証）
 
 ---
 
@@ -451,11 +457,13 @@ SAI1 経由でオーディオ出力。外部コーデックは device/ レイヤ
 
 > 詳細: [04](04-hw-separation.md)
 
-- [ ] SAI1 Block B (Slave RX) 追加 — 全二重
-- [ ] WM8731 I2C 制御（Rev5 対応）
-- [ ] コーデック自動検出（AK4556 / WM8731）
-- [ ] RTOS 起動、syscall、タスク管理
+- [x] SAI1 Block B (Slave RX) 追加 — 全二重構成済み（audio.hh）
+- [x] WM8731 I2C 制御
+- [x] コーデック自動検出（AK4556 / WM8731 / PCM3060、GPIO ADC読み取り）
+- [x] RTOS 起動（4タスク: Audio/System/Control/Idle）
+- [x] PendSV/SVC コンテキストスイッチ
 - [ ] AudioContext マッピング
+- [ ] syscall
 
 ### テスト・検証
 
@@ -463,15 +471,18 @@ SAI1 経由でオーディオ出力。外部コーデックは device/ レイヤ
 - [ ] `xmake test` パス
 
 **L3 (実機 Daisy Seed):**
+- [x] RTOS起動、control_task_entry到達確認（pyOCD/GDB）
 - [ ] パススルー（入力→出力）動作
 
 ---
 
 ## Phase 4: USB + Pod HID
 
-- [ ] `lib/umiport/mcu/stm32h7/mcu/usb_otg.hh` — USB OTG HS (FS動作、内蔵PHY)、mmio形式
+- [x] `lib/umiport/board/daisy_seed/board/usb.hh` — USB OTG HS GPIO/クロック初期化（PB14/PB15 AF12, HSI48）
+- [x] USB MIDI（umiusb Stm32HsHal + UsbMidiClass）
+    - H7 VBUS sensing修正: `GOTGCTL BVALOEN/BVALOVAL` + `GCCFG &= ~VBDEN`（F4のNOVBUSSENSとは異なる）
 - [ ] `lib/umiport/mcu/stm32h7/mcu/adc.hh` — ADC1 (ノブ用)
-- [ ] USB Audio / MIDI（umiusb に H7 用 Hal 実装を注入）
+- [ ] USB Audio（umiusb AudioInterface + CompositeClass）
 - [ ] Pod 固有 HID — ノブ、ボタン、エンコーダ、RGB LED
 - [ ] HID → UMI Event 変換
 - [ ] `lib/umiport/board/daisy_pod/board/bsp.hh` — daisy_seedを継承 + Pod固有HID
@@ -482,20 +493,25 @@ SAI1 経由でオーディオ出力。外部コーデックは device/ レイヤ
 - [ ] `xmake test` パス
 
 **L3 (実機 Daisy Pod):**
+- [x] USB MIDI デバイス認識確認（macOS: "Daisy Pod MIDI", VID:0x1209, PID:0x000A）
 - [ ] USB MIDI 受信→シンセ発音、ノブでパラメータ変更
 
 ---
 
 ## Phase 5: QSPI + SDRAM（オプション）
 
-- [ ] `lib/umiport/mcu/stm32h7/mcu/qspi.hh` — QUADSPI メモリマップドモード
-- [ ] `lib/umiport/mcu/stm32h7/mcu/fmc.hh` — FMC SDRAM初期化
+- [x] `lib/umiport/mcu/stm32h7/mcu/qspi.hh` — QUADSPI メモリマップドモード
+- [x] `lib/umiport/mcu/stm32h7/mcu/fmc.hh` — FMC SDRAM初期化
+- [x] `lib/umiport/board/daisy_seed/board/sdram.hh` — IS42S16160J SDRAM初期化
+- [x] `lib/umiport/board/daisy_seed/board/qspi.hh` — IS25LP064A QSPI初期化
 
 ### テスト・検証
 
 **L3 (実機 Daisy Seed):**
-- [ ] QSPI XIP 実行
-- [ ] SDRAM 読み書き
+- [x] SDRAM初期化通過（ハング無し）
+- [x] QSPI初期化通過（APMS修正済み）
+- [ ] SDRAM 読み書き検証
+- [ ] QSPI XIP 実行検証
 
 ---
 
