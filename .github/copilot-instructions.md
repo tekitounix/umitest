@@ -20,6 +20,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | **MUST ask before deleting files**           | Confirm if commit is needed; use `trash` not `rm`                                                                                                |
 | **Assume NOT a release**                     | Unless explicitly instructed, this is not a release commit                                                                                       |
 | **Parallel work awareness**                  | Other work may be ongoing — commit carefully with branch/tag context                                                                             |
+| **MUST automate test/debug**                 | Tests and debugging must be fully automated via commands or scripts. Never ask the user to perform manual steps.                                 |
 
 ### Planning Phase Checklist
 
@@ -33,17 +34,18 @@ When planning (before any implementation):
 
 ### Code Style Rules
 
-| Rule                                      | Example                                                                    |
-| ----------------------------------------- | -------------------------------------------------------------------------- |
-| **Standard**                              | C++23                                                                      |
-| **Formatter**                             | clang-format (LLVM base, 4-space indent, 120 char line limit)              |
-| **Functions/methods/variables/constexpr** | `lower_case` ✓ — `camelCase` ✗                                             |
-| **Types/classes/concepts**                | `CamelCase` ✓ — `lower_case` ✗                                             |
-| **Enum values**                           | `UPPER_CASE`                                                               |
-| **Namespaces**                            | `lower_case`                                                               |
-| **Member variables**                      | No prefix/suffix. NO `m_`, NO `_` suffix. Use `this->` if needed           |
-| **Pointers/references**                   | Left-aligned: `int* ptr` ✓ — `int *ptr` ✗                                  |
-| **Error handling**                        | Prefer `Result<T>` or error codes. Avoid exceptions in kernel/audio paths. |
+| Rule                                      | Example                                                                      |
+| ----------------------------------------- | ---------------------------------------------------------------------------- |
+| **Standard**                              | C++23                                                                        |
+| **Formatter**                             | clang-format (LLVM base, 4-space indent, 120 char line limit)                |
+| **Functions/methods/variables/constexpr** | `lower_case` ✓ — `camelCase` ✗                                               |
+| **Types/classes/concepts**                | `CamelCase` ✓ — `lower_case` ✗                                               |
+| **Enum values**                           | `UPPER_CASE`                                                                 |
+| **Namespaces**                            | `lower_case`                                                                 |
+| **Member variables**                      | No prefix/suffix. NO `m_`, NO `_` suffix. Use `this->` if needed             |
+| **Pointers/references**                   | Left-aligned: `int* ptr` ✓ — `int *ptr` ✗                                    |
+| **Error handling**                        | Prefer `Result<T>` or error codes. Avoid exceptions in kernel/audio paths.   |
+| **constexpr**                             | `constexpr` only — do NOT add redundant `inline` (C++17以降は暗黙的にinline) |
 
 ### Real-time Safety (process() / audio callbacks)
 
@@ -254,12 +256,13 @@ xmake webhost-serve
 
 ## Key Documentation
 
-| Document                                 | Content                     |
-| ---------------------------------------- | --------------------------- |
-| `docs/refs/specs/ARCHITECTURE.md`        | High-level architecture     |
-| `docs/new/UMI_SYSTEM_ARCHITECTURE.md`    | STM32F4 detailed design     |
-| `docs/dev/CODING_STYLE.md`               | Detailed style guide        |
-| `docs/dev/DEBUG_GUIDE.md`                | Debugging (pyOCD, GDB, RTT) |
-| `docs/new/DESIGN_CONTEXT_API.md`         | AudioContext API design     |
-| `docs/refs/guides/TESTING.md`            | Test strategy               |
-| `docs/refs/reference/API_APPLICATION.md` | `process()` constraints     |
+| Document                                 | Content                       |
+| ---------------------------------------- | ----------------------------- |
+| `docs/refs/specs/ARCHITECTURE.md`        | High-level architecture       |
+| `docs/new/UMI_SYSTEM_ARCHITECTURE.md`    | STM32F4 detailed design       |
+| `lib/docs/CODING_STYLE.md`               | Detailed style guide          |
+| `lib/docs/LIBRARY_STRUCTURE.md`          | Library structure conventions |
+| `lib/docs/TESTING.md`                    | Test strategy                 |
+| `lib/docs/DEBUG_GUIDE.md`                | Debugging (pyOCD, GDB, RTT)   |
+| `docs/new/DESIGN_CONTEXT_API.md`         | AudioContext API design       |
+| `docs/refs/reference/API_APPLICATION.md` | `process()` constraints       |

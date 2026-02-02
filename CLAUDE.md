@@ -20,6 +20,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | **MUST ask before deleting files** | Confirm if commit is needed; use `trash` not `rm` |
 | **Assume NOT a release** | Unless explicitly instructed, this is not a release commit |
 | **Parallel work awareness** | Other work may be ongoing — commit carefully with branch/tag context |
+| **MUST automate test/debug** | Tests and debugging must be fully automated via commands or scripts. Never ask the user to perform manual steps. |
 
 ### Planning Phase Checklist
 
@@ -246,8 +247,9 @@ xmake webhost-serve
 |----------|---------|
 | `docs/refs/specs/ARCHITECTURE.md` | High-level architecture |
 | `docs/new/UMI_SYSTEM_ARCHITECTURE.md` | STM32F4 detailed design |
-| `docs/dev/CODING_STYLE.md` | Detailed style guide |
-| `docs/dev/DEBUG_GUIDE.md` | Debugging (pyOCD, GDB, RTT) |
+| `lib/docs/CODING_STYLE.md` | Detailed style guide |
+| `lib/docs/LIBRARY_STRUCTURE.md` | Library structure conventions |
+| `lib/docs/TESTING.md` | Test strategy |
+| `lib/docs/DEBUG_GUIDE.md` | Debugging (pyOCD, GDB, RTT) |
 | `docs/new/DESIGN_CONTEXT_API.md` | AudioContext API design |
-| `docs/refs/guides/TESTING.md` | Test strategy |
 | `docs/refs/reference/API_APPLICATION.md` | `process()` constraints |

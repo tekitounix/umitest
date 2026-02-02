@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstdio>
 #include <umidsp.hh>
+#include <synth/filter.hh>
 
 // ============================================================================
 // Test utilities

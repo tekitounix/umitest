@@ -296,6 +296,8 @@ bool operator==(const Event& other) const;
 | `bugprone-easily-swappable-parameters` | DSP/組込みでは同型引数が頻出（ADSR、座標等） |
 | `modernize-use-trailing-return-type` | 後置戻り値型を強制しない |
 | `readability-magic-numbers` | 組込みでは数値リテラルが頻出 |
+| `readability-uppercase-literal-suffix` | リテラルサフィックスの大文字強制は不要 |
+| `readability-identifier-length` | 組込み/DSPでは短い変数名が一般的 |
 
 ### エラー扱いの警告
 
@@ -313,12 +315,12 @@ bool operator==(const Event& other) const;
 
 ```yaml
 CompileFlags:
-  CompilationDatabase: .build/
   Add:
     - "--query-driver=/Applications/ArmGNUToolchain/.../arm-none-eabi-g++"
+    - "-std=c++23"
 ```
 
-xmake が生成する `compile_commands.json` を参照。`--query-driver` でARM GCCの組み込みヘッダパスを解決。
+xmake が `compile_commands.json` をプロジェクトルートに生成。`--query-driver` でARM GCCの組み込みヘッダパスを解決。
 
 ### ARM クロスコンパイル対応
 
@@ -362,6 +364,8 @@ Diagnostics:
       - bugprone-easily-swappable-parameters
       - modernize-use-trailing-return-type
       - readability-magic-numbers
+      - readability-uppercase-literal-suffix
+      - readability-identifier-length
     CheckOptions:
       readability-identifier-naming.FunctionCase: lower_case
       readability-identifier-naming.VariableCase: lower_case
@@ -386,31 +390,13 @@ find lib -name "*.cc" -o -name "*.hh" | xargs clang-format -i
 ### 静的解析実行
 
 ```bash
-# clang-tidy 実行
-clang-tidy src/main.cc -- -std=c++20
-
-# compile_commands.json がある場合
-clang-tidy -p .build src/main.cc
-```
-
-### VS Code 統合
-
-`.vscode/settings.json`:
-
-```json
-{
-    "editor.formatOnSave": true,
-    "C_Cpp.clang_format_path": "/usr/bin/clang-format",
-    "clangd.arguments": [
-        "--compile-commands-dir=.build",
-        "--clang-tidy"
-    ]
-}
+# clang-tidy 実行（プロジェクトルートの compile_commands.json を使用）
+clang-tidy -p . src/main.cc
 ```
 
 ---
 
 ## 関連ドキュメント
 
-- [API リファレンス](../reference/) - API ドキュメント群
-- [ARCHITECTURE.md](../specs/ARCHITECTURE.md) - アーキテクチャ概要
+- [LIBRARY_STRUCTURE.md](LIBRARY_STRUCTURE.md) - ライブラリ構造規約
+- [TESTING.md](TESTING.md) - テスト戦略

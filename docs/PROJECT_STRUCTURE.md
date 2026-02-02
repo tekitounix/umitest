@@ -487,11 +487,11 @@ docs/
 │
 ├── dev/                         # === 開発ガイド ===
 │   ├── CODING_STYLE.md          # コーディングスタイル詳細
-│   ├── DEBUG_GUIDE.md           # デバッグガイド（pyOCD, GDB, RTT）
+│   ├── DEBUG_GUIDE.md           # デバッグガイド（→ lib/docs/DEBUG_GUIDE.md に移動）
 │   ├── GUIDELINE.md             # 開発ガイドライン
 │   ├── TESTING.md               # テスト戦略
 │   ├── SIMULATION.md            # シミュレーション手順
-│   ├── LIBRARY_PACKAGING.md     # ライブラリパッケージング
+│   ├── LIBRARY_PACKAGING.md     # ライブラリパッケージング（→ lib/docs/LIBRARY_STRUCTURE.md に統合）
 │   └── UAC2_DUPLEX_INVESTIGATION.md # UAC2デュプレックス調査
 │
 ├── umi-kernel/                  # === カーネル設計 ===
