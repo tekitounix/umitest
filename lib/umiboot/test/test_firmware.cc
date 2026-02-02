@@ -1,27 +1,27 @@
 // SPDX-License-Identifier: MIT
 // umi_boot Firmware Validation Tests
 
-#include "test_framework.hh"
+#include <umitest.hh>
 #include <umiboot/firmware.hh>
 
 using namespace umiboot;
-using namespace umiboot::test;
+using namespace umitest;
 
 // =============================================================================
 // Firmware Header Tests
 // =============================================================================
 
-TEST(firmware_header_size) {
-    ASSERT_EQ(sizeof(FirmwareHeader), 128u);
-    TEST_PASS();
+bool test_firmware_header_size(TestContext& t) {
+    t.assert_eq(sizeof(FirmwareHeader), 128u);
+    return true;
 }
 
-TEST(firmware_magic) {
-    ASSERT_EQ(FIRMWARE_MAGIC, 0x554D4946u);  // "UMIF"
-    TEST_PASS();
+bool test_firmware_magic(TestContext& t) {
+    t.assert_eq(FIRMWARE_MAGIC, 0x554D4946u);  // "UMIF"
+    return true;
 }
 
-TEST(firmware_header_builder) {
+bool test_firmware_header_builder(TestContext& t) {
     auto header = FirmwareHeaderBuilder()
         .version(1, 2, 3)
         .build_number(100)
@@ -32,99 +32,99 @@ TEST(firmware_header_builder) {
         .board("STM32F411")
         .build();
 
-    ASSERT_EQ(header.magic, FIRMWARE_MAGIC);
-    ASSERT_EQ(header.header_version, FIRMWARE_HEADER_VERSION);
-    ASSERT_EQ(header.fw_version_major, 1u);
-    ASSERT_EQ(header.fw_version_minor, 2u);
-    ASSERT_EQ(header.fw_version_patch, 3u);
-    ASSERT_EQ(header.fw_build_number, 100u);
-    ASSERT_EQ(header.image_size, 1024u);
-    ASSERT_EQ(header.image_crc32, 0xDEADBEEFu);
-    ASSERT_EQ(header.load_address, 0x08000000u);
-    ASSERT_EQ(header.entry_point, 0x08000100u);
-    ASSERT_EQ(std::strcmp(reinterpret_cast<const char*>(header.target_board), "STM32F411"), 0);
-    TEST_PASS();
+    t.assert_eq(header.magic, FIRMWARE_MAGIC);
+    t.assert_eq(header.header_version, FIRMWARE_HEADER_VERSION);
+    t.assert_eq(header.fw_version_major, 1u);
+    t.assert_eq(header.fw_version_minor, 2u);
+    t.assert_eq(header.fw_version_patch, 3u);
+    t.assert_eq(header.fw_build_number, 100u);
+    t.assert_eq(header.image_size, 1024u);
+    t.assert_eq(header.image_crc32, 0xDEADBEEFu);
+    t.assert_eq(header.load_address, 0x08000000u);
+    t.assert_eq(header.entry_point, 0x08000100u);
+    t.assert_eq(std::strcmp(reinterpret_cast<const char*>(header.target_board), "STM32F411"), 0);
+    return true;
 }
 
 // =============================================================================
 // Version Utilities Tests
 // =============================================================================
 
-TEST(version_compare_equal) {
+bool test_version_compare_equal(TestContext& t) {
     auto result = compare_versions(1, 2, 3, 1, 2, 3);
-    ASSERT_EQ(result, VersionCompare::EQUAL);
-    TEST_PASS();
+    t.assert_eq(result, VersionCompare::EQUAL);
+    return true;
 }
 
-TEST(version_compare_newer_major) {
+bool test_version_compare_newer_major(TestContext& t) {
     auto result = compare_versions(2, 0, 0, 1, 9, 9);
-    ASSERT_EQ(result, VersionCompare::NEWER);
-    TEST_PASS();
+    t.assert_eq(result, VersionCompare::NEWER);
+    return true;
 }
 
-TEST(version_compare_newer_minor) {
+bool test_version_compare_newer_minor(TestContext& t) {
     auto result = compare_versions(1, 3, 0, 1, 2, 9);
-    ASSERT_EQ(result, VersionCompare::NEWER);
-    TEST_PASS();
+    t.assert_eq(result, VersionCompare::NEWER);
+    return true;
 }
 
-TEST(version_compare_newer_patch) {
+bool test_version_compare_newer_patch(TestContext& t) {
     auto result = compare_versions(1, 2, 4, 1, 2, 3);
-    ASSERT_EQ(result, VersionCompare::NEWER);
-    TEST_PASS();
+    t.assert_eq(result, VersionCompare::NEWER);
+    return true;
 }
 
-TEST(version_compare_older) {
+bool test_version_compare_older(TestContext& t) {
     auto result = compare_versions(1, 0, 0, 2, 0, 0);
-    ASSERT_EQ(result, VersionCompare::OLDER);
-    TEST_PASS();
+    t.assert_eq(result, VersionCompare::OLDER);
+    return true;
 }
 
-TEST(pack_version) {
+bool test_pack_version(TestContext& t) {
     uint32_t packed = pack_version(1, 2, 3);
-    ASSERT_EQ(packed, 0x01020300u);
-    TEST_PASS();
+    t.assert_eq(packed, 0x01020300u);
+    return true;
 }
 
-TEST(unpack_version) {
+bool test_unpack_version(TestContext& t) {
     uint32_t packed = 0x01020300;
-    ASSERT_EQ(version_major(packed), 1);
-    ASSERT_EQ(version_minor(packed), 2);
-    ASSERT_EQ(version_patch(packed), 3);
-    TEST_PASS();
+    t.assert_eq(version_major(packed), 1);
+    t.assert_eq(version_minor(packed), 2);
+    t.assert_eq(version_patch(packed), 3);
+    return true;
 }
 
 // =============================================================================
 // CRC-32 Tests
 // =============================================================================
 
-TEST(crc32_empty) {
+bool test_crc32_empty(TestContext& t) {
     uint8_t data[1] = {0};
     uint32_t result = crc32(data, 0);
-    ASSERT_EQ(result, 0x00000000u);
-    TEST_PASS();
+    t.assert_eq(result, 0x00000000u);
+    return true;
 }
 
-TEST(crc32_known_value) {
+bool test_crc32_known_value(TestContext& t) {
     // "123456789" -> 0xCBF43926 (IEEE 802.3)
     const uint8_t data[] = "123456789";
     uint32_t result = crc32(data, 9);
-    ASSERT_EQ(result, 0xCBF43926u);
-    TEST_PASS();
+    t.assert_eq(result, 0xCBF43926u);
+    return true;
 }
 
-TEST(crc32_single_byte) {
+bool test_crc32_single_byte(TestContext& t) {
     uint8_t data[] = {0x00};
     uint32_t result = crc32(data, 1);
-    ASSERT_EQ(result, 0xD202EF8Du);
-    TEST_PASS();
+    t.assert_eq(result, 0xD202EF8Du);
+    return true;
 }
 
 // =============================================================================
 // Firmware Validator Tests
 // =============================================================================
 
-TEST(validator_valid_header) {
+bool test_validator_valid_header(TestContext& t) {
     FirmwareValidator<> validator;
     validator.set_bootloader_version(1);
 
@@ -133,11 +133,11 @@ TEST(validator_valid_header) {
         .build();
 
     auto result = validator.validate_header(header);
-    ASSERT_EQ(result, ValidationResult::OK);
-    TEST_PASS();
+    t.assert_eq(result, ValidationResult::OK);
+    return true;
 }
 
-TEST(validator_invalid_magic) {
+bool test_validator_invalid_magic(TestContext& t) {
     FirmwareValidator<> validator;
 
     FirmwareHeader header{};
@@ -145,11 +145,11 @@ TEST(validator_invalid_magic) {
     header.header_version = FIRMWARE_HEADER_VERSION;
 
     auto result = validator.validate_header(header);
-    ASSERT_EQ(result, ValidationResult::INVALID_MAGIC);
-    TEST_PASS();
+    t.assert_eq(result, ValidationResult::INVALID_MAGIC);
+    return true;
 }
 
-TEST(validator_invalid_header_version) {
+bool test_validator_invalid_header_version(TestContext& t) {
     FirmwareValidator<> validator;
 
     FirmwareHeader header{};
@@ -157,11 +157,11 @@ TEST(validator_invalid_header_version) {
     header.header_version = 99;  // Wrong version
 
     auto result = validator.validate_header(header);
-    ASSERT_EQ(result, ValidationResult::INVALID_HEADER_VERSION);
-    TEST_PASS();
+    t.assert_eq(result, ValidationResult::INVALID_HEADER_VERSION);
+    return true;
 }
 
-TEST(validator_board_mismatch) {
+bool test_validator_board_mismatch(TestContext& t) {
     FirmwareValidator<> validator;
     validator.set_board_id("STM32F411");
 
@@ -171,11 +171,11 @@ TEST(validator_board_mismatch) {
         .build();
 
     auto result = validator.validate_header(header);
-    ASSERT_EQ(result, ValidationResult::BOARD_MISMATCH);
-    TEST_PASS();
+    t.assert_eq(result, ValidationResult::BOARD_MISMATCH);
+    return true;
 }
 
-TEST(validator_bootloader_too_old) {
+bool test_validator_bootloader_too_old(TestContext& t) {
     FirmwareValidator<> validator;
     validator.set_bootloader_version(1);
 
@@ -185,11 +185,11 @@ TEST(validator_bootloader_too_old) {
         .build();
 
     auto result = validator.validate_header(header);
-    ASSERT_EQ(result, ValidationResult::BOOTLOADER_TOO_OLD);
-    TEST_PASS();
+    t.assert_eq(result, ValidationResult::BOOTLOADER_TOO_OLD);
+    return true;
 }
 
-TEST(validator_rollback_check) {
+bool test_validator_rollback_check(TestContext& t) {
     FirmwareValidator<> validator;
     validator.set_rollback_version(5);
 
@@ -199,11 +199,11 @@ TEST(validator_rollback_check) {
         .build();
 
     auto result = validator.validate_header(header);
-    ASSERT_EQ(result, ValidationResult::VERSION_TOO_OLD);
-    TEST_PASS();
+    t.assert_eq(result, ValidationResult::VERSION_TOO_OLD);
+    return true;
 }
 
-TEST(validator_signature_required) {
+bool test_validator_signature_required(TestContext& t) {
     FirmwareValidator<> validator;
     validator.require_signature(true);
 
@@ -212,11 +212,11 @@ TEST(validator_signature_required) {
         .build();  // Not signed
 
     auto result = validator.validate_header(header);
-    ASSERT_EQ(result, ValidationResult::NOT_SIGNED);
-    TEST_PASS();
+    t.assert_eq(result, ValidationResult::NOT_SIGNED);
+    return true;
 }
 
-TEST(validator_signature_present) {
+bool test_validator_signature_present(TestContext& t) {
     FirmwareValidator<> validator;
     validator.require_signature(true);
 
@@ -226,11 +226,11 @@ TEST(validator_signature_present) {
         .build();
 
     auto result = validator.validate_header(header);
-    ASSERT_EQ(result, ValidationResult::OK);
-    TEST_PASS();
+    t.assert_eq(result, ValidationResult::OK);
+    return true;
 }
 
-TEST(validator_data_crc) {
+bool test_validator_data_crc(TestContext& t) {
     FirmwareValidator<> validator;
     validator.set_crc(crc32_fn);
 
@@ -244,11 +244,11 @@ TEST(validator_data_crc) {
         .build();
 
     auto result = validator.validate_data(header, data, 5);
-    ASSERT_EQ(result, ValidationResult::OK);
-    TEST_PASS();
+    t.assert_eq(result, ValidationResult::OK);
+    return true;
 }
 
-TEST(validator_data_crc_mismatch) {
+bool test_validator_data_crc_mismatch(TestContext& t) {
     FirmwareValidator<> validator;
     validator.set_crc(crc32_fn);
 
@@ -261,11 +261,11 @@ TEST(validator_data_crc_mismatch) {
         .build();
 
     auto result = validator.validate_data(header, data, 5);
-    ASSERT_EQ(result, ValidationResult::CRC_MISMATCH);
-    TEST_PASS();
+    t.assert_eq(result, ValidationResult::CRC_MISMATCH);
+    return true;
 }
 
-TEST(validator_size_mismatch) {
+bool test_validator_size_mismatch(TestContext& t) {
     FirmwareValidator<> validator;
 
     uint8_t data[10] = {0};
@@ -276,8 +276,8 @@ TEST(validator_size_mismatch) {
         .build();
 
     auto result = validator.validate_data(header, data, 10);  // But got 10
-    ASSERT_EQ(result, ValidationResult::INVALID_SIZE);
-    TEST_PASS();
+    t.assert_eq(result, ValidationResult::INVALID_SIZE);
+    return true;
 }
 
 // =============================================================================
@@ -285,40 +285,39 @@ TEST(validator_size_mismatch) {
 // =============================================================================
 
 int main() {
-    printf("umi_boot Firmware Validation Tests\n");
-    printf("===================================\n");
+    Suite s("umiboot_firmware");
 
-    SECTION("Firmware Header");
-    RUN_TEST(firmware_header_size);
-    RUN_TEST(firmware_magic);
-    RUN_TEST(firmware_header_builder);
+    s.section("Firmware Header");
+    s.run("firmware_header_size", test_firmware_header_size);
+    s.run("firmware_magic", test_firmware_magic);
+    s.run("firmware_header_builder", test_firmware_header_builder);
 
-    SECTION("Version Utilities");
-    RUN_TEST(version_compare_equal);
-    RUN_TEST(version_compare_newer_major);
-    RUN_TEST(version_compare_newer_minor);
-    RUN_TEST(version_compare_newer_patch);
-    RUN_TEST(version_compare_older);
-    RUN_TEST(pack_version);
-    RUN_TEST(unpack_version);
+    s.section("Version Utilities");
+    s.run("version_compare_equal", test_version_compare_equal);
+    s.run("version_compare_newer_major", test_version_compare_newer_major);
+    s.run("version_compare_newer_minor", test_version_compare_newer_minor);
+    s.run("version_compare_newer_patch", test_version_compare_newer_patch);
+    s.run("version_compare_older", test_version_compare_older);
+    s.run("pack_version", test_pack_version);
+    s.run("unpack_version", test_unpack_version);
 
-    SECTION("CRC-32");
-    RUN_TEST(crc32_empty);
-    RUN_TEST(crc32_known_value);
-    RUN_TEST(crc32_single_byte);
+    s.section("CRC-32");
+    s.run("crc32_empty", test_crc32_empty);
+    s.run("crc32_known_value", test_crc32_known_value);
+    s.run("crc32_single_byte", test_crc32_single_byte);
 
-    SECTION("Firmware Validator");
-    RUN_TEST(validator_valid_header);
-    RUN_TEST(validator_invalid_magic);
-    RUN_TEST(validator_invalid_header_version);
-    RUN_TEST(validator_board_mismatch);
-    RUN_TEST(validator_bootloader_too_old);
-    RUN_TEST(validator_rollback_check);
-    RUN_TEST(validator_signature_required);
-    RUN_TEST(validator_signature_present);
-    RUN_TEST(validator_data_crc);
-    RUN_TEST(validator_data_crc_mismatch);
-    RUN_TEST(validator_size_mismatch);
+    s.section("Firmware Validator");
+    s.run("validator_valid_header", test_validator_valid_header);
+    s.run("validator_invalid_magic", test_validator_invalid_magic);
+    s.run("validator_invalid_header_version", test_validator_invalid_header_version);
+    s.run("validator_board_mismatch", test_validator_board_mismatch);
+    s.run("validator_bootloader_too_old", test_validator_bootloader_too_old);
+    s.run("validator_rollback_check", test_validator_rollback_check);
+    s.run("validator_signature_required", test_validator_signature_required);
+    s.run("validator_signature_present", test_validator_signature_present);
+    s.run("validator_data_crc", test_validator_data_crc);
+    s.run("validator_data_crc_mismatch", test_validator_data_crc_mismatch);
+    s.run("validator_size_mismatch", test_validator_size_mismatch);
 
-    return summary();
+    return s.summary();
 }

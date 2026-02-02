@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 // umi_boot Authentication Tests
 
-#include "test_framework.hh"
+#include <umitest.hh>
 #include <umiboot/auth.hh>
 
 using namespace umiboot;
-using namespace umiboot::test;
+using namespace umitest;
 
 // =============================================================================
 // Test Utilities
@@ -34,39 +34,39 @@ static void mock_rng(uint8_t* out, size_t len) {
 // Authentication Tests
 // =============================================================================
 
-TEST(secure_compare_equal) {
+bool test_secure_compare_equal(TestContext& t) {
     uint8_t a[] = {1, 2, 3, 4, 5};
     uint8_t b[] = {1, 2, 3, 4, 5};
-    ASSERT(secure_compare(a, b, 5));
-    TEST_PASS();
+    t.assert_true(secure_compare(a, b, 5));
+    return true;
 }
 
-TEST(secure_compare_not_equal) {
+bool test_secure_compare_not_equal(TestContext& t) {
     uint8_t a[] = {1, 2, 3, 4, 5};
     uint8_t b[] = {1, 2, 3, 4, 6};
-    ASSERT(!secure_compare(a, b, 5));
-    TEST_PASS();
+    t.assert_true(!secure_compare(a, b, 5));
+    return true;
 }
 
-TEST(secure_compare_empty) {
+bool test_secure_compare_empty(TestContext& t) {
     uint8_t a[1] = {0};
     uint8_t b[1] = {0};
-    ASSERT(secure_compare(a, b, 0));
-    TEST_PASS();
+    t.assert_true(secure_compare(a, b, 0));
+    return true;
 }
 
-TEST(authenticator_initial_state) {
+bool test_authenticator_initial_state(TestContext& t) {
     Authenticator<32, 60000> auth;
     uint8_t key[32] = {0};
     auth.init(key, mock_hmac, mock_rng);
 
-    ASSERT_EQ(auth.state(), AuthState::IDLE);
-    ASSERT_EQ(auth.last_error(), AuthError::OK);
-    ASSERT(!auth.is_authenticated(0));
-    TEST_PASS();
+    t.assert_eq(auth.state(), AuthState::IDLE);
+    t.assert_eq(auth.last_error(), AuthError::OK);
+    t.assert_true(!auth.is_authenticated(0));
+    return true;
 }
 
-TEST(authenticator_challenge_generation) {
+bool test_authenticator_challenge_generation(TestContext& t) {
     Authenticator<32, 60000> auth;
     uint8_t key[32] = {0};
     auth.init(key, mock_hmac, mock_rng);
@@ -74,18 +74,18 @@ TEST(authenticator_challenge_generation) {
     uint8_t challenge[32];
     auth.generate_challenge(challenge);
 
-    ASSERT_EQ(auth.state(), AuthState::CHALLENGE_SENT);
+    t.assert_eq(auth.state(), AuthState::CHALLENGE_SENT);
 
     // Verify challenge was generated (not all zeros)
     bool has_nonzero = false;
     for (int i = 0; i < 32; ++i) {
         if (challenge[i] != 0) has_nonzero = true;
     }
-    ASSERT(has_nonzero);
-    TEST_PASS();
+    t.assert_true(has_nonzero);
+    return true;
 }
 
-TEST(authenticator_verify_correct_response) {
+bool test_authenticator_verify_correct_response(TestContext& t) {
     Authenticator<32, 60000> auth;
     uint8_t key[32] = {1, 2, 3, 4};  // Simple key
     auth.init(key, mock_hmac, mock_rng);
@@ -99,13 +99,13 @@ TEST(authenticator_verify_correct_response) {
     mock_hmac(key, 32, challenge, 32, response);
 
     // Verify
-    ASSERT(auth.verify_response(response, 1000));
-    ASSERT_EQ(auth.state(), AuthState::AUTHENTICATED);
-    ASSERT(auth.is_authenticated(1000));
-    TEST_PASS();
+    t.assert_true(auth.verify_response(response, 1000));
+    t.assert_eq(auth.state(), AuthState::AUTHENTICATED);
+    t.assert_true(auth.is_authenticated(1000));
+    return true;
 }
 
-TEST(authenticator_verify_wrong_response) {
+bool test_authenticator_verify_wrong_response(TestContext& t) {
     Authenticator<32, 60000> auth;
     uint8_t key[32] = {1, 2, 3, 4};
     auth.init(key, mock_hmac, mock_rng);
@@ -116,13 +116,13 @@ TEST(authenticator_verify_wrong_response) {
     // Wrong response
     uint8_t wrong_response[32] = {0};
 
-    ASSERT(!auth.verify_response(wrong_response, 1000));
-    ASSERT_EQ(auth.state(), AuthState::IDLE);
-    ASSERT_EQ(auth.last_error(), AuthError::INVALID_RESPONSE);
-    TEST_PASS();
+    t.assert_true(!auth.verify_response(wrong_response, 1000));
+    t.assert_eq(auth.state(), AuthState::IDLE);
+    t.assert_eq(auth.last_error(), AuthError::INVALID_RESPONSE);
+    return true;
 }
 
-TEST(authenticator_session_timeout) {
+bool test_authenticator_session_timeout(TestContext& t) {
     Authenticator<32, 1000> auth;  // 1 second timeout
     uint8_t key[32] = {0};
     auth.init(key, mock_hmac, mock_rng);
@@ -135,14 +135,14 @@ TEST(authenticator_session_timeout) {
     auth.verify_response(response, 100);
 
     // Should be authenticated
-    ASSERT(auth.is_authenticated(100));
+    t.assert_true(auth.is_authenticated(100));
 
     // After timeout
-    ASSERT(!auth.is_authenticated(1200));
-    TEST_PASS();
+    t.assert_true(!auth.is_authenticated(1200));
+    return true;
 }
 
-TEST(authenticator_logout) {
+bool test_authenticator_logout(TestContext& t) {
     Authenticator<32, 60000> auth;
     uint8_t key[32] = {0};
     auth.init(key, mock_hmac, mock_rng);
@@ -154,16 +154,16 @@ TEST(authenticator_logout) {
     mock_hmac(key, 32, challenge, 32, response);
     auth.verify_response(response, 1000);
 
-    ASSERT(auth.is_authenticated(1000));
+    t.assert_true(auth.is_authenticated(1000));
 
     auth.logout();
 
-    ASSERT_EQ(auth.state(), AuthState::IDLE);
-    ASSERT(!auth.is_authenticated(1000));
-    TEST_PASS();
+    t.assert_eq(auth.state(), AuthState::IDLE);
+    t.assert_true(!auth.is_authenticated(1000));
+    return true;
 }
 
-TEST(authenticator_refresh_session) {
+bool test_authenticator_refresh_session(TestContext& t) {
     Authenticator<32, 1000> auth;
     uint8_t key[32] = {0};
     auth.init(key, mock_hmac, mock_rng);
@@ -179,14 +179,14 @@ TEST(authenticator_refresh_session) {
     auth.refresh_session(500);
 
     // Should still be authenticated at 1400ms (500 + 1000 - 100)
-    ASSERT(auth.is_authenticated(1400));
+    t.assert_true(auth.is_authenticated(1400));
 
     // But not at 1600ms
-    ASSERT(!auth.is_authenticated(1600));
-    TEST_PASS();
+    t.assert_true(!auth.is_authenticated(1600));
+    return true;
 }
 
-TEST(auth_client_compute_response) {
+bool test_auth_client_compute_response(TestContext& t) {
     AuthClient<32> client;
     uint8_t key[32] = {1, 2, 3, 4};
     client.init(key, mock_hmac);
@@ -194,16 +194,16 @@ TEST(auth_client_compute_response) {
     uint8_t challenge[32] = {10, 20, 30};
     uint8_t response[32];
 
-    ASSERT(client.compute_response(challenge, response));
+    t.assert_true(client.compute_response(challenge, response));
 
     // Verify response matches expected
     uint8_t expected[32];
     mock_hmac(key, 32, challenge, 32, expected);
-    ASSERT(std::memcmp(response, expected, 32) == 0);
-    TEST_PASS();
+    t.assert_true(std::memcmp(response, expected, 32) == 0);
+    return true;
 }
 
-TEST(auth_client_no_hmac) {
+bool test_auth_client_no_hmac(TestContext& t) {
     AuthClient<32> client;
     uint8_t key[32] = {0};
     client.init(key, nullptr);  // No HMAC function
@@ -211,17 +211,17 @@ TEST(auth_client_no_hmac) {
     uint8_t challenge[32] = {0};
     uint8_t response[32];
 
-    ASSERT(!client.compute_response(challenge, response));
-    TEST_PASS();
+    t.assert_true(!client.compute_response(challenge, response));
+    return true;
 }
 
-TEST(auth_commands_values) {
-    ASSERT_EQ(static_cast<uint8_t>(AuthCommand::AUTH_CHALLENGE_REQ), 0x30);
-    ASSERT_EQ(static_cast<uint8_t>(AuthCommand::AUTH_CHALLENGE), 0x31);
-    ASSERT_EQ(static_cast<uint8_t>(AuthCommand::AUTH_RESPONSE), 0x32);
-    ASSERT_EQ(static_cast<uint8_t>(AuthCommand::AUTH_OK), 0x33);
-    ASSERT_EQ(static_cast<uint8_t>(AuthCommand::AUTH_FAIL), 0x34);
-    TEST_PASS();
+bool test_auth_commands_values(TestContext& t) {
+    t.assert_eq(static_cast<uint8_t>(AuthCommand::AUTH_CHALLENGE_REQ), 0x30);
+    t.assert_eq(static_cast<uint8_t>(AuthCommand::AUTH_CHALLENGE), 0x31);
+    t.assert_eq(static_cast<uint8_t>(AuthCommand::AUTH_RESPONSE), 0x32);
+    t.assert_eq(static_cast<uint8_t>(AuthCommand::AUTH_OK), 0x33);
+    t.assert_eq(static_cast<uint8_t>(AuthCommand::AUTH_FAIL), 0x34);
+    return true;
 }
 
 // =============================================================================
@@ -229,29 +229,28 @@ TEST(auth_commands_values) {
 // =============================================================================
 
 int main() {
-    printf("umi_boot Authentication Tests\n");
-    printf("==============================\n");
+    Suite s("umiboot_auth");
 
-    SECTION("Secure Compare");
-    RUN_TEST(secure_compare_equal);
-    RUN_TEST(secure_compare_not_equal);
-    RUN_TEST(secure_compare_empty);
+    s.section("Secure Compare");
+    s.run("secure_compare_equal", test_secure_compare_equal);
+    s.run("secure_compare_not_equal", test_secure_compare_not_equal);
+    s.run("secure_compare_empty", test_secure_compare_empty);
 
-    SECTION("Authenticator");
-    RUN_TEST(authenticator_initial_state);
-    RUN_TEST(authenticator_challenge_generation);
-    RUN_TEST(authenticator_verify_correct_response);
-    RUN_TEST(authenticator_verify_wrong_response);
-    RUN_TEST(authenticator_session_timeout);
-    RUN_TEST(authenticator_logout);
-    RUN_TEST(authenticator_refresh_session);
+    s.section("Authenticator");
+    s.run("authenticator_initial_state", test_authenticator_initial_state);
+    s.run("authenticator_challenge_generation", test_authenticator_challenge_generation);
+    s.run("authenticator_verify_correct_response", test_authenticator_verify_correct_response);
+    s.run("authenticator_verify_wrong_response", test_authenticator_verify_wrong_response);
+    s.run("authenticator_session_timeout", test_authenticator_session_timeout);
+    s.run("authenticator_logout", test_authenticator_logout);
+    s.run("authenticator_refresh_session", test_authenticator_refresh_session);
 
-    SECTION("Auth Client");
-    RUN_TEST(auth_client_compute_response);
-    RUN_TEST(auth_client_no_hmac);
+    s.section("Auth Client");
+    s.run("auth_client_compute_response", test_auth_client_compute_response);
+    s.run("auth_client_no_hmac", test_auth_client_no_hmac);
 
-    SECTION("Protocol Constants");
-    RUN_TEST(auth_commands_values);
+    s.section("Protocol Constants");
+    s.run("auth_commands_values", test_auth_commands_values);
 
-    return summary();
+    return s.summary();
 }

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // umidi Message Tests - ChannelVoice, System, SysEx
-#include "test_framework.hh"
+#include <umitest.hh>
 #include "messages/channel_voice.hh"
 #include "messages/system.hh"
 #include "messages/sysex.hh"
@@ -9,82 +9,82 @@
 #include <type_traits>
 
 using namespace umidi;
-using namespace umidi::test;
+using namespace umitest;
 using namespace umidi::message;
 
 // =============================================================================
 // Channel Voice Message Tests
 // =============================================================================
 
-TEST(channel_voice_note_on_create) {
+bool test_channel_voice_note_on_create(TestContext& t) {
     auto msg = NoteOn::create(5, 60, 100);
-    ASSERT(msg.is_valid());
-    ASSERT_EQ(msg.channel(), 5);
-    ASSERT_EQ(msg.note(), 60);
-    ASSERT_EQ(msg.velocity(), 100);
-    TEST_PASS();
+    t.assert_true(msg.is_valid());
+    t.assert_eq(msg.channel(), 5);
+    t.assert_eq(msg.note(), 60);
+    t.assert_eq(msg.velocity(), 100);
+    return true;
 }
 
-TEST(channel_voice_note_off_create) {
+bool test_channel_voice_note_off_create(TestContext& t) {
     auto msg = NoteOff::create(3, 72, 64);
-    ASSERT(msg.is_valid());
-    ASSERT_EQ(msg.channel(), 3);
-    ASSERT_EQ(msg.note(), 72);
-    ASSERT_EQ(msg.velocity(), 64);
-    TEST_PASS();
+    t.assert_true(msg.is_valid());
+    t.assert_eq(msg.channel(), 3);
+    t.assert_eq(msg.note(), 72);
+    t.assert_eq(msg.velocity(), 64);
+    return true;
 }
 
-TEST(channel_voice_cc_create) {
+bool test_channel_voice_cc_create(TestContext& t) {
     auto msg = ControlChange::create(0, 7, 100);  // Volume
-    ASSERT(msg.is_valid());
-    ASSERT_EQ(msg.channel(), 0);
-    ASSERT_EQ(msg.controller(), 7);
-    ASSERT_EQ(msg.value(), 100);
-    TEST_PASS();
+    t.assert_true(msg.is_valid());
+    t.assert_eq(msg.channel(), 0);
+    t.assert_eq(msg.controller(), 7);
+    t.assert_eq(msg.value(), 100);
+    return true;
 }
 
-TEST(channel_voice_program_change_create) {
+bool test_channel_voice_program_change_create(TestContext& t) {
     auto msg = ProgramChange::create(9, 42);
-    ASSERT(msg.is_valid());
-    ASSERT_EQ(msg.channel(), 9);
-    ASSERT_EQ(msg.program(), 42);
-    TEST_PASS();
+    t.assert_true(msg.is_valid());
+    t.assert_eq(msg.channel(), 9);
+    t.assert_eq(msg.program(), 42);
+    return true;
 }
 
-TEST(channel_voice_pitch_bend_create) {
+bool test_channel_voice_pitch_bend_create(TestContext& t) {
     auto msg = PitchBend::create(0, 8192);  // Center
-    ASSERT(msg.is_valid());
-    ASSERT_EQ(msg.channel(), 0);
-    ASSERT_EQ(msg.value(), 8192);
-    ASSERT_EQ(msg.signed_value(), 0);
-    TEST_PASS();
+    t.assert_true(msg.is_valid());
+    t.assert_eq(msg.channel(), 0);
+    t.assert_eq(msg.value(), 8192);
+    t.assert_eq(msg.signed_value(), 0);
+    return true;
 }
 
-TEST(channel_voice_pitch_bend_signed) {
+bool test_channel_voice_pitch_bend_signed(TestContext& t) {
     auto msg = PitchBend::create_signed(0, -1000);
-    ASSERT(msg.is_valid());
-    ASSERT_EQ(msg.signed_value(), -1000);
-    TEST_PASS();
+    t.assert_true(msg.is_valid());
+    t.assert_eq(msg.signed_value(), -1000);
+    return true;
 }
 
-TEST(channel_voice_channel_pressure_create) {
+bool test_channel_voice_channel_pressure_create(TestContext& t) {
     auto msg = ChannelPressure::create(2, 80);
-    ASSERT(msg.is_valid());
-    ASSERT_EQ(msg.channel(), 2);
-    ASSERT_EQ(msg.pressure(), 80);
-    TEST_PASS();
+    t.assert_true(msg.is_valid());
+    t.assert_eq(msg.channel(), 2);
+    t.assert_eq(msg.pressure(), 80);
+    return true;
 }
 
-TEST(channel_voice_poly_pressure_create) {
+bool test_channel_voice_poly_pressure_create(TestContext& t) {
     auto msg = PolyPressure::create(4, 60, 90);
-    ASSERT(msg.is_valid());
-    ASSERT_EQ(msg.channel(), 4);
-    ASSERT_EQ(msg.note(), 60);
-    ASSERT_EQ(msg.pressure(), 90);
-    TEST_PASS();
+    t.assert_true(msg.is_valid());
+    t.assert_eq(msg.channel(), 4);
+    t.assert_eq(msg.note(), 60);
+    t.assert_eq(msg.pressure(), 90);
+    return true;
 }
 
-TEST(channel_voice_dispatch) {
+bool test_channel_voice_dispatch(TestContext& t) {
     auto ump = UMP32::note_on(0, 60, 100);
     bool handled = false;
     uint8_t note_val = 0;
@@ -97,127 +97,127 @@ TEST(channel_voice_dispatch) {
         }
     });
 
-    ASSERT(handled);
-    ASSERT_EQ(note_val, 60);
-    TEST_PASS();
+    t.assert_true(handled);
+    t.assert_eq(note_val, 60);
+    return true;
 }
 
 // =============================================================================
 // System Message Tests
 // =============================================================================
 
-TEST(system_timing_clock) {
+bool test_system_timing_clock(TestContext& t) {
     auto msg = TimingClock::create();
-    ASSERT(msg.is_valid());
-    ASSERT(msg.ump.is_timing_clock());
-    TEST_PASS();
+    t.assert_true(msg.is_valid());
+    t.assert_true(msg.ump.is_timing_clock());
+    return true;
 }
 
-TEST(system_start) {
+bool test_system_start(TestContext& t) {
     auto msg = Start::create();
-    ASSERT(msg.is_valid());
-    ASSERT(msg.ump.is_start());
-    TEST_PASS();
+    t.assert_true(msg.is_valid());
+    t.assert_true(msg.ump.is_start());
+    return true;
 }
 
-TEST(system_continue) {
+bool test_system_continue(TestContext& t) {
     auto msg = Continue::create();
-    ASSERT(msg.is_valid());
-    ASSERT(msg.ump.is_continue());
-    TEST_PASS();
+    t.assert_true(msg.is_valid());
+    t.assert_true(msg.ump.is_continue());
+    return true;
 }
 
-TEST(system_stop) {
+bool test_system_stop(TestContext& t) {
     auto msg = Stop::create();
-    ASSERT(msg.is_valid());
-    ASSERT(msg.ump.is_stop());
-    TEST_PASS();
+    t.assert_true(msg.is_valid());
+    t.assert_true(msg.ump.is_stop());
+    return true;
 }
 
-TEST(system_active_sensing) {
+bool test_system_active_sensing(TestContext& t) {
     auto msg = ActiveSensing::create();
-    ASSERT(msg.is_valid());
-    ASSERT(msg.ump.is_active_sensing());
-    TEST_PASS();
+    t.assert_true(msg.is_valid());
+    t.assert_true(msg.ump.is_active_sensing());
+    return true;
 }
 
-TEST(system_reset) {
+bool test_system_reset(TestContext& t) {
     auto msg = SystemReset::create();
-    ASSERT(msg.is_valid());
-    ASSERT(msg.ump.is_system_reset());
-    TEST_PASS();
+    t.assert_true(msg.is_valid());
+    t.assert_true(msg.ump.is_system_reset());
+    return true;
 }
 
-TEST(system_mtc) {
+bool test_system_mtc(TestContext& t) {
     auto msg = MidiTimeCode::create(0x23);
-    ASSERT(msg.is_valid());
-    ASSERT_EQ(msg.type_and_value(), 0x23);
-    TEST_PASS();
+    t.assert_true(msg.is_valid());
+    t.assert_eq(msg.type_and_value(), 0x23);
+    return true;
 }
 
-TEST(system_song_position) {
+bool test_system_song_position(TestContext& t) {
     auto msg = SongPosition::create(1234);
-    ASSERT(msg.is_valid());
-    ASSERT_EQ(msg.position(), 1234);
-    TEST_PASS();
+    t.assert_true(msg.is_valid());
+    t.assert_eq(msg.position(), 1234);
+    return true;
 }
 
-TEST(system_song_position_max) {
+bool test_system_song_position_max(TestContext& t) {
     auto msg = SongPosition::create(16383);
-    ASSERT(msg.is_valid());
-    ASSERT_EQ(msg.position(), 16383);
-    TEST_PASS();
+    t.assert_true(msg.is_valid());
+    t.assert_eq(msg.position(), 16383);
+    return true;
 }
 
-TEST(system_song_select) {
+bool test_system_song_select(TestContext& t) {
     auto msg = SongSelect::create(5);
-    ASSERT(msg.is_valid());
-    ASSERT_EQ(msg.song(), 5);
-    TEST_PASS();
+    t.assert_true(msg.is_valid());
+    t.assert_eq(msg.song(), 5);
+    return true;
 }
 
-TEST(system_tune_request) {
+bool test_system_tune_request(TestContext& t) {
     auto msg = TuneRequest::create();
-    ASSERT(msg.is_valid());
-    ASSERT(msg.ump.is_tune_request());
-    TEST_PASS();
+    t.assert_true(msg.is_valid());
+    t.assert_true(msg.ump.is_tune_request());
+    return true;
 }
 
 // =============================================================================
 // SysEx Tests (using UMP64 directly)
 // =============================================================================
 
-TEST(sysex7_complete) {
+bool test_sysex7_complete(TestContext& t) {
     uint8_t data[] = {0x7E, 0x00, 0x06, 0x01};
     auto ump = UMP64::sysex7_complete(0, data, 4);
-    ASSERT_EQ(ump.mt(), 3);  // MT=3 for SysEx7
-    TEST_PASS();
+    t.assert_eq(ump.mt(), 3);  // MT=3 for SysEx7
+    return true;
 }
 
-TEST(sysex7_bytes_access) {
+bool test_sysex7_bytes_access(TestContext& t) {
     uint8_t data[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06};
     auto ump = UMP64::sysex7_complete(0, data, 6);
-    ASSERT_EQ(ump.sysex_num_bytes(), 6);
-    TEST_PASS();
+    t.assert_eq(ump.sysex_num_bytes(), 6);
+    return true;
 }
 
 // =============================================================================
 // Utility Message Tests (using UMP32 directly)
 // =============================================================================
 
-TEST(utility_mt0) {
+bool test_utility_mt0(TestContext& t) {
     // MT=0 is Utility Message Type
     UMP32 ump(0, 0, 0, 0, 0);  // NOOP
-    ASSERT_EQ(ump.mt(), 0);
-    TEST_PASS();
+    t.assert_eq(ump.mt(), 0);
+    return true;
 }
 
-TEST(utility_jr_timestamp) {
+bool test_utility_jr_timestamp(TestContext& t) {
     // JR Timestamp: MT=0, Status=0x0020
     uint16_t ts = 1234;
     UMP32 ump(0, 0, 0x00, (ts >> 8) & 0xFF, ts & 0xFF);
-    ASSERT_EQ(ump.mt(), 0);
-    TEST_PASS();
+    t.assert_eq(ump.mt(), 0);
+    return true;
 }
 
 // =============================================================================
@@ -225,39 +225,39 @@ TEST(utility_jr_timestamp) {
 // =============================================================================
 
 int main() {
-    printf("=== umidi Message Tests ===\n");
+    Suite s("umidi_messages");
 
-    SECTION("Channel Voice Messages");
-    RUN_TEST(channel_voice_note_on_create);
-    RUN_TEST(channel_voice_note_off_create);
-    RUN_TEST(channel_voice_cc_create);
-    RUN_TEST(channel_voice_program_change_create);
-    RUN_TEST(channel_voice_pitch_bend_create);
-    RUN_TEST(channel_voice_pitch_bend_signed);
-    RUN_TEST(channel_voice_channel_pressure_create);
-    RUN_TEST(channel_voice_poly_pressure_create);
-    RUN_TEST(channel_voice_dispatch);
+    s.section("Channel Voice Messages");
+    s.run("channel_voice_note_on_create", test_channel_voice_note_on_create);
+    s.run("channel_voice_note_off_create", test_channel_voice_note_off_create);
+    s.run("channel_voice_cc_create", test_channel_voice_cc_create);
+    s.run("channel_voice_program_change_create", test_channel_voice_program_change_create);
+    s.run("channel_voice_pitch_bend_create", test_channel_voice_pitch_bend_create);
+    s.run("channel_voice_pitch_bend_signed", test_channel_voice_pitch_bend_signed);
+    s.run("channel_voice_channel_pressure_create", test_channel_voice_channel_pressure_create);
+    s.run("channel_voice_poly_pressure_create", test_channel_voice_poly_pressure_create);
+    s.run("channel_voice_dispatch", test_channel_voice_dispatch);
 
-    SECTION("System Messages");
-    RUN_TEST(system_timing_clock);
-    RUN_TEST(system_start);
-    RUN_TEST(system_continue);
-    RUN_TEST(system_stop);
-    RUN_TEST(system_active_sensing);
-    RUN_TEST(system_reset);
-    RUN_TEST(system_mtc);
-    RUN_TEST(system_song_position);
-    RUN_TEST(system_song_position_max);
-    RUN_TEST(system_song_select);
-    RUN_TEST(system_tune_request);
+    s.section("System Messages");
+    s.run("system_timing_clock", test_system_timing_clock);
+    s.run("system_start", test_system_start);
+    s.run("system_continue", test_system_continue);
+    s.run("system_stop", test_system_stop);
+    s.run("system_active_sensing", test_system_active_sensing);
+    s.run("system_reset", test_system_reset);
+    s.run("system_mtc", test_system_mtc);
+    s.run("system_song_position", test_system_song_position);
+    s.run("system_song_position_max", test_system_song_position_max);
+    s.run("system_song_select", test_system_song_select);
+    s.run("system_tune_request", test_system_tune_request);
 
-    SECTION("SysEx");
-    RUN_TEST(sysex7_complete);
-    RUN_TEST(sysex7_bytes_access);
+    s.section("SysEx");
+    s.run("sysex7_complete", test_sysex7_complete);
+    s.run("sysex7_bytes_access", test_sysex7_bytes_access);
 
-    SECTION("Utility");
-    RUN_TEST(utility_mt0);
-    RUN_TEST(utility_jr_timestamp);
+    s.section("Utility");
+    s.run("utility_mt0", test_utility_mt0);
+    s.run("utility_jr_timestamp", test_utility_jr_timestamp);
 
-    return summary();
+    return s.summary();
 }
