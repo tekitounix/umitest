@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "../backend/cm/common/fault.hh"
+#include <common/fault.hh>
 #include <cstdint>
 #include <cstddef>
 #include <atomic>

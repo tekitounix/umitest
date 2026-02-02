@@ -10,7 +10,7 @@
 #include "mpu_config.hh"
 
 #if defined(__ARM_ARCH) && defined(UMIOS_KERNEL)
-#include "../backend/cm/platform/privilege.hh"
+#include <platform/privilege.hh>
 #endif
 
 namespace umi::kernel {
