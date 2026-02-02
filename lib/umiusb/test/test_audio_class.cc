@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // UMI-USB: AudioClass Tests — UAC2 Feature Unit GET/SET CUR (Mute, Volume)
-#include "test_common.hh"
+#include <umitest.hh>
+using namespace umitest;
 #include "audio/audio_interface.hh"
 #include "stub_hal.hh"
 
@@ -10,7 +11,9 @@ using namespace umiusb;
 using TestAudioClass = AudioClass<UacVersion::UAC2, MaxSpeed::FULL, AudioStereo48k>;
 
 int main() {
-    SECTION("UAC2 Feature Unit GET CUR Mute (entity 6)");
+    Suite s("usb_audio_class");
+
+    s.section("UAC2 Feature Unit GET CUR Mute (entity 6)");
     {
         TestAudioClass audio;
         audio.set_feature_defaults(true, -256, false, 0);
@@ -27,12 +30,12 @@ int main() {
         uint8_t buf[64]{};
         std::span<uint8_t> response(buf, sizeof(buf));
         bool handled = audio.handle_request(setup, response);
-        CHECK(handled, "Feature Unit GET CUR Mute handled");
-        CHECK_EQ(response.size(), size_t{1}, "Response is 1 byte");
-        CHECK_EQ(response[0], uint8_t{1}, "Mute is ON");
+        s.check(handled, "Feature Unit GET CUR Mute handled");
+        s.check_eq(response.size(), size_t{1});
+        s.check_eq(response[0], uint8_t{1});
     }
 
-    SECTION("UAC2 Feature Unit GET CUR Volume (entity 6)");
+    s.section("UAC2 Feature Unit GET CUR Volume (entity 6)");
     {
         TestAudioClass audio;
         audio.set_feature_defaults(false, -512, false, 0); // -2dB in 1/256 dB
@@ -47,13 +50,13 @@ int main() {
         uint8_t buf[64]{};
         std::span<uint8_t> response(buf, sizeof(buf));
         bool handled = audio.handle_request(setup, response);
-        CHECK(handled, "Feature Unit GET CUR Volume handled");
-        CHECK_EQ(response.size(), size_t{2}, "Response is 2 bytes");
+        s.check(handled, "Feature Unit GET CUR Volume handled");
+        s.check_eq(response.size(), size_t{2});
         int16_t vol = static_cast<int16_t>(response[0] | (response[1] << 8));
-        CHECK_EQ(vol, int16_t{-512}, "Volume is -512 (1/256 dB)");
+        s.check_eq(vol, int16_t{-512});
     }
 
-    SECTION("UAC2 Feature Unit GET RANGE Volume (entity 6)");
+    s.section("UAC2 Feature Unit GET RANGE Volume (entity 6)");
     {
         TestAudioClass audio;
 
@@ -67,13 +70,13 @@ int main() {
         uint8_t buf[64]{};
         std::span<uint8_t> response(buf, sizeof(buf));
         bool handled = audio.handle_request(setup, response);
-        CHECK(handled, "Feature Unit GET RANGE Volume handled");
-        CHECK_EQ(response.size(), size_t{8}, "Response is 8 bytes");
+        s.check(handled, "Feature Unit GET RANGE Volume handled");
+        s.check_eq(response.size(), size_t{8});
         // wNumSubRanges = 1
-        CHECK_EQ(response[0], uint8_t{1}, "wNumSubRanges = 1");
+        s.check_eq(response[0], uint8_t{1});
     }
 
-    SECTION("UAC2 Clock Source GET CUR Frequency");
+    s.section("UAC2 Clock Source GET CUR Frequency");
     {
         TestAudioClass audio;
 
@@ -87,13 +90,13 @@ int main() {
         uint8_t buf[64]{};
         std::span<uint8_t> response(buf, sizeof(buf));
         bool handled = audio.handle_request(setup, response);
-        CHECK(handled, "Clock Source GET CUR handled");
-        CHECK_EQ(response.size(), size_t{4}, "Response is 4 bytes");
+        s.check(handled, "Clock Source GET CUR handled");
+        s.check_eq(response.size(), size_t{4});
         uint32_t rate = response[0] | (response[1] << 8) | (response[2] << 16) | (response[3] << 24);
-        CHECK_EQ(rate, uint32_t{48000}, "Sample rate is 48000");
+        s.check_eq(rate, uint32_t{48000});
     }
 
-    SECTION("UAC2 Clock Source GET RANGE");
+    s.section("UAC2 Clock Source GET RANGE");
     {
         TestAudioClass audio;
 
@@ -107,14 +110,14 @@ int main() {
         uint8_t buf[64]{};
         std::span<uint8_t> response(buf, sizeof(buf));
         bool handled = audio.handle_request(setup, response);
-        CHECK(handled, "Clock Source GET RANGE handled");
-        CHECK(response.size() >= 14, "Response has at least 1 range entry");
+        s.check(handled, "Clock Source GET RANGE handled");
+        s.check(response.size() >= 14, "Response has at least 1 range entry");
         // wNumSubRanges >= 1
         uint16_t count = response[0] | (response[1] << 8);
-        CHECK(count >= 1, "At least 1 rate range");
+        s.check(count >= 1, "At least 1 rate range");
     }
 
-    SECTION("UAC2 Selector Unit GET CUR (entity 8)");
+    s.section("UAC2 Selector Unit GET CUR (entity 8)");
     {
         TestAudioClass audio;
 
@@ -128,12 +131,12 @@ int main() {
         uint8_t buf[64]{};
         std::span<uint8_t> response(buf, sizeof(buf));
         bool handled = audio.handle_request(setup, response);
-        CHECK(handled, "Selector Unit GET CUR handled");
-        CHECK_EQ(response.size(), size_t{1}, "Response is 1 byte");
-        CHECK_EQ(response[0], uint8_t{1}, "Default selection is 1");
+        s.check(handled, "Selector Unit GET CUR handled");
+        s.check_eq(response.size(), size_t{1});
+        s.check_eq(response[0], uint8_t{1});
     }
 
-    SECTION("UAC2 Clock Selector GET CUR (entity 9)");
+    s.section("UAC2 Clock Selector GET CUR (entity 9)");
     {
         TestAudioClass audio;
 
@@ -147,12 +150,12 @@ int main() {
         uint8_t buf[64]{};
         std::span<uint8_t> response(buf, sizeof(buf));
         bool handled = audio.handle_request(setup, response);
-        CHECK(handled, "Clock Selector GET CUR handled");
-        CHECK_EQ(response.size(), size_t{1}, "Response is 1 byte");
-        CHECK_EQ(response[0], uint8_t{1}, "Default clock selection is 1");
+        s.check(handled, "Clock Selector GET CUR handled");
+        s.check_eq(response.size(), size_t{1});
+        s.check_eq(response[0], uint8_t{1});
     }
 
-    SECTION("UAC2 Mixer Unit GET CUR (entity 10, crosspoint 0)");
+    s.section("UAC2 Mixer Unit GET CUR (entity 10, crosspoint 0)");
     {
         TestAudioClass audio;
 
@@ -166,13 +169,13 @@ int main() {
         uint8_t buf[64]{};
         std::span<uint8_t> response(buf, sizeof(buf));
         bool handled = audio.handle_request(setup, response);
-        CHECK(handled, "Mixer Unit GET CUR handled");
-        CHECK_EQ(response.size(), size_t{2}, "Response is 2 bytes");
+        s.check(handled, "Mixer Unit GET CUR handled");
+        s.check_eq(response.size(), size_t{2});
         int16_t val = static_cast<int16_t>(response[0] | (response[1] << 8));
-        CHECK_EQ(val, int16_t{0}, "Default mixer gain is 0");
+        s.check_eq(val, int16_t{0});
     }
 
-    SECTION("UAC2 Mixer Unit SET CUR (entity 10, crosspoint 2)");
+    s.section("UAC2 Mixer Unit SET CUR (entity 10, crosspoint 2)");
     {
         TestAudioClass audio;
 
@@ -187,7 +190,7 @@ int main() {
         uint8_t buf[64]{};
         std::span<uint8_t> response(buf, sizeof(buf));
         bool handled = audio.handle_request(setup, response);
-        CHECK(handled, "Mixer Unit SET CUR setup handled");
+        s.check(handled, "Mixer Unit SET CUR setup handled");
 
         // Data phase: set gain to -128 (1/256 dB)
         uint8_t data[2] = {0x80, 0xFF};  // -128 as int16_t
@@ -203,29 +206,29 @@ int main() {
 
         std::span<uint8_t> get_response(buf, sizeof(buf));
         handled = audio.handle_request(get_setup, get_response);
-        CHECK(handled, "Mixer Unit GET CUR after SET handled");
+        s.check(handled, "Mixer Unit GET CUR after SET handled");
         int16_t val = static_cast<int16_t>(get_response[0] | (get_response[1] << 8));
-        CHECK_EQ(val, int16_t{-128}, "Mixer gain is -128 after SET");
+        s.check_eq(val, int16_t{-128});
     }
 
-    SECTION("BOS descriptor contains WinUSB and WebUSB capabilities");
+    s.section("BOS descriptor contains WinUSB and WebUSB capabilities");
     {
         TestAudioClass audio;
         auto bos = audio.bos_descriptor();
-        CHECK(bos.size() == 57, "BOS descriptor is 57 bytes");
-        CHECK_EQ(bos[0], uint8_t{5}, "BOS header bLength = 5");
-        CHECK_EQ(bos[1], uint8_t{0x0F}, "BOS bDescriptorType = 0x0F");
-        CHECK_EQ(bos[4], uint8_t{2}, "bNumDeviceCaps = 2");
+        s.check(bos.size() == 57, "BOS descriptor is 57 bytes");
+        s.check_eq(bos[0], uint8_t{5});
+        s.check_eq(bos[1], uint8_t{0x0F});
+        s.check_eq(bos[4], uint8_t{2});
         // WinUSB Platform Capability at offset 5
-        CHECK_EQ(bos[5], uint8_t{28}, "WinUSB cap bLength = 28");
-        CHECK_EQ(bos[6], uint8_t{0x10}, "WinUSB cap type = DeviceCapability");
-        CHECK_EQ(bos[7], uint8_t{0x05}, "WinUSB cap subtype = Platform");
+        s.check_eq(bos[5], uint8_t{28});
+        s.check_eq(bos[6], uint8_t{0x10});
+        s.check_eq(bos[7], uint8_t{0x05});
         // WebUSB Platform Capability at offset 33
-        CHECK_EQ(bos[33], uint8_t{24}, "WebUSB cap bLength = 24");
-        CHECK_EQ(bos[34], uint8_t{0x10}, "WebUSB cap type = DeviceCapability");
+        s.check_eq(bos[33], uint8_t{24});
+        s.check_eq(bos[34], uint8_t{0x10});
     }
 
-    SECTION("WinUSB vendor request returns MS OS 2.0 descriptor set");
+    s.section("WinUSB vendor request returns MS OS 2.0 descriptor set");
     {
         TestAudioClass audio;
 
@@ -239,14 +242,14 @@ int main() {
         uint8_t buf[192]{};
         std::span<uint8_t> response(buf, sizeof(buf));
         bool handled = audio.handle_vendor_request(setup, response);
-        CHECK(handled, "WinUSB vendor request handled");
-        CHECK(response.size() > 10, "MS OS 2.0 desc set has content");
+        s.check(handled, "WinUSB vendor request handled");
+        s.check(response.size() > 10, "MS OS 2.0 desc set has content");
         // Descriptor Set Header check
         uint16_t hdr_len = response[0] | (response[1] << 8);
-        CHECK_EQ(hdr_len, uint16_t{10}, "Descriptor set header length = 10");
+        s.check_eq(hdr_len, uint16_t{10});
     }
 
-    SECTION("WebUSB vendor request returns URL descriptor");
+    s.section("WebUSB vendor request returns URL descriptor");
     {
         TestAudioClass audio;
 
@@ -260,11 +263,11 @@ int main() {
         uint8_t buf[64]{};
         std::span<uint8_t> response(buf, sizeof(buf));
         bool handled = audio.handle_vendor_request(setup, response);
-        CHECK(handled, "WebUSB vendor request handled");
-        CHECK(response.size() > 3, "URL descriptor has content");
-        CHECK_EQ(response[1], uint8_t{0x03}, "bDescriptorType = WEBUSB_URL");
-        CHECK_EQ(response[2], uint8_t{0x01}, "bScheme = HTTPS");
+        s.check(handled, "WebUSB vendor request handled");
+        s.check(response.size() > 3, "URL descriptor has content");
+        s.check_eq(response[1], uint8_t{0x03});
+        s.check_eq(response[2], uint8_t{0x01});
     }
 
-    TEST_SUMMARY();
+    return s.summary();
 }

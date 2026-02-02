@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // UMI-USB: UsbMidiClass Tests
-#include "test_common.hh"
+#include <umitest.hh>
+using namespace umitest;
 #include "midi/usb_midi_class.hh"
 #include "stub_hal.hh"
 
@@ -19,24 +20,26 @@ static_assert(requires(TestMidiClass& c, const SetupPacket& s) {
 }, "UsbMidiClass must satisfy Class concept");
 
 int main() {
-    SECTION("UsbMidiClass descriptor build");
+    Suite s("usb_midi_class");
+
+    s.section("UsbMidiClass descriptor build");
     {
         TestMidiClass midi;
         midi.build_descriptor(0, 1);
 
         auto desc = midi.config_descriptor();
-        CHECK(desc.size() > 9, "Descriptor has content");
+        s.check(desc.size() > 9, "Descriptor has content");
 
         // First 9 bytes = Configuration descriptor header
-        CHECK_EQ(desc[0], uint8_t{9}, "Config bLength");
-        CHECK_EQ(desc[1], uint8_t{0x02}, "Config bDescriptorType");
+        s.check_eq(desc[0], uint8_t{9});
+        s.check_eq(desc[1], uint8_t{0x02});
         // wTotalLength should match span size
         uint16_t total = static_cast<uint16_t>(desc[2]) | (static_cast<uint16_t>(desc[3]) << 8);
-        CHECK_EQ(total, static_cast<uint16_t>(desc.size()), "wTotalLength matches");
-        CHECK_EQ(desc[4], uint8_t{2}, "bNumInterfaces = 2");
+        s.check_eq(total, static_cast<uint16_t>(desc.size()));
+        s.check_eq(desc[4], uint8_t{2});
     }
 
-    SECTION("UsbMidiClass MIDI rx callback");
+    s.section("UsbMidiClass MIDI rx callback");
     {
         TestMidiClass midi;
         midi.build_descriptor(0, 1);
@@ -56,24 +59,24 @@ int main() {
         uint8_t packet[] = {0x09, 0x90, 0x3C, 0x7F};  // Note On, C4, velocity 127
         midi.on_rx(3, std::span<const uint8_t>(packet, 4));
 
-        CHECK_EQ(last_cable, uint8_t{0}, "MIDI callback cable = 0");
-        CHECK_EQ(last_len, uint8_t{3}, "MIDI callback len = 3");
-        CHECK_EQ(last_data[0], uint8_t{0x90}, "Note On status");
-        CHECK_EQ(last_data[1], uint8_t{0x3C}, "Note number C4");
-        CHECK_EQ(last_data[2], uint8_t{0x7F}, "Velocity 127");
+        s.check_eq(last_cable, uint8_t{0});
+        s.check_eq(last_len, uint8_t{3});
+        s.check_eq(last_data[0], uint8_t{0x90});
+        s.check_eq(last_data[1], uint8_t{0x3C});
+        s.check_eq(last_data[2], uint8_t{0x7F});
     }
 
-    SECTION("UsbMidiClass configure_endpoints");
+    s.section("UsbMidiClass configure_endpoints");
     {
         TestMidiClass midi;
         StubHal hal;
         hal.init();
         midi.configure_endpoints(hal);
 
-        CHECK_EQ(hal.num_configured_eps, uint8_t{2}, "2 EPs configured (OUT + IN)");
+        s.check_eq(hal.num_configured_eps, uint8_t{2});
     }
 
-    SECTION("UsbMidiClass send_midi");
+    s.section("UsbMidiClass send_midi");
     {
         TestMidiClass midi;
         midi.build_descriptor(0, 1);
@@ -84,39 +87,39 @@ int main() {
 
         uint8_t msg[] = {0x90, 0x3C, 0x7F};  // Note On
         bool sent = midi.send_midi(hal, 0, msg, 3);
-        CHECK(sent, "send_midi returns true");
-        CHECK_EQ(hal.ep_buf_len[3], uint16_t{4}, "4 bytes written to EP");
-        CHECK_EQ(hal.ep_buf[3][0], uint8_t{0x09}, "Header: cable 0, CIN 0x09");
-        CHECK_EQ(hal.ep_buf[3][1], uint8_t{0x90}, "Status");
+        s.check(sent, "send_midi returns true");
+        s.check_eq(hal.ep_buf_len[3], uint16_t{4});
+        s.check_eq(hal.ep_buf[3][0], uint8_t{0x09});
+        s.check_eq(hal.ep_buf[3][1], uint8_t{0x90});
     }
 
-    SECTION("ump_word_count returns correct sizes");
+    s.section("ump_word_count returns correct sizes");
     {
-        CHECK_EQ(ump_word_count(0), uint8_t{1}, "MT=0 Utility: 1 word");
-        CHECK_EQ(ump_word_count(1), uint8_t{1}, "MT=1 System: 1 word");
-        CHECK_EQ(ump_word_count(2), uint8_t{1}, "MT=2 MIDI1.0 CV: 1 word");
-        CHECK_EQ(ump_word_count(3), uint8_t{2}, "MT=3 SysEx7: 2 words");
-        CHECK_EQ(ump_word_count(4), uint8_t{2}, "MT=4 MIDI2.0 CV: 2 words");
-        CHECK_EQ(ump_word_count(5), uint8_t{4}, "MT=5 SysEx8: 4 words");
+        s.check_eq(ump_word_count(0), uint8_t{1});
+        s.check_eq(ump_word_count(1), uint8_t{1});
+        s.check_eq(ump_word_count(2), uint8_t{1});
+        s.check_eq(ump_word_count(3), uint8_t{2});
+        s.check_eq(ump_word_count(4), uint8_t{2});
+        s.check_eq(ump_word_count(5), uint8_t{4});
     }
 
-    SECTION("MIDI 2.0 Alt Setting switch");
+    s.section("MIDI 2.0 Alt Setting switch");
     {
         TestMidiClass midi;
         midi.build_descriptor(0, 1);
         StubHal hal;
         hal.init();
 
-        CHECK_EQ(static_cast<uint8_t>(midi.active_version()), uint8_t{0}, "Default MIDI 1.0");
+        s.check_eq(static_cast<uint8_t>(midi.active_version()), uint8_t{0});
 
         midi.set_interface(hal, 1, 1);  // Alt Setting 1 = MIDI 2.0
-        CHECK_EQ(static_cast<uint8_t>(midi.active_version()), uint8_t{1}, "Switched to MIDI 2.0");
+        s.check_eq(static_cast<uint8_t>(midi.active_version()), uint8_t{1});
 
         midi.set_interface(hal, 1, 0);  // Back to Alt Setting 0
-        CHECK_EQ(static_cast<uint8_t>(midi.active_version()), uint8_t{0}, "Back to MIDI 1.0");
+        s.check_eq(static_cast<uint8_t>(midi.active_version()), uint8_t{0});
     }
 
-    SECTION("MIDI 2.0 UMP native receive");
+    s.section("MIDI 2.0 UMP native receive");
     {
         TestMidiClass midi;
         midi.build_descriptor(0, 1);
@@ -138,9 +141,9 @@ int main() {
         uint8_t ump_data[] = {0x7F, 0x3C, 0x90, 0x20};
         midi.on_rx(3, std::span<const uint8_t>(ump_data, 4));  // EP_MIDI_OUT = 3
 
-        CHECK_EQ(rx_len, uint16_t{4}, "UMP callback received 4 bytes");
-        CHECK_EQ(rx_data[3], uint8_t{0x20}, "MT=2 header byte");
+        s.check_eq(rx_len, uint16_t{4});
+        s.check_eq(rx_data[3], uint8_t{0x20});
     }
 
-    TEST_SUMMARY();
+    return s.summary();
 }

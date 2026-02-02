@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // UMI-USB: Descriptor Builder Tests
-#include "test_common.hh"
+#include <umitest.hh>
+using namespace umitest;
 #include "core/descriptor.hh"
 #include "stub_hal.hh"
 
@@ -164,50 +165,51 @@ static_assert(Hal<StubHal>, "StubHal must satisfy Hal concept");
 // ============================================================================
 
 int main() {
-    SECTION("Descriptor byte layout");
+    Suite s("usb_descriptor");
+
+    s.section("Descriptor byte layout");
     {
         // Device descriptor runtime verification
-        CHECK_EQ(dev_desc.data[0], uint8_t{18}, "Device desc bLength");
-        CHECK_EQ(dev_desc.data[1], dtype::Device, "Device desc bDescriptorType");
-        CHECK_EQ(dev_desc.data[4], uint8_t{0xEF}, "Device desc bDeviceClass");
+        s.check_eq(dev_desc.data[0], uint8_t{18});
+        s.check_eq(dev_desc.data[1], dtype::Device);
+        s.check_eq(dev_desc.data[4], uint8_t{0xEF});
     }
 
-    SECTION("ConfigHeader");
+    s.section("ConfigHeader");
     {
         constexpr auto cfg = ConfigHeader{.max_power = 250}.build<100, 3>();
-        CHECK_EQ(cfg.data[0], uint8_t{9}, "ConfigHeader bLength");
-        CHECK_EQ(cfg.data[1], dtype::Configuration, "ConfigHeader type");
+        s.check_eq(cfg.data[0], uint8_t{9});
+        s.check_eq(cfg.data[1], dtype::Configuration);
         // wTotalLength = 100 in LE
-        CHECK_EQ(cfg.data[2], uint8_t{100}, "wTotalLength low");
-        CHECK_EQ(cfg.data[3], uint8_t{0}, "wTotalLength high");
-        CHECK_EQ(cfg.data[4], uint8_t{3}, "bNumInterfaces");
-        CHECK_EQ(cfg.data[8], uint8_t{250}, "bMaxPower");
+        s.check_eq(cfg.data[2], uint8_t{100});
+        s.check_eq(cfg.data[3], uint8_t{0});
+        s.check_eq(cfg.data[4], uint8_t{3});
+        s.check_eq(cfg.data[8], uint8_t{250});
     }
 
-    SECTION("StubHal basic operations");
+    s.section("StubHal basic operations");
     {
         StubHal hal;
         hal.init();
-        CHECK(hal.is_connected(), "Connected after init");
-        CHECK_EQ(static_cast<uint8_t>(hal.get_speed()), static_cast<uint8_t>(Speed::FULL),
-                 "Default speed is FULL");
+        s.check(hal.is_connected(), "Connected after init");
+        s.check_eq(static_cast<uint8_t>(hal.get_speed()), static_cast<uint8_t>(Speed::FULL));
 
         hal.set_address(7);
         hal.set_feedback_ep(2);
-        CHECK_EQ(hal.fb_ep, uint8_t{2}, "Feedback EP set");
-        CHECK(hal.is_feedback_tx_ready(), "Feedback tx ready by default");
+        s.check_eq(hal.fb_ep, uint8_t{2});
+        s.check(hal.is_feedback_tx_ready(), "Feedback tx ready by default");
 
         hal.set_feedback_tx_flag();
-        CHECK(hal.fb_tx_flag, "Feedback tx flag set");
+        s.check(hal.fb_tx_flag, "Feedback tx flag set");
 
         hal.ep0_prepare_rx(64);
-        CHECK_EQ(hal.ep0_rx_len, uint16_t{64}, "EP0 rx len");
+        s.check_eq(hal.ep0_rx_len, uint16_t{64});
 
         uint8_t data[] = {0xAA, 0xBB};
         hal.ep_write(1, data, 2);
-        CHECK_EQ(hal.ep_buf_len[1], uint16_t{2}, "EP1 write len");
-        CHECK_EQ(hal.ep_buf[1][0], uint8_t{0xAA}, "EP1 data[0]");
+        s.check_eq(hal.ep_buf_len[1], uint16_t{2});
+        s.check_eq(hal.ep_buf[1][0], uint8_t{0xAA});
     }
 
-    TEST_SUMMARY();
+    return s.summary();
 }

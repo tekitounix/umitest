@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // UMI-USB: CompositeClass Tests — IAD, descriptor merging, dispatch
-#include "test_common.hh"
+#include <umitest.hh>
+using namespace umitest;
 #include "core/composite_class.hh"
 #include "midi/usb_midi_class.hh"
 #include "stub_hal.hh"
@@ -63,7 +64,9 @@ struct StubAudioClass {
 using TestMidiClass = UsbMidiClass<MidiPort<1, 3>, MidiPort<1, 3>>;
 
 int main() {
-    SECTION("CompositeClass merged descriptor with IAD");
+    Suite s("usb_composite");
+
+    s.section("CompositeClass merged descriptor with IAD");
     {
         StubAudioClass audio;
         audio.build_fake_descriptor(2);
@@ -75,28 +78,28 @@ int main() {
         composite.build_merged_descriptor(0, 4, 0x01, 0x00);
 
         auto desc = composite.config_descriptor();
-        CHECK(desc.size() > 9, "Merged descriptor has content");
+        s.check(desc.size() > 9, "Merged descriptor has content");
 
         // Check config header
-        CHECK_EQ(desc[0], uint8_t{9}, "bLength = 9");
-        CHECK_EQ(desc[1], uint8_t{0x02}, "bDescriptorType = Configuration");
+        s.check_eq(desc[0], uint8_t{9});
+        s.check_eq(desc[1], uint8_t{0x02});
 
         // wTotalLength should match span size
         uint16_t total = static_cast<uint16_t>(desc[2]) | (static_cast<uint16_t>(desc[3]) << 8);
-        CHECK_EQ(total, static_cast<uint16_t>(desc.size()), "wTotalLength matches");
+        s.check_eq(total, static_cast<uint16_t>(desc.size()));
 
         // bNumInterfaces = audio(2) + midi(2) = 4
-        CHECK_EQ(desc[4], uint8_t{4}, "bNumInterfaces = 4");
+        s.check_eq(desc[4], uint8_t{4});
 
         // IAD should be at offset 9
-        CHECK_EQ(desc[9], uint8_t{8}, "IAD bLength = 8");
-        CHECK_EQ(desc[10], uint8_t{0x0B}, "IAD bDescriptorType = 0x0B");
-        CHECK_EQ(desc[11], uint8_t{0}, "IAD bFirstInterface = 0");
-        CHECK_EQ(desc[12], uint8_t{4}, "IAD bInterfaceCount = 4");
-        CHECK_EQ(desc[13], uint8_t{0x01}, "IAD bFunctionClass = Audio");
+        s.check_eq(desc[9], uint8_t{8});
+        s.check_eq(desc[10], uint8_t{0x0B});
+        s.check_eq(desc[11], uint8_t{0});
+        s.check_eq(desc[12], uint8_t{4});
+        s.check_eq(desc[13], uint8_t{0x01});
     }
 
-    SECTION("CompositeClass dispatches on_configured to both");
+    s.section("CompositeClass dispatches on_configured to both");
     {
         StubAudioClass audio;
         TestMidiClass midi;
@@ -113,10 +116,10 @@ int main() {
         // Send MIDI data to OUT endpoint
         uint8_t packet[] = {0x09, 0x90, 0x3C, 0x7F};
         composite.on_rx(3, std::span<const uint8_t>(packet, 4));
-        CHECK(midi_rx_called, "MIDI on_rx dispatched through composite");
+        s.check(midi_rx_called, "MIDI on_rx dispatched through composite");
     }
 
-    SECTION("CompositeClass configure_endpoints dispatches to both");
+    s.section("CompositeClass configure_endpoints dispatches to both");
     {
         StubAudioClass audio;
         TestMidiClass midi;
@@ -127,8 +130,8 @@ int main() {
         hal.init();
 
         composite.configure_endpoints(hal);
-        CHECK_EQ(hal.num_configured_eps, uint8_t{2}, "MIDI configured 2 endpoints");
+        s.check_eq(hal.num_configured_eps, uint8_t{2});
     }
 
-    TEST_SUMMARY();
+    return s.summary();
 }

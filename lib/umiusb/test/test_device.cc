@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // UMI-USB: Device Core Tests — BOS, vendor request, DeviceBuilder
-#include "test_common.hh"
+#include <umitest.hh>
+using namespace umitest;
 #include "core/device.hh"
 #include "midi/usb_midi_class.hh"
 #include "stub_hal.hh"
@@ -56,7 +57,9 @@ struct TestClass {
 static_assert(Class<TestClass>, "TestClass must satisfy Class concept");
 
 int main() {
-    SECTION("Device handles GetDescriptor Device");
+    Suite s("usb_device");
+
+    s.section("Device handles GetDescriptor Device");
     {
         StubHal hal;
         hal.init();
@@ -73,17 +76,17 @@ int main() {
         setup.wLength = 18;
         hal.callbacks.on_setup(hal.callbacks.context, setup);
 
-        CHECK(hal.ep_buf_len[0] > 0, "Device descriptor sent");
-        CHECK_EQ(hal.ep_buf[0][0], uint8_t{18}, "bLength = 18");
-        CHECK_EQ(hal.ep_buf[0][1], uint8_t{0x01}, "bDescriptorType = Device");
+        s.check(hal.ep_buf_len[0] > 0, "Device descriptor sent");
+        s.check_eq(hal.ep_buf[0][0], uint8_t{18});
+        s.check_eq(hal.ep_buf[0][1], uint8_t{0x01});
         // Check VID/PID
         uint16_t vid = hal.ep_buf[0][8] | (hal.ep_buf[0][9] << 8);
         uint16_t pid = hal.ep_buf[0][10] | (hal.ep_buf[0][11] << 8);
-        CHECK_EQ(vid, uint16_t{0x1234}, "VID correct");
-        CHECK_EQ(pid, uint16_t{0x5678}, "PID correct");
+        s.check_eq(vid, uint16_t{0x1234});
+        s.check_eq(pid, uint16_t{0x5678});
     }
 
-    SECTION("Device handles BOS descriptor");
+    s.section("Device handles BOS descriptor");
     {
         StubHal hal;
         hal.init();
@@ -99,12 +102,12 @@ int main() {
         setup.wLength = 64;
         hal.callbacks.on_setup(hal.callbacks.context, setup);
 
-        CHECK(hal.ep_buf_len[0] > 0, "BOS descriptor sent");
-        CHECK_EQ(hal.ep_buf[0][0], uint8_t{5}, "BOS bLength");
-        CHECK_EQ(hal.ep_buf[0][1], uint8_t{0x0F}, "BOS bDescriptorType");
+        s.check(hal.ep_buf_len[0] > 0, "BOS descriptor sent");
+        s.check_eq(hal.ep_buf[0][0], uint8_t{5});
+        s.check_eq(hal.ep_buf[0][1], uint8_t{0x0F});
     }
 
-    SECTION("Device delegates vendor request to class");
+    s.section("Device delegates vendor request to class");
     {
         StubHal hal;
         hal.init();
@@ -121,10 +124,10 @@ int main() {
         setup.wLength = 0;
         hal.callbacks.on_setup(hal.callbacks.context, setup);
 
-        CHECK(cls.vendor_handled, "Vendor request delegated to class");
+        s.check(cls.vendor_handled, "Vendor request delegated to class");
     }
 
-    SECTION("Device STALLs DeviceQualifier for FS-only");
+    s.section("Device STALLs DeviceQualifier for FS-only");
     {
         StubHal hal;
         hal.init();
@@ -141,10 +144,10 @@ int main() {
         hal.ep_stalled[0] = false;
         hal.callbacks.on_setup(hal.callbacks.context, setup);
 
-        CHECK(hal.ep_stalled[0], "DeviceQualifier STALLed for FS-only device");
+        s.check(hal.ep_stalled[0], "DeviceQualifier STALLed for FS-only device");
     }
 
-    SECTION("DeviceBuilder initialization sequence");
+    s.section("DeviceBuilder initialization sequence");
     {
         StubHal hal;
         hal.init();
@@ -155,8 +158,8 @@ int main() {
         // DeviceBuilder should disconnect, then reconnect
         auto dev = DeviceBuilder<StubHal, TestClass>(hal, cls, info).build();
         (void)dev;
-        CHECK(hal.is_connected(), "HAL reconnected after build");
+        s.check(hal.is_connected(), "HAL reconnected after build");
     }
 
-    TEST_SUMMARY();
+    return s.summary();
 }
