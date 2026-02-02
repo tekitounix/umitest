@@ -13,6 +13,9 @@ local lib_dir = path.directory(os.scriptdir())
 -- Include umiport (hardware abstraction layer)
 includes(path.join(lib_dir, "umiport"))
 
+-- Include umimmio (type-safe register abstraction)
+includes(path.join(lib_dir, "umimmio"))
+
 -- =====================================================================
 -- UMI Shell Library (platform-independent shell primitives)
 -- =====================================================================
