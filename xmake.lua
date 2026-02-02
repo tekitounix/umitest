@@ -95,6 +95,7 @@ end
 -- =====================================================================
 
 includes("lib/umi")
+includes("lib/umitest")
 includes("lib/umimock")
 includes("lib/umifs")
 includes("lib/umifs/test")
@@ -118,7 +119,6 @@ target_end()
 
 -- Main host tests (use umi.all for all library includes)
 for _, test in ipairs({
-    {"test_dsp", "lib/umidsp/test/test_dsp.cc"},
     {"test_loop_style", "tests/test_loop_style.cc"},
     {"test_kernel", "tests/test_kernel.cc"},
     {"test_audio", "tests/test_audio.cc"},
@@ -136,6 +136,24 @@ for _, test in ipairs({
         add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
     target_end()
 end
+
+-- DSP test (using umitest framework)
+target("test_dsp")
+    add_rules("host.test")
+    set_default(true)
+    add_deps("umi.all", "umitest")
+    add_files("lib/umidsp/test/test_dsp.cc")
+    add_includedirs("tests")
+    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
+target_end()
+-- Syscall/AudioContext test (umitest framework)
+target("test_syscall_context")
+    add_rules("host.test")
+    set_default(true)
+    add_deps("umi.all", "umitest")
+    add_files("tests/test_syscall_context.cc")
+    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
+target_end()
 
 -- Crypto/signature test (requires crypto source files)
 target("test_signature")
@@ -160,7 +178,7 @@ for _, test in ipairs({
     target(test[1])
         add_rules("host.test")
         set_group("tests/umidi")
-        add_deps("umi.midi", "umi.boot")
+        add_deps("umi.midi", "umi.boot", "umitest")
         add_files(test[2])
         add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
     target_end()
@@ -175,7 +193,7 @@ for _, test in ipairs({
     target(test[1])
         add_rules("host.test")
         set_group("tests/umiboot")
-        add_deps("umi.boot")
+        add_deps("umi.boot", "umitest")
         add_files(test[2])
         add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
     target_end()
