@@ -6,7 +6,8 @@
 // All benchmarks use identical storage geometry (512B × 512 blocks = 256KB)
 // and identical operation sequences for fair comparison.
 
-#include "test_common.hh"
+#include <umitest.hh>
+using namespace umitest;
 
 // Enable adapters
 #define FS_ADAPTER_LFS_REF
@@ -43,6 +44,8 @@ static void run_benchmarks(Adapter& a, uint8_t* storage, double results[6]) {
 // ============================================================================
 
 int main() {
+    Suite s("fs_bench");
+
     std::printf("\n=== umifs unified benchmark (host) ===\n");
     std::printf("Storage: %u B blocks × %u blocks = %u KB\n\n",
                 BENCH_BLOCK_SIZE, BENCH_BLOCK_COUNT, BENCH_TOTAL_SIZE / 1024);
@@ -61,25 +64,25 @@ int main() {
 
     double results[N_FS][N_OPS]{};
 
-    SECTION("Benchmark: lfs (reference C)");
+    s.section("Benchmark: lfs (reference C)");
     {
         LfsRefAdapter a;
         run_benchmarks(a, storage_lfs_ref, results[0]);
-        CHECK(true, "lfs(ref) benchmarks complete");
+        s.check(true, "lfs(ref) benchmarks complete");
     }
 
-    SECTION("Benchmark: fat (cleanroom)");
+    s.section("Benchmark: fat (cleanroom)");
     {
         FatAdapter a;
         run_benchmarks(a, storage_fat, results[1]);
-        CHECK(true, "fat(cr) benchmarks complete");
+        s.check(true, "fat(cr) benchmarks complete");
     }
 
-    SECTION("Benchmark: slim");
+    s.section("Benchmark: slim");
     {
         SlimAdapter a;
         run_benchmarks(a, storage_slim, results[2]);
-        CHECK(true, "slim benchmarks complete");
+        s.check(true, "slim benchmarks complete");
     }
 
     // ================================================================
@@ -106,5 +109,5 @@ int main() {
     }
 
     std::printf("\n");
-    TEST_SUMMARY();
+    return s.summary();
 }

@@ -2,7 +2,8 @@
 // Comparison tests: C++23 port (umi::fs::fat) vs reference FatFs C implementation
 // Verifies functional equivalence and measures performance delta
 
-#include "test_common.hh"
+#include <umitest.hh>
+using namespace umitest;
 
 // --- C++23 port ---
 #include <umifs/fat/ff.hh>
@@ -194,8 +195,8 @@ static void report_perf(const char* op, double port_us, double ref_us) {
 // Test: mount comparison
 // ============================================================================
 
-static void test_mount_compare() {
-    SECTION("Compare: Mount");
+static void test_mount_compare(Suite& s) {
+    s.section("Compare: Mount");
 
     // Port
     format_fat16(storage_port);
@@ -204,14 +205,14 @@ static void test_mount_compare() {
     pfs.set_diskio(&pdio);
     umi::fs::FatFsVolume pvol{};
     auto pres = pfs.mount(&pvol, "", 1);
-    CHECK(pres == umi::fs::FatResult::OK, "port mount");
+    s.check(pres == umi::fs::FatResult::OK, "port mount");
     pfs.unmount("");
 
     // Reference
     format_fat16(storage_ref);
     FATFS rvol{};
     FRESULT rres = f_mount(&rvol, "", 1);
-    CHECK(rres == FR_OK, "ref mount");
+    s.check(rres == FR_OK, "ref mount");
     f_unmount("");
 }
 
@@ -219,8 +220,8 @@ static void test_mount_compare() {
 // Test: file write/read equivalence
 // ============================================================================
 
-static void test_file_rw_compare() {
-    SECTION("Compare: File Write/Read");
+static void test_file_rw_compare(Suite& s) {
+    s.section("Compare: File Write/Read");
 
     const char* data = "Hello, FATfs comparison!";
     auto len = std::strlen(data);
@@ -264,18 +265,18 @@ static void test_file_rw_compare() {
     f_close(&rfp);
     f_unmount("");
 
-    CHECK(pbr == rbr, "bytes read match");
-    CHECK(pbw == rbw, "bytes written match");
-    CHECK(std::memcmp(pbuf, rbuf, pbr) == 0, "file content matches between port and ref");
-    CHECK(std::memcmp(pbuf, data, len) == 0, "data is correct");
+    s.check(pbr == rbr, "bytes read match");
+    s.check(pbw == rbw, "bytes written match");
+    s.check(std::memcmp(pbuf, rbuf, pbr) == 0, "file content matches between port and ref");
+    s.check(std::memcmp(pbuf, data, len) == 0, "data is correct");
 }
 
 // ============================================================================
 // Test: on-disk format compatibility (port write → ref read)
 // ============================================================================
 
-static void test_cross_port_to_ref() {
-    SECTION("Compare: Cross-read (port → ref)");
+static void test_cross_port_to_ref(Suite& s) {
+    s.section("Compare: Cross-read (port → ref)");
 
     // Write with port
     format_fat16(storage_port);
@@ -299,17 +300,17 @@ static void test_cross_port_to_ref() {
     // Read with reference
     FATFS rvol{};
     FRESULT res = f_mount(&rvol, "", 1);
-    CHECK(res == FR_OK, "ref mounts port image");
+    s.check(res == FR_OK, "ref mounts port image");
 
     FIL rfp{};
     res = f_open(&rfp, "CROSS.TXT", FA_READ);
-    CHECK(res == FR_OK, "ref opens port file");
+    s.check(res == FR_OK, "ref opens port file");
 
     char rbuf[32]{};
     UINT br;
     f_read(&rfp, rbuf, sizeof(rbuf), &br);
-    CHECK(br == std::strlen(msg), "ref reads correct size");
-    CHECK(std::memcmp(rbuf, msg, std::strlen(msg)) == 0, "ref reads correct data");
+    s.check(br == std::strlen(msg), "ref reads correct size");
+    s.check(std::memcmp(rbuf, msg, std::strlen(msg)) == 0, "ref reads correct data");
     f_close(&rfp);
     f_unmount("");
 }
@@ -318,8 +319,8 @@ static void test_cross_port_to_ref() {
 // Test: on-disk format compatibility (ref write → port read)
 // ============================================================================
 
-static void test_cross_ref_to_port() {
-    SECTION("Compare: Cross-read (ref → port)");
+static void test_cross_ref_to_port(Suite& s) {
+    s.section("Compare: Cross-read (ref → port)");
 
     // Write with reference
     format_fat16(storage_ref);
@@ -343,17 +344,17 @@ static void test_cross_ref_to_port() {
     pfs.set_diskio(&pdio);
     umi::fs::FatFsVolume pvol{};
     auto pres = pfs.mount(&pvol, "", 1);
-    CHECK(pres == umi::fs::FatResult::OK, "port mounts ref image");
+    s.check(pres == umi::fs::FatResult::OK, "port mounts ref image");
 
     umi::fs::FatFile pfp{};
     pres = pfs.open(&pfp, "CROSS.TXT", FA_READ);
-    CHECK(pres == umi::fs::FatResult::OK, "port opens ref file");
+    s.check(pres == umi::fs::FatResult::OK, "port opens ref file");
 
     char pbuf[32]{};
     uint32_t br;
     pfs.read(&pfp, pbuf, sizeof(pbuf), &br);
-    CHECK(br == std::strlen(msg), "port reads correct size");
-    CHECK(std::memcmp(pbuf, msg, std::strlen(msg)) == 0, "port reads correct data");
+    s.check(br == std::strlen(msg), "port reads correct size");
+    s.check(std::memcmp(pbuf, msg, std::strlen(msg)) == 0, "port reads correct data");
     pfs.close(&pfp);
     pfs.unmount("");
 }
@@ -362,8 +363,8 @@ static void test_cross_ref_to_port() {
 // Test: directory operations equivalence
 // ============================================================================
 
-static void test_dir_compare() {
-    SECTION("Compare: Directory operations");
+static void test_dir_compare(Suite& s) {
+    s.section("Compare: Directory operations");
 
     // Port
     format_fat16(storage_port);
@@ -424,11 +425,11 @@ static void test_dir_compare() {
     }
     f_unmount("");
 
-    CHECK(pcount == rcount, "directory entry count matches");
-    CHECK(pcount == EXPECT_ENTRIES, "both have 3 entries");
+    s.check(pcount == rcount, "directory entry count matches");
+    s.check(pcount == EXPECT_ENTRIES, "both have 3 entries");
     for (int i = 0; i < pcount && i < rcount; i++) {
-        CHECK(std::strcmp(pnames[i], rnames[i]) == 0, "entry name matches");
-        CHECK((pattrs[i] & 0x10) == (rattrs[i] & 0x10), "entry dir attribute matches");
+        s.check(std::strcmp(pnames[i], rnames[i]) == 0, "entry name matches");
+        s.check((pattrs[i] & 0x10) == (rattrs[i] & 0x10), "entry dir attribute matches");
     }
 }
 
@@ -436,8 +437,8 @@ static void test_dir_compare() {
 // Performance: file write
 // ============================================================================
 
-static void test_perf_write() {
-    SECTION("Perf: File write 4KB");
+static void test_perf_write(Suite& s) {
+    s.section("Perf: File write 4KB");
 
     constexpr int ITERATIONS = 30;
     constexpr int WARMUP = 2;
@@ -487,15 +488,15 @@ static void test_perf_write() {
     }
 
     report_perf("write 4KB", port_total / ITERATIONS, ref_total / ITERATIONS);
-    CHECK(port_total / ref_total < 2.0, "port write not more than 2x slower than ref");
+    s.check(port_total / ref_total < 2.0, "port write not more than 2x slower than ref");
 }
 
 // ============================================================================
 // Performance: file read
 // ============================================================================
 
-static void test_perf_read() {
-    SECTION("Perf: File read 4KB");
+static void test_perf_read(Suite& s) {
+    s.section("Perf: File read 4KB");
 
     uint8_t pattern[512];
     std::srand(123);
@@ -565,15 +566,15 @@ static void test_perf_read() {
     f_unmount("");
 
     report_perf("read 4KB", port_total / ITERATIONS, ref_total / ITERATIONS);
-    CHECK(port_total / ref_total < 2.0, "port read not more than 2x slower than ref");
+    s.check(port_total / ref_total < 2.0, "port read not more than 2x slower than ref");
 }
 
 // ============================================================================
 // Performance: mount
 // ============================================================================
 
-static void test_perf_mount() {
-    SECTION("Perf: Mount");
+static void test_perf_mount(Suite& s) {
+    s.section("Perf: Mount");
 
     constexpr int ITERATIONS = 100;
 
@@ -603,15 +604,15 @@ static void test_perf_mount() {
     }
 
     report_perf("mount", port_total / ITERATIONS, ref_total / ITERATIONS);
-    CHECK(port_total / ref_total < 2.0, "port mount not more than 2x slower than ref");
+    s.check(port_total / ref_total < 2.0, "port mount not more than 2x slower than ref");
 }
 
 // ============================================================================
 // Performance: 64KB write with random data
 // ============================================================================
 
-static void test_perf_write_64k() {
-    SECTION("Perf: Write 64KB random");
+static void test_perf_write_64k(Suite& s) {
+    s.section("Perf: Write 64KB random");
 
     constexpr int ITERATIONS = 10;
     constexpr int WARMUP = 2;
@@ -663,15 +664,15 @@ static void test_perf_write_64k() {
     }
 
     report_perf("write 64KB random", port_total / ITERATIONS, ref_total / ITERATIONS);
-    CHECK(port_total / ref_total < 2.0, "port write 64KB not more than 2x slower than ref");
+    s.check(port_total / ref_total < 2.0, "port write 64KB not more than 2x slower than ref");
 }
 
 // ============================================================================
 // Performance: 64KB read with random data
 // ============================================================================
 
-static void test_perf_read_64k() {
-    SECTION("Perf: Read 64KB random");
+static void test_perf_read_64k(Suite& s) {
+    s.section("Perf: Read 64KB random");
 
     constexpr int ITERATIONS = 10;
     constexpr int WARMUP = 2;
@@ -743,7 +744,7 @@ static void test_perf_read_64k() {
     f_unmount("");
 
     report_perf("read 64KB random", port_total / ITERATIONS, ref_total / ITERATIONS);
-    CHECK(port_total / ref_total < 2.0, "port read 64KB not more than 2x slower than ref");
+    s.check(port_total / ref_total < 2.0, "port read 64KB not more than 2x slower than ref");
 }
 
 // ============================================================================
@@ -751,19 +752,21 @@ static void test_perf_read_64k() {
 // ============================================================================
 
 int main() {
+    Suite s("fs_fat_compare");
+
     std::printf("\n=== FATfs: C++23 port vs reference C implementation ===\n\n");
 
-    test_mount_compare();
-    test_file_rw_compare();
-    test_cross_port_to_ref();
-    test_cross_ref_to_port();
-    test_dir_compare();
-    test_perf_write();
-    test_perf_read();
-    test_perf_write_64k();
-    test_perf_read_64k();
-    test_perf_mount();
+    test_mount_compare(s);
+    test_file_rw_compare(s);
+    test_cross_port_to_ref(s);
+    test_cross_ref_to_port(s);
+    test_dir_compare(s);
+    test_perf_write(s);
+    test_perf_read(s);
+    test_perf_write_64k(s);
+    test_perf_read_64k(s);
+    test_perf_mount(s);
 
     std::printf("\n");
-    TEST_SUMMARY();
+    return s.summary();
 }

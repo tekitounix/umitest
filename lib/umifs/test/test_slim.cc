@@ -6,9 +6,10 @@
 #include <umifs/slim/slim_config.hh>
 #include <umifs/slim/slim_types.hh>
 
-#include "test_common.hh"
+#include <umitest.hh>
 
 using namespace umi::fs;
+using namespace umitest;
 
 // ============================================================================
 // RAM Block Device
@@ -92,39 +93,39 @@ struct SlimFixture {
 // Format / Mount / Unmount
 // ============================================================================
 
-static void test_format_and_mount() {
-    SECTION("Format and Mount");
+static void test_format_and_mount(Suite& s) {
+    s.section("Format and Mount");
 
     SlimFs fs;
     std::memset(storage, 0xFF, TOTAL_SIZE);
     auto cfg = make_config();
 
     int rc = fs.format(&cfg);
-    CHECK(rc == 0, "format succeeds");
+    s.check(rc == 0, "format succeeds");
 
     rc = fs.mount(&cfg);
-    CHECK(rc == 0, "mount succeeds");
+    s.check(rc == 0, "mount succeeds");
 
     rc = fs.unmount();
-    CHECK(rc == 0, "unmount succeeds");
+    s.check(rc == 0, "unmount succeeds");
 }
 
-static void test_remount() {
-    SECTION("Remount preserves data");
+static void test_remount(Suite& s) {
+    s.section("Remount preserves data");
 
     SlimFixture f;
     f.format_and_mount();
 
     // Create a directory, then remount and verify
     int rc = f.fs.mkdir("/test");
-    CHECK(rc == 0, "mkdir /test");
+    s.check(rc == 0, "mkdir /test");
 
     f.remount();
 
     SlimInfo info{};
     rc = f.fs.stat("/test", info);
-    CHECK(rc == 0, "stat /test after remount");
-    CHECK(info.type == SlimType::DIR, "type is DIR");
+    s.check(rc == 0, "stat /test after remount");
+    s.check(info.type == SlimType::DIR, "type is DIR");
 
     (void)f.fs.unmount();
 }
@@ -133,30 +134,30 @@ static void test_remount() {
 // Directory operations
 // ============================================================================
 
-static void test_mkdir_and_stat() {
-    SECTION("mkdir and stat");
+static void test_mkdir_and_stat(Suite& s) {
+    s.section("mkdir and stat");
 
     SlimFixture f;
     f.format_and_mount();
 
     int rc = f.fs.mkdir("/mydir");
-    CHECK(rc == 0, "mkdir /mydir");
+    s.check(rc == 0, "mkdir /mydir");
 
     SlimInfo info{};
     rc = f.fs.stat("/mydir", info);
-    CHECK(rc == 0, "stat /mydir");
-    CHECK(info.type == SlimType::DIR, "type is DIR");
-    CHECK(std::strcmp(info.name, "mydir") == 0, "name is mydir");
+    s.check(rc == 0, "stat /mydir");
+    s.check(info.type == SlimType::DIR, "type is DIR");
+    s.check(std::strcmp(info.name, "mydir") == 0, "name is mydir");
 
     // Duplicate mkdir should fail
     rc = f.fs.mkdir("/mydir");
-    CHECK(rc != 0, "duplicate mkdir fails");
+    s.check(rc != 0, "duplicate mkdir fails");
 
     (void)f.fs.unmount();
 }
 
-static void test_dir_read() {
-    SECTION("dir_open / dir_read / dir_close");
+static void test_dir_read(Suite& s) {
+    s.section("dir_open / dir_read / dir_close");
 
     SlimFixture f;
     f.format_and_mount();
@@ -167,7 +168,7 @@ static void test_dir_read() {
 
     SlimDir dir{};
     int rc = f.fs.dir_open(dir, "/");
-    CHECK(rc == 0, "dir_open /");
+    s.check(rc == 0, "dir_open /");
 
     int count = 0;
     SlimInfo info{};
@@ -177,30 +178,30 @@ static void test_dir_read() {
             break;
         count++;
     }
-    CHECK(count == 3, "root has 3 entries");
+    s.check(count == 3, "root has 3 entries");
 
     rc = f.fs.dir_close(dir);
-    CHECK(rc == 0, "dir_close");
+    s.check(rc == 0, "dir_close");
 
     (void)f.fs.unmount();
 }
 
-static void test_nested_dirs() {
-    SECTION("Nested directories");
+static void test_nested_dirs(Suite& s) {
+    s.section("Nested directories");
 
     SlimFixture f;
     f.format_and_mount();
 
     int rc = f.fs.mkdir("/parent");
-    CHECK(rc == 0, "mkdir /parent");
+    s.check(rc == 0, "mkdir /parent");
 
     rc = f.fs.mkdir("/parent/child");
-    CHECK(rc == 0, "mkdir /parent/child");
+    s.check(rc == 0, "mkdir /parent/child");
 
     SlimInfo info{};
     rc = f.fs.stat("/parent/child", info);
-    CHECK(rc == 0, "stat /parent/child");
-    CHECK(info.type == SlimType::DIR, "child is DIR");
+    s.check(rc == 0, "stat /parent/child");
+    s.check(info.type == SlimType::DIR, "child is DIR");
 
     (void)f.fs.unmount();
 }
@@ -209,42 +210,42 @@ static void test_nested_dirs() {
 // File operations
 // ============================================================================
 
-static void test_file_write_read() {
-    SECTION("File write and read");
+static void test_file_write_read(Suite& s) {
+    s.section("File write and read");
 
     SlimFixture f;
     f.format_and_mount();
 
     SlimFile file{};
     int rc = f.fs.file_open(file, "/hello.txt", SlimOpenFlags::WRONLY | SlimOpenFlags::CREAT);
-    CHECK(rc == 0, "file_open for write");
+    s.check(rc == 0, "file_open for write");
 
     const char* msg = "Hello, slimfs!";
     auto data = std::span<const uint8_t>(reinterpret_cast<const uint8_t*>(msg), std::strlen(msg));
     rc = f.fs.file_write(file, data);
-    CHECK(rc == static_cast<int>(std::strlen(msg)), "file_write returns bytes written");
+    s.check(rc == static_cast<int>(std::strlen(msg)), "file_write returns bytes written");
 
     rc = f.fs.file_close(file);
-    CHECK(rc == 0, "file_close after write");
+    s.check(rc == 0, "file_close after write");
 
     // Read back
     SlimFile rfile{};
     rc = f.fs.file_open(rfile, "/hello.txt", SlimOpenFlags::RDONLY);
-    CHECK(rc == 0, "file_open for read");
+    s.check(rc == 0, "file_open for read");
 
     uint8_t buf[64]{};
     rc = f.fs.file_read(rfile, {buf, sizeof(buf)});
-    CHECK(rc == static_cast<int>(std::strlen(msg)), "file_read returns bytes read");
-    CHECK(std::memcmp(buf, msg, std::strlen(msg)) == 0, "data matches");
+    s.check(rc == static_cast<int>(std::strlen(msg)), "file_read returns bytes read");
+    s.check(std::memcmp(buf, msg, std::strlen(msg)) == 0, "data matches");
 
     rc = f.fs.file_close(rfile);
-    CHECK(rc == 0, "file_close after read");
+    s.check(rc == 0, "file_close after read");
 
     (void)f.fs.unmount();
 }
 
-static void test_file_stat() {
-    SECTION("File stat");
+static void test_file_stat(Suite& s) {
+    s.section("File stat");
 
     SlimFixture f;
     f.format_and_mount();
@@ -258,15 +259,15 @@ static void test_file_stat() {
 
     SlimInfo info{};
     int rc = f.fs.stat("/data.bin", info);
-    CHECK(rc == 0, "stat /data.bin");
-    CHECK(info.type == SlimType::REG, "type is REG");
-    CHECK(info.size == 100, "size is 100");
+    s.check(rc == 0, "stat /data.bin");
+    s.check(info.type == SlimType::REG, "type is REG");
+    s.check(info.size == 100, "size is 100");
 
     (void)f.fs.unmount();
 }
 
-static void test_file_seek() {
-    SECTION("File seek");
+static void test_file_seek(Suite& s) {
+    s.section("File seek");
 
     SlimFixture f;
     f.format_and_mount();
@@ -283,20 +284,20 @@ static void test_file_seek() {
     // Read from offset
     (void)f.fs.file_open(file, "/seek.bin", SlimOpenFlags::RDONLY);
     int rc = f.fs.file_seek(file, 100, SlimWhence::SET);
-    CHECK(rc >= 0, "seek to 100");
+    s.check(rc >= 0, "seek to 100");
 
     uint8_t buf[10]{};
     rc = f.fs.file_read(file, {buf, 10});
-    CHECK(rc == 10, "read 10 bytes at offset 100");
-    CHECK(buf[0] == 100, "first byte is 100");
-    CHECK(buf[9] == 109, "last byte is 109");
+    s.check(rc == 10, "read 10 bytes at offset 100");
+    s.check(buf[0] == 100, "first byte is 100");
+    s.check(buf[9] == 109, "last byte is 109");
 
     (void)f.fs.file_close(file);
     (void)f.fs.unmount();
 }
 
-static void test_file_truncate() {
-    SECTION("File truncate");
+static void test_file_truncate(Suite& s) {
+    s.section("File truncate");
 
     SlimFixture f;
     f.format_and_mount();
@@ -308,17 +309,17 @@ static void test_file_truncate() {
     (void)f.fs.file_write(file, {data, sizeof(data)});
 
     int rc = f.fs.file_truncate(file, 50);
-    CHECK(rc == 0, "truncate to 50");
+    s.check(rc == 0, "truncate to 50");
 
     int sz = f.fs.file_size(file);
-    CHECK(sz == 50, "size is 50 after truncate");
+    s.check(sz == 50, "size is 50 after truncate");
 
     (void)f.fs.file_close(file);
     (void)f.fs.unmount();
 }
 
-static void test_file_persist_after_remount() {
-    SECTION("File data persists after remount");
+static void test_file_persist_after_remount(Suite& s) {
+    s.section("File data persists after remount");
 
     SlimFixture f;
     f.format_and_mount();
@@ -334,8 +335,8 @@ static void test_file_persist_after_remount() {
     (void)f.fs.file_open(file, "/persist.txt", SlimOpenFlags::RDONLY);
     uint8_t buf[64]{};
     int rc = f.fs.file_read(file, {buf, sizeof(buf)});
-    CHECK(rc == static_cast<int>(std::strlen(msg)), "read after remount");
-    CHECK(std::memcmp(buf, msg, std::strlen(msg)) == 0, "data matches after remount");
+    s.check(rc == static_cast<int>(std::strlen(msg)), "read after remount");
+    s.check(std::memcmp(buf, msg, std::strlen(msg)) == 0, "data matches after remount");
     (void)f.fs.file_close(file);
 
     (void)f.fs.unmount();
@@ -345,8 +346,8 @@ static void test_file_persist_after_remount() {
 // Large file (multi-block)
 // ============================================================================
 
-static void test_large_file() {
-    SECTION("Large file (multi-block)");
+static void test_large_file(Suite& s) {
+    s.section("Large file (multi-block)");
 
     SlimFixture f;
     f.format_and_mount();
@@ -383,7 +384,7 @@ static void test_large_file() {
         if (!match)
             break;
     }
-    CHECK(match, "large file data integrity");
+    s.check(match, "large file data integrity");
     (void)f.fs.file_close(file);
 
     (void)f.fs.unmount();
@@ -393,8 +394,8 @@ static void test_large_file() {
 // Remove
 // ============================================================================
 
-static void test_remove_file() {
-    SECTION("Remove file");
+static void test_remove_file(Suite& s) {
+    s.section("Remove file");
 
     SlimFixture f;
     f.format_and_mount();
@@ -406,34 +407,34 @@ static void test_remove_file() {
     (void)f.fs.file_close(file);
 
     int rc = f.fs.remove("/rm.txt");
-    CHECK(rc == 0, "remove succeeds");
+    s.check(rc == 0, "remove succeeds");
 
     SlimInfo info{};
     rc = f.fs.stat("/rm.txt", info);
-    CHECK(rc != 0, "stat after remove fails");
+    s.check(rc != 0, "stat after remove fails");
 
     (void)f.fs.unmount();
 }
 
-static void test_remove_dir() {
-    SECTION("Remove empty directory");
+static void test_remove_dir(Suite& s) {
+    s.section("Remove empty directory");
 
     SlimFixture f;
     f.format_and_mount();
 
     (void)f.fs.mkdir("/empty");
     int rc = f.fs.remove("/empty");
-    CHECK(rc == 0, "remove empty dir");
+    s.check(rc == 0, "remove empty dir");
 
     SlimInfo info{};
     rc = f.fs.stat("/empty", info);
-    CHECK(rc != 0, "stat after remove fails");
+    s.check(rc != 0, "stat after remove fails");
 
     (void)f.fs.unmount();
 }
 
-static void test_remove_nonempty_dir() {
-    SECTION("Remove non-empty directory fails");
+static void test_remove_nonempty_dir(Suite& s) {
+    s.section("Remove non-empty directory fails");
 
     SlimFixture f;
     f.format_and_mount();
@@ -442,7 +443,7 @@ static void test_remove_nonempty_dir() {
     (void)f.fs.mkdir("/notempty/child");
 
     int rc = f.fs.remove("/notempty");
-    CHECK(rc != 0, "remove non-empty dir fails");
+    s.check(rc != 0, "remove non-empty dir fails");
 
     (void)f.fs.unmount();
 }
@@ -451,8 +452,8 @@ static void test_remove_nonempty_dir() {
 // Rename
 // ============================================================================
 
-static void test_rename() {
-    SECTION("Rename file");
+static void test_rename(Suite& s) {
+    s.section("Rename file");
 
     SlimFixture f;
     f.format_and_mount();
@@ -464,22 +465,22 @@ static void test_rename() {
     (void)f.fs.file_close(file);
 
     int rc = f.fs.rename("/old.txt", "/new.txt");
-    CHECK(rc == 0, "rename succeeds");
+    s.check(rc == 0, "rename succeeds");
 
     SlimInfo info{};
     rc = f.fs.stat("/old.txt", info);
-    CHECK(rc != 0, "old name gone");
+    s.check(rc != 0, "old name gone");
 
     rc = f.fs.stat("/new.txt", info);
-    CHECK(rc == 0, "new name exists");
-    CHECK(info.type == SlimType::REG, "type is REG");
+    s.check(rc == 0, "new name exists");
+    s.check(info.type == SlimType::REG, "type is REG");
 
     // Verify data
     (void)f.fs.file_open(file, "/new.txt", SlimOpenFlags::RDONLY);
     uint8_t buf[64]{};
     rc = f.fs.file_read(file, {buf, sizeof(buf)});
-    CHECK(rc == static_cast<int>(std::strlen(msg)), "data length after rename");
-    CHECK(std::memcmp(buf, msg, std::strlen(msg)) == 0, "data matches after rename");
+    s.check(rc == static_cast<int>(std::strlen(msg)), "data length after rename");
+    s.check(std::memcmp(buf, msg, std::strlen(msg)) == 0, "data matches after rename");
     (void)f.fs.file_close(file);
 
     (void)f.fs.unmount();
@@ -489,20 +490,20 @@ static void test_rename() {
 // fs_size / fs_traverse
 // ============================================================================
 
-static void test_fs_size() {
-    SECTION("fs_size");
+static void test_fs_size(Suite& s) {
+    s.section("fs_size");
 
     SlimFixture f;
     f.format_and_mount();
 
     int sz = f.fs.fs_size();
-    CHECK(sz > 0, "fs_size > 0 after format");
+    s.check(sz > 0, "fs_size > 0 after format");
 
     (void)f.fs.unmount();
 }
 
-static void test_fs_traverse() {
-    SECTION("fs_traverse");
+static void test_fs_traverse(Suite& s) {
+    s.section("fs_traverse");
 
     SlimFixture f;
     f.format_and_mount();
@@ -513,8 +514,8 @@ static void test_fs_traverse() {
         return 0;
     };
     int rc = f.fs.fs_traverse(cb, &block_count);
-    CHECK(rc == 0, "fs_traverse succeeds");
-    CHECK(block_count > 0, "traversed blocks > 0");
+    s.check(rc == 0, "fs_traverse succeeds");
+    s.check(block_count > 0, "traversed blocks > 0");
 
     (void)f.fs.unmount();
 }
@@ -523,21 +524,21 @@ static void test_fs_traverse() {
 // Edge cases
 // ============================================================================
 
-static void test_open_nonexistent() {
-    SECTION("Open nonexistent file");
+static void test_open_nonexistent(Suite& s) {
+    s.section("Open nonexistent file");
 
     SlimFixture f;
     f.format_and_mount();
 
     SlimFile file{};
     int rc = f.fs.file_open(file, "/nope.txt", SlimOpenFlags::RDONLY);
-    CHECK(rc != 0, "open nonexistent fails");
+    s.check(rc != 0, "open nonexistent fails");
 
     (void)f.fs.unmount();
 }
 
-static void test_file_append() {
-    SECTION("File append mode");
+static void test_file_append(Suite& s) {
+    s.section("File append mode");
 
     SlimFixture f;
     f.format_and_mount();
@@ -559,8 +560,8 @@ static void test_file_append() {
     (void)f.fs.file_open(file, "/app.txt", SlimOpenFlags::RDONLY);
     uint8_t buf[64]{};
     int rc = f.fs.file_read(file, {buf, sizeof(buf)});
-    CHECK(rc == 11, "total length is 11");
-    CHECK(std::memcmp(buf, "Hello World", 11) == 0, "appended data matches");
+    s.check(rc == 11, "total length is 11");
+    s.check(std::memcmp(buf, "Hello World", 11) == 0, "appended data matches");
     (void)f.fs.file_close(file);
 
     (void)f.fs.unmount();
@@ -625,8 +626,8 @@ static bool try_mount_after_fault() {
 }
 #endif // SLIM_FAULT_TESTS
 
-static void test_power_loss_during_mkdir() {
-    SECTION("Power-loss during mkdir — mount recovers");
+static void test_power_loss_during_mkdir(Suite& s) {
+    s.section("Power-loss during mkdir — mount recovers");
 
     SlimFixture f;
     f.format_and_mount();
@@ -643,18 +644,18 @@ static void test_power_loss_during_mkdir() {
     SlimFs fs2{};
     auto cfg = make_config();
     int rc = fs2.mount(&cfg);
-    CHECK(rc == 0, "mount after power-loss succeeds");
+    s.check(rc == 0, "mount after power-loss succeeds");
 
     // /willdie should not exist
     SlimInfo info{};
     rc = fs2.stat("/willdie", info);
-    CHECK(rc != 0, "mkdir entry absent after power-loss");
+    s.check(rc != 0, "mkdir entry absent after power-loss");
 
     (void)fs2.unmount();
 }
 
-static void test_power_loss_during_file_write() {
-    SECTION("Power-loss during file_write — mount recovers");
+static void test_power_loss_during_file_write(Suite& s) {
+    s.section("Power-loss during file_write — mount recovers");
 
     SlimFixture f;
     f.format_and_mount();
@@ -682,23 +683,23 @@ static void test_power_loss_during_file_write() {
     SlimFs fs2{};
     auto cfg = make_config();
     int rc = fs2.mount(&cfg);
-    CHECK(rc == 0, "mount after write power-loss");
+    s.check(rc == 0, "mount after write power-loss");
 
     SlimFile rf{};
     rc = fs2.file_open(rf, "/safe.txt", SlimOpenFlags::RDONLY);
-    CHECK(rc == 0, "open safe.txt after power-loss");
+    s.check(rc == 0, "open safe.txt after power-loss");
 
     uint8_t buf[64]{};
     rc = fs2.file_read(rf, {buf, sizeof(buf)});
-    CHECK(rc == static_cast<int>(std::strlen(msg)), "original data length preserved");
-    CHECK(std::memcmp(buf, msg, std::strlen(msg)) == 0, "original data intact");
+    s.check(rc == static_cast<int>(std::strlen(msg)), "original data length preserved");
+    s.check(std::memcmp(buf, msg, std::strlen(msg)) == 0, "original data intact");
 
     (void)fs2.file_close(rf);
     (void)fs2.unmount();
 }
 
-static void test_power_loss_during_remove() {
-    SECTION("Power-loss during remove — mount recovers");
+static void test_power_loss_during_remove(Suite& s) {
+    s.section("Power-loss during remove — mount recovers");
 
     SlimFixture f;
     f.format_and_mount();
@@ -716,18 +717,18 @@ static void test_power_loss_during_remove() {
     SlimFs fs2{};
     auto cfg = make_config();
     int rc = fs2.mount(&cfg);
-    CHECK(rc == 0, "mount after remove power-loss");
+    s.check(rc == 0, "mount after remove power-loss");
 
     SlimInfo info{};
     rc = fs2.stat("/keep", info);
-    CHECK(rc == 0, "dir still exists after power-loss");
-    CHECK(info.type == SlimType::DIR, "type is DIR");
+    s.check(rc == 0, "dir still exists after power-loss");
+    s.check(info.type == SlimType::DIR, "type is DIR");
 
     (void)fs2.unmount();
 }
 
-static void test_superblock_redundancy() {
-    SECTION("Superblock A corruption — falls back to B");
+static void test_superblock_redundancy(Suite& s) {
+    s.section("Superblock A corruption — falls back to B");
 
     SlimFixture f;
     f.format_and_mount();
@@ -741,13 +742,13 @@ static void test_superblock_redundancy() {
     SlimFs fs2{};
     auto cfg = make_config();
     int rc = fs2.mount(&cfg);
-    CHECK(rc == 0, "mount with corrupted SB-A via SB-B");
+    s.check(rc == 0, "mount with corrupted SB-A via SB-B");
 
     (void)fs2.unmount();
 }
 
-static void test_both_superblocks_corrupt() {
-    SECTION("Both superblocks corrupt — mount fails");
+static void test_both_superblocks_corrupt(Suite& s) {
+    s.section("Both superblocks corrupt — mount fails");
 
     SlimFixture f;
     f.format_and_mount();
@@ -760,12 +761,12 @@ static void test_both_superblocks_corrupt() {
     SlimFs fs2{};
     auto cfg = make_config();
     int rc = fs2.mount(&cfg);
-    CHECK(rc != 0, "mount fails with both SBs corrupt");
+    s.check(rc != 0, "mount fails with both SBs corrupt");
 }
 
 #if SLIM_FAULT_TESTS
-static void test_fault_injection_mkdir() {
-    SECTION("Fault injection: crash at every prog/erase during mkdir");
+static void test_fault_injection_mkdir(Suite& s) {
+    s.section("Fault injection: crash at every prog/erase during mkdir");
 
     for (int n = 0; n < 20; ++n) {
         // Start from clean state
@@ -788,7 +789,7 @@ static void test_fault_injection_mkdir() {
             // Crash occurred — verify recovery
             bool ok = try_mount_after_fault();
             if (!ok) {
-                umi::test::checkf(false, "fault mkdir n=%d: mount crashed", n);
+                s.check(false, "fault mkdir: mount crashed after fault injection");
                 return;
             }
             // Also try mounting from pre-operation snapshot (always valid)
@@ -797,7 +798,7 @@ static void test_fault_injection_mkdir() {
             auto cfg3 = make_config();
             rc = fs3.mount(&cfg3);
             if (rc != 0) {
-                umi::test::checkf(false, "fault mkdir n=%d: pre-op mount failed", n);
+                s.check(false, "fault mkdir: pre-op mount failed after fault injection");
                 return;
             }
             (void)fs3.unmount();
@@ -805,11 +806,11 @@ static void test_fault_injection_mkdir() {
             (void)fs.unmount();
         }
     }
-    CHECK(true, "mkdir fault injection: all crash points recovered");
+    s.check(true, "mkdir fault injection: all crash points recovered");
 }
 
-static void test_fault_injection_file_write() {
-    SECTION("Fault injection: crash at every prog/erase during file_write");
+static void test_fault_injection_file_write(Suite& s) {
+    s.section("Fault injection: crash at every prog/erase during file_write");
 
     for (int n = 0; n < 30; ++n) {
         std::memset(storage, 0xFF, TOTAL_SIZE);
@@ -839,7 +840,7 @@ static void test_fault_injection_file_write() {
         if (rc < 0) {
             bool ok = try_mount_after_fault();
             if (!ok) {
-                umi::test::checkf(false, "fault write n=%d: mount crashed", n);
+                s.check(false, "fault write: mount crashed after fault injection");
                 return;
             }
             // Verify pre-op state is mountable and original data intact
@@ -848,20 +849,20 @@ static void test_fault_injection_file_write() {
             auto cfg3 = make_config();
             rc = fs3.mount(&cfg3);
             if (rc != 0) {
-                umi::test::checkf(false, "fault write n=%d: pre-op mount failed", n);
+                s.check(false, "fault write: pre-op mount failed after fault injection");
                 return;
             }
             SlimFile rf{};
             rc = fs3.file_open(rf, "/data.bin", SlimOpenFlags::RDONLY);
             if (rc != 0) {
-                umi::test::checkf(false, "fault write n=%d: open pre-op file failed", n);
+                s.check(false, "fault write: open pre-op file failed after fault injection");
                 (void)fs3.unmount();
                 return;
             }
             uint8_t rbuf[64]{};
             rc = fs3.file_read(rf, {rbuf, sizeof(rbuf)});
             if (rc != 64 || std::memcmp(rbuf, data, 64) != 0) {
-                umi::test::checkf(false, "fault write n=%d: original data corrupted", n);
+                s.check(false, "fault write: original data corrupted after fault injection");
                 (void)fs3.file_close(rf);
                 (void)fs3.unmount();
                 return;
@@ -873,11 +874,11 @@ static void test_fault_injection_file_write() {
             (void)fs.unmount();
         }
     }
-    CHECK(true, "file_write fault injection: all crash points recovered");
+    s.check(true, "file_write fault injection: all crash points recovered");
 }
 
-static void test_fault_injection_rename() {
-    SECTION("Fault injection: crash at every prog/erase during rename");
+static void test_fault_injection_rename(Suite& s) {
+    s.section("Fault injection: crash at every prog/erase during rename");
 
     for (int n = 0; n < 30; ++n) {
         std::memset(storage, 0xFF, TOTAL_SIZE);
@@ -902,7 +903,7 @@ static void test_fault_injection_rename() {
         if (rc < 0) {
             bool ok = try_mount_after_fault();
             if (!ok) {
-                umi::test::checkf(false, "fault rename n=%d: mount crashed", n);
+                s.check(false, "fault rename: mount crashed after fault injection");
                 return;
             }
             // Pre-op state: /src.txt must exist
@@ -911,13 +912,13 @@ static void test_fault_injection_rename() {
             auto cfg3 = make_config();
             rc = fs3.mount(&cfg3);
             if (rc != 0) {
-                umi::test::checkf(false, "fault rename n=%d: pre-op mount failed", n);
+                s.check(false, "fault rename: pre-op mount failed after fault injection");
                 return;
             }
             SlimInfo info{};
             rc = fs3.stat("/src.txt", info);
             if (rc != 0) {
-                umi::test::checkf(false, "fault rename n=%d: src gone in pre-op", n);
+                s.check(false, "fault rename: src gone in pre-op after fault injection");
                 (void)fs3.unmount();
                 return;
             }
@@ -926,11 +927,11 @@ static void test_fault_injection_rename() {
             (void)fs.unmount();
         }
     }
-    CHECK(true, "rename fault injection: all crash points recovered");
+    s.check(true, "rename fault injection: all crash points recovered");
 }
 
-static void test_fault_injection_remove() {
-    SECTION("Fault injection: crash at every prog/erase during remove");
+static void test_fault_injection_remove(Suite& s) {
+    s.section("Fault injection: crash at every prog/erase during remove");
 
     for (int n = 0; n < 20; ++n) {
         std::memset(storage, 0xFF, TOTAL_SIZE);
@@ -950,14 +951,14 @@ static void test_fault_injection_remove() {
         if (rc < 0) {
             bool ok = try_mount_after_fault();
             if (!ok) {
-                umi::test::checkf(false, "fault remove n=%d: mount crashed", n);
+                s.check(false, "fault remove: mount crashed after fault injection");
                 return;
             }
         } else {
             (void)fs.unmount();
         }
     }
-    CHECK(true, "remove fault injection: all crash points recovered");
+    s.check(true, "remove fault injection: all crash points recovered");
 }
 #endif // SLIM_FAULT_TESTS
 
@@ -965,14 +966,14 @@ static void test_fault_injection_remove() {
 // Geometry API
 // ============================================================================
 
-static void test_geometry_api() {
-    SECTION("Geometry API");
+static void test_geometry_api(Suite& s) {
+    s.section("Geometry API");
 
     SlimFixture f;
     f.format_and_mount();
 
-    CHECK(f.fs.block_size() == BLOCK_SIZE, "block_size matches config");
-    CHECK(f.fs.block_count_total() == BLOCK_COUNT, "block_count matches config");
+    s.check(f.fs.block_size() == BLOCK_SIZE, "block_size matches config");
+    s.check(f.fs.block_count_total() == BLOCK_COUNT, "block_count matches config");
 
     (void)f.fs.unmount();
 }
@@ -981,8 +982,8 @@ static void test_geometry_api() {
 // close_all
 // ============================================================================
 
-static void test_close_all() {
-    SECTION("close_all");
+static void test_close_all(Suite& s) {
+    s.section("close_all");
 
     SlimFixture f;
     f.format_and_mount();
@@ -999,10 +1000,10 @@ static void test_close_all() {
     // Verify files were synced — data should be readable
     SlimFile rf{};
     int rc = f.fs.file_open(rf, "/a.txt", SlimOpenFlags::RDONLY);
-    CHECK(rc == 0, "open a.txt after close_all");
+    s.check(rc == 0, "open a.txt after close_all");
     uint8_t buf[16]{};
     rc = f.fs.file_read(rf, {buf, sizeof(buf)});
-    CHECK(rc == 4, "read 4 bytes from a.txt");
+    s.check(rc == 4, "read 4 bytes from a.txt");
     (void)f.fs.file_close(rf);
 
     (void)f.fs.unmount();
@@ -1012,8 +1013,8 @@ static void test_close_all() {
 // pending_move recovery
 // ============================================================================
 
-static void test_pending_move_recovery_complete() {
-    SECTION("pending_move recovery: rename completed");
+static void test_pending_move_recovery_complete(Suite& s) {
+    s.section("pending_move recovery: rename completed");
 
     SlimFixture f;
     f.format_and_mount();
@@ -1027,16 +1028,16 @@ static void test_pending_move_recovery_complete() {
 
     // Normal rename should work and pending_move should be clear after
     int rc = f.fs.rename("/src.txt", "/dst.txt");
-    CHECK(rc == 0, "rename succeeds");
+    s.check(rc == 0, "rename succeeds");
 
     f.remount();
 
     SlimInfo info{};
     rc = f.fs.stat("/dst.txt", info);
-    CHECK(rc == 0, "dst exists after remount");
+    s.check(rc == 0, "dst exists after remount");
 
     rc = f.fs.stat("/src.txt", info);
-    CHECK(rc != 0, "src gone after remount");
+    s.check(rc != 0, "src gone after remount");
 
     (void)f.fs.unmount();
 }
@@ -1045,8 +1046,8 @@ static void test_pending_move_recovery_complete() {
 // Wear leveling distribution
 // ============================================================================
 
-static void test_wear_leveling_distribution() {
-    SECTION("Wear leveling: block allocation distributes");
+static void test_wear_leveling_distribution(Suite& s) {
+    s.section("Wear leveling: block allocation distributes");
 
     SlimFixture f;
     f.format_and_mount();
@@ -1081,7 +1082,7 @@ static void test_wear_leveling_distribution() {
         if (block_usage[i] > 0)
             ++used_blocks;
     }
-    CHECK(used_blocks >= 4, "at least 4 blocks used across iterations");
+    s.check(used_blocks >= 4, "at least 4 blocks used across iterations");
 
     (void)f.fs.unmount();
 }
@@ -1090,8 +1091,8 @@ static void test_wear_leveling_distribution() {
 // COW write power-loss safety
 // ============================================================================
 
-static void test_cow_write_power_loss() {
-    SECTION("COW: power-loss during write preserves old data");
+static void test_cow_write_power_loss(Suite& s) {
+    s.section("COW: power-loss during write preserves old data");
 
     SlimFixture f;
     f.format_and_mount();
@@ -1119,23 +1120,23 @@ static void test_cow_write_power_loss() {
     SlimFs fs2{};
     auto cfg = make_config();
     int rc = fs2.mount(&cfg);
-    CHECK(rc == 0, "mount after COW power-loss");
+    s.check(rc == 0, "mount after COW power-loss");
 
     SlimFile rf{};
     rc = fs2.file_open(rf, "/cow.txt", SlimOpenFlags::RDONLY);
-    CHECK(rc == 0, "open cow.txt after power-loss");
+    s.check(rc == 0, "open cow.txt after power-loss");
 
     uint8_t buf[64]{};
     rc = fs2.file_read(rf, {buf, sizeof(buf)});
-    CHECK(rc == static_cast<int>(std::strlen(original)), "original data length preserved");
-    CHECK(std::memcmp(buf, original, std::strlen(original)) == 0, "original data intact after COW power-loss");
+    s.check(rc == static_cast<int>(std::strlen(original)), "original data length preserved");
+    s.check(std::memcmp(buf, original, std::strlen(original)) == 0, "original data intact after COW power-loss");
 
     (void)fs2.file_close(rf);
     (void)fs2.unmount();
 }
 
-static void test_cow_write_sync() {
-    SECTION("COW: write + sync commits new data");
+static void test_cow_write_sync(Suite& s) {
+    s.section("COW: write + sync commits new data");
 
     SlimFixture f;
     f.format_and_mount();
@@ -1157,12 +1158,12 @@ static void test_cow_write_sync() {
 
     SlimFile rf{};
     int rc = f.fs.file_open(rf, "/cow2.txt", SlimOpenFlags::RDONLY);
-    CHECK(rc == 0, "open cow2.txt after remount");
+    s.check(rc == 0, "open cow2.txt after remount");
 
     uint8_t buf[64]{};
     rc = f.fs.file_read(rf, {buf, sizeof(buf)});
-    CHECK(rc == static_cast<int>(std::strlen(msg2)), "new data length");
-    CHECK(std::memcmp(buf, msg2, std::strlen(msg2)) == 0, "new data matches");
+    s.check(rc == static_cast<int>(std::strlen(msg2)), "new data length");
+    s.check(std::memcmp(buf, msg2, std::strlen(msg2)) == 0, "new data matches");
 
     (void)f.fs.file_close(rf);
     (void)f.fs.unmount();
@@ -1172,8 +1173,8 @@ static void test_cow_write_sync() {
 // Additional production-quality tests
 // ============================================================================
 
-static void test_multi_write_same_block() {
-    SECTION("Multi-write within same block");
+static void test_multi_write_same_block(Suite& s) {
+    s.section("Multi-write within same block");
 
     SlimFixture f;
     f.format_and_mount();
@@ -1186,9 +1187,9 @@ static void test_multi_write_same_block() {
     std::memset(a, 0xAA, sizeof(a));
     std::memset(b, 0xBB, sizeof(b));
     int rc = f.fs.file_write(file, {a, sizeof(a)});
-    CHECK(rc == 200, "first write 200");
+    s.check(rc == 200, "first write 200");
     rc = f.fs.file_write(file, {b, sizeof(b)});
-    CHECK(rc == 200, "second write 200");
+    s.check(rc == 200, "second write 200");
     (void)f.fs.file_close(file);
 
     // Verify both parts
@@ -1196,15 +1197,15 @@ static void test_multi_write_same_block() {
     (void)f.fs.file_open(rf, "/mw.bin", SlimOpenFlags::RDONLY);
     uint8_t out[400]{};
     rc = f.fs.file_read(rf, {out, sizeof(out)});
-    CHECK(rc == 400, "read 400 bytes");
-    CHECK(std::memcmp(out, a, 200) == 0, "first 200 bytes are 0xAA");
-    CHECK(std::memcmp(out + 200, b, 200) == 0, "next 200 bytes are 0xBB");
+    s.check(rc == 400, "read 400 bytes");
+    s.check(std::memcmp(out, a, 200) == 0, "first 200 bytes are 0xAA");
+    s.check(std::memcmp(out + 200, b, 200) == 0, "next 200 bytes are 0xBB");
     (void)f.fs.file_close(rf);
     (void)f.fs.unmount();
 }
 
-static void test_multi_write_cross_block() {
-    SECTION("Multi-write crossing block boundary");
+static void test_multi_write_cross_block(Suite& s) {
+    s.section("Multi-write crossing block boundary");
 
     SlimFixture f;
     f.format_and_mount();
@@ -1224,15 +1225,15 @@ static void test_multi_write_cross_block() {
     (void)f.fs.file_open(rf, "/cross.bin", SlimOpenFlags::RDONLY);
     uint8_t out[800]{};
     int rc = f.fs.file_read(rf, {out, sizeof(out)});
-    CHECK(rc == 800, "read 800 bytes");
-    CHECK(std::memcmp(out, a, 400) == 0, "first 400 bytes");
-    CHECK(std::memcmp(out + 400, b, 400) == 0, "next 400 bytes");
+    s.check(rc == 800, "read 800 bytes");
+    s.check(std::memcmp(out, a, 400) == 0, "first 400 bytes");
+    s.check(std::memcmp(out + 400, b, 400) == 0, "next 400 bytes");
     (void)f.fs.file_close(rf);
     (void)f.fs.unmount();
 }
 
-static void test_overwrite_preserves_surrounding() {
-    SECTION("Overwrite middle preserves surrounding data");
+static void test_overwrite_preserves_surrounding(Suite& s) {
+    s.section("Overwrite middle preserves surrounding data");
 
     SlimFixture f;
     f.format_and_mount();
@@ -1258,7 +1259,7 @@ static void test_overwrite_preserves_surrounding() {
     (void)f.fs.file_open(rf, "/ow.bin", SlimOpenFlags::RDONLY);
     uint8_t out[300]{};
     int rc = f.fs.file_read(rf, {out, sizeof(out)});
-    CHECK(rc == 300, "read 300 bytes");
+    s.check(rc == 300, "read 300 bytes");
 
     bool pre_ok = true;
     for (int i = 0; i < 100; ++i) {
@@ -1267,7 +1268,7 @@ static void test_overwrite_preserves_surrounding() {
             break;
         }
     }
-    CHECK(pre_ok, "bytes [0..100) preserved as 0x11");
+    s.check(pre_ok, "bytes [0..100) preserved as 0x11");
 
     bool mid_ok = true;
     for (int i = 100; i < 200; ++i) {
@@ -1276,7 +1277,7 @@ static void test_overwrite_preserves_surrounding() {
             break;
         }
     }
-    CHECK(mid_ok, "bytes [100..200) overwritten to 0x99");
+    s.check(mid_ok, "bytes [100..200) overwritten to 0x99");
 
     bool post_ok = true;
     for (int i = 200; i < 300; ++i) {
@@ -1285,14 +1286,14 @@ static void test_overwrite_preserves_surrounding() {
             break;
         }
     }
-    CHECK(post_ok, "bytes [200..300) preserved as 0x11");
+    s.check(post_ok, "bytes [200..300) preserved as 0x11");
 
     (void)f.fs.file_close(rf);
     (void)f.fs.unmount();
 }
 
-static void test_cow_multi_block_file() {
-    SECTION("COW overwrite of multi-block file");
+static void test_cow_multi_block_file(Suite& s) {
+    s.section("COW overwrite of multi-block file");
 
     SlimFixture f;
     f.format_and_mount();
@@ -1320,7 +1321,7 @@ static void test_cow_multi_block_file() {
     (void)f.fs.file_open(rf, "/big.bin", SlimOpenFlags::RDONLY);
     uint8_t out[500]{};
     int rc = f.fs.file_read(rf, {out, sizeof(out)});
-    CHECK(rc == 500, "read first 500 bytes");
+    s.check(rc == 500, "read first 500 bytes");
     bool ok = true;
     for (int i = 0; i < 500; ++i) {
         if (out[i] != 0xFF) {
@@ -1328,13 +1329,13 @@ static void test_cow_multi_block_file() {
             break;
         }
     }
-    CHECK(ok, "first 500 bytes are 0xFF after COW overwrite");
+    s.check(ok, "first 500 bytes are 0xFF after COW overwrite");
     (void)f.fs.file_close(rf);
     (void)f.fs.unmount();
 }
 
-static void test_cow_truncate_during_dirty() {
-    SECTION("Truncate during dirty COW state");
+static void test_cow_truncate_during_dirty(Suite& s) {
+    s.section("Truncate during dirty COW state");
 
     SlimFixture f;
     f.format_and_mount();
@@ -1353,20 +1354,20 @@ static void test_cow_truncate_during_dirty() {
     (void)f.fs.file_write(file, {more, sizeof(more)});
     // Now truncate while dirty
     int rc = f.fs.file_truncate(file, 50);
-    CHECK(rc == 0, "truncate during dirty succeeds");
+    s.check(rc == 0, "truncate during dirty succeeds");
     (void)f.fs.file_close(file);
 
     // Verify size
     SlimInfo info{};
     rc = f.fs.stat("/trunc.bin", info);
-    CHECK(rc == 0, "stat after truncate");
-    CHECK(info.size == 50, "size is 50 after truncate");
+    s.check(rc == 0, "stat after truncate");
+    s.check(info.size == 50, "size is 50 after truncate");
 
     (void)f.fs.unmount();
 }
 
-static void test_rdwr_read_after_write() {
-    SECTION("RDWR read after unsync write returns error");
+static void test_rdwr_read_after_write(Suite& s) {
+    s.section("RDWR read after unsync write returns error");
 
     SlimFixture f;
     f.format_and_mount();
@@ -1389,14 +1390,14 @@ static void test_rdwr_read_after_write() {
     (void)f.fs.file_seek(file, 0, SlimWhence::SET);
     uint8_t buf[64]{};
     int rc = f.fs.file_read(file, {buf, sizeof(buf)});
-    CHECK(rc < 0, "read on dirty COW file returns error");
+    s.check(rc < 0, "read on dirty COW file returns error");
 
     (void)f.fs.file_close(file);
     (void)f.fs.unmount();
 }
 
-static void test_multiple_files_cow() {
-    SECTION("Multiple files with concurrent COW writes");
+static void test_multiple_files_cow(Suite& s) {
+    s.section("Multiple files with concurrent COW writes");
 
     SlimFixture f;
     f.format_and_mount();
@@ -1433,20 +1434,20 @@ static void test_multiple_files_cow() {
     uint8_t buf[64]{};
     (void)f.fs.file_open(rf, "/fa.bin", SlimOpenFlags::RDONLY);
     int rc = f.fs.file_read(rf, {buf, sizeof(buf)});
-    CHECK(rc == 64, "fa read 64");
-    CHECK(buf[0] == 0xAA && buf[63] == 0xAA, "fa data is 0xAA");
+    s.check(rc == 64, "fa read 64");
+    s.check(buf[0] == 0xAA && buf[63] == 0xAA, "fa data is 0xAA");
     (void)f.fs.file_close(rf);
 
     (void)f.fs.file_open(rf, "/fb.bin", SlimOpenFlags::RDONLY);
     rc = f.fs.file_read(rf, {buf, sizeof(buf)});
-    CHECK(rc == 64, "fb read 64");
-    CHECK(buf[0] == 0xBB && buf[63] == 0xBB, "fb data is 0xBB");
+    s.check(rc == 64, "fb read 64");
+    s.check(buf[0] == 0xBB && buf[63] == 0xBB, "fb data is 0xBB");
     (void)f.fs.file_close(rf);
     (void)f.fs.unmount();
 }
 
-static void test_write_empty_buf() {
-    SECTION("Write empty buffer");
+static void test_write_empty_buf(Suite& s) {
+    s.section("Write empty buffer");
 
     SlimFixture f;
     f.format_and_mount();
@@ -1454,13 +1455,13 @@ static void test_write_empty_buf() {
     SlimFile file{};
     (void)f.fs.file_open(file, "/empty.bin", SlimOpenFlags::WRONLY | SlimOpenFlags::CREAT);
     int rc = f.fs.file_write(file, {static_cast<const uint8_t*>(nullptr), 0});
-    CHECK(rc == 0, "empty write returns 0");
+    s.check(rc == 0, "empty write returns 0");
     (void)f.fs.file_close(file);
     (void)f.fs.unmount();
 }
 
-static void test_seek_beyond_eof() {
-    SECTION("Seek beyond EOF");
+static void test_seek_beyond_eof(Suite& s) {
+    s.section("Seek beyond EOF");
 
     SlimFixture f;
     f.format_and_mount();
@@ -1472,14 +1473,14 @@ static void test_seek_beyond_eof() {
 
     int rc = f.fs.file_seek(file, 100, SlimWhence::SET);
     // seek beyond EOF should succeed (sparse semantics) or clamp
-    CHECK(rc >= 0, "seek beyond EOF returns non-negative");
+    s.check(rc >= 0, "seek beyond EOF returns non-negative");
 
     (void)f.fs.file_close(file);
     (void)f.fs.unmount();
 }
 
-static void test_rename_overwrite() {
-    SECTION("Rename overwrites existing file");
+static void test_rename_overwrite(Suite& s) {
+    s.section("Rename overwrites existing file");
 
     SlimFixture f;
     f.format_and_mount();
@@ -1497,42 +1498,42 @@ static void test_rename_overwrite() {
     (void)f.fs.file_close(file);
 
     int rc = f.fs.rename("/src.txt", "/dst.txt");
-    CHECK(rc == 0, "rename overwrite succeeds");
+    s.check(rc == 0, "rename overwrite succeeds");
 
     // dst should now have src's data
     SlimFile rf{};
     (void)f.fs.file_open(rf, "/dst.txt", SlimOpenFlags::RDONLY);
     uint8_t buf[64]{};
     rc = f.fs.file_read(rf, {buf, sizeof(buf)});
-    CHECK(rc == static_cast<int>(std::strlen(src_data)), "dst has src data length");
-    CHECK(std::memcmp(buf, src_data, std::strlen(src_data)) == 0, "dst has src data content");
+    s.check(rc == static_cast<int>(std::strlen(src_data)), "dst has src data length");
+    s.check(std::memcmp(buf, src_data, std::strlen(src_data)) == 0, "dst has src data content");
     (void)f.fs.file_close(rf);
 
     // src should be gone
     SlimInfo info{};
     rc = f.fs.stat("/src.txt", info);
-    CHECK(rc != 0, "src is gone");
+    s.check(rc != 0, "src is gone");
 
     (void)f.fs.unmount();
 }
 
-static void test_deeply_nested_dir() {
-    SECTION("Deeply nested directories");
+static void test_deeply_nested_dir(Suite& s) {
+    s.section("Deeply nested directories");
 
     SlimFixture f;
     f.format_and_mount();
 
     int rc = f.fs.mkdir("/a");
-    CHECK(rc == 0, "mkdir /a");
+    s.check(rc == 0, "mkdir /a");
     rc = f.fs.mkdir("/a/b");
-    CHECK(rc == 0, "mkdir /a/b");
+    s.check(rc == 0, "mkdir /a/b");
     rc = f.fs.mkdir("/a/b/c");
-    CHECK(rc == 0, "mkdir /a/b/c");
+    s.check(rc == 0, "mkdir /a/b/c");
 
     // Create file in deepest dir
     SlimFile file{};
     rc = f.fs.file_open(file, "/a/b/c/deep.txt", SlimOpenFlags::WRONLY | SlimOpenFlags::CREAT);
-    CHECK(rc == 0, "create /a/b/c/deep.txt");
+    s.check(rc == 0, "create /a/b/c/deep.txt");
     const char* msg = "deep";
     (void)f.fs.file_write(file, {reinterpret_cast<const uint8_t*>(msg), 4});
     (void)f.fs.file_close(file);
@@ -1541,14 +1542,14 @@ static void test_deeply_nested_dir() {
 
     SlimInfo info{};
     rc = f.fs.stat("/a/b/c/deep.txt", info);
-    CHECK(rc == 0, "stat deep file after remount");
-    CHECK(info.size == 4, "deep file size is 4");
+    s.check(rc == 0, "stat deep file after remount");
+    s.check(info.size == 4, "deep file size is 4");
 
     (void)f.fs.unmount();
 }
 
-static void test_many_files_in_dir() {
-    SECTION("Many files in directory");
+static void test_many_files_in_dir(Suite& s) {
+    s.section("Many files in directory");
 
     SlimFixture f;
     f.format_and_mount();
@@ -1562,7 +1563,7 @@ static void test_many_files_in_dir() {
         name[3] = '\0';
         SlimFile file{};
         int rc = f.fs.file_open(file, name, SlimOpenFlags::WRONLY | SlimOpenFlags::CREAT);
-        CHECK(rc == 0, "create file");
+        s.check(rc == 0, "create file");
         uint8_t d = static_cast<uint8_t>(i);
         (void)f.fs.file_write(file, {&d, 1});
         (void)f.fs.file_close(file);
@@ -1576,18 +1577,18 @@ static void test_many_files_in_dir() {
         name[3] = '\0';
         SlimFile rf{};
         int rc = f.fs.file_open(rf, name, SlimOpenFlags::RDONLY);
-        CHECK(rc == 0, "open file for read");
+        s.check(rc == 0, "open file for read");
         uint8_t d = 0xFF;
         rc = f.fs.file_read(rf, {&d, 1});
-        CHECK(rc == 1 && d == static_cast<uint8_t>(i), "file has correct data");
+        s.check(rc == 1 && d == static_cast<uint8_t>(i), "file has correct data");
         (void)f.fs.file_close(rf);
     }
 
     (void)f.fs.unmount();
 }
 
-static void test_remove_then_create() {
-    SECTION("Remove then create same name");
+static void test_remove_then_create(Suite& s) {
+    s.section("Remove then create same name");
 
     SlimFixture f;
     f.format_and_mount();
@@ -1599,7 +1600,7 @@ static void test_remove_then_create() {
     (void)f.fs.file_close(file);
 
     int rc = f.fs.remove("/reuse.txt");
-    CHECK(rc == 0, "remove succeeds");
+    s.check(rc == 0, "remove succeeds");
 
     (void)f.fs.file_open(file, "/reuse.txt", SlimOpenFlags::WRONLY | SlimOpenFlags::CREAT);
     const char* d2 = "second";
@@ -1610,14 +1611,14 @@ static void test_remove_then_create() {
     (void)f.fs.file_open(rf, "/reuse.txt", SlimOpenFlags::RDONLY);
     uint8_t buf[16]{};
     rc = f.fs.file_read(rf, {buf, sizeof(buf)});
-    CHECK(rc == 6, "recreated file has 6 bytes");
-    CHECK(std::memcmp(buf, d2, 6) == 0, "recreated file has new data");
+    s.check(rc == 6, "recreated file has 6 bytes");
+    s.check(std::memcmp(buf, d2, 6) == 0, "recreated file has new data");
     (void)f.fs.file_close(rf);
     (void)f.fs.unmount();
 }
 
-static void test_file_sync_explicit() {
-    SECTION("Explicit sync persists data");
+static void test_file_sync_explicit(Suite& s) {
+    s.section("Explicit sync persists data");
 
     SlimFixture f;
     f.format_and_mount();
@@ -1628,7 +1629,7 @@ static void test_file_sync_explicit() {
     (void)f.fs.file_write(file, {reinterpret_cast<const uint8_t*>(msg), 6});
 
     int rc = f.fs.file_sync(file);
-    CHECK(rc == 0, "sync succeeds");
+    s.check(rc == 0, "sync succeeds");
 
     // Snapshot after sync
     std::memcpy(snapshot, storage, TOTAL_SIZE);
@@ -1639,21 +1640,21 @@ static void test_file_sync_explicit() {
     SlimFs fs2{};
     auto cfg = make_config();
     rc = fs2.mount(&cfg);
-    CHECK(rc == 0, "mount after sync+power-loss");
+    s.check(rc == 0, "mount after sync+power-loss");
 
     SlimFile rf{};
     rc = fs2.file_open(rf, "/sync.txt", SlimOpenFlags::RDONLY);
-    CHECK(rc == 0, "open after sync");
+    s.check(rc == 0, "open after sync");
     uint8_t buf[16]{};
     rc = fs2.file_read(rf, {buf, sizeof(buf)});
-    CHECK(rc == 6, "synced data length");
-    CHECK(std::memcmp(buf, msg, 6) == 0, "synced data intact");
+    s.check(rc == 6, "synced data length");
+    s.check(std::memcmp(buf, msg, 6) == 0, "synced data intact");
     (void)fs2.file_close(rf);
     (void)fs2.unmount();
 }
 
-static void test_double_close() {
-    SECTION("Double close is safe");
+static void test_double_close(Suite& s) {
+    s.section("Double close is safe");
 
     SlimFixture f;
     f.format_and_mount();
@@ -1665,13 +1666,13 @@ static void test_double_close() {
     int rc = f.fs.file_close(file);
     // May return error or 0, but must not crash
     (void)rc;
-    CHECK(true, "double close did not crash");
+    s.check(true, "double close did not crash");
 
     (void)f.fs.unmount();
 }
 
-static void test_open_flags_excl() {
-    SECTION("CREAT|EXCL fails on existing file");
+static void test_open_flags_excl(Suite& s) {
+    s.section("CREAT|EXCL fails on existing file");
 
     SlimFixture f;
     f.format_and_mount();
@@ -1681,13 +1682,13 @@ static void test_open_flags_excl() {
     (void)f.fs.file_close(file);
 
     int rc = f.fs.file_open(file, "/excl.txt", SlimOpenFlags::WRONLY | SlimOpenFlags::CREAT | SlimOpenFlags::EXCL);
-    CHECK(rc != 0, "CREAT|EXCL on existing file fails");
+    s.check(rc != 0, "CREAT|EXCL on existing file fails");
 
     (void)f.fs.unmount();
 }
 
-static void test_boundary_block_size_write() {
-    SECTION("Write exactly data_per_block bytes");
+static void test_boundary_block_size_write(Suite& s) {
+    s.section("Write exactly data_per_block bytes");
 
     SlimFixture f;
     f.format_and_mount();
@@ -1699,21 +1700,21 @@ static void test_boundary_block_size_write() {
     uint8_t data[dpb];
     std::memset(data, 0x42, sizeof(data));
     int rc = f.fs.file_write(file, {data, sizeof(data)});
-    CHECK(rc == static_cast<int>(dpb), "write exactly dpb bytes");
+    s.check(rc == static_cast<int>(dpb), "write exactly dpb bytes");
     (void)f.fs.file_close(file);
 
     SlimFile rf{};
     (void)f.fs.file_open(rf, "/boundary.bin", SlimOpenFlags::RDONLY);
     uint8_t out[dpb]{};
     rc = f.fs.file_read(rf, {out, sizeof(out)});
-    CHECK(rc == static_cast<int>(dpb), "read dpb bytes");
-    CHECK(std::memcmp(out, data, dpb) == 0, "boundary data matches");
+    s.check(rc == static_cast<int>(dpb), "read dpb bytes");
+    s.check(std::memcmp(out, data, dpb) == 0, "boundary data matches");
     (void)f.fs.file_close(rf);
     (void)f.fs.unmount();
 }
 
-static void test_pending_move_recovery_incomplete() {
-    SECTION("pending_move recovery: rename incomplete");
+static void test_pending_move_recovery_incomplete(Suite& s) {
+    s.section("pending_move recovery: rename incomplete");
 
     SlimFixture f;
     f.format_and_mount();
@@ -1730,7 +1731,7 @@ static void test_pending_move_recovery_incomplete() {
 
     // Do rename — this will succeed normally
     int rc = f.fs.rename("/pm_src.txt", "/pm_dst.txt");
-    CHECK(rc == 0, "rename succeeds");
+    s.check(rc == 0, "rename succeeds");
 
     // Restore pre-rename state (simulating crash before rename started writing)
     std::memcpy(storage, snapshot, TOTAL_SIZE);
@@ -1739,19 +1740,19 @@ static void test_pending_move_recovery_incomplete() {
     SlimFs fs2{};
     auto cfg = make_config();
     rc = fs2.mount(&cfg);
-    CHECK(rc == 0, "mount after incomplete rename");
+    s.check(rc == 0, "mount after incomplete rename");
 
     SlimInfo info{};
     rc = fs2.stat("/pm_src.txt", info);
-    CHECK(rc == 0, "src still exists");
+    s.check(rc == 0, "src still exists");
     rc = fs2.stat("/pm_dst.txt", info);
-    CHECK(rc != 0, "dst does not exist");
+    s.check(rc != 0, "dst does not exist");
 
     (void)fs2.unmount();
 }
 
-static void test_full_disk_write() {
-    SECTION("Write until disk full");
+static void test_full_disk_write(Suite& s) {
+    s.section("Write until disk full");
 
     SlimFixture f;
     f.format_and_mount();
@@ -1785,14 +1786,14 @@ static void test_full_disk_write() {
         (void)f.fs.file_close(file);
     }
 
-    CHECK(total_written > 0, "wrote some data before full");
-    CHECK(got_nospc, "eventually got NOSPC");
+    s.check(total_written > 0, "wrote some data before full");
+    s.check(got_nospc, "eventually got NOSPC");
 
     (void)f.fs.unmount();
 }
 
-static void test_full_disk_mkdir() {
-    SECTION("mkdir until disk full");
+static void test_full_disk_mkdir(Suite& s) {
+    s.section("mkdir until disk full");
 
     SlimFixture f;
     f.format_and_mount();
@@ -1814,8 +1815,8 @@ static void test_full_disk_mkdir() {
         ++created;
     }
 
-    CHECK(created > 0, "created some directories");
-    CHECK(got_nospc, "eventually got NOSPC for mkdir");
+    s.check(created > 0, "created some directories");
+    s.check(got_nospc, "eventually got NOSPC for mkdir");
 
     (void)f.fs.unmount();
 }
@@ -1824,46 +1825,46 @@ static void test_full_disk_mkdir() {
 // Custom attributes
 // ============================================================================
 
-static void test_custom_attributes() {
-    SECTION("Custom attributes: set, get, multiple types");
+static void test_custom_attributes(Suite& s) {
+    s.section("Custom attributes: set, get, multiple types");
 
     SlimFixture f;
     f.format_and_mount();
 
     int rc = f.fs.mkdir("/presets");
-    CHECK(rc == 0, "mkdir presets");
+    s.check(rc == 0, "mkdir presets");
 
     // Set attribute type 1 = category tag
     uint8_t tag[] = {'B', 'a', 's', 's'};
     rc = f.fs.setattr("/presets", 1, {tag, sizeof(tag)});
-    CHECK(rc == 0, "setattr type 1");
+    s.check(rc == 0, "setattr type 1");
 
     // Set attribute type 2 = favorite flag
     uint8_t fav = 1;
     rc = f.fs.setattr("/presets", 2, {&fav, 1});
-    CHECK(rc == 0, "setattr type 2");
+    s.check(rc == 0, "setattr type 2");
 
     // Read back type 1
     uint8_t buf[32]{};
     int sz = f.fs.getattr("/presets", 1, {buf, sizeof(buf)});
-    CHECK(sz == 4, "getattr type 1 returns 4 bytes");
-    CHECK(std::memcmp(buf, tag, 4) == 0, "getattr type 1 content matches");
+    s.check(sz == 4, "getattr type 1 returns 4 bytes");
+    s.check(std::memcmp(buf, tag, 4) == 0, "getattr type 1 content matches");
 
     // Read back type 2
     uint8_t buf2[4]{};
     sz = f.fs.getattr("/presets", 2, {buf2, sizeof(buf2)});
-    CHECK(sz == 1, "getattr type 2 returns 1 byte");
-    CHECK(buf2[0] == 1, "getattr type 2 content matches");
+    s.check(sz == 1, "getattr type 2 returns 1 byte");
+    s.check(buf2[0] == 1, "getattr type 2 content matches");
 
     // Nonexistent type
     sz = f.fs.getattr("/presets", 99, {buf, sizeof(buf)});
-    CHECK(sz < 0, "getattr nonexistent type returns error");
+    s.check(sz < 0, "getattr nonexistent type returns error");
 
     (void)f.fs.unmount();
 }
 
-static void test_attr_remove() {
-    SECTION("Custom attributes: remove");
+static void test_attr_remove(Suite& s) {
+    s.section("Custom attributes: remove");
 
     SlimFixture f;
     f.format_and_mount();
@@ -1871,72 +1872,72 @@ static void test_attr_remove() {
     // Create file with attrs
     SlimFile file{};
     int rc = f.fs.file_open(file, "/data.bin", SlimOpenFlags::RDWR | SlimOpenFlags::CREAT);
-    CHECK(rc == 0, "file_open");
+    s.check(rc == 0, "file_open");
     rc = f.fs.file_close(file);
-    CHECK(rc == 0, "file_close");
+    s.check(rc == 0, "file_close");
 
     uint8_t val[] = {0xAA, 0xBB};
     rc = f.fs.setattr("/data.bin", 5, {val, sizeof(val)});
-    CHECK(rc == 0, "setattr");
+    s.check(rc == 0, "setattr");
 
     rc = f.fs.removeattr("/data.bin", 5);
-    CHECK(rc == 0, "removeattr succeeds");
+    s.check(rc == 0, "removeattr succeeds");
 
     uint8_t buf[4]{};
     int sz = f.fs.getattr("/data.bin", 5, {buf, sizeof(buf)});
-    CHECK(sz < 0, "getattr after remove returns error");
+    s.check(sz < 0, "getattr after remove returns error");
 
     // Remove again should fail
     rc = f.fs.removeattr("/data.bin", 5);
-    CHECK(rc < 0, "removeattr again returns error");
+    s.check(rc < 0, "removeattr again returns error");
 
     (void)f.fs.unmount();
 }
 
-static void test_attr_overwrite() {
-    SECTION("Custom attributes: overwrite existing");
+static void test_attr_overwrite(Suite& s) {
+    s.section("Custom attributes: overwrite existing");
 
     SlimFixture f;
     f.format_and_mount();
 
     int rc = f.fs.mkdir("/dir");
-    CHECK(rc == 0, "mkdir");
+    s.check(rc == 0, "mkdir");
 
     uint8_t v1[] = {1, 2, 3};
     rc = f.fs.setattr("/dir", 10, {v1, sizeof(v1)});
-    CHECK(rc == 0, "setattr v1");
+    s.check(rc == 0, "setattr v1");
 
     uint8_t v2[] = {4, 5, 6, 7, 8};
     rc = f.fs.setattr("/dir", 10, {v2, sizeof(v2)});
-    CHECK(rc == 0, "setattr v2 overwrites");
+    s.check(rc == 0, "setattr v2 overwrites");
 
     uint8_t buf[16]{};
     int sz = f.fs.getattr("/dir", 10, {buf, sizeof(buf)});
-    CHECK(sz == 5, "getattr returns new size");
-    CHECK(std::memcmp(buf, v2, 5) == 0, "getattr returns new content");
+    s.check(sz == 5, "getattr returns new size");
+    s.check(std::memcmp(buf, v2, 5) == 0, "getattr returns new content");
 
     (void)f.fs.unmount();
 }
 
-static void test_attr_persist_remount() {
-    SECTION("Custom attributes: persist across remount");
+static void test_attr_persist_remount(Suite& s) {
+    s.section("Custom attributes: persist across remount");
 
     SlimFixture f;
     f.format_and_mount();
 
     int rc = f.fs.mkdir("/cfg");
-    CHECK(rc == 0, "mkdir");
+    s.check(rc == 0, "mkdir");
 
     uint8_t data[] = {0xDE, 0xAD};
     rc = f.fs.setattr("/cfg", 3, {data, sizeof(data)});
-    CHECK(rc == 0, "setattr");
+    s.check(rc == 0, "setattr");
 
     f.remount();
 
     uint8_t buf[8]{};
     int sz = f.fs.getattr("/cfg", 3, {buf, sizeof(buf)});
-    CHECK(sz == 2, "getattr after remount returns 2 bytes");
-    CHECK(buf[0] == 0xDE && buf[1] == 0xAD, "content matches after remount");
+    s.check(sz == 2, "getattr after remount returns 2 bytes");
+    s.check(buf[0] == 0xDE && buf[1] == 0xAD, "content matches after remount");
 
     (void)f.fs.unmount();
 }
@@ -1945,55 +1946,55 @@ static void test_attr_persist_remount() {
 // Directory seek / tell / rewind
 // ============================================================================
 
-static void test_dir_seek_tell_rewind() {
-    SECTION("dir_seek / dir_tell / dir_rewind");
+static void test_dir_seek_tell_rewind(Suite& s) {
+    s.section("dir_seek / dir_tell / dir_rewind");
 
     SlimFixture f;
     f.format_and_mount();
 
     int rc = f.fs.mkdir("/a");
-    CHECK(rc == 0, "mkdir a");
+    s.check(rc == 0, "mkdir a");
     rc = f.fs.mkdir("/b");
-    CHECK(rc == 0, "mkdir b");
+    s.check(rc == 0, "mkdir b");
     rc = f.fs.mkdir("/c");
-    CHECK(rc == 0, "mkdir c");
+    s.check(rc == 0, "mkdir c");
 
     SlimDir dir{};
     rc = f.fs.dir_open(dir, "/");
-    CHECK(rc == 0, "dir_open");
+    s.check(rc == 0, "dir_open");
 
     // Read first entry
     SlimInfo info{};
     rc = f.fs.dir_read(dir, info);
-    CHECK(rc == 1, "dir_read 1st");
+    s.check(rc == 1, "dir_read 1st");
 
     int pos = f.fs.dir_tell(dir);
-    CHECK(pos == 1, "dir_tell after 1 read");
+    s.check(pos == 1, "dir_tell after 1 read");
 
     // Read second
     rc = f.fs.dir_read(dir, info);
-    CHECK(rc == 1, "dir_read 2nd");
+    s.check(rc == 1, "dir_read 2nd");
 
     // Seek back to position 1
     rc = f.fs.dir_seek(dir, 1);
-    CHECK(rc == 0, "dir_seek to 1");
+    s.check(rc == 0, "dir_seek to 1");
     pos = f.fs.dir_tell(dir);
-    CHECK(pos == 1, "dir_tell after seek");
+    s.check(pos == 1, "dir_tell after seek");
 
     // Read should give 2nd entry again
     SlimInfo info2{};
     rc = f.fs.dir_read(dir, info2);
-    CHECK(rc == 1, "dir_read after seek");
-    CHECK(std::strcmp(info.name, info2.name) == 0, "same entry after seek");
+    s.check(rc == 1, "dir_read after seek");
+    s.check(std::strcmp(info.name, info2.name) == 0, "same entry after seek");
 
     // Rewind
     rc = f.fs.dir_rewind(dir);
-    CHECK(rc == 0, "dir_rewind");
+    s.check(rc == 0, "dir_rewind");
     pos = f.fs.dir_tell(dir);
-    CHECK(pos == 0, "dir_tell after rewind");
+    s.check(pos == 0, "dir_tell after rewind");
 
     rc = f.fs.dir_close(dir);
-    CHECK(rc == 0, "dir_close");
+    s.check(rc == 0, "dir_close");
 
     (void)f.fs.unmount();
 }
@@ -2002,8 +2003,8 @@ static void test_dir_seek_tell_rewind() {
 // fs_gc
 // ============================================================================
 
-static void test_fs_gc() {
-    SECTION("fs_gc compacts deleted entries");
+static void test_fs_gc(Suite& s) {
+    s.section("fs_gc compacts deleted entries");
 
     SlimFixture f;
     f.format_and_mount();
@@ -2016,7 +2017,7 @@ static void test_fs_gc() {
         name[2] = static_cast<char>('0' + i);
         name[3] = '\0';
         int rc = f.fs.mkdir(name);
-        CHECK(rc == 0, "mkdir");
+        s.check(rc == 0, "mkdir");
     }
     for (int i = 0; i < 3; ++i) {
         char name[16];
@@ -2025,33 +2026,33 @@ static void test_fs_gc() {
         name[2] = static_cast<char>('0' + i);
         name[3] = '\0';
         int rc = f.fs.remove(name);
-        CHECK(rc == 0, "remove");
+        s.check(rc == 0, "remove");
     }
 
     // Run GC
     int rc = f.fs.fs_gc();
-    CHECK(rc == 0, "fs_gc succeeds");
+    s.check(rc == 0, "fs_gc succeeds");
 
     // Remaining entries should still be accessible
     SlimInfo info{};
     rc = f.fs.stat("/f3", info);
-    CHECK(rc == 0, "stat f3 after gc");
+    s.check(rc == 0, "stat f3 after gc");
     rc = f.fs.stat("/f4", info);
-    CHECK(rc == 0, "stat f4 after gc");
+    s.check(rc == 0, "stat f4 after gc");
 
     // Deleted entries should still be gone
     rc = f.fs.stat("/f0", info);
-    CHECK(rc < 0, "f0 still deleted after gc");
+    s.check(rc < 0, "f0 still deleted after gc");
 
     // Dir listing should only show 2 entries
     SlimDir dir{};
     rc = f.fs.dir_open(dir, "/");
-    CHECK(rc == 0, "dir_open");
+    s.check(rc == 0, "dir_open");
     int count = 0;
     while (f.fs.dir_read(dir, info) == 1) {
         ++count;
     }
-    CHECK(count == 2, "dir has 2 entries after gc");
+    s.check(count == 2, "dir has 2 entries after gc");
     (void)f.fs.dir_close(dir);
 
     (void)f.fs.unmount();
@@ -2061,41 +2062,41 @@ static void test_fs_gc() {
 // fs_grow
 // ============================================================================
 
-static void test_fs_grow() {
-    SECTION("fs_grow extends filesystem");
+static void test_fs_grow(Suite& s) {
+    s.section("fs_grow extends filesystem");
 
     SlimFixture f;
     f.format_and_mount();
 
     uint32_t old_count = f.fs.block_count_total();
     int old_size = f.fs.fs_size();
-    CHECK(old_size >= 0, "fs_size before grow");
+    s.check(old_size >= 0, "fs_size before grow");
 
     // Grow by 8 blocks
     uint32_t new_count = old_count + 8;
     // Extend storage (already have room since BLOCK_COUNT=64 and we use fewer)
     int rc = f.fs.fs_grow(new_count);
-    CHECK(rc == 0, "fs_grow succeeds");
-    CHECK(f.fs.block_count_total() == new_count, "block_count updated");
+    s.check(rc == 0, "fs_grow succeeds");
+    s.check(f.fs.block_count_total() == new_count, "block_count updated");
 
     // Shrink should fail
     rc = f.fs.fs_grow(old_count);
-    CHECK(rc < 0, "fs_grow shrink fails");
+    s.check(rc < 0, "fs_grow shrink fails");
 
     // Same size should be no-op
     rc = f.fs.fs_grow(new_count);
-    CHECK(rc == 0, "fs_grow same size is no-op");
+    s.check(rc == 0, "fs_grow same size is no-op");
 
     // Verify filesystem still works
     rc = f.fs.mkdir("/after_grow");
-    CHECK(rc == 0, "mkdir after grow");
+    s.check(rc == 0, "mkdir after grow");
 
     // Remount and verify
     f.remount();
     SlimInfo info{};
     rc = f.fs.stat("/after_grow", info);
-    CHECK(rc == 0, "stat after_grow after remount");
-    CHECK(f.fs.block_count_total() == new_count, "block_count persisted after remount");
+    s.check(rc == 0, "stat after_grow after remount");
+    s.check(f.fs.block_count_total() == new_count, "block_count persisted after remount");
 
     (void)f.fs.unmount();
 }
@@ -2105,70 +2106,72 @@ static void test_fs_grow() {
 // ============================================================================
 
 int main() {
-    test_format_and_mount();
-    test_remount();
-    test_mkdir_and_stat();
-    test_dir_read();
-    test_nested_dirs();
-    test_file_write_read();
-    test_file_stat();
-    test_file_seek();
-    test_file_truncate();
-    test_file_persist_after_remount();
-    test_large_file();
-    test_remove_file();
-    test_remove_dir();
-    test_remove_nonempty_dir();
-    test_rename();
-    test_fs_size();
-    test_fs_traverse();
-    test_open_nonexistent();
-    test_file_append();
-    test_power_loss_during_mkdir();
-    test_power_loss_during_file_write();
-    test_power_loss_during_remove();
-    test_superblock_redundancy();
-    test_both_superblocks_corrupt();
+    Suite s("fs_slim");
+
+    test_format_and_mount(s);
+    test_remount(s);
+    test_mkdir_and_stat(s);
+    test_dir_read(s);
+    test_nested_dirs(s);
+    test_file_write_read(s);
+    test_file_stat(s);
+    test_file_seek(s);
+    test_file_truncate(s);
+    test_file_persist_after_remount(s);
+    test_large_file(s);
+    test_remove_file(s);
+    test_remove_dir(s);
+    test_remove_nonempty_dir(s);
+    test_rename(s);
+    test_fs_size(s);
+    test_fs_traverse(s);
+    test_open_nonexistent(s);
+    test_file_append(s);
+    test_power_loss_during_mkdir(s);
+    test_power_loss_during_file_write(s);
+    test_power_loss_during_remove(s);
+    test_superblock_redundancy(s);
+    test_both_superblocks_corrupt(s);
 #if SLIM_FAULT_TESTS
-    test_fault_injection_mkdir();
-    test_fault_injection_file_write();
-    test_fault_injection_rename();
-    test_fault_injection_remove();
+    test_fault_injection_mkdir(s);
+    test_fault_injection_file_write(s);
+    test_fault_injection_rename(s);
+    test_fault_injection_remove(s);
 #endif
-    test_geometry_api();
-    test_close_all();
-    test_pending_move_recovery_complete();
-    test_wear_leveling_distribution();
-    test_cow_write_power_loss();
-    test_cow_write_sync();
-    test_multi_write_same_block();
-    test_multi_write_cross_block();
-    test_overwrite_preserves_surrounding();
-    test_cow_multi_block_file();
-    test_cow_truncate_during_dirty();
-    test_rdwr_read_after_write();
-    test_multiple_files_cow();
-    test_write_empty_buf();
-    test_seek_beyond_eof();
-    test_rename_overwrite();
-    test_deeply_nested_dir();
-    test_many_files_in_dir();
-    test_remove_then_create();
-    test_file_sync_explicit();
-    test_double_close();
-    test_open_flags_excl();
-    test_boundary_block_size_write();
-    test_pending_move_recovery_incomplete();
-    test_full_disk_write();
-    test_full_disk_mkdir();
+    test_geometry_api(s);
+    test_close_all(s);
+    test_pending_move_recovery_complete(s);
+    test_wear_leveling_distribution(s);
+    test_cow_write_power_loss(s);
+    test_cow_write_sync(s);
+    test_multi_write_same_block(s);
+    test_multi_write_cross_block(s);
+    test_overwrite_preserves_surrounding(s);
+    test_cow_multi_block_file(s);
+    test_cow_truncate_during_dirty(s);
+    test_rdwr_read_after_write(s);
+    test_multiple_files_cow(s);
+    test_write_empty_buf(s);
+    test_seek_beyond_eof(s);
+    test_rename_overwrite(s);
+    test_deeply_nested_dir(s);
+    test_many_files_in_dir(s);
+    test_remove_then_create(s);
+    test_file_sync_explicit(s);
+    test_double_close(s);
+    test_open_flags_excl(s);
+    test_boundary_block_size_write(s);
+    test_pending_move_recovery_incomplete(s);
+    test_full_disk_write(s);
+    test_full_disk_mkdir(s);
 
-    test_custom_attributes();
-    test_attr_remove();
-    test_attr_overwrite();
-    test_attr_persist_remount();
-    test_dir_seek_tell_rewind();
-    test_fs_gc();
-    test_fs_grow();
+    test_custom_attributes(s);
+    test_attr_remove(s);
+    test_attr_overwrite(s);
+    test_attr_persist_remount(s);
+    test_dir_seek_tell_rewind(s);
+    test_fs_gc(s);
+    test_fs_grow(s);
 
-    TEST_SUMMARY();
+    return s.summary();
 }

@@ -3,7 +3,8 @@
 // uses global disk_* callback symbols that conflict with the cleanroom port.
 // Results should be compared with fat(cr) results from test_bench.
 
-#include "test_common.hh"
+#include <umitest.hh>
+using namespace umitest;
 
 #define FS_ADAPTER_FAT
 #include "fs_adapter.hh"
@@ -171,6 +172,8 @@ static void run_benchmarks(Adapter& a, uint8_t* storage, double results[6]) {
 }
 
 int main() {
+    Suite s("fs_bench_fat_ref");
+
     std::printf("\n=== FATfs benchmark: cleanroom vs reference C ===\n");
     std::printf("Storage: %u B × %u = %u KB\n\n", BENCH_BLOCK_SIZE, BENCH_BLOCK_COUNT, BENCH_TOTAL_SIZE / 1024);
 
@@ -182,18 +185,18 @@ int main() {
 
     double cr[N_OPS]{}, ref[N_OPS]{};
 
-    SECTION("Benchmark: fat (cleanroom)");
+    s.section("Benchmark: fat (cleanroom)");
     {
         FatAdapter a;
         run_benchmarks(a, storage_cr, cr);
-        CHECK(true, "fat(cr) benchmarks complete");
+        s.check(true, "fat(cr) benchmarks complete");
     }
 
-    SECTION("Benchmark: fat (reference C)");
+    s.section("Benchmark: fat (reference C)");
     {
         FatRefAdapter a;
         run_benchmarks(a, storage_ref, ref);
-        CHECK(true, "fat(ref) benchmarks complete");
+        s.check(true, "fat(ref) benchmarks complete");
     }
 
     // Summary
@@ -206,5 +209,5 @@ int main() {
     }
 
     std::printf("\n");
-    TEST_SUMMARY();
+    return s.summary();
 }
