@@ -16,6 +16,9 @@ includes(path.join(lib_dir, "umiport"))
 -- Include umimmio (type-safe register abstraction)
 includes(path.join(lib_dir, "umimmio"))
 
+-- Include umi.test (testing framework)
+includes(path.join(lib_dir, "umi/test"))
+
 -- =====================================================================
 -- UMI Shell Library (platform-independent shell primitives)
 -- =====================================================================

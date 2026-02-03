@@ -95,16 +95,16 @@ end
 -- =====================================================================
 
 includes("lib/umi")
-includes("lib/umitest")
-includes("lib/umimock")
-includes("lib/umifs")
-includes("lib/umifs/test")
-includes("lib/umiusb/test")
-includes("lib/umiport")
-includes("lib/umiport/test")
-includes("lib/umios/kernel/test")
-includes("lib/umios/core/test")
-includes("lib/umios/crypto/test")
+includes("lib/umi/test")
+includes("lib/umi/ref")
+includes("lib/umi/fs")
+includes("lib/umi/fs/test")
+includes("lib/umi/usb/test")
+includes("lib/umi/port")
+includes("lib/umi/port/test")
+includes("lib/umi/kernel/test")
+includes("lib/umi/core/test")
+includes("lib/umi/crypto/test")
 
 -- Legacy umios target for backward compatibility
 target("umios")
@@ -126,16 +126,16 @@ target("test_dsp")
     add_rules("host.test")
     set_default(true)
     add_deps("umi.all", "umitest")
-    add_files("lib/umidsp/test/test_dsp.cc")
+    add_files("lib/umi/dsp/test/test_dsp.cc")
     add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
 target_end()
 
 -- umidi library tests
 for _, test in ipairs({
-    {"umidi_test_core", "lib/umidi/test/test_core.cc"},
-    {"umidi_test_messages", "lib/umidi/test/test_messages.cc"},
-    {"umidi_test_protocol", "lib/umidi/test/test_protocol.cc"},
-    {"umidi_test_extended", "lib/umidi/test/test_extended_protocol.cc"},
+    {"umidi_test_core", "lib/umi/midi/test/test_core.cc"},
+    {"umidi_test_messages", "lib/umi/midi/test/test_messages.cc"},
+    {"umidi_test_protocol", "lib/umi/midi/test/test_protocol.cc"},
+    {"umidi_test_extended", "lib/umi/midi/test/test_extended_protocol.cc"},
 }) do
     target(test[1])
         add_rules("host.test")
@@ -148,9 +148,9 @@ end
 
 -- umiboot library tests
 for _, test in ipairs({
-    {"umiboot_test_auth", "lib/umiboot/test/test_auth.cc"},
-    {"umiboot_test_firmware", "lib/umiboot/test/test_firmware.cc"},
-    {"umiboot_test_session", "lib/umiboot/test/test_session.cc"},
+    {"umiboot_test_auth", "lib/umi/boot/test/test_auth.cc"},
+    {"umiboot_test_firmware", "lib/umi/boot/test/test_firmware.cc"},
+    {"umiboot_test_session", "lib/umi/boot/test/test_session.cc"},
 }) do
     target(test[1])
         add_rules("host.test")
@@ -165,8 +165,8 @@ end
 -- ARM Firmware Targets (using embedded rule from arm-embedded)
 -- =====================================================================
 
-local stm32f4_linker = "lib/umiport/mcu/stm32f4/linker.ld"
-local stm32f4_syscalls = "lib/umiport/mcu/stm32f4/syscalls.cc"
+local stm32f4_linker = "lib/umi/port/mcu/stm32f4/linker.ld"
+local stm32f4_syscalls = "lib/umi/port/mcu/stm32f4/syscalls.cc"
 
 -- Helper: Create STM32F4 embedded target
 local function stm32f4_target(name, opts)
@@ -211,10 +211,8 @@ target("renode_test")
     set_values("embedded.mcu", "stm32f407vg")
     set_values("embedded.linker_script", "tools/renode/linker.ld")
     set_values("embedded.optimize", "size")
-    -- Platform-specific includes (cm/platform/*.hh)
-    add_includedirs("lib/umios/backend/cm")
     -- Kernel/driver includes
-    add_includedirs("lib/umios")
+    add_includedirs("lib/umi")
     add_includedirs("lib")
     add_deps("umi.core", "umi.dsp")
     add_defines("STM32F4", "BOARD_STM32F4")
@@ -229,31 +227,31 @@ target("renode_test")
 target_end()
 
 stm32f4_target("bench_midi_format", {
-    source = "lib/umidi/bench/bench_midi_format.cc",
+    source = "lib/umi/midi/bench/bench_midi_format.cc",
     optimize = "size",
     renode_script = "bench_midi.resc"
 })
 
 stm32f4_target("bench_diode_ladder", {
-    source = "lib/umidsp/bench/bench_diode_ladder.cc",
+    source = "lib/umi/dsp/bench/bench_diode_ladder.cc",
     optimize = "fast",
     renode_script = "tools/renode/bench_diode_ladder.resc"
 })
 
 stm32f4_target("bench_waveshaper", {
-    source = "lib/umidsp/bench/bench_waveshaper.cc",
+    source = "lib/umi/dsp/bench/bench_waveshaper.cc",
     optimize = "fast",
     renode_script = "tools/renode/bench_waveshaper.resc"
 })
 
 stm32f4_target("bench_waveshaper_fast", {
-    source = "lib/umidsp/bench/bench_waveshaper_fast.cc",
+    source = "lib/umi/dsp/bench/bench_waveshaper_fast.cc",
     optimize = "fast",
     renode_script = "tools/renode/bench_waveshaper_fast.resc"
 })
 
 stm32f4_target("umidi_test_renode", {
-    source = "lib/umidi/test/test_renode.cc",
+    source = "lib/umi/midi/test/test_renode.cc",
     group = "tests/umidi",
     optimize = "size",
     renode_script = "umidi_test.resc"
@@ -269,8 +267,8 @@ target("umimock_renode")
     add_deps("umi.embedded.full")
     add_defines("STM32F4", "BOARD_STM32F4")
     add_files(stm32f4_syscalls)
-    add_files("lib/umimock/test/test_mock_renode.cc")
-    add_includedirs("lib/umimock/include")
+    add_files("lib/umi/ref/test/test_mock_renode.cc")
+    add_includedirs("lib/umi/ref/include")
 target_end()
 
 -- Note: synth_example and synth_renode moved to examples/_archive
@@ -300,8 +298,8 @@ target("umimock_wasm")
     set_arch("wasm32")
     set_toolchains("emcc")
     set_filename("umimock_wasm.js")
-    add_files("lib/umimock/test/test_mock_wasm.cc")
-    add_includedirs("lib/umimock/include")
+    add_files("lib/umi/ref/test/test_mock_wasm.cc")
+    add_includedirs("lib/umi/ref/include")
     add_cxflags("-fno-exceptions", "-fno-rtti", {force = true})
     add_ldflags("-sEXPORTED_FUNCTIONS=['_main','_umimock_constant','_umimock_ramp_first','_umimock_set_and_get','_umimock_reset_value','_umimock_fill_buffer_check']", {force = true})
     add_ldflags("-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap']", {force = true})
@@ -630,9 +628,9 @@ task("fs-check")
         print(sep .. "\n")
 
         local renode = "/Applications/Renode.app/Contents/MacOS/Renode"
-        if not os.isfile(renode) then renode = "renode" end
-        local test_dir = "lib/umifs/test"
-        local resc = path.join(test_dir, "fs_test.resc")
+         if not os.isfile(renode) then renode = "renode" end
+         local test_dir = "lib/umi/fs/test"
+         local resc = path.join(test_dir, "fs_test.resc")
         local log = "build/renode_fs_uart.log"
 
         -- slim + fat(cr)
