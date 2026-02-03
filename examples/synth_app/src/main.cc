@@ -29,20 +29,16 @@ constexpr uint8_t RESONANCE = 1;
 // Routing Configuration
 // ============================================================================
 
-// Route table: notes → audio, CC#74/71 → param pipeline, buttons → control
-static const RouteTable g_route_table = [] {
-    auto rt = RouteTable::make_default();
-    rt.control_change[74] = ROUTE_PARAM; // CC#74 (Brightness) → param
-    rt.control_change[71] = ROUTE_PARAM; // CC#71 (Resonance) → param
-    return rt;
-}();
-
-// Parameter mapping: CC → denormalized param values
-static const ParamMapping g_param_mapping = [] {
-    auto pm = ParamMapping::make_empty();
-    pm.entries[74] = {param::CUTOFF, {}, 20.0f, 20000.0f};   // CC#74 → Cutoff Hz
-    pm.entries[71] = {param::RESONANCE, {}, 0.0f, 1.0f};     // CC#71 → Resonance 0-1
-    return pm;
+// AppConfig: route table + param mapping consolidated
+static const AppConfig g_app_config = [] {
+    auto cfg = AppConfig::make_default();
+    // Route CC#74/71 → param pipeline
+    cfg.route_table.control_change[74] = ROUTE_PARAM;
+    cfg.route_table.control_change[71] = ROUTE_PARAM;
+    // Parameter mapping: CC → denormalized param values
+    cfg.param_mapping.entries[74] = {param::CUTOFF, {}, 20.0f, 20000.0f};
+    cfg.param_mapping.entries[71] = {param::RESONANCE, {}, 0.0f, 1.0f};
+    return cfg;
 }();
 
 // ============================================================================
@@ -193,9 +189,8 @@ int main() {
     // Register processor with kernel
     umi::register_processor(processor);
 
-    // Configure routing: notes → audio, CC#74/71 → param pipeline
-    umi::set_route_table(&g_route_table);
-    umi::set_param_mapping(&g_param_mapping);
+    // Configure routing and parameter mapping
+    umi::set_app_config(&g_app_config);
 
     // Get shared memory from kernel
     auto& shared = *static_cast<umi::kernel::SharedMemory*>(umi::get_shared());
