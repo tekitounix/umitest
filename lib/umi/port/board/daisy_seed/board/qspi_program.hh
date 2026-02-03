@@ -227,13 +227,8 @@ qspi_program_page(std::uint32_t address, const std::uint8_t* data, std::uint32_t
     }
 
     if (reset_mode) {
-        qspi_exit_memory_mapped();
+        qspi_set_mode(QspiMode::INDIRECT_POLLING);
     }
-
-    qspi_preinit();
-    qspi_deinit();
-    init_qspi();
-    qspi_exit_memory_mapped();
 
     t.write(QUADSPI::FCR::value(0x1F));
 
@@ -259,10 +254,7 @@ qspi_program_page(std::uint32_t address, const std::uint8_t* data, std::uint32_t
     // Set address - AR must be AFTER CCR!
     t.write(QUADSPI::AR::value(address));
 
-    // Write data to FIFO (libDaisy HAL compatible)
-    // DR register must be accessed as byte for proper FIFO operation
-    auto* const dr_byte = reinterpret_cast<volatile std::uint8_t*>(0x52005020);
-
+    // Write data to FIFO using HAL-like abstraction
     for (std::uint32_t i = 0; i < len; ++i) {
         // Wait for FIFO Threshold Flag (FTF) - indicates FIFO has room
         // FTF is set when FIFO level <= FTHRES
@@ -277,7 +269,7 @@ qspi_program_page(std::uint32_t address, const std::uint8_t* data, std::uint32_t
                 return false;
             }
         }
-        *dr_byte = data[i];
+        qspi_write_dr_byte(data[i]);
     }
 
     std::uint32_t tc_timeout = 100000;
@@ -321,7 +313,7 @@ qspi_program_page(std::uint32_t address, const std::uint8_t* data, std::uint32_t
     }
 
     if (reset_mode) {
-        qspi_enter_memory_mapped();
+        qspi_set_mode(QspiMode::MEMORY_MAPPED);
     }
     return true;
 }
@@ -335,8 +327,8 @@ inline bool qspi_program(std::uint32_t address, const std::uint8_t* data, std::u
     // Convert to flash-relative address for calculations
     std::uint32_t flash_addr = address & 0x00FFFFFF;
 
-    // Exit memory-mapped mode once at the start (like libDaisy)
-    qspi_exit_memory_mapped();
+    // Set indirect polling mode once at the start (like libDaisy SetMode)
+    qspi_set_mode(QspiMode::INDIRECT_POLLING);
 
     while (len > 0) {
         // Calculate bytes to write in this page
@@ -344,9 +336,9 @@ inline bool qspi_program(std::uint32_t address, const std::uint8_t* data, std::u
         std::uint32_t page_remain = Flash::PAGE_SIZE - page_offset;
         std::uint32_t chunk = (len < page_remain) ? len : page_remain;
 
-        // reset_mode=false: don't exit/enter memory-mapped mode per page
+        // Mode already set to INDIRECT_POLLING, no need to switch per page
         if (!qspi_program_page(flash_addr | 0x90000000, data, chunk, false)) {
-            qspi_enter_memory_mapped();
+            qspi_set_mode(QspiMode::MEMORY_MAPPED);
             return false;
         }
 
@@ -355,8 +347,8 @@ inline bool qspi_program(std::uint32_t address, const std::uint8_t* data, std::u
         len -= chunk;
     }
 
-    // Re-enter memory-mapped mode at the end (like libDaisy)
-    qspi_enter_memory_mapped();
+    // Return to memory-mapped mode at the end (like libDaisy SetMode)
+    qspi_set_mode(QspiMode::MEMORY_MAPPED);
     return true;
 }
 

@@ -16,6 +16,12 @@ namespace umi::daisy {
 // Flash device alias for this board
 using Flash = flash::IS25LP064A;
 
+/// QSPI operating modes (libDaisy compatible)
+enum class QspiMode { INDIRECT_POLLING, MEMORY_MAPPED };
+
+/// Current QSPI mode state (libDaisy SetMode pattern)
+inline QspiMode g_qspi_current_mode = QspiMode::MEMORY_MAPPED;
+
 /// Pre-initialize IO2/IO3 pins to HIGH state (libDaisy compatible)
 /// This disables WP#/HOLD# functions before QSPI initialization
 inline void init_qspi_gpio_preinit() {
@@ -172,6 +178,20 @@ inline void qspi_write_byte(std::uint8_t cmd, std::uint8_t data) {
     }
     t.write(QUADSPI::FCR::value(1U << 1)); // Clear TCF
     qspi_wait_busy();
+}
+
+/// Write single byte to QSPI Data Register (HAL-like abstraction)
+/// Replaces direct 0x52005020 access
+inline void qspi_write_dr_byte(std::uint8_t data) {
+    auto* const dr = reinterpret_cast<volatile std::uint8_t*>(0x52005020);
+    *dr = data;
+}
+
+/// Read single byte from QSPI Data Register (HAL-like abstraction)
+/// Replaces direct 0x52005020 access
+inline std::uint8_t qspi_read_dr_byte() {
+    auto* const dr = reinterpret_cast<volatile std::uint8_t*>(0x52005020);
+    return *dr;
 }
 
 /// Auto-polling: wait for status register bit to match (libDaisy compatible)
@@ -497,6 +517,51 @@ inline void qspi_deinit() {
     gpio_configure_pin<GPIOF>(t, 7, gpio_mode::OUTPUT, gpio_otype::PUSH_PULL, gpio_speed::LOW, gpio_pupd::NONE);
     auto odr = t.read(GPIOF::ODR{});
     t.write(GPIOF::ODR::value(odr | (1U << 6) | (1U << 7)));
+}
+
+/// Set QSPI mode (libDaisy SetMode pattern)
+/// Switches between INDIRECT_POLLING and MEMORY_MAPPED modes
+/// without full peripheral reset
+inline bool qspi_set_mode(QspiMode mode) {
+    using namespace ::umi::stm32h7;
+    mm::DirectTransportT<> t;
+
+    if (g_qspi_current_mode == mode)
+        return true;
+
+    qspi_wait_busy();
+
+    // Abort any ongoing operation
+    auto cr = t.read(QUADSPI::CR{});
+    t.write(QUADSPI::CR::value(cr | (1U << 1))); // ABORT
+    while (t.read(QUADSPI::CR{}) & (1U << 1)) {
+    }
+    t.write(QUADSPI::FCR::value(0x1F));
+
+    if (mode == QspiMode::INDIRECT_POLLING) {
+        // Clear CCR to exit memory-mapped mode
+        t.write(QUADSPI::CCR::value(0));
+        qspi_wait_busy();
+    } else {
+        // MEMORY_MAPPED: Reconfigure CCR for quad I/O read (0xEB)
+        t.write(QUADSPI::ABR::value(0x000000A0));
+        t.write(QUADSPI::CCR::value(static_cast<std::uint32_t>(Flash::QUAD_IO_FAST_READ) |
+                                    (qspi_mode::SINGLE << 8) |          // IMODE: single line for instruction
+                                    (qspi_mode::QUAD << 10) |           // ADMODE: quad for address
+                                    (qspi_adsize::ADDR_24BIT << 12) |   // ADSIZE: 24-bit
+                                    (qspi_mode::QUAD << 14) |           // ABMODE: quad for alternate bytes
+                                    (0U << 16) |                        // ABSIZE: 0 (no alternate bytes)
+                                    (8U << 18) |                        // DCYC: 8 dummy cycles
+                                    (qspi_mode::QUAD << 24) |           // DMODE: quad for data
+                                    (qspi_fmode::MEMORY_MAPPED << 26) | // FMODE: memory-mapped
+                                    (1U << 28)                          // SIOO: send instruction only once
+                                    ));
+        qspi_invalidate_icache();
+        qspi_invalidate_dcache();
+    }
+
+    g_qspi_current_mode = mode;
+    return true;
 }
 
 /// Initialize QSPI in memory-mapped mode (libDaisy 2-stage compatible)

@@ -171,9 +171,8 @@ class QspiUpdater {
             return false;
         }
 
-        auto* dr = reinterpret_cast<volatile std::uint8_t*>(0x52005020);
         for (std::uint32_t i = 0; i < size; ++i) {
-            out[i] = *dr;
+            out[i] = qspi_read_dr_byte();
         }
 
         t.write(QUADSPI::FCR::value(1U << 1));
@@ -429,7 +428,7 @@ class QspiUpdater {
         std::uint32_t expected_crc = (std::uint32_t(decoded[0]) << 24) | (std::uint32_t(decoded[1]) << 16) |
                                      (std::uint32_t(decoded[2]) << 8) | decoded[3];
 
-        qspi_exit_memory_mapped();
+        qspi_set_mode(QspiMode::INDIRECT_POLLING);
         std::uint32_t actual_crc = 0xFFFFFFFF;
         std::uint32_t remaining = received_bytes_;
         std::uint32_t offset = 0;
@@ -441,7 +440,7 @@ class QspiUpdater {
             if (!qspi_indirect_read(offset, buffer, chunk)) {
                 state_ = QspiUpdateState::ERROR;
                 send_ack(seq, 0x0A, send_fn); // VERIFY_FAILED
-                qspi_enter_memory_mapped();
+                qspi_set_mode(QspiMode::MEMORY_MAPPED);
                 return true;
             }
 
@@ -451,7 +450,7 @@ class QspiUpdater {
         }
 
         actual_crc ^= 0xFFFFFFFF;
-        qspi_enter_memory_mapped();
+        qspi_set_mode(QspiMode::MEMORY_MAPPED);
 
         if (actual_crc != expected_crc) {
             state_ = QspiUpdateState::ERROR;
@@ -562,13 +561,13 @@ class QspiUpdater {
         }
 
         std::uint8_t response[33];
-        qspi_exit_memory_mapped();
+        qspi_set_mode(QspiMode::INDIRECT_POLLING);
         if (qspi_indirect_read(offset, &response[1], size)) {
             response[0] = 0x00;
         } else {
             response[0] = 0x0A;
         }
-        qspi_enter_memory_mapped();
+        qspi_set_mode(QspiMode::MEMORY_MAPPED);
         send_response(dfu::FW_ACK, seq, response, 1 + size, send_fn);
         return true;
     }
