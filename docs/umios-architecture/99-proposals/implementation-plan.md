@@ -14,7 +14,7 @@
 - 01-audio-context.md: Event 構造体を 8B → 24B（union 型）に更新、EventType を UPPER_CASE に
 - 03-event-system.md: AudioEventQueue サイズを 24B × 64 = 1536B に更新
 - 05-midi.md: UMP32 メンバ名 `data` → `word`
-- 06-syscall.md: イベントフラグを lower_case に（constexpr 変数）
+- 03-port/06-syscall.md: イベントフラグを lower_case に（constexpr 変数）
 - 10-shared-memory.md: event_queue サイズ 512B → 1536B
 - 11-scheduler.md: イベントフラグを lower_case に
 - 17-shell.md: KernelStateView を 17 フィールド → 33 フィールドに拡張
@@ -327,7 +327,7 @@ BlockDeviceLike concept と StorageService テンプレートは定義済み。*
 
 ---
 
-### Phase 8: SharedMemory サブリージョン (07-memory.md)
+### Phase 8: SharedMemory サブリージョン (03-port/07-memory.md)
 
 #### Step 8-1: リンカシンボルの実使用
 

@@ -217,7 +217,7 @@ process() に `input_events` として渡される。sample_pos 付き。
 using AudioEventQueue = RingBuffer<umi::Event, 64>;  // 24B × 64 = 1536B
 ```
 
-> umi::Event のサイズ (24B) については [01-audio-context.md](01-audio-context.md) を、SharedMemory 内の配置は [10-shared-memory.md](10-shared-memory.md) を参照。
+> umi::Event のサイズ (24B) については [01-audio-context.md](../00-fundamentals/01-audio-context.md) を、SharedMemory 内の配置は [10-shared-memory.md](10-shared-memory.md) を参照。
 
 ### 2. SharedParamState — 連続値パラメータ
 

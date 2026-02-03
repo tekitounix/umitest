@@ -236,7 +236,7 @@ extern "C" void _start() {
 6. LED をエラーパターンに変更
 
 OS（Shell、USB、LED）はアプリ Fault 後も動作を継続する。
-Fault ログの詳細は [20-diagnostics.md](20-diagnostics.md) を参照。
+Fault ログの詳細は [20-diagnostics.md](../04-services/20-diagnostics.md) を参照。
 
 ---
 
@@ -256,4 +256,4 @@ Fault ログの詳細は [20-diagnostics.md](20-diagnostics.md) を参照。
 - [12-memory-protection.md](12-memory-protection.md) — MPU リージョン設定
 - [14-security.md](14-security.md) — Ed25519 署名検証
 - [15-boot-sequence.md](15-boot-sequence.md) — ロードのタイミング（Phase 2）
-- [20-diagnostics.md](20-diagnostics.md) — Fault ログ
+- [20-diagnostics.md](../04-services/20-diagnostics.md) — Fault ログ

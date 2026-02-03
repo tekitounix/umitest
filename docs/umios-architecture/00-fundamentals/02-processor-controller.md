@@ -35,11 +35,11 @@ struct Volume {
     float gain = 1.0f;
 
     void process(umi::AudioContext& ctx) {
-        const float* in = ctx.input_buffer(0);
-        float* out = ctx.output_buffer(0);
-        if (!in || !out) return;
+        auto in = ctx.input(0);
+        auto out = ctx.output(0);
+        if (in.empty() || out.empty()) return;
 
-        for (uint32_t i = 0; i < ctx.buffer_size; ++i) {
+        for (uint32_t i = 0; i < out.size(); ++i) {
             out[i] = in[i] * gain;
         }
     }
@@ -65,7 +65,7 @@ int main() {
 2. **出力**: オーディオバッファへの書き込み、`output_events` への書き込み
 3. **副作用なし（I/O 禁止）**: LED、ディスプレイ、ログ、ファイル等への直接出力は行わない
 4. **リアルタイム安全**: ヒープ割当・ブロッキング・例外・stdio 禁止
-5. **バッファ寿命**: `AudioContext` の参照・ポインタを保持しない
+5. **バッファ寿命**: `AudioContext` の参照・span・ポインタを保持しない
 
 ### 状態の公開
 
@@ -233,9 +233,9 @@ int main() {
 | `umi::send_sysex(data, len, dest)` | SysEx 送信 | 33 |
 | `umi::log(msg)` | デバッグログ出力 | 50 |
 
-Syscall 番号の詳細は [06-syscall.md](06-syscall.md) を参照。
+Syscall 番号の詳細は [03-port/06-syscall.md](../03-port/06-syscall.md) を参照。
 
-上記の API はアプリケーションコードから見て全ターゲット共通である。内部実装はバックエンドが差し替える（組み込み: SVC syscall、WASM: import 関数、Plugin: 直接呼び出し）が、アプリ側のコードは変更不要。詳細は [08-backend-adapters.md](08-backend-adapters.md) を参照。
+上記の API はアプリケーションコードから見て全ターゲット共通である。内部実装はバックエンドが差し替える（組み込み: SVC syscall、WASM: import 関数、Plugin: 直接呼び出し）が、アプリ側のコードは変更不要。詳細は [08-backend-adapters.md](../08-backend-adapters.md) を参照。
 
 ## EventType
 

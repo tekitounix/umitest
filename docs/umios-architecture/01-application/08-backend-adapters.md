@@ -74,7 +74,7 @@ System Task (優先度 1: Server) で動作する System Service の中核。
 | Control Task | 2 (User) | アプリ main()、syscall 処理 |
 | Idle Task | 3 (Idle) | WFI スリープ |
 
-FPU コンテキスト退避ポリシーの詳細は [11-scheduler.md](11-scheduler.md) を参照。
+FPU コンテキスト退避ポリシーの詳細は [11-scheduler.md](../02-kernel/11-scheduler.md) を参照。
 
 ### タスク間シーケンス（DMA 64 × 4 蓄積パターン）
 

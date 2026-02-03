@@ -137,7 +137,7 @@ if (umi::log("tick") == -ENOSPC) {
 
 ### グループ 6: ファイルシステム (60–89)
 
-詳細は [19-storage-service.md](19-storage-service.md) を参照。
+詳細は [19-storage-service.md](../04-services/19-storage-service.md) を参照。
 
 #### ファイル操作 (60–68) — fd ベース
 
@@ -425,5 +425,5 @@ struct PluginRuntime {
 ## 関連ドキュメント
 
 - [11-scheduler.md](11-scheduler.md) — WaitEvent / Yield の動作（notify / wait_block）
-- [13-system-services.md](13-system-services.md) — FS syscall の非同期設計、サービスアーキテクチャ
+- [13-system-services.md](../04-services/13-system-services.md) — FS syscall の非同期設計、サービスアーキテクチャ
 - [04-param-system.md](04-param-system.md) — SetAppConfig の詳細

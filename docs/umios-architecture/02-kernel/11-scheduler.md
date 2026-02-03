@@ -207,7 +207,7 @@ PendSV (優先度 0xFF)                       ▼
 
 ### イベントフラグ
 
-イベントフラグはビットマスクで表現する（[06-syscall.md](06-syscall.md) §イベントフラグ参照）。
+イベントフラグはビットマスクで表現する（[03-port/06-syscall.md](03-port/03-port/06-syscall.md) §イベントフラグ参照）。
 
 ```
 audio    = (1 << 0)   オーディオバッファ準備完了
@@ -310,6 +310,6 @@ RT-Kernel は以下のポート関数をターゲット実装に要求する:
 ## 関連ドキュメント
 
 - [00-overview.md](00-overview.md) — タスクモデル概要
-- [06-syscall.md](06-syscall.md) — WaitEvent / Yield / Sleep の ABI 定義
-- [07-memory.md](07-memory.md) — タスクスタックのメモリ配置
+- [03-port/06-syscall.md](03-port/03-port/06-syscall.md) — WaitEvent / Yield / Sleep の ABI 定義
+- [03-port/07-memory.md](03-port/03-port/07-memory.md) — タスクスタックのメモリ配置
 - [12-memory-protection.md](12-memory-protection.md) — MPU によるタスク隔離、Fault 処理

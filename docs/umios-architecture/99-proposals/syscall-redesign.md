@@ -2,7 +2,7 @@
 
 ## 背景
 
-現行 [06-syscall.md](06-syscall.md) の全 syscall を選定基準に照らして検証した結果、
+現行 [03-port/06-syscall.md](03-port/03-port/06-syscall.md) の全 syscall を選定基準に照らして検証した結果、
 冗長な番号、不足している機能領域、一貫性の問題が明らかになった。
 
 本ドキュメントは syscall 体系の再設計を提案する。
@@ -385,10 +385,10 @@ AppConfig の RouteTable で対応可能。専用 syscall は過剰。
 
 ## 関連ドキュメント
 
-- [06-syscall.md](06-syscall.md) — 現行 syscall 仕様（本提案で更新対象）
-- [04-param-system.md](04-param-system.md) — AppConfig / ParamMapping 設計
-- [08-backend-adapters.md](08-backend-adapters.md) — バックエンド別実装方式
-- [10-shared-memory.md](10-shared-memory.md) — SharedMemory 構造
-- [13-system-services.md](13-system-services.md) — SystemTask サービスアーキテクチャ
-- [19-storage-service.md](19-storage-service.md) — FS 非同期モデル（Audio Device と同パターン）
-- [20-diagnostics.md](20-diagnostics.md) — KernelMetrics / FaultLog
+- [03-port/06-syscall.md](../03-port/06-syscall.md) — 現行 syscall 仕様（本提案で更新対象）
+- [01-application/04-param-system.md](../01-application/04-param-system.md) — AppConfig / ParamMapping 設計
+- [01-application/08-backend-adapters.md](../01-application/08-backend-adapters.md) — バックエンド別実装方式
+- [01-application/10-shared-memory.md](../01-application/10-shared-memory.md) — SharedMemory 構造
+- [04-services/13-system-services.md](../04-services/13-system-services.md) — SystemTask サービスアーキテクチャ
+- [04-services/19-storage-service.md](../04-services/19-storage-service.md) — FS 非同期モデル（Audio Device と同パターン）
+- [04-services/20-diagnostics.md](../04-services/20-diagnostics.md) — KernelMetrics / FaultLog

@@ -373,7 +373,7 @@ POD 構造体である必要がある。
 | # | ドキュメント | 関連 |
 |---|-------------|------|
 | 04 | [param-system](04-param-system.md) | ParamDescriptor, ParamMapping, SharedParamState |
-| 06 | [syscall](06-syscall.md) | syscall ABI, Group 2 (Configuration), Group 4 (Info) |
+| 06 | [syscall](../03-port/06-syscall.md) | syscall ABI, Group 2 (Configuration), Group 4 (Info) |
 | 08 | [backend-adapters](08-backend-adapters.md) | WASM / Plugin バックエンドの差異 |
 | 10 | [shared-memory](10-shared-memory.md) | SharedParamState のレイアウトと初期化 |
-| 13 | [system-services](13-system-services.md) | EventRouter の役割 |
+| 13 | [system-services](../04-services/13-system-services.md) | EventRouter の役割 |

@@ -7,8 +7,8 @@ SystemTask 上で動作する OS サービス群のアーキテクチャ。
 
 | サービス | 詳細 | 状態 |
 |---------|------|------|
-| Boot Sequence | [15-boot-sequence.md](15-boot-sequence.md) | 実装済み |
-| App Loader | [16-app-loader.md](16-app-loader.md) | 実装済み |
+| Boot Sequence | [15-boot-sequence.md](../02-kernel/15-boot-sequence.md) | 実装済み |
+| App Loader | [16-app-loader.md](../02-kernel/16-app-loader.md) | 実装済み |
 | Shell | [17-shell.md](17-shell.md) | 実装済み |
 | Updater (DFU over SysEx) | [18-updater.md](18-updater.md) | 実装済み |
 | StorageService | [19-storage-service.md](19-storage-service.md) | 新設計 |
@@ -49,10 +49,10 @@ SystemTask ループ:
 
 | フェーズ | 処理 | 参照 |
 |---------|------|------|
-| Reset → main() | ハードウェア初期化、.umia ロード | [15-boot-sequence.md](15-boot-sequence.md) |
-| main() → RTOS 開始 | タスク作成、スケジューラ起動 | [11-scheduler.md](11-scheduler.md) |
+| Reset → main() | ハードウェア初期化、.umia ロード | [15-boot-sequence.md](../02-kernel/15-boot-sequence.md) |
+| main() → RTOS 開始 | タスク作成、スケジューラ起動 | [11-scheduler.md](../02-kernel/11-scheduler.md) |
 | 正常動作 | Shell / Diagnostics / StorageService | 各サービスドキュメント |
-| アプリ Fault | OS 生存、Shell 有効化 | [12-memory-protection.md](12-memory-protection.md) |
+| アプリ Fault | OS 生存、Shell 有効化 | [12-memory-protection.md](../02-kernel/12-memory-protection.md) |
 | DFU モード | Updater がフラッシュ書き込み | [18-updater.md](18-updater.md) |
 
 ### タスク間通信
@@ -74,12 +74,12 @@ AudioTask (prio 0)        SystemTask (prio 1)       ControlTask (prio 2)
 
 ## 関連ドキュメント
 
-- [06-syscall.md](06-syscall.md) — Syscall ABI 定義（番号体系）
-- [11-scheduler.md](11-scheduler.md) — タスクモデル、優先度、コンテキストスイッチ
-- [12-memory-protection.md](12-memory-protection.md) — MPU 設定、Fault 処理
-- [14-security.md](14-security.md) — 署名検証、暗号プリミティブ
-- [15-boot-sequence.md](15-boot-sequence.md) — 起動フロー
-- [16-app-loader.md](16-app-loader.md) — アプリロード
+- [06-syscall.md](../03-port/06-syscall.md) — Syscall ABI 定義（番号体系）
+- [11-scheduler.md](../02-kernel/11-scheduler.md) — タスクモデル、優先度、コンテキストスイッチ
+- [12-memory-protection.md](../02-kernel/12-memory-protection.md) — MPU 設定、Fault 処理
+- [14-security.md](../05-binary/14-security.md) — 署名検証、暗号プリミティブ
+- [15-boot-sequence.md](../02-kernel/15-boot-sequence.md) — 起動フロー
+- [16-app-loader.md](../02-kernel/16-app-loader.md) — アプリロード
 - [17-shell.md](17-shell.md) — 対話シェル
 - [18-updater.md](18-updater.md) — DFU
 - [19-storage-service.md](19-storage-service.md) — ファイルシステム

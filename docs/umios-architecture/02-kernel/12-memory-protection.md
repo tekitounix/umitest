@@ -3,7 +3,7 @@
 ## 概要
 
 MPU によるメモリ保護、ヒープ/スタック衝突検出、Fault 処理と隔離。
-本章は [07-memory.md](07-memory.md) のレイアウト定義を前提とし、保護・監視・障害対応の仕様を規定する。
+本章は [03-port/07-memory.md](03-port/03-port/07-memory.md) のレイアウト定義を前提とし、保護・監視・障害対応の仕様を規定する。
 
 | 項目 | 状態 |
 |------|------|
@@ -27,7 +27,7 @@ MPU によるメモリ保護、ヒープ/スタック衝突検出、Fault 処理
 ## MPU リージョン設計
 
 STM32F4 の MPU はリージョンサイズが 2^n アラインメントの制約を持つ。
-メモリレイアウトの詳細は [07-memory.md](07-memory.md) を参照。
+メモリレイアウトの詳細は [03-port/07-memory.md](03-port/03-port/07-memory.md) を参照。
 
 ### 保護リージョン
 
@@ -181,7 +181,7 @@ class Protection {
 
 ## 関連ドキュメント
 
-- [07-memory.md](07-memory.md) — メモリレイアウト（アドレス、サイズ）
+- [03-port/07-memory.md](03-port/03-port/07-memory.md) — メモリレイアウト（アドレス、サイズ）
 - [11-scheduler.md](11-scheduler.md) — タスク隔離とコンテキストスイッチ
 - [09-app-binary.md](09-app-binary.md) — AppHeader のセクションサイズ定義
-- [13-system-services.md](13-system-services.md) — Fault 後の Shell 有効化、Diagnostics
+- [13-system-services.md](../04-services/13-system-services.md) — Fault 後の Shell 有効化、Diagnostics

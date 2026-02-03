@@ -74,7 +74,9 @@ struct SharedInputState {
 process() 内で CV 入力の即値が必要な場合に使用:
 
 ```cpp
-float pitch_cv = float(ctx.input.raw[CV_PITCH]) / 65535.0f;
+if (ctx.input_state) {
+    float pitch_cv = float(ctx.input_state->raw[CV_PITCH]) / 65535.0f;
+}
 ```
 
 ただし通常は InputParamMapping 経由で SharedParamState に変換して使う方が望ましい。

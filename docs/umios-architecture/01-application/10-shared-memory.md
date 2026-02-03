@@ -5,7 +5,7 @@
 SharedMemory はカーネルとアプリ間で共有するメモリ領域の構造体である。
 アプリは `umi::get_shared()` syscall でポインタを取得する。
 
-本章は SharedMemory の完全な構造体定義を集約する。物理アドレス配置は [07-memory.md](07-memory.md) を、各メンバーの使い方は [01-audio-context.md](01-audio-context.md)・[04-param-system.md](04-param-system.md) を参照。
+本章は SharedMemory の完全な構造体定義を集約する。物理アドレス配置は [07-memory.md](../03-port/07-memory.md) を、各メンバーの使い方は [01-audio-context.md](../00-fundamentals/01-audio-context.md)・[04-param-system.md](04-param-system.md) を参照。
 
 ## SharedMemory 構造体（完全定義）
 
@@ -52,7 +52,7 @@ struct SharedMemory {
 ```
 
 > **旧ドキュメントとの差異**:
-> - 07-memory.md にあったフラットな `std::atomic<float> params[MAX_PARAMS]` (128B) は `SharedParamState` (136B) に置換。`changed_flags` と `version` を含む正式な構造体を使用する
+> - 03-port/07-memory.md にあったフラットな `std::atomic<float> params[MAX_PARAMS]` (128B) は `SharedParamState` (136B) に置換。`changed_flags` と `version` を含む正式な構造体を使用する
 > - `button_pressed`, `button_current` 等のフラットフィールドは `SharedInputState` に集約すべきだが、レガシー互換のため当面維持する
 > - 各内包構造体の正式定義は本章で行い、他章は抜粋のみ記載する
 
@@ -121,7 +121,7 @@ struct SharedInputState {
 
 ## メモリ領域との対応
 
-SharedMemory の各セクションは [07-memory.md](07-memory.md) のリンカシンボルで定義される物理アドレスに配置される。
+SharedMemory の各セクションは [07-memory.md](../03-port/07-memory.md) のリンカシンボルで定義される物理アドレスに配置される。
 
 | セクション | リンカシンボル | サイズ | 主要メンバー |
 |-----------|-------------|--------|------------|
@@ -146,7 +146,7 @@ SharedMemory.channel      → AudioContext.channel
 SharedMemory.input        → AudioContext.input
 ```
 
-詳細は [01-audio-context.md](01-audio-context.md) を参照。
+詳細は [01-audio-context.md](../00-fundamentals/01-audio-context.md) を参照。
 
 ### Controller (main()) からのアクセス
 

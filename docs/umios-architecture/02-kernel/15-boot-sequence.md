@@ -250,7 +250,7 @@ ControlTask はアプリの `_start()` を非特権モードで実行する。
 | BusFault | Red 点灯（無限ループ） |
 | UsageFault | Red 点灯（無限ループ） |
 
-RTOS 起動後の Fault 処理については [20-diagnostics.md](20-diagnostics.md) を参照。
+RTOS 起動後の Fault 処理については [20-diagnostics.md](../04-services/20-diagnostics.md) を参照。
 
 ---
 
@@ -265,5 +265,5 @@ RTOS 起動後の Fault 処理については [20-diagnostics.md](20-diagnostics
 - [10-shared-memory.md](10-shared-memory.md) — SharedMemory 構造体
 - [11-scheduler.md](11-scheduler.md) — タスクモデル、FPU ポリシー
 - [12-memory-protection.md](12-memory-protection.md) — MPU リージョン設計
-- [13-system-services.md](13-system-services.md) — サービスアーキテクチャ概要
+- [13-system-services.md](../04-services/13-system-services.md) — サービスアーキテクチャ概要
 - [16-app-loader.md](16-app-loader.md) — アプリロード詳細

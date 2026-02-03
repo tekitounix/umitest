@@ -159,5 +159,5 @@ Ed25519 検証は ~800B のスタックを使用する。SystemTask のスタッ
 ## 関連ドキュメント
 
 - [09-app-binary.md](09-app-binary.md) — AppHeader の signature / crc32 フィールド
-- [13-system-services.md](13-system-services.md) — Loader / Updater のフロー
+- [13-system-services.md](../04-services/13-system-services.md) — Loader / Updater のフロー
 - [12-memory-protection.md](12-memory-protection.md) — MPU によるカーネル Flash 保護
