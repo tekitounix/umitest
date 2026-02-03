@@ -1,6 +1,9 @@
-#include <mmio/mmio.hh>
+#include <umimmio.hh>
+#include <transport/i2c.hh>
+#include <transport/spi.hh>
 #include "test_transport.hh"
 #include <umitest.hh>
+#include <span>
 
 // Memory-mapped device for DirectTransport testing
 struct TestDevice : mm::Device<> {
@@ -19,9 +22,55 @@ struct TestDevice : mm::Device<> {
     };
 };
 
+struct TestDevice64 : mm::Device<> {
+    struct REG64 : mm::Register<TestDevice64, 0x2000, 64> {
+        struct LOW32 : mm::Field<REG64, 0, 32> {};
+        struct HIGH16 : mm::Field<REG64, 32, 16> {};
+    };
+};
+
 namespace {
 // Mock memory for DirectTransport
 std::array<std::uint32_t, 1024> mock_memory{};
+
+// Mock I2C driver for mm::I2cTransport (span-based API)
+class MockI2cDriver {
+    struct DeviceMemory {
+        std::array<std::uint8_t, 512> data{};
+    };
+    std::array<DeviceMemory, 128> devices{};
+
+public:
+    bool write(std::uint8_t addr7, std::span<const std::uint8_t> data) noexcept {
+        if (data.size() < 1) {
+            return false;
+        }
+        auto& dev = devices[addr7 & 0x7F];
+        std::uint16_t reg = data[0];
+        if (data.size() >= 2) {
+            for (std::size_t i = 1; i < data.size(); ++i) {
+                dev.data[reg++] = data[i];
+            }
+        }
+        return true;
+    }
+
+    bool write_read(std::uint8_t addr7, std::span<const std::uint8_t> tx, std::span<std::uint8_t> rx) noexcept {
+        if (tx.size() < 1) {
+            return false;
+        }
+        auto& dev = devices[addr7 & 0x7F];
+        std::uint16_t reg = tx[0];
+        for (std::size_t i = 0; i < rx.size(); ++i) {
+            rx[i] = dev.data[reg + i];
+        }
+        return true;
+    }
+
+    std::uint8_t& operator()(std::uint8_t addr7, std::uint8_t reg) {
+        return devices[addr7 & 0x7F].data[reg];
+    }
+};
 
 // Mock DirectTransport for testing
 template <typename CheckPolicy = std::true_type>
@@ -47,6 +96,35 @@ public:
         using T = typename Reg::RegValueType;
         auto idx = (Reg::address - 0x1000) / sizeof(T);
         mock_memory[idx] = static_cast<std::uint32_t>(value);
+    }
+};
+
+// Mock DirectTransport for 64-bit registers
+template <typename CheckPolicy = std::true_type>
+class MockDirectTransport64 : private mm::RegOps<MockDirectTransport64<CheckPolicy>, CheckPolicy> {
+    friend class mm::RegOps<MockDirectTransport64<CheckPolicy>, CheckPolicy>;
+public:
+    using mm::RegOps<MockDirectTransport64<CheckPolicy>, CheckPolicy>::write;
+    using mm::RegOps<MockDirectTransport64<CheckPolicy>, CheckPolicy>::read;
+    using mm::RegOps<MockDirectTransport64<CheckPolicy>, CheckPolicy>::modify;
+    using mm::RegOps<MockDirectTransport64<CheckPolicy>, CheckPolicy>::is;
+    using mm::RegOps<MockDirectTransport64<CheckPolicy>, CheckPolicy>::flip;
+    using TransportTag = mm::DirectTransportTag;
+
+    mutable std::array<std::uint64_t, 16> mem{};
+
+    template <typename Reg>
+    [[nodiscard]] auto reg_read(Reg /*reg*/) const noexcept -> typename Reg::RegValueType {
+        using T = typename Reg::RegValueType;
+        auto idx = (Reg::address - 0x2000) / sizeof(T);
+        return static_cast<T>(mem[idx]);
+    }
+
+    template <typename Reg>
+    void reg_write(Reg /*reg*/, typename Reg::RegValueType value) const noexcept {
+        using T = typename Reg::RegValueType;
+        auto idx = (Reg::address - 0x2000) / sizeof(T);
+        mem[idx] = static_cast<std::uint64_t>(value);
     }
 };
 
@@ -216,6 +294,30 @@ int main() {
         return !t.failed;
     });
 
+    s.section("mm::I2cTransport");
+    s.run("8-bit register read/write (library transport)", [](umitest::TestContext& t) {
+        MockI2cDriver i2c_driver;
+        mm::I2cTransport<MockI2cDriver> i2c(i2c_driver, 0x50 << 1);
+        i2c.write(test::TestDevice8::REG0::value(0xAA));
+        t.assert_eq(i2c_driver(0x50, 0x00), static_cast<uint8_t>(0xAA));
+        auto val = i2c.read(test::TestDevice8::REG0{});
+        t.assert_eq(val, static_cast<uint8_t>(0xAA));
+        return !t.failed;
+    });
+
+    s.section("mm::SpiTransport");
+    s.run("8-bit register read/write (library transport)", [](umitest::TestContext& t) {
+        test::MockSpiBus spi_bus;
+        test::MockCsPin cs;
+        test::SpiDevice spi_device(spi_bus, cs);
+        mm::SpiTransport<decltype(spi_device)> spi_transport(spi_device);
+        spi_transport.write(test::TestDevice8::REG1::value(0xCD));
+        t.assert_eq(spi_bus[0x01], static_cast<uint8_t>(0xCD));
+        auto val = spi_transport.read(test::TestDevice8::REG1{});
+        t.assert_eq(val, static_cast<uint8_t>(0xCD));
+        return !t.failed;
+    });
+
     s.section("transport constraints");
     s.run("DirectOnlyDevice works with DirectTransport", [](umitest::TestContext& t) {
         mock_memory.fill(0);
@@ -230,6 +332,18 @@ int main() {
         [[maybe_unused]] auto v1 = TestDevice::Block0::REG1::FIELD::value(0);
         [[maybe_unused]] auto v2 = TestDevice::Block0::REG1::FIELD::value(15);
         t.assert_true(true, "compile-time value range accepted");
+        return !t.failed;
+    });
+
+    s.section("64-bit registers");
+    s.run("64-bit register read/write", [](umitest::TestContext& t) {
+        MockDirectTransport64<> mcu64;
+        mcu64.write(TestDevice64::REG64::value(0x1122334455667788ULL));
+        auto val = mcu64.read(TestDevice64::REG64{});
+        t.assert_eq(val, 0x1122334455667788ULL);
+        mcu64.modify(TestDevice64::REG64::HIGH16::value(0xABCD));
+        auto updated = mcu64.read(TestDevice64::REG64{});
+        t.assert_eq(updated, 0x1122ABCD55667788ULL);
         return !t.failed;
     });
 

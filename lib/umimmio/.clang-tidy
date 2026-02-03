@@ -1,0 +1,21 @@
+# MMIO register definitions - allow ALL_CAPS naming for hardware register conventions
+# Inherits from project-wide .clang-tidy, only overrides IgnoredRegexp patterns
+#
+# MMIO register definitions follow hardware datasheet naming:
+#   - Device/Block: USART1, GPIO, RCC, TIM2
+#   - Registers: CR1, BRR, ISR, DR
+#   - Fields: UE, RE, TE, RXNE
+
+InheritParentConfig: true
+
+CheckOptions:
+  # ALL_CAPS exceptions for MMIO types (USART1, GPIO, CR1, BRR, etc.)
+  - { key: readability-identifier-naming.TypeIgnoredRegexp,       value: '^[A-Z][A-Z0-9_]*$' }
+  - { key: readability-identifier-naming.ClassIgnoredRegexp,      value: '^[A-Z][A-Z0-9_]*$' }
+  - { key: readability-identifier-naming.StructIgnoredRegexp,     value: '^[A-Z][A-Z0-9_]*$' }
+  - { key: readability-identifier-naming.TypeAliasIgnoredRegexp,  value: '.*_t$|^[A-Z][A-Z0-9_]*$' }
+  
+  # ALL_CAPS exceptions for MMIO members/variables (UE, RE, TE, etc.)
+  - { key: readability-identifier-naming.MemberIgnoredRegexp,           value: '^[A-Z][A-Z0-9_]*$' }
+  - { key: readability-identifier-naming.VariableIgnoredRegexp,         value: '^[A-Z][A-Z0-9_]*$|^_.*' }
+  - { key: readability-identifier-naming.StaticVariableIgnoredRegexp,   value: '^[A-Z][A-Z0-9_]*$|^_.*' }

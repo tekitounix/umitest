@@ -1,7 +1,8 @@
 #pragma once
-#include <mmio/mmio.hh>
+#include <umimmio.hh>
 #include <array>
 #include <cstring>
+#include <cassert>
 
 namespace test {
 
@@ -53,10 +54,12 @@ public:
         : bus(bus), device_address(addr) {}
 
     void raw_write(std::uint8_t reg_addr, const void* data, std::size_t size) const noexcept {
+        assert(size <= 8 && "Register size must be <= 64 bits");
         bus.write(device_address, reg_addr, data, size);
     }
 
     void raw_read(std::uint8_t reg_addr, void* data, std::size_t size) const noexcept {
+        assert(size <= 8 && "Register size must be <= 64 bits");
         bus.write_then_read(device_address, &reg_addr, 1, data, size);
     }
 };
@@ -133,6 +136,7 @@ public:
     explicit SpiTransport(SpiDev& device) noexcept : device(device) {}
 
     void raw_write(std::uint8_t reg_addr, const void* data, std::size_t size) const noexcept {
+        assert(size <= 8 && "Register size must be <= 64 bits");
         // Write command (MSB clear)
         std::uint8_t cmd = reg_addr & 0x7F;
         std::array<std::uint8_t, 9> tx_buf;  // cmd + up to 8 bytes
@@ -143,6 +147,7 @@ public:
     }
 
     void raw_read(std::uint8_t reg_addr, void* data, std::size_t size) const noexcept {
+        assert(size <= 8 && "Register size must be <= 64 bits");
         // Read command (MSB set)
         std::uint8_t cmd = reg_addr | 0x80;
         std::array<std::uint8_t, 9> tx_buf{};

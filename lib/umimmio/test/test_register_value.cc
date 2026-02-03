@@ -1,4 +1,4 @@
-#include <mmio/mmio.hh>
+#include <umimmio.hh>
 #include <umitest.hh>
 
 // Using mm namespace from mmio.hh
@@ -58,7 +58,7 @@ public:
     }
 
     template <typename Reg>
-    auto reg_write(Reg reg, typename Reg::RegValueType value) noexcept -> void {
+    auto reg_write(Reg reg, typename Reg::RegValueType value) const noexcept -> void {
         TestBackend::reg_write(reg, value);
     }
 };
@@ -67,26 +67,33 @@ int main() {
     umitest::Suite s("mmio_register_value");
 
     s.section("register Value write");
-    TestTransport<> transport;
+    s.run("register Value writes", [](umitest::TestContext& t) {
+        TestTransport<> transport;
 
-    transport.write(TestDevice::POWER_CTL::PowerDown{});
-    s.check_eq(static_cast<int>(transport.read(TestDevice::POWER_CTL{})), 0x01);
+        transport.write(TestDevice::POWER_CTL::PowerDown{});
+        t.assert_eq(static_cast<int>(transport.read(TestDevice::POWER_CTL{})), 0x01);
 
-    transport.write(TestDevice::POWER_CTL::PowerUp{});
-    s.check_eq(static_cast<int>(transport.read(TestDevice::POWER_CTL{})), 0x9E);
+        transport.write(TestDevice::POWER_CTL::PowerUp{});
+        t.assert_eq(static_cast<int>(transport.read(TestDevice::POWER_CTL{})), 0x9E);
 
-    transport.write(TestDevice::POWER_CTL::PartialPower{});
-    s.check_eq(static_cast<int>(transport.read(TestDevice::POWER_CTL{})), 0x06);
+        transport.write(TestDevice::POWER_CTL::PartialPower{});
+        t.assert_eq(static_cast<int>(transport.read(TestDevice::POWER_CTL{})), 0x06);
 
-    transport.write(TestDevice::CONFIG::DefaultConfig{});
-    s.check_eq(static_cast<int>(transport.read(TestDevice::CONFIG{})), 0xA5);
+        transport.write(TestDevice::CONFIG::DefaultConfig{});
+        t.assert_eq(static_cast<int>(transport.read(TestDevice::CONFIG{})), 0xA5);
 
-    transport.write(TestDevice::CONFIG::TestConfig{});
-    s.check_eq(static_cast<int>(transport.read(TestDevice::CONFIG{})), 0x5A);
+        transport.write(TestDevice::CONFIG::TestConfig{});
+        t.assert_eq(static_cast<int>(transport.read(TestDevice::CONFIG{})), 0x5A);
+        return !t.failed;
+    });
 
     s.section("field Value still works");
-    transport.write(TestDevice::POWER_CTL::PWR_DOWN::Set{});
-    s.check_eq(static_cast<int>(transport.read(TestDevice::POWER_CTL{})), 0x01);
+    s.run("field Value write", [](umitest::TestContext& t) {
+        TestTransport<> transport;
+        transport.write(TestDevice::POWER_CTL::PWR_DOWN::Set{});
+        t.assert_eq(static_cast<int>(transport.read(TestDevice::POWER_CTL{})), 0x01);
+        return !t.failed;
+    });
 
     return s.summary();
 }

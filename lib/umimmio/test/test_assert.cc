@@ -7,13 +7,14 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <array>
+#include <cstring>
 
-#include <mmio/mmio.hh>
+#include <umimmio.hh>
 #include <umitest.hh>
 
 namespace {
 // Mock DirectTransport for testing
-std::array<std::uint32_t, 1024> mock_memory{};
+std::array<std::uint32_t, 2048> mock_memory{};
 
 template <typename CheckPolicy = std::true_type>
 class TestDirectTransport : private mm::RegOps<TestDirectTransport<CheckPolicy>, CheckPolicy> {
@@ -29,13 +30,15 @@ public:
     template <typename Reg>
     [[nodiscard]] auto reg_read(Reg /*reg*/) const noexcept -> typename Reg::RegValueType {
         using T = typename Reg::RegValueType;
-        return *reinterpret_cast<const T*>(&mock_memory[(Reg::address - 0x1000) / 4]);
+        T value{};
+        std::memcpy(&value, &mock_memory[(Reg::address - 0x1000) / 4], sizeof(T));
+        return value;
     }
 
     template <typename Reg>
     void reg_write(Reg /*reg*/, typename Reg::RegValueType value) const noexcept {
         using T = typename Reg::RegValueType;
-        *reinterpret_cast<T*>(&mock_memory[(Reg::address - 0x1000) / 4]) = value;
+        std::memcpy(&mock_memory[(Reg::address - 0x1000) / 4], &value, sizeof(T));
     }
 };
 
@@ -170,6 +173,10 @@ int main() {
             "F5::value(0b11111) no assert");
     s.check(fork_expect_assert([] { transport.modify(AssertDev::Reg16::F5::value(0b100000)); }),
             "F5::value(0b100000) triggers assert");
+
+    s.section("signed values");
+    s.check(fork_expect_assert([] { transport.write(AssertDev::Reg8::F4::value(-1)); }),
+            "F4::value(-1) triggers assert");
 
     return s.summary();
 }
