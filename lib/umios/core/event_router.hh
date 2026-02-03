@@ -10,6 +10,9 @@
 #include <cstdint>
 #include <cstring>
 
+// RouteTable, RouteFlags, MidiCommandIndex are defined in route_table.hh
+// (included transitively via param_mapping.hh → route_table.hh)
+
 namespace umi {
 
 // ============================================================================
@@ -33,98 +36,6 @@ struct RawInput {
 };
 
 static_assert(sizeof(RawInput) == 12);
-
-// ============================================================================
-// Route Flags — Per-message routing decisions
-// ============================================================================
-
-/// Bitmask flags controlling where a message is routed
-enum RouteFlags : uint8_t {
-    ROUTE_NONE        = 0,      ///< Message dropped
-    ROUTE_AUDIO       = 1,      ///< → AudioEventQueue (process() input_events)
-    ROUTE_CONTROL     = 2,      ///< → ControlEventQueue (CC converted to INPUT_CHANGE)
-    ROUTE_STREAM      = 4,      ///< → Stream recording (future)
-    ROUTE_PARAM       = 8,      ///< → ParamMapping → SharedParamState
-    ROUTE_CONTROL_RAW = 16,     ///< → ControlEventQueue (UMP32 unchanged)
-};
-
-/// Bitwise OR operator for RouteFlags
-constexpr RouteFlags operator|(RouteFlags a, RouteFlags b) noexcept {
-    return static_cast<RouteFlags>(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
-}
-
-// ============================================================================
-// Route Table — Message routing policy
-// ============================================================================
-
-/// MIDI command index for channel_voice table
-/// Maps (status >> 4) - 8 to index 0-7
-///   0 = NoteOff (0x8n), 1 = NoteOn (0x9n), 2 = PolyAT (0xAn)
-///   3 = CC (0xBn), 4 = PgmChange (0xCn), 5 = ChanAT (0xDn)
-///   6 = PitchBend (0xEn), 7 = reserved
-enum MidiCommandIndex : uint8_t {
-    NOTE_OFF_IDX = 0,
-    NOTE_ON_IDX = 1,
-    POLY_AT_IDX = 2,
-    CC_IDX = 3,
-    PGM_CHANGE_IDX = 4,
-    CHAN_AT_IDX = 5,
-    PITCH_BEND_IDX = 6,
-};
-
-/// Routing table: determines where each MIDI message type goes
-/// Layout: 272 bytes total
-struct RouteTable {
-    /// Channel voice messages: [command_index][channel] → flags
-    /// command_index: (status >> 4) - 8 (0-7)
-    /// channel: status & 0x0F (0-15)
-    RouteFlags channel_voice[8][16];    ///< 128B
-
-    /// Control Change overrides: [CC#] → flags
-    /// When non-zero, overrides channel_voice[CC_IDX][ch] for this CC number
-    RouteFlags control_change[128];     ///< 128B
-
-    /// System messages: [status & 0x0F] → flags
-    /// Index: 0=0xF0(SysEx), 1=0xF1(MTC), ... 8=0xF8(Clock), etc.
-    RouteFlags system[16];              ///< 16B
-
-    /// Look up route flags for a MIDI status byte
-    /// @param status MIDI status byte (0x80-0xFF)
-    /// @param data1 First data byte (for CC override)
-    /// @return Combined route flags
-    [[nodiscard]] RouteFlags lookup(uint8_t status, uint8_t data1 = 0) const noexcept {
-        if (status >= 0xF0) {
-            return system[status & 0x0F];
-        }
-        uint8_t cmd_idx = (status >> 4) - 8;
-        uint8_t ch = status & 0x0F;
-        RouteFlags flags = channel_voice[cmd_idx][ch];
-
-        // CC override: if control_change entry is set, use it instead
-        if (cmd_idx == CC_IDX && control_change[data1] != ROUTE_NONE) {
-            flags = control_change[data1];
-        }
-        return flags;
-    }
-
-    /// Create a default route table (all notes → audio, all CC → control)
-    static constexpr RouteTable make_default() noexcept {
-        RouteTable rt{};
-        // Route all note on/off to audio path
-        for (uint8_t ch = 0; ch < 16; ++ch) {
-            rt.channel_voice[NOTE_OFF_IDX][ch] = ROUTE_AUDIO;
-            rt.channel_voice[NOTE_ON_IDX][ch] = ROUTE_AUDIO;
-            rt.channel_voice[POLY_AT_IDX][ch] = ROUTE_AUDIO;
-            rt.channel_voice[PITCH_BEND_IDX][ch] = ROUTE_AUDIO;
-            rt.channel_voice[CHAN_AT_IDX][ch] = ROUTE_AUDIO;
-            rt.channel_voice[CC_IDX][ch] = ROUTE_CONTROL;
-            rt.channel_voice[PGM_CHANGE_IDX][ch] = ROUTE_CONTROL;
-        }
-        return rt;
-    }
-};
-
-static_assert(sizeof(RouteTable) == 272);
 
 // ============================================================================
 // Control Event — Events delivered to Controller task

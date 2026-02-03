@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "route_table.hh"
 #include "shared_state.hh"
 #include <cstdint>
 
@@ -106,18 +107,28 @@ static_assert(sizeof(InputConfig) == 8);
 // Application Configuration Bundle
 // ============================================================================
 
-// Forward declaration
-struct RouteTable;
-
 /// Complete application configuration
-/// Set atomically via syscall, double-buffered in kernel
+/// Set atomically via SetAppConfig syscall (Nr 20), triple-buffered in kernel.
+/// Replaces individual syscalls (Nr 21-24) to guarantee block-boundary consistency.
+///
+/// Usage:
+///   static AppConfig cfg = AppConfig::make_default();
+///   cfg.route_table.control_change[74] = ROUTE_PARAM;
+///   cfg.param_mapping.entries[74] = {0, {}, 20.0f, 20000.0f};
+///   umi::set_app_config(&cfg);
+///
+/// The kernel copies this into an inactive buffer and swaps at the next
+/// audio block boundary, ensuring process() always sees a consistent snapshot.
 struct AppConfig {
-    ParamMapping param_mapping;
-    InputParamMapping input_mapping;
-    InputConfig inputs[16];
+    RouteTable route_table;             ///< MIDI routing (272B)
+    ParamMapping param_mapping;         ///< CC → parameter mapping (1536B)
+    InputParamMapping input_mapping;    ///< HW input → parameter mapping (192B)
+    InputConfig inputs[16];             ///< Per-input configuration (128B)
 
+    /// Create default configuration (default routing, all params unmapped)
     static constexpr AppConfig make_default() noexcept {
         AppConfig cfg{};
+        cfg.route_table = RouteTable::make_default();
         cfg.param_mapping = ParamMapping::make_empty();
         cfg.input_mapping = InputParamMapping::make_empty();
         return cfg;
