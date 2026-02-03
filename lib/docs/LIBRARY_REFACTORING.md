@@ -1,6 +1,10 @@
-# UMI ライブラリ構成リファクタリング提案
+# UMI ライブラリ構成リファクタリング計画
 
-本文書は `lib/` 以下のライブラリ構成をフラット化し、依存関係を明確化するためのリファクタリング計画を定義する。
+本文書は `lib/` 以下のライブラリ構成を理想的な統合構造へ移行する計画を定義する。
+
+**更新履歴**:
+- 2026-02-03: 理想形（`lib/umi/` 統合構造）を採用。全ライブラリを `umi::` namespace 下に統合
+- 2026-02-03: System ServiceをRuntime層に配置、`umi::ref`を採用、coroを独立レイヤーに配置
 
 ---
 
@@ -8,404 +12,403 @@
 
 ### 現状の問題
 
-1. **umios が巨大すぎる** — core/kernel/backend/adapter/crypto/app/platform が混在
-2. **責務の境界が曖昧** — Application層とOS層のコードが同一ライブラリに存在
-3. **循環依存のリスク** — 内部サブディレクトリ間の依存が複雑
+1. **命名の不統一**: `umidsp::Osc` + `#include <umidsp/osc.hh>` — 「umi」プレフィックスが断片的
+2. **namespace とパスの不一致**: `umios::core::AudioContext` だがパスは `umios/core/`
+3. **アーキテクチャの不可視**: 3層モデル（Application/Runtime/Backend）がディレクトリ構造に反映されていない
+4. **拡張時の迷い**: 新機能を `umixxx/` として独立させるか `umios/xxx/` に入れるか判断困難
 
 ### 目標
 
-- **フラットなフォルダ構成** — lib/ 直下に全ライブラリを配置（umios のようなネスト構造を解消）
-- **循環依存の排除** — 依存グラフが DAG（有向非巡回グラフ）
-- **明確な責務分離** — アーキテクチャ仕様（docs/umios-architecture）の3層モデルに対応
-- **ターゲット非依存の最大化** — アプリコードの移植性向上
+- **完全な命名統一**: `umi::xxx::Name` + `#include <umi/xxx/name.hh>`
+- **namespace = path = 責務**: 3重の一貫性を達成
+- **アーキテクチャの視覚化**: 3層モデルがディレクトリ構造に直接表現される
+- **業界標準との整合**: Abseil, Folly, Zephyr と同じパターン
 
 ---
 
-## アーキテクチャ仕様との対応
+## 理想形: `lib/umi/` 統合構造
 
-docs/umios-architecture で定義された3層モデル:
+### 最終的なディレクトリ構成
 
 ```
-┌─────────────────────────────────────────────┐
-│              Application 層                  │
-│  Processor: process(AudioContext&)          │
-│  Controller: main() + wait_event()          │
-├─────────────────────────────────────────────┤
-│              Runtime 層                      │
-│  EventRouter, ParamState, AudioEngine       │
-├─────────────────────────────────────────────┤
-│           Backend Adapter 層                 │
-│  組み込み: DMA + ISR + SVC                   │
-│  WASM: AudioWorklet                         │
-│  Plugin: DAW processBlock()                 │
-└─────────────────────────────────────────────┘
+lib/
+└── umi/
+    ├── core/               # umi::core — Application境界型（最下層）
+    │   ├── audio_context.hh
+    │   ├── processor.hh
+    │   ├── event.hh
+    │   ├── types.hh
+    │   ├── error.hh
+    │   ├── shared_state.hh
+    │   ├── time.hh
+    │   ├── syscall_nr.hh   # OS/App共有定義
+    │   └── ui/             # UIフレームワーク（将来使用）
+    │       ├── ui_controller.hh
+    │       ├── ui_map.hh
+    │       └── ui_view.hh
+    │
+    ├── runtime/            # umi::runtime — イベントルーティング（Runtime層）
+    │   ├── event_router.hh
+    │   ├── param_mapping.hh
+    │   └── route_table.hh
+    │
+    ├── service/            # umi::service — System Service（トップレベル独立カテゴリ）
+    │   ├── loader/         # アプリローダー（.umia検証・ロード）
+    │   │   ├── loader.hh
+    │   │   ├── loader.cc
+    │   │   └── app_header.hh
+    │   ├── shell/          # SysEx対話シェル
+    │   │   ├── shell.hh
+    │   │   └── shell_commands.hh
+    │   ├── audio/          # オーディオサービス
+    │   │   └── audio.hh
+    │   ├── midi/           # MIDIサービス
+    │   │   └── midi.hh
+    │   └── storage/        # ストレージサービス
+    │       └── storage.hh
+    │
+    ├── kernel/             # umi::kernel — RTOSカーネル（Backend層、組み込み専用）
+    │   ├── scheduler.hh
+    │   ├── syscall_handler.hh
+    │   ├── mpu.hh
+    │   ├── protection.hh
+    │   ├── fault_handler.hh
+    │   ├── fpu_policy.hh
+    │   └── metrics.hh
+    │
+    ├── app/                # umi::app — アプリSDK（Application層）
+    │   ├── syscall.hh
+    │   ├── umi_app.hh
+    │   ├── crt0.cc
+    │   ├── app.ld
+    │   └── app_sections.ld
+    │
+    ├── adapter/            # umi::adapter — バックエンドアダプタ
+    │   ├── embedded.hh
+    │   ├── embedded_adapter.hh
+    │   ├── umim.hh         # WASMアダプタ
+    │   └── web/
+    │       ├── web_adapter.hh
+    │       ├── web_sim.js
+    │       ├── web_sim_worklet.js
+    │       ├── umi.js
+    │       ├── umi-worklet.js
+    │       └── worklet-processor.js
+    │
+    ├── coro/               # umi::coro — コルーチン（ターゲット非依存、Controllerで使用）
+    │   ├── coroutine.hh
+    │   ├── task.hh
+    │   ├── scheduler.hh
+    │   └── awaitable.hh
+    │
+    ├── dsp/                # umi::dsp — DSP処理
+    │   ├── oscillator/
+    │   │   ├── sine.hh
+    │   │   ├── saw.hh
+    │   │   └── square.hh
+    │   ├── filter/
+    │   │   ├── biquad.hh
+    │   │   └── svf.hh
+    │   └── envelope/
+    │       └── adsr.hh
+    │
+    ├── midi/               # umi::midi — MIDI処理
+    │   ├── ump.hh
+    │   ├── message.hh
+    │   └── sysex.hh
+    │
+    ├── usb/                # umi::usb — USBスタック
+    │   └── audio_class.hh
+    │
+    ├── port/               # umi::port — HAL/BSP
+    │   ├── hal/
+    │   └── platform/
+    │       ├── stm32f4/
+    │       ├── stm32h7/
+    │       └── wasm/
+    │
+    ├── crypto/             # umi::crypto — 暗号
+    │   ├── ed25519.hh
+    │   ├── ed25519.cc
+    │   ├── sha256.hh
+    │   ├── sha256.cc
+    │   ├── sha512.hh
+    │   ├── sha512.cc
+    │   └── public_key.hh
+    │
+    ├── synth/              # umi::synth — シンセ実装
+    │   └── voice.hh
+    │
+    ├── fs/                 # umi::fs — ファイルシステム
+    │   ├── fat/            # FatFs実装
+    │   │   ├── ff.hh
+    │   │   ├── ff_config.hh
+    │   │   ├── ff_diskio.hh
+    │   │   ├── ff_types.hh
+    │   │   └── ff_unicode.hh
+    │   └── slim/           # SLIM実装（独自軽量FS）
+    │       ├── slim.hh
+    │       ├── slim_config.hh
+    │       └── slim_types.hh
+    │
+    ├── ui/                 # umi::ui — UI状態管理（旧 umiui）
+    │   └── hid.hh
+    │
+    ├── gfx/                # umi::gfx — グラフィック描画（旧 umigui）
+    │   ├── canvas.hh
+    │   └── framebuffer.hh
+    │
+    ├── boot/               # umi::boot — ブートローダー（旧 umiboot）
+    │   └── dfu.hh
+    │
+    ├── mmio/               # umi::mmio — MMIO抽象化（旧 umimmio）
+    │   └── register.hh
+    │
+    ├── util/               # umi::util — 共通ユーティリティ
+    │   ├── ring_buffer.hh
+    │   ├── triple_buffer.hh
+    │   ├── log.hh
+    │   └── assert.hh
+    │
+    ├── shell/              # umi::shell — シェルプリミティブ（ホスト側ツール）
+    │   └── primitives.hh
+    │
+    ├── test/               # umi::test — テストフレームワーク（旧 umitest）
+    │   └── test_common.hh
+    │
+    └── ref/                # umi::ref — ライブラリ構造規約のリファレンス（旧 umimock）
+        └── reference.hh
 ```
-
-各層に対応するライブラリを明確に分離する。
 
 ---
 
-## 現状のライブラリ構成（16ライブラリ）
+## namespace とパスの対応
 
-| ライブラリ | 現在の役割 | 問題点 |
-|-----------|-----------|--------|
-| umi | 統合ファサード（xmake.luaのみ） | 実体なし、依存宣言のみ |
-| **umios** | OSコア全体 | **巨大すぎ、要分解** |
-| umidi | MIDI処理 | ✅ 独立性高い |
-| umidsp | DSP処理 | ✅ 独立性高い |
-| umiport | HAL | ✅ 構造良好 |
-| umiboot | ブートローダー | umios/cryptoと境界曖昧 |
-| umishell | シェルプリミティブ | ✅ 独立性高い |
-| umisynth | シンセ実装 | ✅ umidspに依存（適切） |
-| umiusb | USBスタック | umidspに依存（要検討） |
-| umifs | ファイルシステム | ✅ 独立性高い |
-| umimmio | MMIO抽象化 | ✅ 独立性高い |
-| umimock | ライブラリ構造規約のリファレンス実装 | lib/ に維持 |
-| umitest | テストフレームワーク | テスト専用 |
-| umigui | グラフィック描画（Canvas, FrameBuffer） | ✅ 独立性高い |
-| umiui | UI状態管理（HW入力→イベント変換） | ✅ 独立性高い |
+| 機能 | 旧namespace | 旧パス | 新namespace | 新パス |
+|------|------------|--------|-------------|--------|
+| AudioContext | `umios::core` | `<umios/core/audio_context.hh>` | `umi::core` | `<umi/core/audio_context.hh>` |
+| EventRouter | `umios::core` | `<umios/core/event_router.hh>` | `umi::runtime` | `<umi/runtime/event_router.hh>` |
+| Shell Service | `umios::kernel` | `<umios/kernel/umi_shell.hh>` | `umi::service::shell` | `<umi/service/shell/shell.hh>` |
+| Scheduler | `umios::kernel` | `<umios/kernel/umi_kernel.hh>` | `umi::kernel` | `<umi/kernel/scheduler.hh>` |
+| Task | `umios::kernel` | `<umios/kernel/coro.hh>` | `umi::coro` | `<umi/coro/task.hh>` |
+| Sine | `umidsp` | `<umidsp/osc.hh>` | `umi::dsp` | `<umi/dsp/oscillator/sine.hh>` |
+| UMP | `umidi` | `<umidi/ump.hh>` | `umi::midi` | `<umi/midi/ump.hh>` |
+| Gpio | `umiport` | `<umiport/gpio.hh>` | `umi::port` | `<umi/port/gpio.hh>` |
+| Ed25519 | `umios::crypto` | `<umios/crypto/ed25519.hh>` | `umi::crypto` | `<umi/crypto/ed25519.hh>` |
+| UIController | `umios::core::ui` | `<umios/core/ui/ui_controller.hh>` | `umi::core::ui` | `<umi/core/ui/ui_controller.hh>` |
+| FatFs | `umifs::fat` | `<umifs/fat/ff.hh>` | `umi::fs::fat` | `<umi/fs/fat/ff.hh>` |
+| SLIM | `umifs::slim` | `<umifs/slim/slim.hh>` | `umi::fs::slim` | `<umi/fs/slim/slim.hh>` |
 
 ---
 
-## 提案: umios の分解
-
-### 分解前の umios 構造
+## アーキテクチャの視覚化
 
 ```
-lib/umios/
-├── core/           # AudioContext, Event, Processor
-├── kernel/         # Scheduler, Syscall, Loader
-├── backend/        # cm/, wasm/
-├── adapter/        # embedded_adapter, umim_adapter
-├── crypto/         # ed25519, sha256, sha512
-├── app/            # crt0, syscall stub, linker script
-└── platform/       # (README.mdのみ)
+lib/umi/
+├── core/           ← Application層（型定義、依存なし）
+├── app/            ← Application層（coreに依存）
+├── coro/           ← 協調的マルチタスク（coreに依存）
+│
+├── runtime/        ← Runtime層（coreに依存）
+│
+├── service/        ← System Service（トップレベル独立カテゴリ）
+│   ├── shell/      # SysEx対話シェル
+│   ├── audio/      # オーディオサービス
+│   ├── midi/       # MIDIサービス
+│   └── storage/    # ストレージサービス
+│
+├── kernel/         ← Backend層（runtimeに依存、組み込み専用）
+├── adapter/        ← Backend Adapter（kernelと対話）
+│
+├── port/           ← HAL層（アーキテクチャ外、低レベル）
+├── mmio/           ← レジスタ抽象（最下位）
+│
+├── dsp/            ← ドメイン: オーディオ処理
+├── midi/           ← ドメイン: MIDIプロトコル
+├── synth/          ← ドメイン: シンセ実装（dspに依存）
+├── usb/            ← ドメイン: USBスタック
+├── fs/             ← ドメイン: ファイルシステム（fat, slim）
+├── crypto/         ← ドメイン: 暗号（独立）
+├── ui/             ← ドメイン: UI入力
+├── gfx/            ← ドメイン: UI描画
+├── boot/           ← ドメイン: ブートローダー
+├── shell/          ← ドメイン: ホスト側シェルツール
+├── util/           ← ドメイン: 共通ユーティリティ
+├── test/           ← ドメイン: テストフレームワーク
+└── ref/            ← ドメイン: リファレンス実装
 ```
 
-### 分解後の構成
-
-| 新ライブラリ | 元の場所 | 責務 | 層 |
-|-------------|---------|------|-----|
-| **umicore** | umios/core/ (基本型) | AudioContext, Processor, Event, types, shared_state | Application境界 |
-| **umirt** | umios/core/ (ルーティング) | EventRouter, ParamMapping, RouteTable, irq | Runtime |
-| **umikernel** | umios/kernel/ | Scheduler, Syscall, MPU, Loader, modules/ | Backend (組み込み) |
-| **umiadapt** | umios/adapter/, umios/backend/ | embedded_adapter, umim_adapter, web_sim | Backend Adapter |
-| **umiapp** | umios/app/ | crt0, syscall stub, linker script | Application (バイナリ) |
-| **umicrypto** | umios/crypto/ | ed25519, sha256, sha512 | 共通ユーティリティ |
-
-**注記**: `umios/backend/cm/` は現在空。Cortex-M 固有コードは `umikernel` に統合。
-
-### 各ライブラリの詳細
-
-#### umicore — Application層の基本型
-
-アプリ開発者が使う **ターゲット非依存** の基本型。
-
-```
-lib/umicore/
-├── README.md
-├── xmake.lua
-├── include/umicore/
-│   ├── audio_context.hh    # AudioContext構造体
-│   ├── processor.hh        # ProcessorLike concept
-│   ├── event.hh            # Event, EventQueue
-│   ├── types.hh            # sample_t, port_id_t等
-│   ├── error.hh            # Result<T>, Error
-│   ├── shared_state.hh     # SharedParamState, SharedChannelState
-│   ├── time.hh             # TimeSpec
-│   └── triple_buffer.hh    # TripleBuffer
-└── test/
-```
-
-**依存**: なし（完全独立）
-
-**インクルード例**:
-```cpp
-#include <umicore/audio_context.hh>
-#include <umicore/processor.hh>
-```
-
-#### umirt — Runtime層
-
-EventRouter とパラメータ管理。OS/バックエンドが使用。
-
-```
-lib/umirt/
-├── README.md
-├── xmake.lua
-├── include/umirt/
-│   ├── event_router.hh     # EventRouter
-│   ├── param_mapping.hh    # ParamMapping
-│   ├── route_table.hh      # RouteTable
-│   └── irq.hh              # IRQ utilities
-└── test/
-```
-
-**依存**: umicore
-
-#### umikernel — 組み込みOS
-
-RTOS カーネル、スケジューラ、syscall 実装。**組み込みターゲット専用**。
-
-```
-lib/umikernel/
-├── README.md
-├── xmake.lua
-├── include/umikernel/
-│   ├── scheduler.hh        # タスクスケジューラ
-│   ├── syscall_handler.hh  # SVC ハンドラ
-│   ├── syscall/            # 各syscall実装
-│   ├── loader.hh           # .umia ローダー
-│   ├── mpu_config.hh       # MPU設定
-│   ├── protection.hh       # メモリ保護
-│   ├── metrics.hh          # KernelMetrics
-│   ├── fault_handler.hh    # HardFault処理
-│   └── modules/            # Shell, Updater等
-├── src/
-│   └── loader.cc
-└── test/
-```
-
-**依存**: umirt, umicore, umiport
-
-#### umiadapt — バックエンドアダプタ
-
-各ターゲット向けの AudioContext 構築とイベント変換ブリッジ。
-
-```
-lib/umiadapt/
-├── README.md
-├── xmake.lua
-├── include/umiadapt/
-│   ├── embedded_adapter.hh  # 組み込み用アダプタ
-│   ├── umim_adapter.hh      # WASM用アダプタ
-│   ├── embedded.hh          # 組み込み共通定義
-│   └── web/                 # Web用ブリッジ
-│       ├── web_sim.js
-│       └── web_sim_worklet.js
-└── test/
-```
-
-**依存**: umicore, umikernel (組み込み時)
-
-**役割**:
-- `embedded_adapter`: DMA ISR → AudioContext 構築 → process() 呼び出し
-- `umim_adapter`: WASM ↔ JS ブリッジ、Web MIDI API 統合
-
-#### umiapp — アプリバイナリ用
-
-.umia バイナリのスタートアップと syscall スタブ。
-
-```
-lib/umiapp/
-├── README.md
-├── xmake.lua
-├── crt0.cc                 # C runtime startup
-├── syscall.hh              # syscall wrapper
-├── umi_app.hh              # アプリ用ヘッダ
-├── app.ld                  # リンカスクリプト
-└── app_sections.ld         # セクション定義
-```
-
-**依存**: umicore（型定義のみ）
-
-#### umicrypto — 暗号ライブラリ
-
-署名検証とハッシュ。組み込み/ホスト両対応。
-
-```
-lib/umicrypto/
-├── README.md
-├── xmake.lua
-├── include/umicrypto/
-│   ├── ed25519.hh
-│   ├── sha256.hh
-│   ├── sha512.hh
-│   └── public_key.hh
-├── src/
-│   ├── ed25519.cc
-│   ├── sha256.cc
-│   └── sha512.cc
-└── test/
-```
-
-**依存**: なし
+**3層モデル（Application/Runtime/Backend）+ ドメイン層 + インフラ層**
 
 ---
 
-## 提案: ライブラリのリネーム
-
-紛らわしい名前を明確化するためのリネーム提案。
-
-| 現在 | 提案 | 理由 |
-|------|------|------|
-| `umigui` | `umigfx` | "graphics" の略。描画ライブラリであることが明確 |
-| `umiui` | `umihid` | Human Interface Device。HW入力→イベント変換の役割を示す |
-| `umimock` | `umiref` | リファレンス実装。モックではない |
-
----
-
-## 最終的なライブラリ構成（18ライブラリ）
-
-| ライブラリ | 役割 | 依存 | 層 |
-|-----------|------|-----|-----|
-| **umicore** | AudioContext, Processor, Event, shared_state | なし | Application境界 |
-| **umirt** | EventRouter, ParamMapping, RouteTable | umicore | Runtime |
-| **umikernel** | RTOS, Scheduler, Syscall, modules | umirt, umiport | Backend (組み込み) |
-| **umiadapt** | embedded_adapter, umim_adapter, web_sim | umicore, (umikernel) | Backend Adapter |
-| **umiapp** | crt0, syscall stub | umicore | Application |
-| **umicrypto** | ed25519, sha256/512 | なし | 共通 |
-| **umiport** | HAL (arch/mcu/board/platform) | umimmio | Backend |
-| **umimmio** | MMIO抽象化 | なし | Backend |
-| **umidi** | MIDI処理 | なし | 共通 |
-| **umidsp** | DSP処理 | なし | 共通 |
-| **umisynth** | シンセ実装 | umidsp | Application |
-| **umiboot** | ブートローダー | umicrypto | Backend |
-| **umifs** | ファイルシステム | なし | 共通 |
-| **umiusb** | USBスタック | umidsp | Backend |
-| **umishell** | シェルプリミティブ | なし | 共通 |
-| **umigfx** | グラフィック描画（Canvas, FrameBuffer, Skin） | なし | Application |
-| **umihid** | UI状態管理（HW入力→イベント変換） | なし | Application |
-| **umiref** | ライブラリ構造規約のリファレンス | なし | 開発参考 |
-| **umitest** | テストフレームワーク | なし | テスト |
-
-### 削除されるライブラリ
-
-- `umi/` — ファサード不要（各ライブラリを直接使用）
-- `umios/` — 分解後に削除
-
-### リネームされるライブラリ
-
-- `umimock/` → `umiref/`（ライブラリ構造規約のリファレンス）
-- `umigui/` → `umigfx/`
-- `umiui/` → `umihid/`
-
-### lib/ に残すライブラリ
-
-- `umitest/` — テストフレームワーク（lib/ 内で他ライブラリから参照されるため）
-- `umiref/` — ライブラリ構造規約のリファレンス実装
-
----
-
-## 依存グラフ
+## 依存グラフ（理想形）
 
 ```
                     ┌─────────┐
-                    │ umicore │ ← Application層の基本型・境界インターフェース
+                    │ umi::mmio│ ← 最下位（レジスタ抽象）
                     └────┬────┘
                          │
-         ┌───────────────┼───────────────┬───────────────┐
-         │               │               │               │
-         ▼               ▼               ▼               ▼
-    ┌─────────┐    ┌──────────┐    ┌─────────┐    ┌──────────┐
-    │  umirt  │    │  umiapp  │    │umisynth │    │ umiadapt │
-    │(Runtime)│    │  (App)   │    │  (App)  │    │(Adapter) │
-    └────┬────┘    └──────────┘    └────┬────┘    └────┬─────┘
-         │                              │               │
-         ▼                              ▼               │
-    ┌───────────┐                  ┌─────────┐         │
-    │ umikernel │◀─────────────────┤ umidsp  │         │
-    │(Backend)  │                  └─────────┘         │
-    └─────┬─────┘                                      │
-          │                                            │
-          ▼                                            │
-    ┌──────────┐     ┌──────────┐                      │
-    │ umiport  │────▶│ umimmio  │◀─────────────────────┘
-    └──────────┘     └──────────┘
+                         ▼
+                    ┌─────────┐
+                    │umi::port│ ← HAL（mmioに依存）
+                    └────┬────┘
+                         │
+        ┌────────────────┼────────────────┐
+        │                │                │
+        ▼                ▼                ▼
+   ┌─────────┐      ┌─────────┐      ┌─────────┐
+   │umi::core│      │umi::util│      │umi::kernel
+   │(Application)   │(共通)     │      │(Backend)
+   └────┬────┘      └─────────┘      └────┬────┘
+        │                                  │
+   ┌────┴────┐                             │
+   │         │                             │
+   ▼         ▼                             │
+┌──────┐ ┌──────┐ ┌─────────────┐         │
+│umi:: │ │umi:: │ │umi::runtime │◀─────────┘
+│app   │ │coro  │ │(Runtime)    │
+└──────┘ └──────┘ └─────────────┘
 
+              ┌─────────────────────┐
+              │ umi::service        │  ← System Service（トップレベル独立）
+              │ - shell             │
+              │ - audio             │
+              │ - midi              │
+              │ - storage           │
+              └─────────────────────┘
+                         │
+                         ▼
+                    ┌──────────┐
+                    │umi::adapter
+                    └──────────┘
 
-独立ライブラリ（依存なし）:
-  umidi, umidsp, umifs, umishell, umicrypto, umimmio,
-  umigfx, umihid, umiref, umitest
+ドメイン層（独立またはcoreに依存）:
+  umi::crypto, umi::fs, umi::mmio,
+  umi::ui, umi::gfx, umi::boot, umi::shell, umi::test, umi::ref,
+  umi::service
 
-派生依存:
-  umiboot ← umicrypto
-  umiusb ← umidsp
-  umisynth ← umidsp
-```
-
-### umigfx と umihid の役割分担
-
-| ライブラリ | 責務 | 例 |
-|-----------|------|-----|
-| **umigfx** | グラフィック描画 | Canvas2D, FrameBuffer, Skin, Layout |
-| **umihid** | UI状態管理 | Knob/Slider/Button状態、HW入力→Event変換 |
-
-```
-HW入力 (GPIO, ADC, Encoder)
-    │
-    ▼
-umihid (状態管理・イベント変換)
-    │ ControlEvent
-    ▼
-EventRouter (umirt)
-    │
-    ├── AudioEventQueue → process()
-    └── ControlEventQueue → Controller
-
-umigfx は Controller が umihid の状態を画面に描画する際に使用
+ドメイン層（core + 他ドメインに依存）:
+  umi::dsp ← なし
+  umi::midi（プロトコル）← なし
+  umi::synth ← umi::dsp
+  umi::usb ← umi::dsp
+  
+System Service（独立カテゴリ）:
+  umi::service::shell, umi::service::audio, umi::service::midi, umi::service::storage
 ```
 
 ---
 
 ## 移行計画
 
-### フェーズ 1: umios の分解（優先度: 高）
+### Phase 1: 準備（1日）
 
-1. `umicore/` 作成 — umios/core/ の基本型（audio_context, processor, event, types, shared_state, error）を移動
-2. `umirt/` 作成 — umios/core/ のルーティング系（event_router, param_mapping, route_table, irq）を移動
-3. `umicrypto/` 作成 — umios/crypto/ を移動
-4. `umiapp/` 作成 — umios/app/ を移動
-5. `umiadapt/` 作成 — umios/adapter/, umios/backend/wasm/ を移動
-6. `umikernel/` 作成 — umios/kernel/ を移動
-7. `umios/` 削除
+1. **重複・未使用コード削除**（STRUCTURE_ANALYSIS.md 参照）
+   - `lib/umios/core/app.hh`（`app/umi_app.hh` と重複）
+   - `lib/umios/kernel/syscall/syscall_numbers.hh`（`core/syscall_nr.hh` と重複）
+   - `lib/umios/kernel/modules/`（`umiusb` と重複・未使用）
+   - `lib/umios/backend/cm/`（空）
+   - `lib/umios/platform/`（READMEのみ）
 
-**見積もり**: 3-4日
+2. **移行順序の決定**（依存の少ない順）
+   - Step 1: `umi/mmio/`, `umi/util/`, `umi/crypto/`（依存なし）
+   - Step 2: `umi/core/`（基本型）
+   - Step 3: `umi/coro/`（coreに依存）
+   - Step 4: `umi/runtime/`（coreに依存）
+   - Step 5: `umi/service/` 移動（System Service、トップレベル独立カテゴリ）
+   - Step 6: `umi/port/`（mmioに依存）
+   - Step 7: `umi/dsp/`, `umi/midi/`, `umi/fs/`（coreまたは独立）
+   - Step 8: `umi/kernel/`（runtime, portに依存）
+   - Step 9: `umi/adapter/`（core, kernelに依存）
+   - Step 10: `umi/app/`（coreに依存）
+   - Step 11: `umi/synth/`, `umi/usb/`（dspに依存）
+   - Step 12: `umi/ui/`, `umi/gfx/`, `umi/boot/`, `umi/shell/`, `umi/test/`, `umi/ref/`
 
-### フェーズ 2: リネーム整理（優先度: 低）
+### Phase 2: 統合移行（3-4日）
 
-1. `umimock/` → `umiref/` にリネーム（ライブラリ構造規約のリファレンス）
-2. テスト用モック機能を `umitest/` に統合
+各ステップで以下を実行：
+1. 新ディレクトリ `lib/umi/xxx/` 作成
+2. ファイル移動・namespace変更
+3. xmake.lua 更新
+4. ビルド・テスト検証
 
-**見積もり**: 半日
+| ステップ | 内容 | 工数 | 検証コマンド |
+|---------|------|------|-------------|
+| 2.1 | `umi/mmio/`, `umi/util/`, `umi/crypto/` 移動 | 4h | `xmake test` |
+| 2.2 | `umi/core/` 移動 | 4h | `xmake build test_kernel test_audio` |
+| 2.3 | `umi/coro/` 移動 | 2h | `xmake build synth_app` |
+| 2.4 | `umi/runtime/` 移動 | 3h | `xmake build stm32f4_kernel` |
+| 2.5 | `umi/service/` 移動（System Service、トップレベル独立） | 3h | `xmake build stm32f4_kernel` |
+| 2.6 | `umi/port/` 移動 | 3h | `xmake build stm32f4_kernel` |
+| 2.7 | `umi/dsp/`, `umi/midi/`, `umi/fs/` 移動 | 4h | `xmake test` |
+| 2.8 | `umi/kernel/` 移動 | 6h | `xmake build stm32f4_kernel` + flash |
+| 2.9 | `umi/adapter/` 移動 | 4h | `xmake build headless_webhost` |
+| 2.10 | `umi/app/` 移動 | 2h | `xmake build synth_app` |
+| 2.11 | `umi/synth/`, `umi/usb/` 移動 | 2h | `xmake build synth_app` |
+| 2.12 | その他（ui, gfx, boot, shell, test, ref）移動 | 4h | `xmake test` |
+| 2.13 | 旧ディレクトリ削除・最終検証 | 4h | 全ターゲットビルド |
 
-### フェーズ 3: umi ファサード削除（優先度: 低）
+**並列作業可能**: Step 2.1, 2.2, 2.3 は独立して実行可能
 
-1. 各 example/target の依存を直接指定に変更
-2. `lib/umi/` 削除
+### Phase 3: ドキュメント更新（1日）
 
-**見積もり**: 1日
+- CLAUDE.md — 全パス参照を更新
+- README.md — ディレクトリ構造を更新
+- 各ライブラリREADME.md — インクルードパスを更新
+- docs/umios-architecture/ — 必要に応じて更新
 
----
+### Phase 4: 互換性ヘッダ削除（将来）
 
-## 互換性への配慮
-
-### インクルードパス
-
-移行期間中は互換性ヘッダを提供:
+移行期間中は互換性ヘッダを提供：
 
 ```cpp
-// lib/umios/core/audio_context.hh (互換性用)
+// lib/umidsp/osc.hh（互換性用、移行期間中のみ）
 #pragma once
-#warning "umios/core/audio_context.hh is deprecated, use umicore/audio_context.hh"
-#include <umicore/audio_context.hh>
+#warning "umidsp/osc.hh is deprecated, use umi/dsp/oscillator/sine.hh"
+#include <umi/dsp/oscillator/sine.hh>
 ```
+
+**互換性期間**: 3ヶ月または次のマイルストーンリリースまで
 
 ---
 
 ## 検証基準
 
-移行完了の判定基準:
+### Phase 1完了時
+- [ ] 重複コード削除完了
+- [ ] 全ターゲットビルド成功
 
-1. **ビルド成功**: 全ターゲット（host/embedded/wasm）がビルド可能
-2. **テスト通過**: `xmake test` が全て PASS
-3. **循環依存なし**: 依存グラフが DAG（有向非巡回グラフ）
-4. **ドキュメント更新**: CLAUDE.md, README.md の更新完了
+### Phase 2完了時（各ステップで）
+- [ ] ビルド成功: `xmake build <target>`
+- [ ] テスト通過: `xmake test`
+- [ ] 循環依存なし: 依存グラフがDAG
+
+### Phase 3完了時
+- [ ] ドキュメント更新完了
+- [ ] CLAUDE.md のパス参照が新構造に対応
+
+### Phase 4完了時
+- [ ] 互換性ヘッダ削除
+- [ ] 全コードベースが新パスのみを使用
+
+---
+
+## 利点（理想形達成時）
+
+1. **命名の一貫性**: `umi::dsp::Sine` + `#include <umi/dsp/oscillator/sine.hh>` — 3重の一致
+2. **アーキテクチャの視覚化**: 3層モデルがディレクトリ構造に反映
+   - Application層: `core/`, `app/`, `coro/`
+   - Runtime層: `runtime/`（System Service含む）
+   - Backend層: `kernel/`, `adapter/`
+3. **業界標準との整合**: Abseil, Folly, Zephyr と同じパターン
+4. **拡張時の明確性**: 新機能は常に `lib/umi/xxx/` として追加
+5. **シンプルなメンタルモデル**: 「すべては `umi::` の下にある」
 
 ---
 
 ## 参考資料
 
-- [docs/umios-architecture/00-overview.md](../../docs/umios-architecture/00-overview.md) — システム全体像
-- [docs/umios-architecture/08-backend-adapters.md](../../docs/umios-architecture/08-backend-adapters.md) — バックエンド設計
+- [lib/umios/docs/STRUCTURE_ANALYSIS.md](../umios/docs/STRUCTURE_ANALYSIS.md) — 現状のコードベース分析
 - [lib/docs/LIBRARY_STRUCTURE.md](LIBRARY_STRUCTURE.md) — ライブラリ構造規約
+- [docs/umios-architecture/00-overview.md](../../docs/umios-architecture/00-overview.md) — 3層モデル定義
