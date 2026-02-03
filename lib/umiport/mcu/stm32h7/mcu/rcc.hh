@@ -2,8 +2,8 @@
 // STM32H750 RCC (Reset and Clock Control) - mmio register definitions
 #pragma once
 
-#include <mmio/mmio.hh>
-#include <mmio/transport/direct.hh>
+#include <umimmio.hh>
+#include <transport/direct.hh>
 
 namespace umi::stm32h7 {
 
@@ -206,7 +206,8 @@ struct RCC : mm::Device<mm::RW, mm::DirectTransportTag> {
 
     /// Domain 1 kernel clock configuration register
     struct D1CCIPR : mm::Register<RCC, 0x4C, 32> {
-        struct SDMMCSEL : mm::Field<D1CCIPR, 16, 1> {}; // SDMMC clock source (bit 16)
+        struct FMCSEL : mm::Field<D1CCIPR, 0, 2> {};    // FMC clock source
+        struct SDMMCSEL : mm::Field<D1CCIPR, 16, 1> {};  // SDMMC clock source (bit 16)
     };
 
     /// Domain 3 kernel clock configuration register
@@ -268,11 +269,35 @@ constexpr std::uint32_t I2S_CKIN = 3;
 constexpr std::uint32_t PER_CK = 4;
 } // namespace rcc_saisel
 
+// FMC clock source selection (D1CCIPR.FMCSEL, 2-bit)
+namespace rcc_fmcsel {
+constexpr std::uint32_t HCLK = 0;   // D1 HCLK (default)
+constexpr std::uint32_t PLL1Q = 1;  // PLL1 Q output
+constexpr std::uint32_t PLL2R = 2;  // PLL2 R output
+constexpr std::uint32_t CLKP = 3;   // per_ck
+} // namespace rcc_fmcsel
+
 // SDMMC clock source selection (D1CCIPR.SDMMCSEL, 1-bit)
 namespace rcc_sdmmcsel {
 constexpr std::uint32_t PLL1Q = 0;  // PLL1 Q output
 constexpr std::uint32_t PLL2R = 1;  // PLL2 R output
 } // namespace rcc_sdmmcsel
+
+// ADC clock source selection (D3CCIPR.ADCSEL, 2-bit)
+namespace rcc_adcsel {
+constexpr std::uint32_t PLL2P = 0;  // PLL2 P output
+constexpr std::uint32_t PLL3R = 1;  // PLL3 R output
+constexpr std::uint32_t CLKP = 2;   // per_ck
+} // namespace rcc_adcsel
+
+// SPI1/2/3 clock source selection (D2CCIP1R.SPI123SEL, 3-bit)
+namespace rcc_spi123sel {
+constexpr std::uint32_t PLL1Q = 0;  // PLL1 Q output
+constexpr std::uint32_t PLL2P = 1;  // PLL2 P output
+constexpr std::uint32_t PLL3P = 2;  // PLL3 P output
+constexpr std::uint32_t I2S_CKIN = 3;
+constexpr std::uint32_t PER_CK = 4;
+} // namespace rcc_spi123sel
 
 // NOLINTEND(readability-identifier-naming)
 

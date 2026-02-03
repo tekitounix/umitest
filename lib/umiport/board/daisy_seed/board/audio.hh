@@ -8,7 +8,7 @@
 #include <mcu/sai.hh>
 #include <mcu/dma.hh>
 #include <mcu/i2c.hh>
-#include <mmio/transport/direct.hh>
+#include <transport/direct.hh>
 #include "board/bsp.hh"
 #include <umiport/device/pcm3060/pcm3060.hh>
 #include <umiport/device/wm8731/wm8731.hh>
@@ -31,11 +31,13 @@ inline void init_pll3() {
     // Configure PLL3 prescaler: DIVM3 = 6 (16MHz / 6 = 2.667MHz VCO input)
     transport.modify(RCC::PLLCKSELR::DIVM3::value(6));
 
-    // PLL3 config: wide VCO, input range 2-4MHz, enable P output (for SAI)
+    // PLL3 config: wide VCO, input range 2-4MHz, enable P/Q/R outputs
     transport.modify(
         RCC::PLLCFGR::PLL3VCOSEL::Reset{},              // Wide VCO
         RCC::PLLCFGR::PLL3RGE::value(rcc_pllrge::RANGE_2_4MHZ),
-        RCC::PLLCFGR::DIVP3EN::Set{}
+        RCC::PLLCFGR::DIVP3EN::Set{},
+        RCC::PLLCFGR::DIVQ3EN::Set{},
+        RCC::PLLCFGR::DIVR3EN::Set{}
     );
 
     // PLL3 dividers: N=295-1=294, P=16-1=15

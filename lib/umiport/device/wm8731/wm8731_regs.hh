@@ -3,7 +3,7 @@
 // Reference: WM8731 datasheet, Table 32 (Register Map)
 #pragma once
 
-#include <mmio/mmio.hh>
+#include <umimmio.hh>
 
 namespace umi::device {
 

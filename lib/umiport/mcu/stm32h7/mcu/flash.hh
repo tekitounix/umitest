@@ -2,7 +2,7 @@
 // STM32H750 FLASH - mmio register definitions (access control only)
 #pragma once
 
-#include <mmio/mmio.hh>
+#include <umimmio.hh>
 
 namespace umi::stm32h7 {
 

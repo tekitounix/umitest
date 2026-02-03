@@ -7,7 +7,7 @@
 #include <mcu/rcc.hh>
 #include <mcu/gpio.hh>
 #include <mcu/fmc.hh>
-#include <mmio/transport/direct.hh>
+#include <transport/direct.hh>
 
 namespace umi::daisy {
 

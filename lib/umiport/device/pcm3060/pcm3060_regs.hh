@@ -3,7 +3,7 @@
 // Reference: PCM3060 datasheet, Table 1 (Register Map)
 #pragma once
 
-#include <mmio/mmio.hh>
+#include <umimmio.hh>
 
 namespace umi::device {
 

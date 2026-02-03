@@ -4,9 +4,10 @@
 #pragma once
 
 #include <cstdint>
-#include <mcu/rcc.hh>
 #include <mcu/gpio.hh>
-#include <mmio/transport/direct.hh>
+#include <mcu/pwr.hh>
+#include <mcu/rcc.hh>
+#include <transport/direct.hh>
 
 namespace umi::daisy {
 
@@ -23,14 +24,12 @@ inline void init_usb() {
     // Configure PB14 (DM) and PB15 (DP) as AF12 (USB OTG HS)
     constexpr std::uint8_t af12 = 12;
     for (std::uint8_t pin : {14, 15}) {
-        gpio_configure_pin<GPIOB>(transport, pin,
-                                   gpio_mode::ALTERNATE, gpio_otype::PUSH_PULL,
-                                   gpio_speed::VERY_HIGH, gpio_pupd::NONE);
+        gpio_configure_pin<GPIOB>(
+            transport, pin, gpio_mode::ALTERNATE, gpio_otype::PUSH_PULL, gpio_speed::VERY_HIGH, gpio_pupd::NONE);
         gpio_set_af<GPIOB>(transport, pin, af12);
     }
 
-    // Select HSI48 as USB clock source (USBSEL=0b11)
-    transport.modify(RCC::D2CCIP2R::USBSEL::value(0b11));
+    // HSI48 and USBSEL are already configured in init_clocks()
 
     // Enable USB1 OTG HS clock
     transport.modify(RCC::AHB1ENR::USB1OTGHSEN::Set{});
@@ -38,6 +37,9 @@ inline void init_usb() {
 
     // Disable ULPI clock (using internal FS PHY)
     transport.modify(RCC::AHB1ENR::USB1OTGHSULPIEN::Reset{});
+
+    // Enable USB voltage detector (per libDaisy: after USB clock enable)
+    transport.modify(PWR::CR3::USB33DEN::Set{});
 }
 
 } // namespace umi::daisy

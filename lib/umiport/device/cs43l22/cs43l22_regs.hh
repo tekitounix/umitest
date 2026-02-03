@@ -2,7 +2,7 @@
 // CS43L22 Audio DAC - Register definitions via umimmio
 #pragma once
 
-#include <mmio/mmio.hh>
+#include <umimmio.hh>
 
 namespace device {
 

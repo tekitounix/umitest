@@ -3,7 +3,7 @@
 // Reference: RM0433 Rev 8, Section 25 (ADC)
 #pragma once
 
-#include <mmio/mmio.hh>
+#include <umimmio.hh>
 
 namespace umi::stm32h7 {
 

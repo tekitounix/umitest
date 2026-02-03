@@ -2,7 +2,7 @@
 // STM32H750 GPIO - mmio register definitions
 #pragma once
 
-#include <mmio/mmio.hh>
+#include <umimmio.hh>
 
 namespace umi::stm32h7 {
 

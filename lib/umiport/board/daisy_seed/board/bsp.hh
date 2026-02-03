@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <mcu/rcc.hh>
 #include <mcu/gpio.hh>
-#include <mmio/transport/direct.hh>
+#include <transport/direct.hh>
 
 namespace umi::daisy {
 

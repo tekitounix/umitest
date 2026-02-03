@@ -9,7 +9,7 @@
 #include <mcu/adc.hh>
 #include <mcu/dma.hh>
 #include <mcu/rcc.hh>
-#include <mmio/transport/direct.hh>
+#include <transport/direct.hh>
 // Use relative include to avoid resolving to daisy_seed's bsp.hh
 #include "bsp.hh"
 

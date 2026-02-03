@@ -3,7 +3,7 @@
 // Reference: RM0433 Rev 8, Section 16 (DMA) and Section 17 (DMAMUX)
 #pragma once
 
-#include <mmio/mmio.hh>
+#include <umimmio.hh>
 
 namespace umi::stm32h7 {
 
