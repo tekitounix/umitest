@@ -102,6 +102,9 @@ includes("lib/umifs/test")
 includes("lib/umiusb/test")
 includes("lib/umiport")
 includes("lib/umiport/test")
+includes("lib/umios/kernel/test")
+includes("lib/umios/core/test")
+includes("lib/umios/crypto/test")
 
 -- Legacy umios target for backward compatibility
 target("umios")
@@ -117,54 +120,13 @@ target_end()
 -- Host Tests (using host.test rule from arm-embedded)
 -- =====================================================================
 
--- Main host tests (use umi.all for all library includes)
-for _, test in ipairs({
-    {"test_loop_style", "tests/test_loop_style.cc"},
-    {"test_kernel", "tests/test_kernel.cc"},
-    {"test_audio", "tests/test_audio.cc"},
-    {"test_midi", "tests/test_midi.cc"},
-    {"test_midi_lib", "tests/test_midi_lib.cc"},
-    {"test_umidi_comprehensive", "tests/test_umidi_comprehensive.cc"},
-    {"test_concepts", "tests/test_concepts.cc"},
-}) do
-    target(test[1])
-        add_rules("host.test")
-        set_default(true)
-        add_deps("umi.all")
-        add_files(test[2])
-        add_includedirs("tests")
-        add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
-    target_end()
-end
-
+-- NOTE: All tests have been moved to lib/<name>/test/
 -- DSP test (using umitest framework)
 target("test_dsp")
     add_rules("host.test")
     set_default(true)
     add_deps("umi.all", "umitest")
     add_files("lib/umidsp/test/test_dsp.cc")
-    add_includedirs("tests")
-    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
-target_end()
--- Syscall/AudioContext test (umitest framework)
-target("test_syscall_context")
-    add_rules("host.test")
-    set_default(true)
-    add_deps("umi.all", "umitest")
-    add_files("tests/test_syscall_context.cc")
-    add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
-target_end()
-
--- Crypto/signature test (requires crypto source files)
-target("test_signature")
-    add_rules("host.test")
-    set_default(true)
-    add_deps("umi.all")
-    add_files("tests/test_signature.cc")
-    add_files("lib/umios/crypto/sha512.cc")
-    add_files("lib/umios/crypto/ed25519.cc")
-    add_includedirs("tests")
-    add_includedirs("lib/umios")
     add_cxxflags("-fno-exceptions", "-fno-rtti", {force = true})
 target_end()
 
@@ -241,20 +203,13 @@ stm32f4_target("firmware", {
     deps = "umios"
 })
 
-stm32f4_target("renode_test_legacy", {
-    source = "tests/renode_test.cc",
-    deps = "umios",
-    optimize = "size",
-    renode_script = "test.resc"
-})
-
--- New Renode test with syscall/MPU support
+-- Renode test with syscall/MPU support
 target("renode_test")
     set_group("firmware")
     set_default(false)
     add_rules("embedded")
     set_values("embedded.mcu", "stm32f407vg")
-    set_values("embedded.linker_script", "port/renode/stm32f4/linker.ld")
+    set_values("embedded.linker_script", "tools/renode/linker.ld")
     set_values("embedded.optimize", "size")
     -- Platform-specific includes (cm/platform/*.hh)
     add_includedirs("lib/umios/backend/cm")
@@ -269,30 +224,30 @@ target("renode_test")
         local renode = "/Applications/Renode.app/Contents/MacOS/Renode"
         if not os.isfile(renode) then renode = "renode" end
         os.execv(renode, {"--console", "--disable-xwt", "-e",
-            "include @port/renode/stm32f4/platform.resc; loadUmi; start"})
+            "include @tools/renode/platform.resc; loadUmi; start"})
     end)
 target_end()
 
 stm32f4_target("bench_midi_format", {
-    source = "tests/bench_midi_format.cc",
+    source = "lib/umidi/bench/bench_midi_format.cc",
     optimize = "size",
     renode_script = "bench_midi.resc"
 })
 
 stm32f4_target("bench_diode_ladder", {
-    source = "tests/bench_diode_ladder.cc",
+    source = "lib/umidsp/bench/bench_diode_ladder.cc",
     optimize = "fast",
     renode_script = "tools/renode/bench_diode_ladder.resc"
 })
 
 stm32f4_target("bench_waveshaper", {
-    source = "tests/bench_waveshaper.cc",
+    source = "lib/umidsp/bench/bench_waveshaper.cc",
     optimize = "fast",
     renode_script = "tools/renode/bench_waveshaper.resc"
 })
 
 stm32f4_target("bench_waveshaper_fast", {
-    source = "tests/bench_waveshaper_fast.cc",
+    source = "lib/umidsp/bench/bench_waveshaper_fast.cc",
     optimize = "fast",
     renode_script = "tools/renode/bench_waveshaper_fast.resc"
 })
@@ -372,7 +327,15 @@ task("test")
     set_category("action")
     on_run(function ()
         import("core.project.project")
-        local tests = {"test_dsp", "test_kernel", "test_audio", "test_midi", "test_syscall_context"}
+        local tests = {
+            "test_dsp",
+            "test_umios_kernel",
+            "test_umios_audio",
+            "test_umios_midi",
+            "test_umios_concepts",
+            "test_umios_syscall",
+            "test_umios_crypto"
+        }
         for _, name in ipairs(tests) do
             os.exec("xmake build " .. name)
         end

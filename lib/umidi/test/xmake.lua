@@ -25,6 +25,7 @@ add_umidi_test("core", "test_core.cc")
 add_umidi_test("messages", "test_messages.cc")
 add_umidi_test("protocol", "test_protocol.cc")
 add_umidi_test("extended_protocol", "test_extended_protocol.cc")
+add_umidi_test("comprehensive", "test_comprehensive.cc")
 
 -- All-in-one test runner
 target("umidi_test_all")

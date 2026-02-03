@@ -412,17 +412,6 @@ tests/
 
 ---
 
-## port/ — プラットフォームポート
-
-```
-port/renode/stm32f4/
-├── linker.ld                    # Renode用リンカスクリプト
-├── platform.resc                # Renodeプラットフォーム定義
-└── stm32f4.repl                 # Renodeペリフェラル定義
-```
-
----
-
 ## tools/ — ビルド・デバッグツール
 
 ```
