@@ -4,7 +4,8 @@
 
 local test_dir = os.scriptdir()
 local umifs_dir = path.directory(test_dir)
-local lib_dir = path.directory(umifs_dir)
+local umi_dir = path.directory(umifs_dir)
+local lib_dir = path.directory(umi_dir)
 local root_dir = path.directory(lib_dir)
 
 -- =====================================================================
@@ -107,8 +108,8 @@ target_end()
 -- Renode embedded tests (Cortex-M4 STM32F407)
 -- =====================================================================
 
-local stm32f4_linker = path.join(lib_dir, "umiport/mcu/stm32f4/linker.ld")
-local stm32f4_syscalls = path.join(lib_dir, "umiport/mcu/stm32f4/syscalls.cc")
+local stm32f4_linker = path.join(umi_dir, "port/mcu/stm32f4/linker.ld")
+local stm32f4_syscalls = path.join(umi_dir, "port/mcu/stm32f4/syscalls.cc")
 
 target("renode_fs_test")
     set_group("firmware")

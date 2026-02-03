@@ -1,7 +1,7 @@
 add_rules("mode.debug", "mode.release")
 
 -- Target definition
-local target_name = "umi_runtime"
+local target_name = "umi.runtime"
 target(target_name)
     set_kind("static")
     
@@ -12,7 +12,7 @@ target(target_name)
     add_headerfiles("*.hh")
     
     -- Dependencies
-    add_deps("umi_core")
+    add_deps("umi.core")
     
     -- Tests
     for _, file in ipairs(os.files("test/**/test_*.cc")) do

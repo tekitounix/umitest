@@ -398,7 +398,7 @@ class DfuClient:
             
             if progress_callback:
                 progress_callback(i + 1, chunk_count)
-        
+
         print()  # Newline after progress bar
         
         # FW_VERIFY

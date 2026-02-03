@@ -22,23 +22,23 @@ target("stm32f4_kernel")
     
     -- Source files
     add_files("src/*.cc")
-    add_files("$(projectdir)/lib/umiport/mcu/stm32f4/syscalls.cc")
-    add_files("$(projectdir)/lib/umios/kernel/loader.cc")
-    add_files("$(projectdir)/lib/umiport/common/common/irq.cc")
+    add_files("$(projectdir)/lib/umi/port/mcu/stm32f4/syscalls.cc")
+    add_files("$(projectdir)/lib/umi/service/loader/loader.cc")
+    add_files("$(projectdir)/lib/umi/port/common/common/irq.cc")
 
     -- Crypto library for signature verification
-    add_files("$(projectdir)/lib/umios/crypto/sha512.cc")
-    add_files("$(projectdir)/lib/umios/crypto/ed25519.cc")
+    add_files("$(projectdir)/lib/umi/crypto/sha512.cc")
+    add_files("$(projectdir)/lib/umi/crypto/ed25519.cc")
 
     -- Dependencies
     add_deps("umi.embedded.full")
 
     -- Include paths
     add_includedirs("src")
-    add_includedirs("$(projectdir)/lib/umios/kernel")
-    add_includedirs("$(projectdir)/lib/umios/crypto")
-    add_includedirs("$(projectdir)/lib/umimmio/include")
-    add_includedirs("$(projectdir)/lib/umiport/device")
+    add_includedirs("$(projectdir)/lib/umi/kernel")
+    add_includedirs("$(projectdir)/lib/umi/crypto")
+    add_includedirs("$(projectdir)/lib/umi/mmio/include")
+    add_includedirs("$(projectdir)/lib/umi/port/device")
 
     -- Defines
     add_defines("UMIOS_KERNEL=1")

@@ -9,20 +9,20 @@ target("synth_app")
     -- Use embedded rule for ARM build
     add_rules("embedded")
     set_values("embedded.mcu", "stm32f407vg")
-    set_values("embedded.linker_script", "$(projectdir)/lib/umios/app/app.ld")
+set_values("embedded.linker_script", "$(projectdir)/lib/umi/app/app.ld")
     set_values("embedded.optimize", "size")  -- -Os for apps
     
     -- Source files (app startup + main)
     add_files("src/*.cc")
-    add_files("$(projectdir)/lib/umios/app/crt0.cc")
+add_files("$(projectdir)/lib/umi/app/crt0.cc")
     
     -- Include paths
     add_includedirs("src")
-    add_includedirs("$(projectdir)/lib/umios/app")
-    add_includedirs("$(projectdir)/lib/umios/kernel")  -- For shared types
-    add_includedirs("$(projectdir)/lib/umios")         -- For umios/core/...
+add_includedirs("$(projectdir)/lib/umi/app")
+add_includedirs("$(projectdir)/lib/umi/kernel")
+add_includedirs("$(projectdir)/lib/umi")
     add_includedirs("$(projectdir)/lib")               -- For lib-relative paths
-    add_includedirs("$(projectdir)/lib/umisynth/include")  -- For umisynth/synth.hh
+add_includedirs("$(projectdir)/lib/umi/synth")
     add_includedirs("$(projectdir)/examples/headless_webhost/src")  -- For synth.hh
     
     -- DSP library
@@ -33,7 +33,7 @@ target("synth_app")
     
     -- Additional linker flags for minimal runtime
     add_ldflags("-nodefaultlibs", {force = true})
-    add_ldflags("-Wl,-L" .. path.join(os.projectdir(), "lib", "umios", "app"), {force = true})
+add_ldflags("-Wl,-L" .. path.join(os.projectdir(), "lib", "umi", "app"), {force = true})
     
     -- Post-build: generate .umia with header
     -- Note: embedded rule generates .bin, .hex, .map automatically
@@ -49,9 +49,9 @@ target("synth_app")
             return
         end
         
-        -- Create .umia using Python tool
-        local make_umia = path.join(os.projectdir(), "tools", "make_umia.py")
-        if os.isfile(make_umia) then
+            -- Create .umia using Python tool
+            local make_umia = path.join(os.projectdir(), "lib", "umi", "tools", "build", "make_umia.py")
+            if os.isfile(make_umia) then
             os.execv("python3", {make_umia, binfile, umiafile, "--name", "SynthApp"})
             print("App: " .. umiafile)
         else

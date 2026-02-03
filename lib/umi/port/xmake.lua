@@ -12,38 +12,41 @@
 
 add_rules("mode.debug", "mode.release")
 
-target("umi_port")
+-- Get the script directory for relative paths
+local port_dir = os.scriptdir()
+
+target("umi.port")
     set_kind("static")
-    add_includedirs(".", {public = true})
+    add_includedirs(port_dir, {public = true})
 
     -- Core include directories (always included)
-    add_includedirs("concepts", {public = true})
-    add_includedirs("common", {public = true})
+    add_includedirs(path.join(port_dir, "concepts"), {public = true})
+    add_includedirs(path.join(port_dir, "common"), {public = true})
 
     -- Architecture-specific (Cortex-M4)
-    add_includedirs("arch/cm4", {public = true})
+    add_includedirs(path.join(port_dir, "arch/cm4"), {public = true})
 
     -- MCU-specific (STM32F4)
-    add_includedirs("mcu/stm32f4", {public = true})
+    add_includedirs(path.join(port_dir, "mcu/stm32f4"), {public = true})
 
     -- Board-specific (STM32F4 Discovery)
-    add_includedirs("board/stm32f4_disco", {public = true})
+    add_includedirs(path.join(port_dir, "board/stm32f4_disco"), {public = true})
 
     -- Platform-specific (embedded)
-    add_includedirs("platform/embedded", {public = true})
+    add_includedirs(path.join(port_dir, "platform/embedded"), {public = true})
 
     -- Source files
-    add_files("arch/cm4/**/*.cc")
-    add_files("common/**/*.cc")
-    add_files("mcu/stm32f4/**/*.cc")
+    add_files(path.join(port_dir, "arch/cm4/**/*.cc"))
+    add_files(path.join(port_dir, "common/**/*.cc"))
+    add_files(path.join(port_dir, "mcu/stm32f4/*.cc"))
 
     -- Header files
-    add_headerfiles("concepts/**/*.hh")
-    add_headerfiles("common/**/*.hh")
-    add_headerfiles("arch/**/*.hh")
-    add_headerfiles("mcu/**/*.hh")
-    add_headerfiles("board/**/*.hh")
-    add_headerfiles("device/**/*.hh")
-    add_headerfiles("platform/**/*.hh")
+    add_headerfiles(path.join(port_dir, "concepts/**/*.hh"))
+    add_headerfiles(path.join(port_dir, "common/**/*.hh"))
+    add_headerfiles(path.join(port_dir, "arch/**/*.hh"))
+    add_headerfiles(path.join(port_dir, "mcu/**/*.hh"))
+    add_headerfiles(path.join(port_dir, "board/**/*.hh"))
+    add_headerfiles(path.join(port_dir, "device/**/*.hh"))
+    add_headerfiles(path.join(port_dir, "platform/**/*.hh"))
 
 target_end()

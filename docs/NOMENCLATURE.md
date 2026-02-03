@@ -78,7 +78,7 @@
 │  │  • umi/app.hh        - register_processor, wait_event              │ │
 │  │  • umi/coro.hh       - コルーチンサポート                            │ │
 │  │  • syscall.hh        - カーネルへのsyscallインターフェース            │ │
-│  │  • make_umia.py    - ビルドツール                                  │ │
+│  │  • lib/umi/tools/build/make_umia.py    - ビルドツール                  │ │
 │  └────────────────────────────────────────────────────────────────────┘ │
 │                                                                          │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -97,7 +97,7 @@
 | **UMI-OS Kernel** | 仕様を実装したカーネル本体。アプリをホストする**ファームウェア全体** | `lib/umios/kernel/`, `examples/stm32f4_kernel/` |
 | **UMI HAL** | MCU固有のハードウェアドライバ群 | `lib/umios/backend/` |
 | **UMI Libraries** | OS非依存の再利用可能ライブラリ | `lib/umidsp/`, `lib/umidi/`, `lib/umiusb/` |
-| **UMI App SDK** | アプリケーション開発者向けAPI・ツール | `lib/umios/app/`, `tools/make_umia.py` |
+| **UMI App SDK** | アプリケーション開発者向けAPI・ツール | `lib/umios/app/`, `lib/umi/tools/build/make_umia.py` |
 
 ### カーネル内部コンポーネント
 

@@ -1,6 +1,6 @@
 add_rules("mode.debug", "mode.release")
 
-target("umi_service")
+target("umi.service")
     set_kind("static")
     add_includedirs(".", {public = true})
     
@@ -13,5 +13,5 @@ target("umi_service")
     add_headerfiles("storage/*.hh")
     
     -- Dependencies
-    add_deps("umi_core", "umi_runtime", "umi_fs")
+    add_deps("umi.core", "umi.runtime", "umi.fs")
 target_end()

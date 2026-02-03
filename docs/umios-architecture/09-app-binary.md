@@ -140,10 +140,10 @@ extern "C" void _start() {
 
 ### ビルドツール
 
-`tools/make_umia.py` で ELF から .umia を生成する。
+`lib/umi/tools/build/make_umia.py` で ELF から .umia を生成する。
 
 ```bash
-python tools/make_umia.py \
+python lib/umi/tools/build/make_umia.py \
     --input build/synth_app.elf \
     --output build/synth_app.umia \
     --target development \

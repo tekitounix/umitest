@@ -1,6 +1,6 @@
 add_rules("mode.debug", "mode.release")
 
-local target_name = "umi_ref"
+local target_name = "umi.ref"
 target(target_name)
     set_kind("static")
     
@@ -10,6 +10,6 @@ target(target_name)
     add_headerfiles("*.hh")
     add_headerfiles("include/*.hh")
     
-    add_deps("umi_core")
+    add_deps("umi.core")
     
 target_end()

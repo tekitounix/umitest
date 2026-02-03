@@ -7,14 +7,15 @@
 --       add_deps("umi")  -- or specific: "umi.core", "umi.dsp", "umi.midi"
 -- =====================================================================
 
--- Get the lib directory (parent of this package)
-local lib_dir = path.directory(os.scriptdir())
+-- Get the umi lib directory (directory containing this script)
+local umi_dir = os.scriptdir()
+local lib_dir = path.directory(umi_dir)
 
--- Include umiport (hardware abstraction layer)
-includes(path.join(lib_dir, "umiport"))
+-- Include port (hardware abstraction layer)
+includes(path.join(umi_dir, "port"))
 
--- Include umimmio (type-safe register abstraction)
-includes(path.join(lib_dir, "umimmio"))
+-- Include mmio (type-safe register abstraction)
+includes(path.join(umi_dir, "mmio"))
 
 -- Include umi.test (testing framework)
 includes(path.join(lib_dir, "umi/test"))
@@ -27,7 +28,7 @@ target("umi.shell")
     set_kind("headeronly")
     set_group("umi")
 
-    add_includedirs(path.join(lib_dir, "umishell/include"), {public = true})
+    add_includedirs(path.join(lib_dir, "umi/shell"), {public = true})
 target_end()
 
 -- =====================================================================
@@ -39,11 +40,10 @@ target("umi.core")
     set_group("umi")
     add_deps("umi.shell")
 
-    -- umios core includes
-    add_includedirs(path.join(lib_dir, "umios/core"), {public = true})
-    add_includedirs(path.join(lib_dir, "umios/kernel"), {public = true})
-    add_includedirs(path.join(lib_dir, "umios/adapter"), {public = true})
-    add_includedirs(lib_dir, {public = true})  -- for <umios/...> paths
+    add_includedirs(path.join(lib_dir, "umi/core"), {public = true})
+    add_includedirs(path.join(lib_dir, "umi/kernel"), {public = true})
+    add_includedirs(path.join(lib_dir, "umi/adapter"), {public = true})
+    add_includedirs(path.join(lib_dir, "umi"), {public = true})
 target_end()
 
 -- =====================================================================
@@ -54,7 +54,6 @@ target("umi.wasm")
     set_kind("headeronly")
     set_group("umi")
     add_deps("umi.core")
-    add_deps("umi.port.wasm")
 
 target_end()
 
@@ -65,8 +64,7 @@ target_end()
 target("umi.embedded")
     set_kind("headeronly")
     set_group("umi")
-    add_deps("umi.core")
-    add_deps("umi.port.embedded.stm32f4_disco")
+    add_deps("umi.core", "umi.port")
 
 target_end()
 
@@ -79,7 +77,7 @@ target("umi.kernel")
     set_group("umi")
     add_deps("umi.core")
 
-    add_includedirs(path.join(lib_dir, "umios/kernel"), {public = true})
+    add_includedirs(path.join(lib_dir, "umi/kernel"), {public = true})
 target_end()
 
 -- =====================================================================
@@ -91,7 +89,7 @@ target("umi.dsp")
     set_group("umi")
 
     -- Include only the public header root
-    add_includedirs(path.join(lib_dir, "umidsp/include"), {public = true})
+    add_includedirs(path.join(lib_dir, "umi/dsp"), {public = true})
 target_end()
 
 -- =====================================================================
@@ -102,7 +100,7 @@ target("umi.midi")
     set_kind("headeronly")
     set_group("umi")
 
-    add_includedirs(path.join(lib_dir, "umidi/include"), {public = true})
+    add_includedirs(path.join(lib_dir, "umi/midi"), {public = true})
 target_end()
 
 -- =====================================================================
@@ -113,7 +111,7 @@ target("umi.boot")
     set_kind("headeronly")
     set_group("umi")
 
-    add_includedirs(path.join(lib_dir, "umiboot/include"), {public = true})
+    add_includedirs(path.join(lib_dir, "umi/boot"), {public = true})
 target_end()
 
 -- =====================================================================
@@ -125,7 +123,7 @@ target("umi.synth")
     set_group("umi")
     add_deps("umi.dsp")
 
-    add_includedirs(path.join(lib_dir, "umisynth/include"), {public = true})
+    add_includedirs(path.join(lib_dir, "umi/synth"), {public = true})
 target_end()
 
 -- =====================================================================
@@ -137,7 +135,13 @@ target("umi.usb")
     set_group("umi")
     add_deps("umi.dsp")  -- ASRC components
 
-    add_includedirs(path.join(lib_dir, "umiusb/include"), {public = true})
+    add_includedirs(path.join(lib_dir, "umi/usb"), {public = true})
+target_end()
+
+target("umi.mmio")
+    set_kind("static")
+    set_group("umi")
+    add_includedirs(path.join(lib_dir, "umi/mmio"), {public = true})
 target_end()
 
 -- =====================================================================

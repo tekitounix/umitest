@@ -8,5 +8,5 @@ target("umi_synth")
     add_headerfiles("include/(**.hh)")
 
     -- Dependencies
-    add_deps("umi_core", "umi_dsp", {public = true})
+    add_deps("umi.core", "umi.dsp", {public = true})
 target_end()

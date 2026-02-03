@@ -1,8 +1,8 @@
 -- Daisy Pod Kernel (STM32H750)
 -- Phase 6: Audio + RTOS + USB Audio/MIDI + Synth + EventRouter
 
-local board_dir = path.join(os.projectdir(), "lib/umiport/board/daisy_seed")
-local pod_board_dir = path.join(os.projectdir(), "lib/umiport/board/daisy_pod")
+local board_dir = path.join(os.projectdir(), "lib/umi/port/board/daisy_seed")
+local pod_board_dir = path.join(os.projectdir(), "lib/umi/port/board/daisy_pod")
 
 target("daisy_pod_kernel")
     set_group("firmware")
@@ -25,7 +25,7 @@ target("daisy_pod_kernel")
 
     -- Source files
     add_files("src/*.cc")
-    add_files("$(projectdir)/lib/umiport/common/common/irq.cc")
+    add_files("$(projectdir)/lib/umi/port/common/common/irq.cc")
     -- handlers.cc replaced by local arch.cc (with kernel callback mechanism)
 
     -- Dependencies
@@ -38,17 +38,17 @@ target("daisy_pod_kernel")
         add_defines("UMI_DEBUG=1")
     end
 
-    -- Include paths (umiport layers)
+    -- Include paths (port layers)
     add_includedirs("src")
-    add_includedirs(path.join(os.projectdir(), "lib/umimmio/include"))
-    add_includedirs(path.join(os.projectdir(), "lib/umiport/arch/cm7"))
-    add_includedirs(path.join(os.projectdir(), "lib/umiport/mcu/stm32h7"))
-    add_includedirs(path.join(os.projectdir(), "lib/umiport/common"))
+    add_includedirs(path.join(os.projectdir(), "lib/umi/mmio"))
+    add_includedirs(path.join(os.projectdir(), "lib/umi/port/arch/cm7"))
+    add_includedirs(path.join(os.projectdir(), "lib/umi/port/mcu/stm32h7"))
+    add_includedirs(path.join(os.projectdir(), "lib/umi/port/common"))
     add_includedirs(path.join(os.projectdir(), "lib"))
-    add_includedirs(path.join(os.projectdir(), "lib/umiusb/include"))
-    add_includedirs(path.join(os.projectdir(), "lib/umidsp/include"))
-    add_includedirs(path.join(os.projectdir(), "lib/umios/core"))
-    add_includedirs(path.join(os.projectdir(), "lib/umios"))
+    add_includedirs(path.join(os.projectdir(), "lib/umi/usb"))
+    add_includedirs(path.join(os.projectdir(), "lib/umi/dsp"))
+    add_includedirs(path.join(os.projectdir(), "lib/umi/core"))
+    add_includedirs(path.join(os.projectdir(), "lib/umi"))
     add_includedirs(board_dir)
     add_includedirs(pod_board_dir)
 target_end()

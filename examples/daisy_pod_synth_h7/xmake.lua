@@ -12,13 +12,13 @@ target("daisy_pod_synth_h7")
 
     -- Source files
     add_files("src/*.cc")
-    add_files("$(projectdir)/lib/umios/app/crt0.cc")
+add_files("$(projectdir)/lib/umi/app/crt0.cc")
 
     -- Include paths
     add_includedirs("src")
-    add_includedirs("$(projectdir)/lib/umios/app")
-    add_includedirs("$(projectdir)/lib/umios/kernel")
-    add_includedirs("$(projectdir)/lib/umios")
+add_includedirs("$(projectdir)/lib/umi/app")
+add_includedirs("$(projectdir)/lib/umi/kernel")
+add_includedirs("$(projectdir)/lib/umi")
     add_includedirs("$(projectdir)/lib")
 
     -- Defines
@@ -26,7 +26,7 @@ target("daisy_pod_synth_h7")
 
     -- Minimal runtime
     add_ldflags("-nodefaultlibs", {force = true})
-    add_ldflags("-Wl,-L" .. path.join(os.projectdir(), "lib", "umios", "app"), {force = true})
+add_ldflags("-Wl,-L" .. path.join(os.projectdir(), "lib", "umi", "app"), {force = true})
 
     -- Post-build: generate .umia
     after_build(function (target)
@@ -40,7 +40,7 @@ target("daisy_pod_synth_h7")
             return
         end
 
-        local make_umia = path.join(os.projectdir(), "tools", "make_umia.py")
+        local make_umia = path.join(os.projectdir(), "lib", "umi", "tools", "build", "make_umia.py")
         if os.isfile(make_umia) then
             os.execv("python3", {make_umia, binfile, umiafile, "--name", "DaisySynth"})
             print("App: " .. umiafile)

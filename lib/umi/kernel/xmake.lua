@@ -1,6 +1,6 @@
 add_rules("mode.debug", "mode.release")
 
-target("umi_kernel")
+target("umi.kernel")
     set_kind("static")
     add_includedirs(".", {public = true})
 
@@ -12,5 +12,5 @@ target("umi_kernel")
     add_headerfiles("syscall/*.hh")
 
     -- Dependencies
-    add_deps("umi_core", "umi_runtime", "umi_port", "umi_service")
+    add_deps("umi.core", "umi.runtime", "umi.port", "umi.service")
 target_end()

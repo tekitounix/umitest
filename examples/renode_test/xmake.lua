@@ -28,14 +28,14 @@ target("renode_test")
     add_ldflags("-lgcc")
 
     -- Include paths
-    -- Platform-specific headers via umiport
-    add_includedirs("$(projectdir)/lib/umiport/common")
-    add_includedirs("$(projectdir)/lib/umiport/arch/cm4")
-    add_includedirs("$(projectdir)/lib/umiport/mcu/stm32f4")
-    add_includedirs("$(projectdir)/lib/umiport/board/stm32f4_disco")
-    add_includedirs("$(projectdir)/lib/umiport/platform/embedded")
+    -- Platform-specific headers via port
+    add_includedirs("$(projectdir)/lib/umi/port/common")
+    add_includedirs("$(projectdir)/lib/umi/port/arch/cm4")
+    add_includedirs("$(projectdir)/lib/umi/port/mcu/stm32f4")
+    add_includedirs("$(projectdir)/lib/umi/port/board/stm32f4_disco")
+    add_includedirs("$(projectdir)/lib/umi/port/platform/embedded")
     -- Kernel headers
-    add_includedirs("$(projectdir)/lib/umios")
+    add_includedirs("$(projectdir)/lib/umi")
     -- General lib path
     add_includedirs("$(projectdir)/lib")
 

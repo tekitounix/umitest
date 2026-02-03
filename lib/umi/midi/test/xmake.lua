@@ -4,13 +4,13 @@
 
 -- umidi is header-only, so tests only need include paths
 local umidi_includedirs = {
-    "$(projectdir)/lib/umidi",
-    "$(projectdir)/lib/umidi/test"
+    "$(projectdir)/lib/umi/midi",
+    "$(projectdir)/lib/umi/midi/test"
 }
 
 -- Common test settings
 local function add_umidi_test(name, source)
-    target("umidi_test_" .. name)
+target("umidi_test_" .. name)
         set_kind("binary")
         set_languages("c++23")
         add_files(source)

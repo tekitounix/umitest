@@ -12,8 +12,8 @@ import struct
 import zlib
 from pathlib import Path
 
-# Add umi_dfu module
-sys.path.insert(0, str(Path(__file__).parent))
+# Add umi_dfu module (tools/)
+sys.path.insert(0, str(Path(__file__).parents[5] / 'lib' / 'umi' / 'boot' / 'tools'))
 from umi_dfu import DfuClient, DfuCmd, build_sysex, parse_sysex, encode_7bit
 
 # Error codes expected from device

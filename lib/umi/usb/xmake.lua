@@ -1,6 +1,6 @@
 add_rules("mode.debug", "mode.release")
 
-target("umi_usb")
+target("umi.usb")
     set_kind("headeronly")
     add_includedirs("include", {public = true})
 
@@ -8,5 +8,5 @@ target("umi_usb")
     add_headerfiles("include/(**.hh)")
 
     -- Dependencies
-    add_deps("umi_core", "umi_dsp")
+    add_deps("umi.core", "umi.dsp")
 target_end()

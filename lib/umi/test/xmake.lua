@@ -1,8 +1,10 @@
 add_rules("mode.debug", "mode.release")
 
-local target_name = "umi_test"
+includes("umitest")
+
+local target_name = "umi.test"
 target(target_name)
-    set_kind("static")
+    set_kind("headeronly")
     
     add_includedirs(".", {public = true})
     add_includedirs("include", {public = true})

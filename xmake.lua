@@ -102,9 +102,6 @@ includes("lib/umi/fs/test")
 includes("lib/umi/usb/test")
 includes("lib/umi/port")
 includes("lib/umi/port/test")
-includes("lib/umi/kernel/test")
-includes("lib/umi/core/test")
-includes("lib/umi/crypto/test")
 
 -- Legacy umios target for backward compatibility
 target("umios")

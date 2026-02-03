@@ -11,7 +11,7 @@ import struct
 import zlib
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parents[5] / 'lib' / 'umi' / 'boot' / 'tools'))
 from umi_dfu import DfuClient, DfuCmd
 
 # Error codes

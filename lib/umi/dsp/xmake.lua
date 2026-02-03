@@ -1,6 +1,6 @@
 add_rules("mode.debug", "mode.release")
 
-target("umi_dsp")
+target("umi.dsp")
     set_kind("headeronly")
     add_includedirs("include", {public = true})
 
@@ -8,5 +8,5 @@ target("umi_dsp")
     add_headerfiles("include/(**.hh)")
 
     -- Dependencies
-    add_deps("umi_core")
+    add_deps("umi.core")
 target_end()

@@ -1,7 +1,7 @@
 add_rules("mode.debug", "mode.release")
 
 -- Target definition
-local target_name = "umi_crypto"
+local target_name = "umi.crypto"
 target(target_name)
     set_kind("static")
     

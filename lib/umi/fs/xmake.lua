@@ -4,7 +4,7 @@ add_rules("mode.debug", "mode.release")
 -- FATfs C++23 port (static library)
 -- =====================================================================
 
-target("umi_fs_fatfs")
+target("umi.fs.fatfs")
     set_kind("static")
     add_includedirs("fat", {public = true})
     add_includedirs(".", {public = true})
@@ -17,14 +17,14 @@ target("umi_fs_fatfs")
     add_headerfiles("fat/*.hh")
 
     -- Dependencies
-    add_deps("umi_core")
+    add_deps("umi.core")
 target_end()
 
 -- =====================================================================
 -- slimfs (static library)
 -- =====================================================================
 
-target("umi_fs_slimfs")
+target("umi.fs.slimfs")
     set_kind("static")
     add_includedirs("slim", {public = true})
     add_includedirs(".", {public = true})
@@ -36,5 +36,5 @@ target("umi_fs_slimfs")
     add_headerfiles("slim/*.hh")
 
     -- Dependencies
-    add_deps("umi_core")
+    add_deps("umi.core")
 target_end()

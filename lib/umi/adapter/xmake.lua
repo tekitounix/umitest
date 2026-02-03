@@ -1,7 +1,7 @@
 add_rules("mode.debug", "mode.release")
 
 -- Target definition
-local target_name = "umi_adapter"
+local target_name = "umi.adapter"
 target(target_name)
     set_kind("static")
     
@@ -14,6 +14,6 @@ target(target_name)
     add_headerfiles("web/*.js")
     
     -- Dependencies
-    add_deps("umi_core", "umi_kernel")
+    add_deps("umi.core", "umi.kernel")
     
 target_end()
