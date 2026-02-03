@@ -1,0 +1,31 @@
+# Renode script for UMI-OS Filesystem Test — Reference C Implementation
+# Usage: renode --console --disable-xwt -e "include @lib/umifs/test/fs_test_ref.resc"
+
+using sysbus
+
+mach create "umi_fs_test_ref"
+
+# Load platform
+machine LoadPlatformDescription $CWD/tools/renode/stm32f4_test.repl
+
+# Load the test ELF
+sysbus LoadELF $CWD/build/renode_fs_test_ref/release/renode_fs_test_ref.elf
+
+# Set VTOR to flash
+sysbus WriteDoubleWord 0xE000ED08 0x08000000
+
+# Set SP and PC (no vector table — _start is entry point)
+cpu SP 0x20020000
+cpu PC `sysbus GetSymbolAddress "_start"`
+
+# Log UART to file
+logFile $CWD/build/renode_fs_ref_uart.log
+usart2 CreateFileBackend $CWD/build/renode_fs_ref_uart.log true
+
+echo "=== UMI-OS Filesystem Reference Test Starting ==="
+
+# Run for 10 seconds (FS operations may be slow in emulation)
+emulation RunFor "10"
+
+echo "=== Filesystem Reference Test finished ==="
+quit
