@@ -1,0 +1,43 @@
+# Renode script for UMI bench (Cortex-M4)
+# Usage: renode --console --disable-xwt -e "include @lib/umi/bench/target/stm32f4/renode/bench_stm32f4.resc"
+
+using sysbus
+
+mach create "umi_bench"
+
+# Load custom UMI-OS platform description
+machine LoadPlatformDescription $CWD/lib/umi/port/platform/renode/stm32f4_test.repl
+
+# Load the benchmark ELF
+sysbus LoadELF $CWD/build/bench_instruction_stm32f4/release/bench_instruction_stm32f4.elf
+
+# Set VTOR to point to flash (0x08000000) where vector table is located
+sysbus WriteDoubleWord 0xE000ED08 0x08000000
+
+# Copy vector table to 0x0 (STM32 boot alias)
+# ARM Cortex-M reads initial SP from 0x0 and reset vector from 0x4
+sysbus WriteDoubleWord 0x00000000 `sysbus ReadDoubleWord 0x08000000`
+sysbus WriteDoubleWord 0x00000004 `sysbus ReadDoubleWord 0x08000004`
+
+# Output UART to file (detailed log with timestamps)
+logFile /Users/tekitou/work/umi/build/bench_stm32f4_uart.log true
+usart2 CreateFileBackend /Users/tekitou/work/umi/build/bench_stm32f4_uart.log true
+
+# Also show clean output on monitor (Ctrl+C to switch to monitor mode)
+showAnalyzer usart2
+
+# Performance setting
+cpu PerformanceInMips 100
+
+# Auto-quit when benchmark finishes (detects "=== Done ===" in UART output)
+usart2 AddLineHook "=== Done ===" "monitor.Parse('usart2 CloseFileBackend @/Users/tekitou/work/umi/build/bench_stm32f4_uart.log'); monitor.Parse('quit')"
+
+echo "=== Benchmark Starting ==="
+echo "(UART output saved to build/bench_stm32f4_uart.log)"
+
+# Run emulation - will quit when "Done" detected, or timeout after 60s virtual time
+emulation RunFor "60"
+echo "[ERROR] Benchmark timed out after 60s!"
+# Ensure file backend is closed on timeout so host can read the log
+usart2 CloseFileBackend /Users/tekitou/work/umi/build/bench_stm32f4_uart.log
+quit
