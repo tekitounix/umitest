@@ -29,14 +29,14 @@
 // umios
 #include <audio_context.hh>
 #include <event.hh>
-#include <event_router.hh>
-#include <param_mapping.hh>
 #include <shared_state.hh>
 #include <syscall_nr.hh>
-#include <triple_buffer.hh>
-#include <umios/kernel/fpu_policy.hh>
-#include <umios/kernel/loader.hh>
-#include <umios/kernel/umi_kernel.hh>
+#include <umi/kernel/fpu_policy.hh>
+#include <umi/kernel/umi_kernel.hh>
+#include <umi/runtime/event_router.hh>
+#include <umi/runtime/param_mapping.hh>
+#include <umi/service/loader/loader.hh>
+#include <umi/util/triple_buffer.hh>
 
 // Local
 #include "arch.hh"

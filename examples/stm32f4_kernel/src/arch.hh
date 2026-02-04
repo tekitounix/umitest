@@ -4,10 +4,9 @@
 
 #pragma once
 
-#include <cstdint>
-
 #include <arch/context.hh>
-#include <umios/kernel/fpu_policy.hh>
+#include <cstdint>
+#include <umi/kernel/fpu_policy.hh>
 
 namespace umi::arch::cm4 {
 
@@ -22,19 +21,10 @@ void init_cycle_counter();
 uint32_t dwt_cycle();
 
 // Task primitives
-void init_task(TaskContext& tcb,
-               uint32_t* stack,
-               uint32_t stack_size,
-               void (*entry)(void*),
-               void* arg,
-               bool use_fpu);
+void init_task(TaskContext& tcb, uint32_t* stack, uint32_t stack_size, void (*entry)(void*), void* arg, bool use_fpu);
 
 template <umi::FpuPolicy Policy>
-inline void init_task(TaskContext& tcb,
-                      uint32_t* stack,
-                      uint32_t stack_size,
-                      void (*entry)(void*),
-                      void* arg) {
+inline void init_task(TaskContext& tcb, uint32_t* stack, uint32_t stack_size, void (*entry)(void*), void* arg) {
     umi::port::cm4::init_task_context<Policy>(tcb, stack, stack_size, entry, arg);
 }
 
@@ -54,10 +44,7 @@ void set_svc_callback(SvcCallback cb);
 
 // Start scheduler (switches to PSP, enters unprivileged mode, calls entry)
 // stack_top: top of stack array (stack_base + stack_size), used for PSP
-[[noreturn]] void start_scheduler(TaskContext* initial_tcb,
-                                   void (*entry)(void*),
-                                   void* arg,
-                                   uint32_t* stack_top);
+[[noreturn]] void start_scheduler(TaskContext* initial_tcb, void (*entry)(void*), void* arg, uint32_t* stack_top);
 
 // Current TCB pointer (used by PendSV_Handler)
 extern TaskContext* volatile current_tcb;

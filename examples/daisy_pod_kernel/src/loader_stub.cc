@@ -3,8 +3,8 @@
 // Full loader.cc has crypto/MPU dependencies not needed yet.
 // Only the methods called from syscall dispatch are implemented here.
 
-#include <umios/kernel/loader.hh>
 #include <cstring>
+#include <umi/service/loader/loader.hh>
 
 namespace umi::kernel {
 
@@ -84,10 +84,8 @@ bool AppLoader::setup_memory(const AppHeader*) noexcept {
     return false;
 }
 
-void AppLoader::copy_sections(const AppHeader*, const uint8_t*) noexcept {
-}
+void AppLoader::copy_sections(const AppHeader*, const uint8_t*) noexcept {}
 
-void AppLoader::configure_mpu() noexcept {
-}
+void AppLoader::configure_mpu() noexcept {}
 
 } // namespace umi::kernel

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // STM32F4 Kernel Implementation
 // RTOS scheduler, syscall handling, audio processing
-// Uses umi::Kernel (scheduler/state), SpscQueue (IPC) from lib/umios
+// Uses umi::Kernel (scheduler/state), SpscQueue (IPC) from lib/umi
 
 #include "kernel.hh"
 
@@ -11,11 +11,11 @@
 #include <cstring>
 #include <loader.hh>
 #include <span>
-#include <umios/app/syscall.hh>
-#include <umios/core/audio_context.hh>
-#include <umios/runtime/event_router.hh>
-#include <umios/kernel/fpu_policy.hh>
-#include <umios/kernel/umi_kernel.hh>
+#include <umi/app/syscall.hh>
+#include <umi/core/audio_context.hh>
+#include <umi/kernel/fpu_policy.hh>
+#include <umi/kernel/umi_kernel.hh>
+#include <umi/runtime/event_router.hh>
 
 #include "arch.hh"
 #include "bsp.hh"
@@ -25,11 +25,11 @@
 #include <audio/audio_interface.hh>
 #include <hal/stm32_otg.hh>
 #include <protocol/standard_io.hh>
-#include <umios/service/shell/shell_commands.hh>
+#include <umi/service/shell/shell_commands.hh>
 
 // AppConfig triple-buffer support
-#include <umios/util/triple_buffer.hh>
-#include <umios/runtime/param_mapping.hh>
+#include <umi/runtime/param_mapping.hh>
+#include <umi/util/triple_buffer.hh>
 
 namespace umi::kernel {
 
@@ -45,12 +45,8 @@ struct Stm32F4Hw {
     // Masks priority >= 1 (BASEPRI = 0x10 on STM32F4 with 4-bit priority).
     // Audio DMA (priority 0) is NOT masked — runs through critical sections.
     // DMA ISR must NOT use MaskedCritical; use signal() + PendSV instead.
-    static void enter_critical() {
-        __asm__ volatile("msr basepri, %0" ::"r"(0x10u) : "memory");
-    }
-    static void exit_critical() {
-        __asm__ volatile("msr basepri, %0" ::"r"(0u) : "memory");
-    }
+    static void enter_critical() { __asm__ volatile("msr basepri, %0" ::"r"(0x10u) : "memory"); }
+    static void exit_critical() { __asm__ volatile("msr basepri, %0" ::"r"(0u) : "memory"); }
 
     static void trigger_ipi(std::uint8_t) {}
     static std::uint8_t current_core() { return 0; }
@@ -78,17 +74,17 @@ using HW = umi::Hw<Stm32F4Hw>;
 umi::Kernel<8, 4, HW, 1> g_kernel;
 
 // Compile-time FPU policy determination
-static constexpr umi::TaskFpuDecl fpu_decl {
-    .audio   = true,
-    .system  = false,
+static constexpr umi::TaskFpuDecl fpu_decl{
+    .audio = true,
+    .system = false,
     .control = true,
-    .idle    = false,
+    .idle = false,
 };
 static constexpr int fpu_task_count = umi::count_fpu_tasks(fpu_decl);
-static constexpr auto audio_fpu_policy   = umi::resolve_fpu_policy(fpu_decl.audio,   fpu_task_count);
-static constexpr auto system_fpu_policy  = umi::resolve_fpu_policy(fpu_decl.system,  fpu_task_count);
+static constexpr auto audio_fpu_policy = umi::resolve_fpu_policy(fpu_decl.audio, fpu_task_count);
+static constexpr auto system_fpu_policy = umi::resolve_fpu_policy(fpu_decl.system, fpu_task_count);
 static constexpr auto control_fpu_policy = umi::resolve_fpu_policy(fpu_decl.control, fpu_task_count);
-static constexpr auto idle_fpu_policy    = umi::resolve_fpu_policy(fpu_decl.idle,    fpu_task_count);
+static constexpr auto idle_fpu_policy = umi::resolve_fpu_policy(fpu_decl.idle, fpu_task_count);
 
 umi::TaskId g_audio_task_id;
 umi::TaskId g_system_task_id;
@@ -136,8 +132,7 @@ static EventQueue<INPUT_EVENT_CAPACITY> g_router_audio_queue;
 
 // AppConfig triple-buffer: writer = Controller task (SVC), reader = Audio ISR
 // Placed in CCM to reduce SRAM pressure (~6KB for 3× AppConfig)
-__attribute__((section(".audio_ccm")))
-static umi::TripleBuffer<umi::AppConfig> g_app_config_buf;
+__attribute__((section(".audio_ccm"))) static umi::TripleBuffer<umi::AppConfig> g_app_config_buf;
 
 // ============================================================================
 // Global State
@@ -164,7 +159,7 @@ AppLoader g_loader;
 __attribute__((section(".shared"))) SharedMemory g_shared;
 
 // LED override: kernel can force specific LEDs regardless of app state
-volatile uint8_t g_led_override = 0;       // Kernel forced LED bits
+volatile uint8_t g_led_override = 0;         // Kernel forced LED bits
 volatile uint8_t g_led_override_mask = 0xFF; // Bits under kernel control (default: all)
 
 // ============================================================================
@@ -371,27 +366,27 @@ static volatile uint32_t g_dbg_in_write_count = 0;     // write_audio_in call co
 static volatile uint32_t g_dbg_dma_callback_count = 0; // DMA callback count
 static volatile uint32_t g_dbg_out_mute = 0;
 static volatile int32_t g_dbg_out_volume = 0;
-static volatile uint32_t g_dbg_out_read_count = 0;     // read_audio return value
-static volatile int32_t g_dbg_out_sample_max = 0;      // max abs sample in i2s_work_buf
-static volatile uint32_t g_dbg_out_raw0 = 0;           // first 4 bytes of USB RX packet
-static volatile uint32_t g_dbg_out_raw1 = 0;           // next 4 bytes of USB RX packet
-static volatile uint32_t g_dbg_out_last_sample_l = 0;  // last decoded sample L
-static volatile uint32_t g_dbg_hal_ep1_first_word = 0; // HAL: first word from EP1 RX buf
-static volatile uint32_t g_dbg_out_read_zero_count = 0; // count of read_count==0
+static volatile uint32_t g_dbg_out_read_count = 0;       // read_audio return value
+static volatile int32_t g_dbg_out_sample_max = 0;        // max abs sample in i2s_work_buf
+static volatile uint32_t g_dbg_out_raw0 = 0;             // first 4 bytes of USB RX packet
+static volatile uint32_t g_dbg_out_raw1 = 0;             // next 4 bytes of USB RX packet
+static volatile uint32_t g_dbg_out_last_sample_l = 0;    // last decoded sample L
+static volatile uint32_t g_dbg_hal_ep1_first_word = 0;   // HAL: first word from EP1 RX buf
+static volatile uint32_t g_dbg_out_read_zero_count = 0;  // count of read_count==0
 static volatile uint32_t g_dbg_out_read_short_count = 0; // count of read_count < buffer_size
-static volatile int32_t g_dbg_out_decoded0 = 0;  // first decoded sample from on_rx
-static volatile int32_t g_dbg_out_decoded1 = 0;  // second decoded sample from on_rx
-static volatile uint32_t g_dbg_out_buf_addr = 0; // DMA buf pointer passed to process_audio_frame
-static volatile uint32_t g_dbg_out_buf_word0 = 0; // first word written to DMA buf after pack
-static volatile int32_t g_dbg_out_sample_max_ever = 0; // persistent max (never reset by process)
-static volatile uint32_t g_dbg_out_nonzero_frames = 0; // count of frames where sample_max > 0
-static volatile uint32_t g_dbg_out_zero_frames = 0;    // count of frames where sample_max == 0
-static volatile uint32_t g_dbg_out_raw0_nonzero = 0;   // count of on_rx with raw0 != 0
-static volatile uint32_t g_dbg_hal_ep1_zero_count = 0;  // HAL: EP1 OUT_DATA with bcnt==0
-static volatile uint32_t g_dbg_hal_ep1_bcnt_last = 0;   // HAL: last EP1 bcnt
-static volatile uint32_t g_dbg_hal_ep1_bcnt_min = 0;    // HAL: min EP1 bcnt
-static volatile uint32_t g_dbg_hal_ep1_bcnt_max = 0;    // HAL: max EP1 bcnt
-static volatile uint32_t g_dbg_hal_rxflvl_out = 0;      // HAL: RXFLVL OUT_DATA total
+static volatile int32_t g_dbg_out_decoded0 = 0;          // first decoded sample from on_rx
+static volatile int32_t g_dbg_out_decoded1 = 0;          // second decoded sample from on_rx
+static volatile uint32_t g_dbg_out_buf_addr = 0;         // DMA buf pointer passed to process_audio_frame
+static volatile uint32_t g_dbg_out_buf_word0 = 0;        // first word written to DMA buf after pack
+static volatile int32_t g_dbg_out_sample_max_ever = 0;   // persistent max (never reset by process)
+static volatile uint32_t g_dbg_out_nonzero_frames = 0;   // count of frames where sample_max > 0
+static volatile uint32_t g_dbg_out_zero_frames = 0;      // count of frames where sample_max == 0
+static volatile uint32_t g_dbg_out_raw0_nonzero = 0;     // count of on_rx with raw0 != 0
+static volatile uint32_t g_dbg_hal_ep1_zero_count = 0;   // HAL: EP1 OUT_DATA with bcnt==0
+static volatile uint32_t g_dbg_hal_ep1_bcnt_last = 0;    // HAL: last EP1 bcnt
+static volatile uint32_t g_dbg_hal_ep1_bcnt_min = 0;     // HAL: min EP1 bcnt
+static volatile uint32_t g_dbg_hal_ep1_bcnt_max = 0;     // HAL: max EP1 bcnt
+static volatile uint32_t g_dbg_hal_rxflvl_out = 0;       // HAL: RXFLVL OUT_DATA total
 static volatile uint32_t g_dbg_ring_write_pos = 0;
 static volatile uint32_t g_dbg_ring_read_pos = 0;
 static volatile uint32_t g_dbg_ring_buffered = 0;
@@ -487,18 +482,23 @@ static void process_audio_frame(uint16_t* buf) {
     g_dbg_out_mute = mcu::usb_audio().is_muted() ? 1 : 0;
     g_dbg_out_volume = mcu::usb_audio().volume_db256();
     g_dbg_out_read_count = read_count;
-    if (read_count == 0) g_dbg_out_read_zero_count = g_dbg_out_read_zero_count + 1;
-    if (read_count < mcu::audio::buffer_size) g_dbg_out_read_short_count = g_dbg_out_read_short_count + 1;
+    if (read_count == 0)
+        g_dbg_out_read_zero_count = g_dbg_out_read_zero_count + 1;
+    if (read_count < mcu::audio::buffer_size)
+        g_dbg_out_read_short_count = g_dbg_out_read_short_count + 1;
     // Track max abs sample in i2s_work_buf
     {
         int32_t max_abs = 0;
         for (uint32_t i = 0; i < read_count * 2; ++i) {
             int32_t v = i2s_work_buf[i];
-            if (v < 0) v = -v;
-            if (v > max_abs) max_abs = v;
+            if (v < 0)
+                v = -v;
+            if (v > max_abs)
+                max_abs = v;
         }
         g_dbg_out_sample_max = max_abs;
-        if (max_abs > g_dbg_out_sample_max_ever) g_dbg_out_sample_max_ever = max_abs;
+        if (max_abs > g_dbg_out_sample_max_ever)
+            g_dbg_out_sample_max_ever = max_abs;
         if (max_abs > 0) {
             g_dbg_out_nonzero_frames = g_dbg_out_nonzero_frames + 1;
         } else {
@@ -506,7 +506,8 @@ static void process_audio_frame(uint16_t* buf) {
         }
     }
     g_dbg_out_raw0 = mcu::usb_audio().dbg_out_rx_packet_raw0();
-    if (g_dbg_out_raw0 != 0) g_dbg_out_raw0_nonzero = g_dbg_out_raw0_nonzero + 1;
+    if (g_dbg_out_raw0 != 0)
+        g_dbg_out_raw0_nonzero = g_dbg_out_raw0_nonzero + 1;
     g_dbg_out_raw1 = mcu::usb_audio().dbg_out_rx_packet_raw1();
     g_dbg_out_last_sample_l = static_cast<uint32_t>(mcu::usb_audio().dbg_out_rx_last_sample_l());
     g_dbg_hal_ep1_first_word = mcu::usb_hal().dbg_ep1_out_first_word_;
@@ -816,7 +817,7 @@ void on_pdm_buffer_ready(uint16_t* buf) {
 // Syscall Handler
 // ============================================================================
 
-// Syscall numbers from lib/umios/app/syscall.hh
+// Syscall numbers from lib/umi/app/syscall.hh
 namespace app_syscall = umi::syscall::nr;
 
 static void svc_handler_impl(uint32_t* sp) {

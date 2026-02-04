@@ -6,12 +6,12 @@
 //   - Controller: Button/LED state management (main loop with co_await 16ms)
 
 #include <synth.hh> // headless_webhost/src/synth.hh
+#include <umi/app/syscall.hh>
+#include <umi/core/event_router.hh>
+#include <umi/core/param_mapping.hh>
+#include <umi/kernel/coro.hh>
+#include <umi/kernel/loader.hh>
 #include <umi_app.hh>
-#include <umios/app/syscall.hh>
-#include <umios/core/event_router.hh>
-#include <umios/core/param_mapping.hh>
-#include <umios/kernel/coro.hh>
-#include <umios/kernel/loader.hh>
 
 using namespace umi::coro::literals;
 using namespace umi;

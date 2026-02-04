@@ -4,10 +4,10 @@
 // Demonstrates: register_processor, process(AudioContext&), syscall API
 
 #include <cstdint>
+#include <umi/app/syscall.hh>
+#include <umi/core/audio_context.hh>
+#include <umi/kernel/loader.hh>
 #include <umi_app.hh>
-#include <umios/app/syscall.hh>
-#include <umios/core/audio_context.hh>
-#include <umios/kernel/loader.hh>
 
 using namespace umi;
 
@@ -23,9 +23,18 @@ constexpr std::uint32_t midi_note_to_phase_inc(std::uint8_t note, float sample_r
     constexpr float pow2_32 = 4294967296.0f;
 
     constexpr float semitone_ratios[12] = {
-        1.0f,       1.05946f, 1.12246f, 1.18921f,
-        1.25992f,   1.33484f, 1.41421f, 1.49831f,
-        1.58740f,   1.68179f, 1.78180f, 1.88775f,
+        1.0f,
+        1.05946f,
+        1.12246f,
+        1.18921f,
+        1.25992f,
+        1.33484f,
+        1.41421f,
+        1.49831f,
+        1.58740f,
+        1.68179f,
+        1.78180f,
+        1.88775f,
     };
 
     int semitone = note % 12;
@@ -33,9 +42,11 @@ constexpr std::uint32_t midi_note_to_phase_inc(std::uint8_t note, float sample_r
     float freq = a4_freq * semitone_ratios[semitone] / semitone_ratios[9];
     int shift = octave - 5;
     if (shift > 0) {
-        for (int i = 0; i < shift; ++i) freq *= 2.0f;
+        for (int i = 0; i < shift; ++i)
+            freq *= 2.0f;
     } else if (shift < 0) {
-        for (int i = 0; i < -shift; ++i) freq *= 0.5f;
+        for (int i = 0; i < -shift; ++i)
+            freq *= 0.5f;
     }
     return static_cast<std::uint32_t>(freq * pow2_32 / sample_rate);
 }
@@ -54,7 +65,7 @@ struct Voice {
 constexpr int NUM_VOICES = 8;
 
 class SawSynth {
-public:
+  public:
     void process(AudioContext& ctx) {
         if (sample_rate_ == 0.0f) {
             sample_rate_ = static_cast<float>(ctx.sample_rate);
@@ -69,18 +80,21 @@ public:
 
         auto* out_l = ctx.output(0);
         auto* out_r = ctx.output(1);
-        if (!out_l) return;
+        if (!out_l)
+            return;
 
         for (std::uint32_t i = 0; i < ctx.buffer_size; ++i) {
             float sample = 0.0f;
 
             for (auto& v : voices_) {
-                if (!v.active) continue;
+                if (!v.active)
+                    continue;
 
                 // Envelope
                 if (v.env_rate > 0.0f && v.env_level < v.env_target) {
                     v.env_level += v.env_rate;
-                    if (v.env_level > v.env_target) v.env_level = v.env_target;
+                    if (v.env_level > v.env_target)
+                        v.env_level = v.env_target;
                 } else if (v.env_rate < 0.0f) {
                     v.env_level += v.env_rate;
                     if (v.env_level <= 0.0f) {
@@ -98,17 +112,19 @@ public:
 
             sample *= volume_;
             out_l[i] = sample;
-            if (out_r) out_r[i] = sample;
+            if (out_r)
+                out_r[i] = sample;
         }
     }
 
-private:
+  private:
     Voice voices_[NUM_VOICES] = {};
     float sample_rate_ = 0.0f;
     float volume_ = 0.5f;
 
     void handle_midi(const std::uint8_t* data, std::uint8_t len) {
-        if (len < 2) return;
+        if (len < 2)
+            return;
         std::uint8_t status = data[0] & 0xF0;
 
         if (status == 0x90 && len >= 3 && data[2] > 0) {
@@ -125,9 +141,13 @@ private:
     void note_on(std::uint8_t note, std::uint8_t velocity) {
         Voice* target = nullptr;
         for (auto& v : voices_) {
-            if (!v.active) { target = &v; break; }
+            if (!v.active) {
+                target = &v;
+                break;
+            }
         }
-        if (!target) target = &voices_[0];
+        if (!target)
+            target = &voices_[0];
 
         target->note = note;
         target->phase = 0;
@@ -144,7 +164,8 @@ private:
             if (v.active && v.note == note) {
                 v.env_target = 0.0f;
                 v.env_rate = -v.env_level / (sample_rate_ * 0.1f);
-                if (v.env_rate == 0.0f) v.env_rate = -0.0001f;
+                if (v.env_rate == 0.0f)
+                    v.env_rate = -0.0001f;
                 break;
             }
         }
