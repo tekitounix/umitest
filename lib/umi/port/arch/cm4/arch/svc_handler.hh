@@ -4,7 +4,7 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <umios/core/syscall_nr.hh>
+#include <umi/core/syscall_nr.hh>
 
 namespace umi::kernel {
 
@@ -47,8 +47,8 @@ extern "C" void svc_dispatch(ExceptionFrame* frame, uint8_t svc_num);
         // Determine which stack was used (EXC_RETURN bit 2)
         "tst lr, #4\n"
         "ite eq\n"
-        "mrseq r0, msp\n"      // Using MSP
-        "mrsne r0, psp\n"      // Using PSP
+        "mrseq r0, msp\n" // Using MSP
+        "mrsne r0, psp\n" // Using PSP
 
         // r0 = exception frame pointer
         // r12 contains syscall number (set by caller)
@@ -56,8 +56,7 @@ extern "C" void svc_dispatch(ExceptionFrame* frame, uint8_t svc_num);
         "mov r1, r12\n"
 
         // Call C++ dispatcher
-        "b svc_dispatch\n"
-    );
+        "b svc_dispatch\n");
 }
 
 // ============================================================================
@@ -88,10 +87,10 @@ inline void handle_get_time(ExceptionFrame* frame) {
 inline void handle_yield() {
     // Trigger PendSV for context switch
     volatile uint32_t& ICSR = *reinterpret_cast<volatile uint32_t*>(0xE000ED04);
-    ICSR = (1U << 28);  // Set PENDSVSET
+    ICSR = (1U << 28); // Set PENDSVSET
 }
 
-}  // namespace impl
+} // namespace impl
 
 /// Main syscall dispatcher
 extern "C" inline void svc_dispatch(ExceptionFrame* frame, uint8_t svc_num) {
@@ -111,22 +110,22 @@ extern "C" inline void svc_dispatch(ExceptionFrame* frame, uint8_t svc_num) {
     }
 
     switch (svc_num) {
-        case nr::get_shared:
-            frame->r0 = impl::handle_get_shared(frame->r0);
-            break;
+    case nr::get_shared:
+        frame->r0 = impl::handle_get_shared(frame->r0);
+        break;
 
-        case nr::get_time:
-            impl::handle_get_time(frame);
-            break;
+    case nr::get_time:
+        impl::handle_get_time(frame);
+        break;
 
-        case nr::yield:
-            impl::handle_yield();
-            break;
+    case nr::yield:
+        impl::handle_yield();
+        break;
 
-        default:
-            frame->r0 = static_cast<uint32_t>(SyscallError::INVALID_SYSCALL);
-            break;
+    default:
+        frame->r0 = static_cast<uint32_t>(SyscallError::INVALID_SYSCALL);
+        break;
     }
 }
 
-}  // namespace umi::kernel
+} // namespace umi::kernel

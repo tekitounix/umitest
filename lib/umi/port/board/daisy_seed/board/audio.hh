@@ -10,9 +10,9 @@
 #include <mcu/i2c.hh>
 #include <transport/direct.hh>
 #include "board/bsp.hh"
-#include <umiport/device/pcm3060/pcm3060.hh>
-#include <umiport/device/wm8731/wm8731.hh>
-#include <umiport/device/ak4556/ak4556.hh>
+#include <umi/port/device/pcm3060/pcm3060.hh>
+#include <umi/port/device/wm8731/wm8731.hh>
+#include <umi/port/device/ak4556/ak4556.hh>
 
 namespace umi::daisy {
 

@@ -47,9 +47,9 @@
 ## インクルードパス変更
 
 ```
-#include <umios/backend/cm/stm32f4/rcc.hh>     →  #include <mcu/rcc.hh>
-#include <umios/backend/cm/stm32f4/gpio.hh>     →  #include <mcu/gpio.hh>
-#include <umios/backend/cm/common/nvic.hh>       →  #include <common/nvic.hh>
+#include <umi/port/mcu/stm32f4/rcc.hh>     →  #include <mcu/rcc.hh>
+#include <umi/port/mcu/stm32f4/gpio.hh>     →  #include <mcu/gpio.hh>
+#include <umi/port/common/common/nvic.hh>       →  #include <common/nvic.hh>
 ```
 
 ## 移行手順
@@ -59,4 +59,4 @@
 3. `#include` パスを全て更新
 4. xmake.lua のインクルードパス設定を `umi-port` ルールに移行
 5. ビルド確認（全ターゲット: stm32f4_kernel, headless_webhost, テスト）
-6. `lib/umios/backend/` を削除、`kernel/port/` を削除
+6. `lib/umi/port/backend/` を削除、`kernel/port/` を削除

@@ -1,0 +1,9 @@
+# Non-interactive run for STM32F4 UMI-OS
+# Usage: renode --console --disable-xwt -e "include @lib/umi/port/platform/renode/run_non_interactive.resc"
+
+include @lib/umi/port/platform/renode/platform.resc
+
+# Run briefly (starts emulation), then stop and quit
+emulation RunFor "00:00:01"
+emulation Pause
+quit

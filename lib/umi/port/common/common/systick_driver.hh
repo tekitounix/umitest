@@ -2,9 +2,9 @@
 // UMI-OS SysTick Driver for Cortex-M
 #pragma once
 
-#include <cstdint>
-#include <umios/kernel/driver.hh>
 #include <common/systick.hh>
+#include <cstdint>
+#include <umi/kernel/driver.hh>
 
 namespace umi::driver::systick {
 
@@ -14,8 +14,8 @@ namespace umi::driver::systick {
 
 struct State {
     uint64_t tick_count = 0;
-    uint32_t tick_hz = 1000;      // Default 1ms ticks
-    uint32_t cpu_hz = 168000000;  // Default STM32F4 @168MHz
+    uint32_t tick_hz = 1000;     // Default 1ms ticks
+    uint32_t cpu_hz = 168000000; // Default STM32F4 @168MHz
 
     // Callback for tick notification
     void (*on_tick)(void* ctx) = nullptr;
@@ -85,7 +85,7 @@ inline const Ops kOps = {
     .irq = irq,
 };
 
-}  // namespace umi::driver::systick
+} // namespace umi::driver::systick
 
 // SysTick IRQ handler (called from vector table)
 extern "C" inline void SysTick_Handler() {

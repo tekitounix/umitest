@@ -2,10 +2,10 @@
 
 ## 現状の問題
 
-現在の `lib/umios/backend/` は関心事が混在し、局所性が低い:
+現在の `lib/umi/port/` は関心事が混在し、局所性が低い:
 
 ```
-lib/umios/backend/
+lib/umi/port/
 ├── cm/                              ← "Cortex-M" だが中身は複数の関心事が混在
 │   ├── common/                      ← アーキテクチャ共通レジスタ (NVIC, SCB, SysTick)
 │   ├── drivers/                     ← 汎用ドライバ (SysTick, UART)
@@ -19,7 +19,7 @@ lib/umios/backend/
 │   └── platform/                    ← cm/platform/ と同じファイル名で重複
 └── (concepts は未定義)
 
-lib/umios/kernel/
+lib/umi/kernel/
 └── port/cm4/                        ← カーネルポートが backend と別の場所に
 
 examples/stm32f4_kernel/src/
@@ -134,7 +134,7 @@ arch/はDriverからもHALからも使われる。例えばDriverがDMA転送前
 
 ## ミドルウェア（プロトコルスタック）
 
-`lib/umiusb/`, `lib/umios/kernel/` 等のライブラリはHWに依存しない純粋なロジック層であり、
+`lib/umiusb/`, `lib/umi/kernel/` 等のライブラリはHWに依存しない純粋なロジック層であり、
 **ミドルウェア** または **プロトコルスタック** と呼ぶ。
 
 ```

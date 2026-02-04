@@ -5,13 +5,13 @@
 ```cpp
 // ✗ 禁止 — ソースコード内での条件分岐
 #ifdef STM32F4
-#include <umios/backend/cm/stm32f4/rcc.hh>
+#include <umi/port/mcu/stm32f4/rcc.hh>
 #elif defined(STM32H7)
-#include <umios/backend/cm/stm32h7/rcc.hh>
+#include <umi/port/mcu/stm32h7/rcc.hh>
 #endif
 
 // ✗ 禁止 — フルパスによるMCU固有インクルード
-#include <umios/backend/cm/stm32f4/rcc.hh>
+#include <umi/port/mcu/stm32f4/rcc.hh>
 ```
 
 ```cpp
@@ -83,5 +83,5 @@ target("stm32f4_kernel")
 ```cpp
 #include <board/bsp.hh>              // 定数参照のみ
 #include <arch/traits.hh>            // アーキ定数
-#include <umios/core/audio_context.hh>  // コアAPI（常に同一パス）
+#include <umi/core/audio_context.hh>  // コアAPI（常に同一パス）
 ```

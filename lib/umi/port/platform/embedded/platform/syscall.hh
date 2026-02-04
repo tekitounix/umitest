@@ -3,7 +3,7 @@
 #pragma once
 
 #include <cstdint>
-#include <umios/kernel/syscall/syscall_numbers.hh>
+#include <umi/kernel/syscall/syscall_numbers.hh>
 
 namespace umi::platform {
 
@@ -35,8 +35,7 @@ namespace umi::platform {
     return r0;
 }
 
-[[gnu::always_inline]] inline uint32_t syscall3(uint8_t num, uint32_t arg0, uint32_t arg1,
-                                                 uint32_t arg2) {
+[[gnu::always_inline]] inline uint32_t syscall3(uint8_t num, uint32_t arg0, uint32_t arg1, uint32_t arg2) {
     register uint32_t r0 asm("r0") = arg0;
     register uint32_t r1 asm("r1") = arg1;
     register uint32_t r2 asm("r2") = arg2;
@@ -45,8 +44,8 @@ namespace umi::platform {
     return r0;
 }
 
-[[gnu::always_inline]] inline uint32_t syscall4(uint8_t num, uint32_t arg0, uint32_t arg1,
-                                                 uint32_t arg2, uint32_t arg3) {
+[[gnu::always_inline]] inline uint32_t
+syscall4(uint8_t num, uint32_t arg0, uint32_t arg1, uint32_t arg2, uint32_t arg3) {
     register uint32_t r0 asm("r0") = arg0;
     register uint32_t r1 asm("r1") = arg1;
     register uint32_t r2 asm("r2") = arg2;
@@ -110,4 +109,4 @@ inline int32_t sys_unregister_proc(uint32_t instance) {
     return static_cast<int32_t>(syscall1(nr::sys_unregister_proc, instance));
 }
 
-}  // namespace umi::platform
+} // namespace umi::platform

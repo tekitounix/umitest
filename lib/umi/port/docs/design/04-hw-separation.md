@@ -32,13 +32,13 @@
 │          │     │ (Concept)      │     │ fault.hh     │
 └──────────┘     └────────────────┘     └──────────────┘
                   インターフェース         HW固有実装
-                  (lib/umios/kernel/)     (lib/umiport/)
+                  (lib/umi/kernel/)     (lib/umiport/)
 ```
 
 ## HW分離のConcept定義
 
 ```cpp
-// lib/umios/kernel/ に配置（HW非依存）
+// lib/umi/kernel/ に配置（HW非依存）
 
 /// オーディオHWドライバ — カーネルから見たオーディオI/Oの抽象
 template<typename T>
@@ -68,8 +68,8 @@ concept FaultReport = requires(const T& fault) {
 
 | インターフェース | 定義場所（HW非依存） | 実装場所（HW固有） |
 |-----------------|---------------------|-------------------|
-| `AudioDriver` | `lib/umios/kernel/` | `port/board/<name>/board/audio_driver.hh` |
-| `FaultReport` | `lib/umios/kernel/` | `port/arch/<name>/arch/fault.hh` |
+| `AudioDriver` | `lib/umi/kernel/` | `port/board/<name>/board/audio_driver.hh` |
+| `FaultReport` | `lib/umi/kernel/` | `port/arch/<name>/arch/fault.hh` |
 | `umiusb::Hal` | `lib/umiusb/include/core/hal.hh` | `port/mcu/<name>/mcu/usb_otg.hh` |
 | `AudioBridge` | `lib/umiusb/include/audio/` | `port/board/<name>/board/audio_bridge.hh` |
 

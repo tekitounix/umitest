@@ -1,5 +1,5 @@
 # STM32F4 Platform Script for UMI-OS
-# Run with: renode tools/renode/platform.resc
+# Run with: renode lib/umi/port/platform/renode/platform.resc
 
 using sysbus
 
@@ -7,7 +7,7 @@ using sysbus
 mach create "stm32f4"
 
 # Load platform definition
-machine LoadPlatformDescription @tools/renode/stm32f4_umi.repl
+machine LoadPlatformDescription @lib/umi/port/platform/renode/stm32f4_umi.repl
 
 # Set up logging for UART2
 logLevel 0 usart2

@@ -3,7 +3,7 @@
 #pragma once
 
 #include <cstdint>
-#include <umios/kernel/syscall/syscall_numbers.hh>
+#include <umi/kernel/syscall/syscall_numbers.hh>
 
 // Forward declarations - implemented by WASM kernel
 namespace umi::kernel {
@@ -14,7 +14,7 @@ uint64_t kernel_get_time();
 void* kernel_get_shared(uint32_t region_id);
 int32_t kernel_register_proc(uint32_t instance, uint32_t func);
 int32_t kernel_unregister_proc(uint32_t instance);
-}  // namespace umi::kernel
+} // namespace umi::kernel
 
 namespace umi::platform {
 
@@ -54,4 +54,4 @@ inline int32_t sys_unregister_proc(uint32_t instance) {
     return kernel::kernel_unregister_proc(instance);
 }
 
-}  // namespace umi::platform
+} // namespace umi::platform

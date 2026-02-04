@@ -18,12 +18,12 @@
 //
 #pragma once
 
+#include <array>
+#include <common/nvic.hh>
+#include <common/scb.hh>
 #include <cstddef>
 #include <cstdint>
-#include <array>
-#include <umios/core/irq.hh>
-#include <common/scb.hh>
-#include <common/nvic.hh>
+#include <umi/core/irq.hh>
 
 namespace umi::backend::cm {
 
@@ -32,16 +32,16 @@ namespace umi::backend::cm {
 // ============================================================================
 
 namespace exc {
-    constexpr int NMI        = -14;
-    constexpr int HardFault  = -13;
-    constexpr int MemManage  = -12;
-    constexpr int BusFault   = -11;
-    constexpr int UsageFault = -10;
-    constexpr int SVCall     = -5;
-    constexpr int DebugMon   = -4;
-    constexpr int PendSV     = -2;
-    constexpr int SysTick    = -1;
-}
+constexpr int NMI = -14;
+constexpr int HardFault = -13;
+constexpr int MemManage = -12;
+constexpr int BusFault = -11;
+constexpr int UsageFault = -10;
+constexpr int SVCall = -5;
+constexpr int DebugMon = -4;
+constexpr int PendSV = -2;
+constexpr int SysTick = -1;
+} // namespace exc
 
 // ============================================================================
 // Configuration
@@ -50,7 +50,7 @@ namespace exc {
 /// Number of external IRQs (platform-specific)
 /// STM32F4: 82, STM32H7: 150, RP2040: 26
 #ifndef UMI_CM_NUM_IRQS
-#define UMI_CM_NUM_IRQS 82
+    #define UMI_CM_NUM_IRQS 82
 #endif
 
 /// Number of system exceptions (fixed for Cortex-M)
@@ -65,82 +65,83 @@ constexpr size_t VECTOR_TABLE_SIZE = NUM_EXCEPTIONS + UMI_CM_NUM_IRQS;
 
 /// SRAM-resident vector table.
 /// Alignment must be power of 2 >= table size * 4, minimum 128.
-template<size_t NumIrqs = UMI_CM_NUM_IRQS>
+template <size_t NumIrqs = UMI_CM_NUM_IRQS>
 class VectorTableRAM {
-public:
+  public:
     static constexpr size_t SIZE = NUM_EXCEPTIONS + NumIrqs;
-    
+
     // Calculate alignment (power of 2 >= SIZE * 4, min 128)
     static constexpr size_t calc_align() {
         size_t n = SIZE * 4;
         size_t a = 128;
-        while (a < n) a *= 2;
+        while (a < n)
+            a *= 2;
         return a;
     }
     static constexpr size_t ALIGNMENT = calc_align();
-    
-    using Handler = void(*)();
-    
-private:
+
+    using Handler = void (*)();
+
+  private:
     // SRAM vector table (properly aligned)
     alignas(ALIGNMENT) std::array<Handler, SIZE> table_{};
     bool initialized_ = false;
-    
+
     // Default handler - breakpoint and halt
     [[noreturn]] static void default_handler() {
         asm volatile("bkpt #0");
-        while (true) { asm volatile("" ::: "memory"); }
+        while (true) {
+            asm volatile("" ::: "memory");
+        }
     }
-    
-public:
+
+  public:
     /// Initialize vector table in SRAM and switch VTOR.
     /// @param initial_sp  Initial stack pointer value
     /// @param reset       Reset handler (for warm reset)
     void init(uint32_t initial_sp, Handler reset) {
-        if (initialized_) return;
-        
+        if (initialized_)
+            return;
+
         // Fill with default handlers
         for (auto& h : table_) {
             h = default_handler;
         }
-        
+
         // Entry 0 is initial SP (cast to handler type)
         table_[0] = reinterpret_cast<Handler>(static_cast<uintptr_t>(initial_sp));
-        
+
         // Entry 1 is Reset
         table_[1] = reset;
-        
+
         // Update VTOR to point to SRAM table
         umi::port::arm::SCB::set_vtor(reinterpret_cast<uint32_t>(table_.data()));
-        
+
         // Ensure write completes before any interrupts
         asm volatile("dsb\n isb" ::: "memory");
-        
+
         initialized_ = true;
     }
-    
+
     /// Set handler for system exception or IRQ.
     /// @param num  Exception/IRQ number:
     ///             - System exceptions: Use vector index (2=NMI, 3=HardFault, etc.)
     ///             - IRQs: Use (16 + irq_number)
     Handler set(size_t index, Handler h) {
-        if (index >= SIZE) return nullptr;
+        if (index >= SIZE)
+            return nullptr;
         Handler prev = table_[index];
         table_[index] = h ? h : default_handler;
         asm volatile("dsb" ::: "memory");
         return prev;
     }
-    
+
     /// Get handler at index.
-    Handler get(size_t index) const {
-        return index < SIZE ? table_[index] : nullptr;
-    }
-    
+    Handler get(size_t index) const { return index < SIZE ? table_[index] : nullptr; }
+
     /// Get table base address.
-    uint32_t base() const {
-        return reinterpret_cast<uint32_t>(table_.data());
-    }
-    
+    uint32_t base() const { return reinterpret_cast<uint32_t>(table_.data()); }
+
     /// Check if initialized.
     bool is_initialized() const { return initialized_; }
 };
@@ -175,15 +176,15 @@ inline constexpr size_t irq_to_index(int irq_num) {
     }
 }
 
-}  // namespace umi::backend::cm
+} // namespace umi::backend::cm
 
 // ============================================================================
 // External Symbols (defined in application/startup)
 // ============================================================================
 
 extern "C" {
-    extern uint32_t _estack;
-    [[noreturn]] void Reset_Handler();
+extern uint32_t _estack;
+[[noreturn]] void Reset_Handler();
 }
 
 // ============================================================================
@@ -194,10 +195,7 @@ namespace umi::irq {
 
 inline void init() {
     using namespace umi::backend::cm;
-    g_vector_table.init(
-        reinterpret_cast<uint32_t>(&_estack),
-        reinterpret_cast<Handler>(Reset_Handler)
-    );
+    g_vector_table.init(reinterpret_cast<uint32_t>(&_estack), reinterpret_cast<Handler>(Reset_Handler));
 }
 
 inline Handler set_handler(int irq_num, Handler handler) {
@@ -256,7 +254,8 @@ inline InterruptGuard::InterruptGuard(int irq_num) : irq_(irq_num) {
 }
 
 inline InterruptGuard::~InterruptGuard() {
-    if (was_enabled_) enable(irq_);
+    if (was_enabled_)
+        enable(irq_);
 }
 
 inline CriticalSection::CriticalSection() {
@@ -265,7 +264,7 @@ inline CriticalSection::CriticalSection() {
 }
 
 inline CriticalSection::~CriticalSection() {
-    asm volatile("msr primask, %0" :: "r"(saved_state_) : "memory");
+    asm volatile("msr primask, %0" ::"r"(saved_state_) : "memory");
 }
 
-}  // namespace umi::irq
+} // namespace umi::irq
