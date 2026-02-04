@@ -404,8 +404,8 @@ class PolySynth {
 // =====================================================================
 
 // Include AudioContext if available (outside namespace to avoid std:: conflicts)
-#if __has_include(<umios/core/audio_context.hh>)
-    #include <umios/core/audio_context.hh>
+#if __has_include(<umi/core/audio_context.hh>)
+    #include <umi/core/audio_context.hh>
 
 namespace umi::synth {
 

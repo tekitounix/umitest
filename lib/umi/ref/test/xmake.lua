@@ -3,6 +3,7 @@
 
 target("test_umimock")
     add_rules("host.test")
+    add_tests("default")
     set_group("tests/ref")
     set_default(true)
     add_files("test_mock.cc")

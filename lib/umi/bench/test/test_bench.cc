@@ -108,9 +108,11 @@ bool test_stats_single_sample(TestContext& t) {
     bool ok = true;
     ok &= t.assert_eq(stats.min, 42u);
     ok &= t.assert_eq(stats.max, 42u);
-    ok &= t.assert_eq(stats.mean, 42u);
+    ok &= t.assert_eq(stats.mean, 42.0); // mean is now double
     ok &= t.assert_eq(stats.median, 42u);
     ok &= t.assert_eq(stats.samples, 1u);
+    ok &= t.assert_eq(stats.stddev, 0.0); // single sample has no deviation
+    ok &= t.assert_eq(stats.cv(), 0.0);   // CV is 0 when no deviation
     return ok;
 }
 
@@ -121,9 +123,15 @@ bool test_stats_odd_samples(TestContext& t) {
     bool ok = true;
     ok &= t.assert_eq(stats.min, 1u);
     ok &= t.assert_eq(stats.max, 5u);
-    ok &= t.assert_eq(stats.mean, 3u);   // (1+2+3+4+5)/5 = 3
+    ok &= t.assert_eq(stats.mean, 3.0);  // (1+2+3+4+5)/5 = 3.0 (double)
     ok &= t.assert_eq(stats.median, 3u); // sorted: 1,2,3,4,5 -> middle is 3
     ok &= t.assert_eq(stats.samples, 5u);
+    // stddev for [1,2,3,4,5]: sqrt(((4+1+0+1+4)/5)) = sqrt(2) ≈ 1.414
+    ok &= t.assert_gt(stats.stddev, 1.4);
+    ok &= t.assert_lt(stats.stddev, 1.5);
+    // CV = (1.414/3)*100 ≈ 47.1%
+    ok &= t.assert_gt(stats.cv(), 47.0);
+    ok &= t.assert_lt(stats.cv(), 48.0);
     return ok;
 }
 
@@ -134,9 +142,12 @@ bool test_stats_even_samples(TestContext& t) {
     bool ok = true;
     ok &= t.assert_eq(stats.min, 1u);
     ok &= t.assert_eq(stats.max, 4u);
-    ok &= t.assert_eq(stats.mean, 2u);   // (1+2+3+4)/4 = 2 (integer)
+    ok &= t.assert_eq(stats.mean, 2.5);  // (1+2+3+4)/4 = 2.5 (double)
     ok &= t.assert_eq(stats.median, 2u); // sorted: 1,2,3,4 -> (2+3)/2 = 2
     ok &= t.assert_eq(stats.samples, 4u);
+    // stddev for [1,2,3,4]: sqrt(((2.25+0.25+0.25+2.25)/4)) = sqrt(1.25) ≈ 1.118
+    ok &= t.assert_gt(stats.stddev, 1.1);
+    ok &= t.assert_lt(stats.stddev, 1.2);
     return ok;
 }
 
@@ -153,8 +164,10 @@ bool test_stats_all_same(TestContext& t) {
     bool ok = true;
     ok &= t.assert_eq(stats.min, 7u);
     ok &= t.assert_eq(stats.max, 7u);
-    ok &= t.assert_eq(stats.mean, 7u);
+    ok &= t.assert_eq(stats.mean, 7.0); // double mean
     ok &= t.assert_eq(stats.median, 7u);
+    ok &= t.assert_eq(stats.stddev, 0.0); // no deviation when all same
+    ok &= t.assert_eq(stats.cv(), 0.0);   // CV is 0 when no deviation
     return ok;
 }
 
@@ -165,7 +178,8 @@ bool test_stats_large_values(TestContext& t) {
     bool ok = true;
     ok &= t.assert_eq(stats.min, 1'000'000'000ULL);
     ok &= t.assert_eq(stats.max, 3'000'000'000ULL);
-    ok &= t.assert_eq(stats.mean, 2'000'000'000ULL);
+    ok &= t.assert_eq(stats.mean, 2'000'000'000.0); // double mean
+    ok &= t.assert_eq(stats.sum, 6'000'000'000.0);  // sum field
     return ok;
 }
 

@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: MIT
 #pragma once
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -20,14 +20,36 @@ class Runner {
 
     Runner() = default;
 
-    /// Calibrate baseline overhead
-    template <std::size_t N = DefaultSamples>
+    /// Calibrate baseline overhead with improved statistical reliability
+    /// Uses warmup iterations, median instead of min, and volatile workaround
+    template <std::size_t N = DefaultSamples, std::size_t Warmup = 10>
     Runner& calibrate() {
+        // Warmup iterations to stabilize cache and branch predictor
+        for (std::size_t i = 0; i < Warmup; ++i) {
+            volatile int dummy = 0;
+            (void)measure<Timer>([&dummy] { dummy = 1; });
+            (void)dummy;
+        }
+
         std::array<Counter, N> samples{};
         for (std::size_t i = 0; i < N; ++i) {
-            samples[i] = measure<Timer>([] {});
+            // Use volatile workaround to prevent optimization of empty lambda
+            volatile int dummy = 0;
+            samples[i] = measure<Timer>([&dummy] { dummy = 1; });
+            (void)dummy;
         }
-        baseline = *std::min_element(samples.begin(), samples.end());
+
+        // Sort to compute median (more robust than min for outlier resistance)
+        std::array<Counter, N> sorted = samples;
+        std::sort(sorted.begin(), sorted.end());
+
+        // Use median instead of min for better outlier resistance
+        if constexpr (N % 2 == 0) {
+            baseline = (sorted[N / 2 - 1] + sorted[N / 2]) / 2;
+        } else {
+            baseline = sorted[N / 2];
+        }
+
         return *this;
     }
 

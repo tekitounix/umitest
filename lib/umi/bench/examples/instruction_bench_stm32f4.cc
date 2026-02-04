@@ -12,8 +12,7 @@ using Output = Platform::Output;
 constexpr std::uint32_t iterations = 100;
 
 template <typename Func>
-void bench(const char* name, umi::bench::Runner<Platform::Timer>& runner, Func&& func,
-           std::uint32_t expected = 0) {
+void bench(const char* name, umi::bench::Runner<Platform::Timer>& runner, Func&& func, std::uint32_t expected = 0) {
     auto stats = runner.run<64>(iterations, func);
     umi::bench::report<Output>(name, stats, expected);
 }
@@ -70,14 +69,16 @@ int main() {
 
     Output::puts("\nMemory:\n");
     bench(
-        "LDR", runner,
+        "LDR",
+        runner,
         [&] {
             ldr_index = (ldr_index + 1) & 3u;
             pred_x += ldr_arr[ldr_index];
         },
         2);
     bench(
-        "STR", runner,
+        "STR",
+        runner,
         [&] {
             str_index = (str_index + 1) & 3u;
             str_arr[str_index] = static_cast<int>(str_index);
@@ -86,14 +87,16 @@ int main() {
 
     Output::puts("\nBranch:\n");
     bench(
-        "Predicted", runner,
+        "Predicted",
+        runner,
         [&] {
             if (pred_x >= 0)
                 pred_x = pred_x + 1;
         },
         2);
     bench(
-        "Mispredict", runner,
+        "Mispredict",
+        runner,
         [&] {
             if (mispred_x & 1)
                 mispred_x = mispred_x + 1;
@@ -104,7 +107,8 @@ int main() {
 
     Output::puts("\nPipeline:\n");
     bench(
-        "Independent", runner,
+        "Independent",
+        runner,
         [&] {
             indep_a += 1;
             indep_b += 2;

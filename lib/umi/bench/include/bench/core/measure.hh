@@ -10,14 +10,18 @@
 namespace umi::bench {
 
 /// Measure a single execution of func, returning elapsed cycles/time
+/// Uses acquire/release memory ordering (sufficient for most cases, less overhead than seq_cst)
+/// and includes compiler barrier to prevent optimization of measurement boundaries.
 template <TimerLike Timer, typename Func>
 typename Timer::Counter measure(Func&& func) {
-    std::atomic_signal_fence(std::memory_order_seq_cst);
+    // Compiler barrier to prevent reordering of timer reads
+    std::atomic_signal_fence(std::memory_order_acquire);
     const auto start = Timer::now();
-    std::atomic_signal_fence(std::memory_order_seq_cst);
+    std::atomic_signal_fence(std::memory_order_release);
     std::forward<Func>(func)();
-    std::atomic_signal_fence(std::memory_order_seq_cst);
+    std::atomic_signal_fence(std::memory_order_acquire);
     const auto end = Timer::now();
+    std::atomic_signal_fence(std::memory_order_release);
     return end - start;
 }
 
