@@ -246,6 +246,66 @@ xmake test -g "tests/*"
 
 ---
 
+## コマンド分類: 対話型 vs 非対話型
+
+### 🖥️ 対話型コマンド（ユーザー入力/常駐が必要）
+
+| コマンド | 説明 | 対話性の理由 |
+|----------|------|--------------|
+| `xmake run <target>` | ターゲットを実行 | プログラムが対話型になる可能性あり |
+| `xmake debugger` | GDBデバッガー起動 | GDB対話セッション |
+| `xmake debugger -t <target> --server-only` | GDBサーバー常駐 | サーバープロセスがフォアグラウンドで実行 |
+| `xmake emulator.run` | Renodeエミュレーター | GUI対話セッションまたはコンソール待機 |
+| `xmake emulator.test` | Robot Frameworkテスト | Renode対話 + テスト実行中の待機 |
+| `xmake deploy.serve` | デプロイしてサーバー起動 | Python HTTPサーバーが常駐（Ctrl+Cで停止） |
+| `xmake serve` | HTTPサーバー起動 | サーバーが常駐（Ctrl+Cで停止） |
+| `xmake serve.rtt` | RTTログビューアー | WebSocket接続待機 + HTTPサーバー常駐 |
+| `xmake serve --open` | ブラウザ自動オープン | GUIブラウザ起動 |
+
+### 🔧 非対話型コマンド（バッチ実行可能）
+
+#### ✅ 実行済み
+
+| コマンド | 説明 | 実行結果 |
+|----------|------|----------|
+| `xmake test` | プロジェクトテスト実行 | 13テスト完了 |
+| `xmake build` | ターゲットビルド | 成功 |
+| `xmake build -g firmware` | firmwareグループビルド | 成功 |
+| `xmake build -g tests/*` | テストグループビルド | 成功 |
+| `xmake build -g wasm` | WASMグループビルド | 成功 |
+| `xmake clean` | クリーン | 完了 |
+| `xmake show` | プロジェクト情報表示 | 完了 |
+| `xmake deploy.webhost` | WASMホストデプロイ | 成功 |
+
+#### ⏳ 未実行（実行可能）
+
+| コマンド | 説明 | 実行条件 |
+|----------|------|----------|
+| `xmake check` | プロジェクトチェック | 常に実行可能 |
+| `xmake check clang.tidy` | clang-tidyによるチェック | 常に実行可能 |
+| `xmake format -n` | フォーマットdry-run | 常に実行可能 |
+| `xmake pack` | パッケージング | 常に実行可能 |
+| `xmake debugger.cleanup` | GDBサーバーprocess cleanup | 常に実行可能 |
+| `xmake project -k vsxmake` | Visual Studioプロジェクト生成 | 常に実行可能 |
+| `xmake project -k cmake` | CMakeLists.txt生成 | 常に実行可能 |
+| `xmake project -k compile_commands` | compile_commands.json生成 | 常に実行可能 |
+
+#### ⚠️ ツール依存（環境によっては非対話実行可能）
+
+| コマンド | 説明 | 実行条件 |
+|----------|------|----------|
+| `xmake flash.probes` | プローブ一覧表示 | PyOCD/OpenOCDインストール済み |
+| `xmake flash.status` | フラッシュツール状態 | PyOCD/OpenOCDインストール済み |
+| `xmake flash --dry-run` | フラッシュdry-run | ターゲット定義済み |
+
+#### ❌ 無効/未対応
+
+| コマンド | 説明 | 理由 |
+|----------|------|------|
+| `xmake info` | プロジェクト情報 | このxmakeでは無効化されている |
+
+---
+
 ## コマンド実行状況まとめ（調査時点）
 
 ### ✅ 完了済み（非対話実行成功）
@@ -269,7 +329,7 @@ xmake test -g "tests/*"
 | `xmake debugger --help` | ヘルプ確認のみ |
 | `xmake emulator` | ヘルプのみ |
 
-### ❌ 未完了/未実施
+### ❌ 未完了/未実施（対話型のためスキップ）
 
 | カテゴリ | コマンド | 未実施理由 |
 |----------|----------|------------|
@@ -280,21 +340,46 @@ xmake test -g "tests/*"
 | **デプロイ** | `xmake deploy.serve` | サーバ常駐 |
 | **フラッシュ** | `xmake flash` | ハード/プローブ依存 |
 | **デバッグ** | `xmake debugger` | ハード/プローブ依存 |
+| **サーバー** | `xmake serve` | サーバ常駐 |
+| **サーバー** | `xmake serve.rtt` | サーバ常駐 |
 
-### 🔧 実行可能な追加候補（非対話）
+---
 
-| コマンド | 説明 | 実行可能性 |
-|----------|------|------------|
-| `xmake check` | プロジェクトチェック | ✅ 非対話 |
-| `xmake format` | コードフォーマット | ✅ 非対話 |
-| `xmake pack` | パッケージング | ✅ 非対話 |
-| `xmake flash.probes` | プローブ一覧 | ⚠️ ハード依存 |
-| `xmake flash.status` | フラッシュステータス | ⚠️ ツール依存 |
-| `xmake serve` | HTTPサーバー | ❌ 常駐 |
-| `xmake debugger.cleanup` | GDBサーバー cleanup | ✅ 非対話 |
-| `xmake project -k vsxmake` | VSプロジェクト生成 | ✅ 非対話 |
-| `xmake project -k cmake` | CMake生成 | ✅ 非対話 |
-| `xmake project -k compile_commands` | compile_commands.json生成 | ✅ 非対話 |
+## 非対話型コマンド実行確認結果
+
+### ✅ 実行成功
+
+| # | コマンド | 結果 | 備考 |
+|---|----------|------|------|
+| 1 | `xmake check` | ✅ 成功 | 2 warnings (headerfiles not found) |
+| 2 | `xmake format -n` | ✅ 成功 | format ok |
+| 3 | `xmake debugger.cleanup` | ✅ 成功 | 0 orphaned processes cleaned |
+| 4 | `xmake project -k compile_commands` | ✅ 成功 | compile_commands.json生成 |
+| 5 | `xmake project -k cmake` | ✅ 成功 | CMakeLists.txt生成 |
+| 6 | `xmake flash.probes` | ✅ 成功 | STLINK-V3検出済み |
+| 7 | `xmake flash.status` | ✅ 成功 | PyOCD/OpenOCD両方検出済み |
+| 8 | `xmake pack` | ✅ 成功 | pack ok |
+
+### ⚠️ 実行エラー（ツール/設定問題）
+
+| # | コマンド | 結果 | 備考 |
+|---|----------|------|------|
+| 9 | `xmake check clang.tidy` | ⚠️ エラー | clang-armツールチェーンのmultilib設定エラー |
+
+clang.tidyエラー詳細:
+```
+clang-arm/21.1.1/lib/clang-runtimes/multilib.yaml:47:3: error: unknown key 'IncludeDirs'
+```
+これはclang-armパッケージの設定問題であり、プロジェクトコード自体の問題ではない。
+
+### 📊 実行済みコマンド総合計
+
+| カテゴリ | 数 | コマンド |
+|----------|-----|----------|
+| ✅ 実行成功 | 17 | test, build, build -g firmware, build -g tests/*, build -g wasm, clean, show, deploy.webhost, check, format -n, debugger.cleanup, project -k compile_commands, project -k cmake, flash.probes, flash.status, pack |
+| ⚠️ ツールエラー | 1 | check clang.tidy |
+| ❌ 対話型スキップ | 9 | run, debugger, emulator.run, emulator.test, deploy.serve, serve, serve.rtt |
+| ❌ 無効 | 1 | info |
 
 ---
 
