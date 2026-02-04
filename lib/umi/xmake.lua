@@ -44,6 +44,8 @@ target("umi.core")
     add_includedirs(path.join(lib_dir, "umi/kernel"), {public = true})
     add_includedirs(path.join(lib_dir, "umi/adapter"), {public = true})
     add_includedirs(path.join(lib_dir, "umi"), {public = true})
+    -- For backward compatibility with umios/* includes (via symlink lib/umios -> lib/umi)
+    add_includedirs(lib_dir, {public = true})
 target_end()
 
 -- =====================================================================

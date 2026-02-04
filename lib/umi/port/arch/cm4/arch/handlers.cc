@@ -28,62 +28,60 @@ namespace umi::port::cm4 {
 //   [High address / original stack top]
 
 extern "C" __attribute__((naked)) void PendSV_Handler() {
-    asm volatile(
-        "   .syntax unified                 \n"
-        
-        // Get PSP (current task's stack pointer)
-        "   mrs     r0, psp                 \n"
-        "   isb                             \n"
-        
-        // Get current TCB pointer
-        "   ldr     r3, =umi_cm4_current_tcb \n"
-        "   ldr     r2, [r3]                \n"
-        
-        // Save FPU high registers if used (bit 4 of LR = 0 means FPU)
-        "   tst     lr, #0x10               \n"
-        "   it      eq                      \n"
-        "   vstmdbeq r0!, {s16-s31}         \n"
-        
-        // Save R4-R11 and EXC_RETURN (LR)
-        "   stmdb   r0!, {r4-r11, lr}       \n"
-        
-        // Store stack pointer to TCB (first member)
-        "   str     r0, [r2]                \n"
-        
-        // Critical section: mask interrupts
-        "   mov     r0, #0x50               \n"  // BASEPRI threshold
-        "   msr     basepri, r0             \n"
-        "   dsb                             \n"
-        "   isb                             \n"
-        
-        // Call application's switch context function
-        "   bl      umi_cm4_switch_context  \n"
-        
-        // End critical section
-        "   mov     r0, #0                  \n"
-        "   msr     basepri, r0             \n"
-        
-        // Get new TCB (may have changed)
-        "   ldr     r3, =umi_cm4_current_tcb \n"
-        "   ldr     r1, [r3]                \n"
-        "   ldr     r0, [r1]                \n"  // Stack pointer
-        
-        // Restore R4-R11 and EXC_RETURN
-        "   ldmia   r0!, {r4-r11, lr}       \n"
-        
-        // Restore FPU high registers if needed
-        "   tst     lr, #0x10               \n"
-        "   it      eq                      \n"
-        "   vldmiaeq r0!, {s16-s31}         \n"
-        
-        // Set PSP and return
-        "   msr     psp, r0                 \n"
-        "   isb                             \n"
-        "   bx      lr                      \n"
-        
-        ".align 4                           \n"
-        ::: "memory"
-    );
+    asm volatile("   .syntax unified                 \n"
+
+                 // Get PSP (current task's stack pointer)
+                 "   mrs     r0, psp                 \n"
+                 "   isb                             \n"
+
+                 // Get current TCB pointer
+                 "   ldr     r3, =umi_cm4_current_tcb \n"
+                 "   ldr     r2, [r3]                \n"
+
+                 // Save FPU high registers if used (bit 4 of LR = 0 means FPU)
+                 "   tst     lr, #0x10               \n"
+                 "   it      eq                      \n"
+                 "   vstmdbeq r0!, {s16-s31}         \n"
+
+                 // Save R4-R11 and EXC_RETURN (LR)
+                 "   stmdb   r0!, {r4-r11, lr}       \n"
+
+                 // Store stack pointer to TCB (first member)
+                 "   str     r0, [r2]                \n"
+
+                 // Critical section: mask interrupts
+                 "   mov     r0, #0x50               \n" // BASEPRI threshold
+                 "   msr     basepri, r0             \n"
+                 "   dsb                             \n"
+                 "   isb                             \n"
+
+                 // Call application's switch context function
+                 "   bl      umi_cm4_switch_context  \n"
+
+                 // End critical section
+                 "   mov     r0, #0                  \n"
+                 "   msr     basepri, r0             \n"
+
+                 // Get new TCB (may have changed)
+                 "   ldr     r3, =umi_cm4_current_tcb \n"
+                 "   ldr     r1, [r3]                \n"
+                 "   ldr     r0, [r1]                \n" // Stack pointer
+
+                 // Restore R4-R11 and EXC_RETURN
+                 "   ldmia   r0!, {r4-r11, lr}       \n"
+
+                 // Restore FPU high registers if needed
+                 "   tst     lr, #0x10               \n"
+                 "   it      eq                      \n"
+                 "   vldmiaeq r0!, {s16-s31}         \n"
+
+                 // Set PSP and return
+                 "   msr     psp, r0                 \n"
+                 "   isb                             \n"
+                 "   bx      lr                      \n"
+
+                 ".align 4                           \n" ::
+                     : "memory");
 }
 
 // ============================================================================
@@ -94,36 +92,34 @@ extern "C" __attribute__((naked)) void PendSV_Handler() {
 // Restores context from umi_cm4_current_tcb and switches to thread mode.
 
 extern "C" __attribute__((naked)) void SVC_Handler() {
-    asm volatile(
-        "   .syntax unified                 \n"
-        
-        // Get current TCB
-        "   ldr     r3, =umi_cm4_current_tcb \n"
-        "   ldr     r1, [r3]                \n"
-        "   ldr     r0, [r1]                \n"  // Stack pointer
-        
-        // Restore R4-R11 and EXC_RETURN
-        "   ldmia   r0!, {r4-r11, lr}       \n"
-        
-        // Restore FPU high registers if needed
-        "   tst     lr, #0x10               \n"
-        "   it      eq                      \n"
-        "   vldmiaeq r0!, {s16-s31}         \n"
-        
-        // Set PSP
-        "   msr     psp, r0                 \n"
-        "   isb                             \n"
-        
-        // Ensure interrupts enabled
-        "   mov     r0, #0                  \n"
-        "   msr     basepri, r0             \n"
-        
-        // Return (hardware restores remaining context)
-        "   bx      lr                      \n"
-        
-        ".align 4                           \n"
-        ::: "memory"
-    );
+    asm volatile("   .syntax unified                 \n"
+
+                 // Get current TCB
+                 "   ldr     r3, =umi_cm4_current_tcb \n"
+                 "   ldr     r1, [r3]                \n"
+                 "   ldr     r0, [r1]                \n" // Stack pointer
+
+                 // Restore R4-R11 and EXC_RETURN
+                 "   ldmia   r0!, {r4-r11, lr}       \n"
+
+                 // Restore FPU high registers if needed
+                 "   tst     lr, #0x10               \n"
+                 "   it      eq                      \n"
+                 "   vldmiaeq r0!, {s16-s31}         \n"
+
+                 // Set PSP
+                 "   msr     psp, r0                 \n"
+                 "   isb                             \n"
+
+                 // Ensure interrupts enabled
+                 "   mov     r0, #0                  \n"
+                 "   msr     basepri, r0             \n"
+
+                 // Return (hardware restores remaining context)
+                 "   bx      lr                      \n"
+
+                 ".align 4                           \n" ::
+                     : "memory");
 }
 
-}  // namespace umi::port::cm4
+} // namespace umi::port::cm4

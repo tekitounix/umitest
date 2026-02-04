@@ -9,15 +9,22 @@
 --   board/<brd>/ - Board-level drivers (stm32f4_disco, daisy_seed)
 --   platform/<p>/ - Execution environment (embedded, wasm)
 -- =====================================================================
+--
+-- NOTE: This is a header-only target for include paths only.
+-- Source files must be added by the consuming embedded target.
+-- =====================================================================
 
 add_rules("mode.debug", "mode.release")
 
 -- Get the script directory for relative paths
 local port_dir = os.scriptdir()
+local lib_dir = path.directory(path.directory(port_dir))
 
 target("umi.port")
-    set_kind("static")
+    set_kind("headeronly")
     add_includedirs(port_dir, {public = true})
+    -- For backward compatibility with umios/* includes (via symlink lib/umios -> lib/umi)
+    add_includedirs(lib_dir, {public = true})
 
     -- Core include directories (always included)
     add_includedirs(path.join(port_dir, "concepts"), {public = true})
@@ -35,18 +42,13 @@ target("umi.port")
     -- Platform-specific (embedded)
     add_includedirs(path.join(port_dir, "platform/embedded"), {public = true})
 
-    -- Source files
-    add_files(path.join(port_dir, "arch/cm4/**/*.cc"))
-    add_files(path.join(port_dir, "common/**/*.cc"))
-    add_files(path.join(port_dir, "mcu/stm32f4/*.cc"))
-
-    -- Header files
-    add_headerfiles(path.join(port_dir, "concepts/**/*.hh"))
-    add_headerfiles(path.join(port_dir, "common/**/*.hh"))
-    add_headerfiles(path.join(port_dir, "arch/**/*.hh"))
-    add_headerfiles(path.join(port_dir, "mcu/**/*.hh"))
-    add_headerfiles(path.join(port_dir, "board/**/*.hh"))
-    add_headerfiles(path.join(port_dir, "device/**/*.hh"))
-    add_headerfiles(path.join(port_dir, "platform/**/*.hh"))
+    -- Header files (use relative paths for xmake format compatibility)
+    add_headerfiles("concepts/**/*.hh")
+    add_headerfiles("common/**/*.hh")
+    add_headerfiles("arch/**/*.hh")
+    add_headerfiles("mcu/**/*.hh")
+    add_headerfiles("board/**/*.hh")
+    add_headerfiles("device/**/*.hh")
+    add_headerfiles("platform/**/*.hh")
 
 target_end()

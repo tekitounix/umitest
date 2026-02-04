@@ -11,7 +11,6 @@ namespace umi::backend::cm {
 // Cortex-M7 vector fetch bypasses D-cache for TCM regions, ensuring handlers
 // are always visible to the hardware without explicit cache maintenance.
 // On CM4 (no DTCM section in linker script), this falls back to normal .bss.
-__attribute__((section(".dtcmram_bss")))
-VectorTableRAM<UMI_CM_NUM_IRQS> g_vector_table;
+__attribute__((section(".dtcmram_bss"))) VectorTableRAM<UMI_CM_NUM_IRQS> g_vector_table;
 
-}  // namespace umi::backend::cm
+} // namespace umi::backend::cm

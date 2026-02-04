@@ -166,6 +166,12 @@ end
 
 local stm32f4_linker = "lib/umi/port/mcu/stm32f4/linker.ld"
 local stm32f4_syscalls = "lib/umi/port/mcu/stm32f4/syscalls.cc"
+-- Port source files for STM32F4 (must be compiled with ARM target)
+local stm32f4_port_sources = {
+    "lib/umi/port/arch/cm4/**/*.cc",
+    "lib/umi/port/common/**/*.cc",
+    "lib/umi/port/mcu/stm32f4/*.cc",
+}
 
 -- Helper: Create STM32F4 embedded target
 local function stm32f4_target(name, opts)
@@ -185,6 +191,10 @@ local function stm32f4_target(name, opts)
             add_deps(opts.deps)
         end
         add_defines("STM32F4", "BOARD_STM32F4")
+        -- Add port sources (must be compiled with ARM target)
+        for _, src in ipairs(stm32f4_port_sources) do
+            add_files(src)
+        end
         add_files(stm32f4_syscalls)
         add_files(opts.source)
         if opts.renode_script then
