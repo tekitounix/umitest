@@ -11,18 +11,18 @@ using namespace umitest;
 #include <functional>
 #include <span>
 
-#include "hal/result.hh"
 #include "hal/arch.hh"
+#include "hal/audio.hh"
 #include "hal/board.hh"
 #include "hal/codec.hh"
 #include "hal/fault.hh"
 #include "hal/gpio.hh"
-#include "hal/interrupt.hh"
-#include "hal/timer.hh"
-#include "hal/uart.hh"
 #include "hal/i2c.hh"
 #include "hal/i2s.hh"
-#include "hal/audio.hh"
+#include "hal/interrupt.hh"
+#include "hal/result.hh"
+#include "hal/timer.hh"
+#include "hal/uart.hh"
 
 // ============================================================================
 // Stub implementations for concept satisfaction
@@ -191,7 +191,12 @@ struct I2c {
     Result<void> write_read(std::uint16_t, std::span<const std::uint8_t>, std::span<std::uint8_t>) { return {}; }
     Result<void> write_async(std::uint16_t, std::span<const std::uint8_t>, hal::i2c::TransferCallback) { return {}; }
     Result<void> read_async(std::uint16_t, std::span<std::uint8_t>, hal::i2c::TransferCallback) { return {}; }
-    Result<void> write_read_async(std::uint16_t, std::span<const std::uint8_t>, std::span<std::uint8_t>, hal::i2c::TransferCallback) { return {}; }
+    Result<void> write_read_async(std::uint16_t,
+                                  std::span<const std::uint8_t>,
+                                  std::span<std::uint8_t>,
+                                  hal::i2c::TransferCallback) {
+        return {};
+    }
     bool is_busy() { return false; }
     Result<void> abort() { return {}; }
     Result<void> reset() { return {}; }
@@ -207,7 +212,10 @@ struct I2s {
     Result<void> transmit_receive(std::span<const std::uint16_t>, std::span<std::uint16_t>) { return {}; }
     Result<void> transmit_async(std::span<const std::uint16_t>, hal::i2s::TransferCallback) { return {}; }
     Result<void> receive_async(std::span<std::uint16_t>, hal::i2s::TransferCallback) { return {}; }
-    Result<void> transmit_receive_async(std::span<const std::uint16_t>, std::span<std::uint16_t>, hal::i2s::TransferCallback) { return {}; }
+    Result<void>
+    transmit_receive_async(std::span<const std::uint16_t>, std::span<std::uint16_t>, hal::i2s::TransferCallback) {
+        return {};
+    }
     Result<void> start_continuous_transmit(std::span<const std::uint16_t>, hal::BufferCallback) { return {}; }
     Result<void> start_continuous_receive(std::span<std::uint16_t>, hal::BufferCallback) { return {}; }
     Result<void> stop_continuous() { return {}; }
@@ -364,7 +372,9 @@ static void test_critical_section(Suite& s) {
     s.section("CriticalSection RAII");
     {
         stub::Intc intc;
-        { hal::CriticalSection cs(intc); }
+        {
+            hal::CriticalSection cs(intc);
+        }
         s.check(true, "CriticalSection construct/destruct");
     }
 }

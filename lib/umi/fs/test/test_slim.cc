@@ -5,7 +5,6 @@
 #include <umifs/slim/slim.hh>
 #include <umifs/slim/slim_config.hh>
 #include <umifs/slim/slim_types.hh>
-
 #include <umitest.hh>
 
 using namespace umi::fs;

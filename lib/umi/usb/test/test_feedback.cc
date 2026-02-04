@@ -2,8 +2,8 @@
 // UMI-USB: Feedback Strategy Tests
 #include <umitest.hh>
 using namespace umitest;
-#include "audio/strategy/feedback_strategy.hh"
 #include "audio/strategy/asrc_strategy.hh"
+#include "audio/strategy/feedback_strategy.hh"
 
 using namespace umiusb;
 
@@ -28,10 +28,9 @@ int main() {
         s.check_eq(fb.get_feedback(), nominal);
 
         // Balanced buffer -> feedback should stay near nominal
-        fb.update_from_buffer_level(128);  // writable == half_size -> balanced
+        fb.update_from_buffer_level(128); // writable == half_size -> balanced
         uint32_t balanced = fb.get_feedback();
-        s.check(balanced >= nominal - 100 && balanced <= nominal + 100,
-              "Balanced buffer -> feedback near nominal");
+        s.check(balanced >= nominal - 100 && balanced <= nominal + 100, "Balanced buffer -> feedback near nominal");
 
         // Underfilled (more writable space) -> feedback should increase
         fb.update_from_buffer_level(200);
@@ -67,12 +66,12 @@ int main() {
         asrc.reset();
 
         // With update_interval=1, every call updates
-        uint32_t rate = asrc.update(0x10000, 1);  // 1.0x target
+        uint32_t rate = asrc.update(0x10000, 1); // 1.0x target
         s.check_eq(rate, uint32_t{0x10000});
 
         // Push toward 1.001x - converges slowly due to small alpha (2863/2^32)
         for (int i = 0; i < 100000; ++i) {
-            rate = asrc.update(0x10042, 1);  // ~1.001x
+            rate = asrc.update(0x10042, 1); // ~1.001x
         }
         s.check(rate > 0x10000, "Rate moved above 1.0 toward target");
         s.check(rate <= 0x10042, "Rate does not overshoot target");

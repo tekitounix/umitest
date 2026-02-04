@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 // umidi Extended Protocol Tests - Transport, State, Object Transfer
 #include <umitest.hh>
+
+#include "protocol/umi_object.hh"
+#include "protocol/umi_state.hh"
 #include "protocol/umi_sysex.hh"
 #include "protocol/umi_transport.hh"
-#include "protocol/umi_state.hh"
-#include "protocol/umi_object.hh"
 
 using namespace umidi;
 using namespace umidi::protocol;
@@ -302,8 +303,8 @@ bool test_resume_info_can_resume(TestContext& t) {
     };
 
     t.assert_true(info.can_resume(12345, 0xDEADBEEF));
-    t.assert_true(!info.can_resume(12345, 0x12345678));  // Different hash
-    t.assert_true(!info.can_resume(99999, 0xDEADBEEF));  // Different session
+    t.assert_true(!info.can_resume(12345, 0x12345678)); // Different hash
+    t.assert_true(!info.can_resume(99999, 0xDEADBEEF)); // Different session
     t.assert_eq(info.next_offset(), 500u);
     return true;
 }
@@ -353,8 +354,7 @@ bool test_object_header_init(TestContext& t) {
 
 bool test_object_header_name_truncation(TestContext& t) {
     ObjectHeader header;
-    header.init(ObjectType::SAMPLE, 1,
-                "This name is way too long and should be truncated", 512);
+    header.init(ObjectType::SAMPLE, 1, "This name is way too long and should be truncated", 512);
 
     // Name should be null-terminated within 32 bytes
     t.assert_le(strlen(header.get_name()), 31);
@@ -391,11 +391,11 @@ bool test_sequence_metadata_bpm(TestContext& t) {
 bool test_sample_metadata_root_note(TestContext& t) {
     SampleMetadata meta{};
 
-    meta.set_root_note(60, 0);  // Middle C, no detuning
+    meta.set_root_note(60, 0); // Middle C, no detuning
     t.assert_eq(meta.get_root_note(), 60);
     t.assert_eq(meta.get_fine_tune(), 0);
 
-    meta.set_root_note(69, 50);  // A4 + 50 cents
+    meta.set_root_note(69, 50); // A4 + 50 cents
     t.assert_eq(meta.get_root_note(), 69);
     t.assert_eq(meta.get_fine_tune(), 50);
     return true;
@@ -422,7 +422,8 @@ bool test_ram_storage_write_read(TestContext& t) {
     t.assert_true(storage.write_begin(header));
 
     uint8_t data[64];
-    for (int i = 0; i < 64; ++i) data[i] = static_cast<uint8_t>(i);
+    for (int i = 0; i < 64; ++i)
+        data[i] = static_cast<uint8_t>(i);
     t.assert_true(storage.write_data(header.object_id, 0, data, 64));
     t.assert_true(storage.write_commit(header.object_id));
 
@@ -452,7 +453,8 @@ bool test_ram_storage_partial_read(TestContext& t) {
 
     storage.write_begin(header);
     uint8_t data[100];
-    for (int i = 0; i < 100; ++i) data[i] = static_cast<uint8_t>(i);
+    for (int i = 0; i < 100; ++i)
+        data[i] = static_cast<uint8_t>(i);
     storage.write_data(header.object_id, 0, data, 100);
     storage.write_commit(header.object_id);
 
@@ -545,7 +547,7 @@ bool test_ram_storage_abort(TestContext& t) {
 }
 
 bool test_ram_storage_full(TestContext& t) {
-    RAMObjectStorage<2, 256> storage;  // Only 2 slots
+    RAMObjectStorage<2, 256> storage; // Only 2 slots
 
     for (int i = 0; i < 2; ++i) {
         ObjectHeader header;

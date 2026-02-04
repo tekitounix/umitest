@@ -42,9 +42,9 @@ int main() {
 
         SetupPacket setup{};
         setup.bmRequestType = 0xA1;
-        setup.bRequest = 0x01;      // CUR
-        setup.wValue = 0x0200;      // CS=2 (Volume), CN=0
-        setup.wIndex = 0x0600;      // entity=6
+        setup.bRequest = 0x01; // CUR
+        setup.wValue = 0x0200; // CS=2 (Volume), CN=0
+        setup.wIndex = 0x0600; // entity=6
         setup.wLength = 2;
 
         uint8_t buf[64]{};
@@ -62,9 +62,9 @@ int main() {
 
         SetupPacket setup{};
         setup.bmRequestType = 0xA1;
-        setup.bRequest = 0x02;      // RANGE
-        setup.wValue = 0x0200;      // CS=2 (Volume)
-        setup.wIndex = 0x0600;      // entity=6
+        setup.bRequest = 0x02; // RANGE
+        setup.wValue = 0x0200; // CS=2 (Volume)
+        setup.wIndex = 0x0600; // entity=6
         setup.wLength = 8;
 
         uint8_t buf[64]{};
@@ -82,9 +82,9 @@ int main() {
 
         SetupPacket setup{};
         setup.bmRequestType = 0xA1;
-        setup.bRequest = 0x01;      // CUR
-        setup.wValue = 0x0100;      // CS=1 (SAM_FREQ)
-        setup.wIndex = 0x0100;      // entity=1 (Clock Source)
+        setup.bRequest = 0x01; // CUR
+        setup.wValue = 0x0100; // CS=1 (SAM_FREQ)
+        setup.wIndex = 0x0100; // entity=1 (Clock Source)
         setup.wLength = 4;
 
         uint8_t buf[64]{};
@@ -102,9 +102,9 @@ int main() {
 
         SetupPacket setup{};
         setup.bmRequestType = 0xA1;
-        setup.bRequest = 0x02;      // RANGE
-        setup.wValue = 0x0100;      // CS=1 (SAM_FREQ)
-        setup.wIndex = 0x0100;      // entity=1 (Clock Source)
+        setup.bRequest = 0x02; // RANGE
+        setup.wValue = 0x0100; // CS=1 (SAM_FREQ)
+        setup.wIndex = 0x0100; // entity=1 (Clock Source)
         setup.wLength = 64;
 
         uint8_t buf[64]{};
@@ -123,9 +123,9 @@ int main() {
 
         SetupPacket setup{};
         setup.bmRequestType = 0xA1;
-        setup.bRequest = 0x01;      // CUR
-        setup.wValue = 0x0000;      // CS=0
-        setup.wIndex = 0x0800;      // entity=8
+        setup.bRequest = 0x01; // CUR
+        setup.wValue = 0x0000; // CS=0
+        setup.wIndex = 0x0800; // entity=8
         setup.wLength = 1;
 
         uint8_t buf[64]{};
@@ -142,9 +142,9 @@ int main() {
 
         SetupPacket setup{};
         setup.bmRequestType = 0xA1;
-        setup.bRequest = 0x01;      // CUR
+        setup.bRequest = 0x01; // CUR
         setup.wValue = 0x0000;
-        setup.wIndex = 0x0900;      // entity=9
+        setup.wIndex = 0x0900; // entity=9
         setup.wLength = 1;
 
         uint8_t buf[64]{};
@@ -161,9 +161,9 @@ int main() {
 
         SetupPacket setup{};
         setup.bmRequestType = 0xA1;
-        setup.bRequest = 0x01;      // CUR
-        setup.wValue = 0x0000;      // CS=0, CN=0 (crosspoint 0)
-        setup.wIndex = 0x0A00;      // entity=10
+        setup.bRequest = 0x01; // CUR
+        setup.wValue = 0x0000; // CS=0, CN=0 (crosspoint 0)
+        setup.wIndex = 0x0A00; // entity=10
         setup.wLength = 2;
 
         uint8_t buf[64]{};
@@ -181,10 +181,10 @@ int main() {
 
         // SET CUR: setup phase
         SetupPacket setup{};
-        setup.bmRequestType = 0x21;  // OUT | Class | Interface
-        setup.bRequest = 0x01;       // CUR
-        setup.wValue = 0x0002;       // CS=0, CN=2 (crosspoint 2)
-        setup.wIndex = 0x0A00;       // entity=10
+        setup.bmRequestType = 0x21; // OUT | Class | Interface
+        setup.bRequest = 0x01;      // CUR
+        setup.wValue = 0x0002;      // CS=0, CN=2 (crosspoint 2)
+        setup.wIndex = 0x0A00;      // entity=10
         setup.wLength = 2;
 
         uint8_t buf[64]{};
@@ -193,14 +193,14 @@ int main() {
         s.check(handled, "Mixer Unit SET CUR setup handled");
 
         // Data phase: set gain to -128 (1/256 dB)
-        uint8_t data[2] = {0x80, 0xFF};  // -128 as int16_t
+        uint8_t data[2] = {0x80, 0xFF}; // -128 as int16_t
         audio.on_ep0_rx(std::span<const uint8_t>(data, 2));
 
         // Verify by GET CUR
         SetupPacket get_setup{};
         get_setup.bmRequestType = 0xA1;
         get_setup.bRequest = 0x01;
-        get_setup.wValue = 0x0002;   // CN=2
+        get_setup.wValue = 0x0002; // CN=2
         get_setup.wIndex = 0x0A00;
         get_setup.wLength = 2;
 
@@ -233,10 +233,10 @@ int main() {
         TestAudioClass audio;
 
         SetupPacket setup{};
-        setup.bmRequestType = 0xC0;  // IN | Vendor | Device
-        setup.bRequest = 0x01;       // WINUSB_VENDOR_CODE
+        setup.bmRequestType = 0xC0; // IN | Vendor | Device
+        setup.bRequest = 0x01;      // WINUSB_VENDOR_CODE
         setup.wValue = 0x0000;
-        setup.wIndex = 0x0007;       // MS_OS_20_DESCRIPTOR_INDEX
+        setup.wIndex = 0x0007; // MS_OS_20_DESCRIPTOR_INDEX
         setup.wLength = 64;
 
         uint8_t buf[192]{};
@@ -255,9 +255,9 @@ int main() {
 
         SetupPacket setup{};
         setup.bmRequestType = 0xC0;
-        setup.bRequest = 0x02;       // WEBUSB_VENDOR_CODE
+        setup.bRequest = 0x02; // WEBUSB_VENDOR_CODE
         setup.wValue = 0x0000;
-        setup.wIndex = 0x0002;       // GET_URL
+        setup.wIndex = 0x0002; // GET_URL
         setup.wLength = 64;
 
         uint8_t buf[64]{};

@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 // umidi Message Tests - ChannelVoice, System, SysEx
-#include <umitest.hh>
-#include "messages/channel_voice.hh"
-#include "messages/system.hh"
-#include "messages/sysex.hh"
-#include "messages/utility.hh"
-#include "core/ump.hh"
 #include <type_traits>
+#include <umitest.hh>
+
+#include "core/ump.hh"
+#include "messages/channel_voice.hh"
+#include "messages/sysex.hh"
+#include "messages/system.hh"
+#include "messages/utility.hh"
 
 using namespace umidi;
 using namespace umitest;
@@ -35,7 +36,7 @@ bool test_channel_voice_note_off_create(TestContext& t) {
 }
 
 bool test_channel_voice_cc_create(TestContext& t) {
-    auto msg = ControlChange::create(0, 7, 100);  // Volume
+    auto msg = ControlChange::create(0, 7, 100); // Volume
     t.assert_true(msg.is_valid());
     t.assert_eq(msg.channel(), 0);
     t.assert_eq(msg.controller(), 7);
@@ -52,7 +53,7 @@ bool test_channel_voice_program_change_create(TestContext& t) {
 }
 
 bool test_channel_voice_pitch_bend_create(TestContext& t) {
-    auto msg = PitchBend::create(0, 8192);  // Center
+    auto msg = PitchBend::create(0, 8192); // Center
     t.assert_true(msg.is_valid());
     t.assert_eq(msg.channel(), 0);
     t.assert_eq(msg.value(), 8192);
@@ -190,7 +191,7 @@ bool test_system_tune_request(TestContext& t) {
 bool test_sysex7_complete(TestContext& t) {
     uint8_t data[] = {0x7E, 0x00, 0x06, 0x01};
     auto ump = UMP64::sysex7_complete(0, data, 4);
-    t.assert_eq(ump.mt(), 3);  // MT=3 for SysEx7
+    t.assert_eq(ump.mt(), 3); // MT=3 for SysEx7
     return true;
 }
 
@@ -207,7 +208,7 @@ bool test_sysex7_bytes_access(TestContext& t) {
 
 bool test_utility_mt0(TestContext& t) {
     // MT=0 is Utility Message Type
-    UMP32 ump(0, 0, 0, 0, 0);  // NOOP
+    UMP32 ump(0, 0, 0, 0, 0); // NOOP
     t.assert_eq(ump.mt(), 0);
     return true;
 }

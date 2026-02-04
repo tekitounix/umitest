@@ -2,7 +2,7 @@
 using sysbus
 
 mach create "umi_synth"
-machine LoadPlatformDescription $CWD/renode/stm32f4_test.repl
+machine LoadPlatformDescription $CWD/lib/umi/port/platform/renode/stm32f4_test.repl
 sysbus LoadELF $CWD/.build/synth_example.elf
 sysbus WriteDoubleWord 0xE000ED08 0x08000000
 

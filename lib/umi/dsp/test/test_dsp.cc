@@ -2,8 +2,8 @@
 // UMI-OS DSP Module Tests
 
 #include <cmath>
-#include <umidsp.hh>
 #include <synth/filter.hh>
+#include <umidsp.hh>
 #include <umitest.hh>
 
 using namespace umitest;

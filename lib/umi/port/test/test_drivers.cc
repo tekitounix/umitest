@@ -39,11 +39,12 @@ struct MockI2c8 {
 // ============================================================================
 
 struct MockI2c16 {
-    std::array<std::uint16_t, 16> mem{};  // WM8731 has 16 registers
+    std::array<std::uint16_t, 16> mem{}; // WM8731 has 16 registers
 
     auto writer() {
         return [this](std::uint8_t reg, std::uint16_t data) {
-            if (reg < 16) mem[reg] = data & 0x1FF;
+            if (reg < 16)
+                mem[reg] = data & 0x1FF;
         };
     }
 };
@@ -141,8 +142,9 @@ static void test_wm8731_init(Suite& s) {
 
         s.check_eq(static_cast<int>(bus.mem[0x06]), 0x062);
 
-        s.check_eq(static_cast<int>(bus.mem[0x07]),
-                 static_cast<int>((umi::device::wm8731_fmt::LEFT_JUST << 0) | (umi::device::wm8731_iwl::IWL_24BIT << 2)));
+        s.check_eq(
+            static_cast<int>(bus.mem[0x07]),
+            static_cast<int>((umi::device::wm8731_fmt::LEFT_JUST << 0) | (umi::device::wm8731_iwl::IWL_24BIT << 2)));
 
         s.check_eq(static_cast<int>(bus.mem[0x08]), 0x000);
         s.check_eq(static_cast<int>(bus.mem[0x04]), 0x012);

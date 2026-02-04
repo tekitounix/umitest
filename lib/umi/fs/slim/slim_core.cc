@@ -1977,8 +1977,11 @@ int SlimFs::getattr(const char* path, uint8_t type, std::span<uint8_t> buf) noex
 // Rewrite a metadata block, replacing the attr blob for one entry.
 // This is needed because changing attr_size shifts all subsequent entries.
 namespace {
-int meta_rewrite_attrs(SlimFs& fs, uint32_t block, uint32_t target_entry_off,
-                       const uint8_t* new_attrs, uint32_t new_attr_size,
+int meta_rewrite_attrs(SlimFs& fs,
+                       uint32_t block,
+                       uint32_t target_entry_off,
+                       const uint8_t* new_attrs,
+                       uint32_t new_attr_size,
                        uint32_t old_attr_size) {
     uint32_t total;
     int rc = meta_used_size(fs, block, total);

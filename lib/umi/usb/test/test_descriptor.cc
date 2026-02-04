@@ -13,14 +13,16 @@ using namespace umiusb::desc;
 // ============================================================================
 
 // Device descriptor must be 18 bytes
-static constexpr auto dev_desc = DeviceDesc{
-    .usb_version = 0x0201,
-    .device_class = 0xEF,
-    .device_subclass = 0x02,
-    .device_protocol = 0x01,
-    .vendor_id = 0x1234,
-    .product_id = 0x5678,
-}.build();
+static constexpr auto dev_desc =
+    DeviceDesc{
+        .usb_version = 0x0201,
+        .device_class = 0xEF,
+        .device_subclass = 0x02,
+        .device_protocol = 0x01,
+        .vendor_id = 0x1234,
+        .product_id = 0x5678,
+    }
+        .build();
 static_assert(dev_desc.size == 18, "Device descriptor must be 18 bytes");
 static_assert(dev_desc[0] == 18, "bLength");
 static_assert(dev_desc[1] == dtype::Device, "bDescriptorType");
@@ -35,43 +37,51 @@ static_assert(dev_desc[10] == 0x78, "idProduct low");
 static_assert(dev_desc[11] == 0x56, "idProduct high");
 
 // Interface descriptor must be 9 bytes
-static constexpr auto iface_desc = InterfaceDesc{
-    .interface_number = 0,
-    .num_endpoints = 2,
-    .interface_class = 0x01,
-    .interface_subclass = 0x01,
-}.build();
+static constexpr auto iface_desc =
+    InterfaceDesc{
+        .interface_number = 0,
+        .num_endpoints = 2,
+        .interface_class = 0x01,
+        .interface_subclass = 0x01,
+    }
+        .build();
 static_assert(iface_desc.size == 9, "Interface descriptor must be 9 bytes");
 static_assert(iface_desc[2] == 0, "bInterfaceNumber");
 static_assert(iface_desc[4] == 2, "bNumEndpoints");
 
 // Endpoint descriptor must be 7 bytes
-static constexpr auto ep_desc = EndpointDesc{
-    .address = ep::In | 1,
-    .attributes = ep::Bulk,
-    .max_packet_size = 512,
-}.build();
+static constexpr auto ep_desc =
+    EndpointDesc{
+        .address = ep::In | 1,
+        .attributes = ep::Bulk,
+        .max_packet_size = 512,
+    }
+        .build();
 static_assert(ep_desc.size == 7, "Endpoint descriptor must be 7 bytes");
 static_assert(ep_desc[2] == 0x81, "bEndpointAddress IN|1");
 static_assert(ep_desc[4] == 0x00, "wMaxPacketSize low (512)");
 static_assert(ep_desc[5] == 0x02, "wMaxPacketSize high (512)");
 
 // Audio endpoint descriptor must be 9 bytes
-static constexpr auto audio_ep = AudioEndpointDesc{
-    .address = ep::Out | 1,
-    .attributes = ep::Isochronous | ep::Async,
-    .max_packet_size = 200,
-    .interval = 1,
-}.build();
+static constexpr auto audio_ep =
+    AudioEndpointDesc{
+        .address = ep::Out | 1,
+        .attributes = ep::Isochronous | ep::Async,
+        .max_packet_size = 200,
+        .interval = 1,
+    }
+        .build();
 static_assert(audio_ep.size == 9, "Audio endpoint must be 9 bytes");
 
 // IAD descriptor must be 8 bytes
-static constexpr auto iad = InterfaceAssociationDesc{
-    .first_interface = 0,
-    .interface_count = 3,
-    .function_class = 0x01,
-    .function_subclass = 0x01,
-}.build();
+static constexpr auto iad =
+    InterfaceAssociationDesc{
+        .first_interface = 0,
+        .interface_count = 3,
+        .function_class = 0x01,
+        .function_subclass = 0x01,
+    }
+        .build();
 static_assert(iad.size == 8, "IAD must be 8 bytes");
 static_assert(iad[2] == 0, "bFirstInterface");
 static_assert(iad[3] == 3, "bInterfaceCount");
@@ -110,13 +120,12 @@ static_assert(webusb_url[2] == webusb::SCHEME_HTTPS, "scheme");
 static_assert(webusb_url[3] == 'e', "url[0]");
 
 // UAC2 Feature Unit descriptor
-static constexpr auto uac2_fu = audio::Uac2FeatureUnit<2>(
-    6,           // unit_id
-    2,           // source_id (Input Terminal)
-    0x0000000F,  // master: Mute + Volume (host r/w)
-    0x00000000,  // ch1: none
-    0x00000000,  // ch2: none
-    0            // iFeature
+static constexpr auto uac2_fu = audio::Uac2FeatureUnit<2>(6,          // unit_id
+                                                          2,          // source_id (Input Terminal)
+                                                          0x0000000F, // master: Mute + Volume (host r/w)
+                                                          0x00000000, // ch1: none
+                                                          0x00000000, // ch2: none
+                                                          0           // iFeature
 );
 // bLength = 6 + (2+1)*4 = 18
 static_assert(uac2_fu.size == 18, "UAC2 FU stereo = 18 bytes");
@@ -134,12 +143,14 @@ static constexpr auto uac2_fu_mono = audio::Uac2FeatureUnit<1>(7, 4, 0x0000000F,
 static_assert(uac2_fu_mono.size == 14, "UAC2 FU mono = 14 bytes"); // 6 + (1+1)*4
 
 // Device Qualifier descriptor
-static constexpr auto dq_desc = DeviceQualifierDesc{
-    .usb_version = 0x0200,
-    .device_class = 0xEF,
-    .device_subclass = 0x02,
-    .device_protocol = 0x01,
-}.build();
+static constexpr auto dq_desc =
+    DeviceQualifierDesc{
+        .usb_version = 0x0200,
+        .device_class = 0xEF,
+        .device_subclass = 0x02,
+        .device_protocol = 0x01,
+    }
+        .build();
 static_assert(dq_desc.size == 10, "Device Qualifier must be 10 bytes");
 static_assert(dq_desc[0] == 10, "bLength");
 static_assert(dq_desc[1] == dtype::DeviceQualifier, "bDescriptorType");

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 // umi_boot Authentication Tests
 
-#include <umitest.hh>
 #include <umiboot/auth.hh>
+#include <umitest.hh>
 
 using namespace umiboot;
 using namespace umitest;
@@ -12,14 +12,14 @@ using namespace umitest;
 // =============================================================================
 
 // Simple mock HMAC (just XOR for testing - NOT secure!)
-static void mock_hmac(const uint8_t* key, size_t key_len,
-                      const uint8_t* data, size_t data_len,
-                      uint8_t* out) {
+static void mock_hmac(const uint8_t* key, size_t key_len, const uint8_t* data, size_t data_len, uint8_t* out) {
     // Simple XOR-based "hash" for testing
     for (size_t i = 0; i < 32; ++i) {
         out[i] = 0;
-        if (i < key_len) out[i] ^= key[i];
-        if (i < data_len) out[i] ^= data[i];
+        if (i < key_len)
+            out[i] ^= key[i];
+        if (i < data_len)
+            out[i] ^= data[i];
     }
 }
 
@@ -79,7 +79,8 @@ bool test_authenticator_challenge_generation(TestContext& t) {
     // Verify challenge was generated (not all zeros)
     bool has_nonzero = false;
     for (int i = 0; i < 32; ++i) {
-        if (challenge[i] != 0) has_nonzero = true;
+        if (challenge[i] != 0)
+            has_nonzero = true;
     }
     t.assert_true(has_nonzero);
     return true;
@@ -87,7 +88,7 @@ bool test_authenticator_challenge_generation(TestContext& t) {
 
 bool test_authenticator_verify_correct_response(TestContext& t) {
     Authenticator<32, 60000> auth;
-    uint8_t key[32] = {1, 2, 3, 4};  // Simple key
+    uint8_t key[32] = {1, 2, 3, 4}; // Simple key
     auth.init(key, mock_hmac, mock_rng);
 
     // Generate challenge
@@ -123,7 +124,7 @@ bool test_authenticator_verify_wrong_response(TestContext& t) {
 }
 
 bool test_authenticator_session_timeout(TestContext& t) {
-    Authenticator<32, 1000> auth;  // 1 second timeout
+    Authenticator<32, 1000> auth; // 1 second timeout
     uint8_t key[32] = {0};
     auth.init(key, mock_hmac, mock_rng);
 
@@ -206,7 +207,7 @@ bool test_auth_client_compute_response(TestContext& t) {
 bool test_auth_client_no_hmac(TestContext& t) {
     AuthClient<32> client;
     uint8_t key[32] = {0};
-    client.init(key, nullptr);  // No HMAC function
+    client.init(key, nullptr); // No HMAC function
 
     uint8_t challenge[32] = {0};
     uint8_t response[32];

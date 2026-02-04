@@ -41,7 +41,7 @@ int main() {
     {
         DefaultGain<int32_t> gain;
         int32_t buf[] = {10000, -10000};
-        gain.set_volume_db256(-64);  // Some attenuation
+        gain.set_volume_db256(-64); // Some attenuation
         gain.apply(buf, 1, 2);
         s.check(buf[0] < 10000 && buf[0] > 0, "Attenuated positive sample");
         s.check(buf[1] > -10000 && buf[1] < 0, "Attenuated negative sample");
@@ -51,7 +51,7 @@ int main() {
     {
         DefaultGain<int32_t> gain;
         int32_t buf[] = {10000, -10000};
-        gain.set_volume_db256(-32768);  // Very deep attenuation
+        gain.set_volume_db256(-32768); // Very deep attenuation
         gain.apply(buf, 1, 2);
         s.check_eq(buf[0], int32_t{0});
         s.check_eq(buf[1], int32_t{0});
@@ -83,7 +83,7 @@ int main() {
         DefaultSampleCodec<int32_t> codec;
 
         // Positive value: 0x123456 is not valid 24-bit signed, use 0x1234 instead
-        uint8_t pos_data[] = {0x34, 0x12, 0x00};  // 0x001234 = 4660
+        uint8_t pos_data[] = {0x34, 0x12, 0x00}; // 0x001234 = 4660
         int32_t decoded_pos = codec.decode_i24(pos_data);
         s.check_eq(decoded_pos, int32_t{0x001234});
 

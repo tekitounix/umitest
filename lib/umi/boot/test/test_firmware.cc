@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 // umi_boot Firmware Validation Tests
 
-#include <umitest.hh>
 #include <umiboot/firmware.hh>
+#include <umitest.hh>
 
 using namespace umiboot;
 using namespace umitest;
@@ -17,20 +17,20 @@ bool test_firmware_header_size(TestContext& t) {
 }
 
 bool test_firmware_magic(TestContext& t) {
-    t.assert_eq(FIRMWARE_MAGIC, 0x554D4946u);  // "UMIF"
+    t.assert_eq(FIRMWARE_MAGIC, 0x554D4946u); // "UMIF"
     return true;
 }
 
 bool test_firmware_header_builder(TestContext& t) {
     auto header = FirmwareHeaderBuilder()
-        .version(1, 2, 3)
-        .build_number(100)
-        .image_size(1024)
-        .crc32(0xDEADBEEF)
-        .load_address(0x08000000)
-        .entry_point(0x08000100)
-        .board("STM32F411")
-        .build();
+                      .version(1, 2, 3)
+                      .build_number(100)
+                      .image_size(1024)
+                      .crc32(0xDEADBEEF)
+                      .load_address(0x08000000)
+                      .entry_point(0x08000100)
+                      .board("STM32F411")
+                      .build();
 
     t.assert_eq(header.magic, FIRMWARE_MAGIC);
     t.assert_eq(header.header_version, FIRMWARE_HEADER_VERSION);
@@ -128,9 +128,7 @@ bool test_validator_valid_header(TestContext& t) {
     FirmwareValidator<> validator;
     validator.set_bootloader_version(1);
 
-    auto header = FirmwareHeaderBuilder()
-        .version(1, 0, 0)
-        .build();
+    auto header = FirmwareHeaderBuilder().version(1, 0, 0).build();
 
     auto result = validator.validate_header(header);
     t.assert_eq(result, ValidationResult::OK);
@@ -141,7 +139,7 @@ bool test_validator_invalid_magic(TestContext& t) {
     FirmwareValidator<> validator;
 
     FirmwareHeader header{};
-    header.magic = 0x12345678;  // Wrong magic
+    header.magic = 0x12345678; // Wrong magic
     header.header_version = FIRMWARE_HEADER_VERSION;
 
     auto result = validator.validate_header(header);
@@ -154,7 +152,7 @@ bool test_validator_invalid_header_version(TestContext& t) {
 
     FirmwareHeader header{};
     header.magic = FIRMWARE_MAGIC;
-    header.header_version = 99;  // Wrong version
+    header.header_version = 99; // Wrong version
 
     auto result = validator.validate_header(header);
     t.assert_eq(result, ValidationResult::INVALID_HEADER_VERSION);
@@ -165,10 +163,7 @@ bool test_validator_board_mismatch(TestContext& t) {
     FirmwareValidator<> validator;
     validator.set_board_id("STM32F411");
 
-    auto header = FirmwareHeaderBuilder()
-        .version(1, 0, 0)
-        .board("ESP32")
-        .build();
+    auto header = FirmwareHeaderBuilder().version(1, 0, 0).board("ESP32").build();
 
     auto result = validator.validate_header(header);
     t.assert_eq(result, ValidationResult::BOARD_MISMATCH);
@@ -180,9 +175,9 @@ bool test_validator_bootloader_too_old(TestContext& t) {
     validator.set_bootloader_version(1);
 
     auto header = FirmwareHeaderBuilder()
-        .version(1, 0, 0)
-        .min_bootloader(2)  // Requires bootloader v2
-        .build();
+                      .version(1, 0, 0)
+                      .min_bootloader(2) // Requires bootloader v2
+                      .build();
 
     auto result = validator.validate_header(header);
     t.assert_eq(result, ValidationResult::BOOTLOADER_TOO_OLD);
@@ -194,9 +189,9 @@ bool test_validator_rollback_check(TestContext& t) {
     validator.set_rollback_version(5);
 
     auto header = FirmwareHeaderBuilder()
-        .version(1, 0, 0)
-        .rollback_version(3)  // Too old
-        .build();
+                      .version(1, 0, 0)
+                      .rollback_version(3) // Too old
+                      .build();
 
     auto result = validator.validate_header(header);
     t.assert_eq(result, ValidationResult::VERSION_TOO_OLD);
@@ -207,9 +202,7 @@ bool test_validator_signature_required(TestContext& t) {
     FirmwareValidator<> validator;
     validator.require_signature(true);
 
-    auto header = FirmwareHeaderBuilder()
-        .version(1, 0, 0)
-        .build();  // Not signed
+    auto header = FirmwareHeaderBuilder().version(1, 0, 0).build(); // Not signed
 
     auto result = validator.validate_header(header);
     t.assert_eq(result, ValidationResult::NOT_SIGNED);
@@ -220,10 +213,7 @@ bool test_validator_signature_present(TestContext& t) {
     FirmwareValidator<> validator;
     validator.require_signature(true);
 
-    auto header = FirmwareHeaderBuilder()
-        .version(1, 0, 0)
-        .signed_firmware()
-        .build();
+    auto header = FirmwareHeaderBuilder().version(1, 0, 0).signed_firmware().build();
 
     auto result = validator.validate_header(header);
     t.assert_eq(result, ValidationResult::OK);
@@ -237,11 +227,7 @@ bool test_validator_data_crc(TestContext& t) {
     uint8_t data[] = {1, 2, 3, 4, 5};
     uint32_t expected_crc = crc32(data, 5);
 
-    auto header = FirmwareHeaderBuilder()
-        .version(1, 0, 0)
-        .image_size(5)
-        .crc32(expected_crc)
-        .build();
+    auto header = FirmwareHeaderBuilder().version(1, 0, 0).image_size(5).crc32(expected_crc).build();
 
     auto result = validator.validate_data(header, data, 5);
     t.assert_eq(result, ValidationResult::OK);
@@ -255,10 +241,10 @@ bool test_validator_data_crc_mismatch(TestContext& t) {
     uint8_t data[] = {1, 2, 3, 4, 5};
 
     auto header = FirmwareHeaderBuilder()
-        .version(1, 0, 0)
-        .image_size(5)
-        .crc32(0xDEADBEEF)  // Wrong CRC
-        .build();
+                      .version(1, 0, 0)
+                      .image_size(5)
+                      .crc32(0xDEADBEEF) // Wrong CRC
+                      .build();
 
     auto result = validator.validate_data(header, data, 5);
     t.assert_eq(result, ValidationResult::CRC_MISMATCH);
@@ -271,11 +257,11 @@ bool test_validator_size_mismatch(TestContext& t) {
     uint8_t data[10] = {0};
 
     auto header = FirmwareHeaderBuilder()
-        .version(1, 0, 0)
-        .image_size(5)  // Says 5 bytes
-        .build();
+                      .version(1, 0, 0)
+                      .image_size(5) // Says 5 bytes
+                      .build();
 
-    auto result = validator.validate_data(header, data, 10);  // But got 10
+    auto result = validator.validate_data(header, data, 10); // But got 10
     t.assert_eq(result, ValidationResult::INVALID_SIZE);
     return true;
 }

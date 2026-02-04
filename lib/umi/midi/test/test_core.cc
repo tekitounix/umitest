@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 // umidi Core Tests - UMP, Parser, Result
 #include <umitest.hh>
-#include "core/ump.hh"
+
 #include "core/parser.hh"
 #include "core/result.hh"
 #include "core/sysex_buffer.hh"
+#include "core/ump.hh"
 
 using namespace umidi;
 using namespace umitest;
@@ -63,7 +64,7 @@ bool test_ump32_note_on_all_velocities(TestContext& t) {
 }
 
 bool test_ump32_cc(TestContext& t) {
-    auto ump = UMP32::cc(3, 7, 100);  // Channel 3, CC7 (Volume), value 100
+    auto ump = UMP32::cc(3, 7, 100); // Channel 3, CC7 (Volume), value 100
     t.assert_true(ump.is_cc());
     t.assert_eq(ump.channel(), 3);
     t.assert_eq(ump.cc_number(), 7);
@@ -88,7 +89,7 @@ bool test_ump32_program_change(TestContext& t) {
 }
 
 bool test_ump32_pitch_bend(TestContext& t) {
-    auto ump = UMP32::pitch_bend(0, 8192);  // Center
+    auto ump = UMP32::pitch_bend(0, 8192); // Center
     t.assert_true(ump.is_pitch_bend());
     t.assert_eq(ump.channel(), 0);
     t.assert_eq(ump.pitch_bend_value(), 8192);
@@ -114,7 +115,7 @@ bool test_ump32_poly_pressure(TestContext& t) {
     t.assert_true(ump.is_poly_pressure());
     t.assert_eq(ump.channel(), 4);
     t.assert_eq(ump.note(), 60);
-    t.assert_eq(ump.data2(), 90);  // Poly pressure value is in data2
+    t.assert_eq(ump.data2(), 90); // Poly pressure value is in data2
     return true;
 }
 
@@ -154,8 +155,8 @@ bool test_ump64_size(TestContext& t) {
 
 bool test_ump64_sysex(TestContext& t) {
     uint8_t data[] = {0x7E, 0x00, 0x06, 0x01};
-    auto ump = UMP64::sysex7_complete(0, data, 4);  // group=0
-    t.assert_eq(ump.mt(), 3);  // MT=3 for SysEx7
+    auto ump = UMP64::sysex7_complete(0, data, 4); // group=0
+    t.assert_eq(ump.mt(), 3);                      // MT=3 for SysEx7
     return true;
 }
 
@@ -168,9 +169,9 @@ bool test_parser_note_on(TestContext& t) {
     UMP32 ump;
 
     // Note On: 0x90 0x3C 0x64 (ch0, note 60, vel 100)
-    t.assert_true(!parser.parse(0x90, ump));  // Status
-    t.assert_true(!parser.parse(0x3C, ump));  // Note
-    t.assert_true(parser.parse(0x64, ump));   // Velocity - complete
+    t.assert_true(!parser.parse(0x90, ump)); // Status
+    t.assert_true(!parser.parse(0x3C, ump)); // Note
+    t.assert_true(parser.parse(0x64, ump));  // Velocity - complete
 
     t.assert_true(ump.is_note_on());
     t.assert_eq(ump.channel(), 0);
@@ -183,9 +184,9 @@ bool test_parser_note_off(TestContext& t) {
     Parser parser;
     UMP32 ump;
 
-    t.assert_true(!parser.parse(0x85, ump));  // Note Off ch5
-    t.assert_true(!parser.parse(0x48, ump));  // Note 72
-    t.assert_true(parser.parse(0x40, ump));   // Velocity 64
+    t.assert_true(!parser.parse(0x85, ump)); // Note Off ch5
+    t.assert_true(!parser.parse(0x48, ump)); // Note 72
+    t.assert_true(parser.parse(0x40, ump));  // Velocity 64
 
     t.assert_true(ump.is_note_off());
     t.assert_eq(ump.channel(), 5);
@@ -197,9 +198,9 @@ bool test_parser_cc(TestContext& t) {
     Parser parser;
     UMP32 ump;
 
-    t.assert_true(!parser.parse(0xB3, ump));  // CC ch3
-    t.assert_true(!parser.parse(0x07, ump));  // CC7 (Volume)
-    t.assert_true(parser.parse(0x64, ump));   // Value 100
+    t.assert_true(!parser.parse(0xB3, ump)); // CC ch3
+    t.assert_true(!parser.parse(0x07, ump)); // CC7 (Volume)
+    t.assert_true(parser.parse(0x64, ump));  // Value 100
 
     t.assert_true(ump.is_cc());
     t.assert_eq(ump.cc_number(), 7);
@@ -218,8 +219,8 @@ bool test_parser_running_status(TestContext& t) {
     t.assert_true(ump.is_note_on());
 
     // Running status - another Note On without status byte
-    t.assert_true(!parser.parse_running(0x40, ump));  // Note 64
-    t.assert_true(parser.parse_running(0x50, ump));   // Velocity 80
+    t.assert_true(!parser.parse_running(0x40, ump)); // Note 64
+    t.assert_true(parser.parse_running(0x50, ump));  // Velocity 80
     t.assert_true(ump.is_note_on());
     t.assert_eq(ump.note(), 64);
     t.assert_eq(ump.velocity(), 80);
@@ -230,8 +231,8 @@ bool test_parser_realtime_interruption(TestContext& t) {
     Parser parser;
     UMP32 ump;
 
-    t.assert_true(!parser.parse(0x90, ump));  // Note On start
-    t.assert_true(!parser.parse(0x3C, ump));  // Note byte
+    t.assert_true(!parser.parse(0x90, ump)); // Note On start
+    t.assert_true(!parser.parse(0x3C, ump)); // Note byte
 
     // Timing clock in the middle
     t.assert_true(parser.parse(0xF8, ump));
@@ -248,9 +249,9 @@ bool test_parser_pitch_bend(TestContext& t) {
     Parser parser;
     UMP32 ump;
 
-    t.assert_true(!parser.parse(0xE0, ump));  // Pitch Bend
-    t.assert_true(!parser.parse(0x00, ump));  // LSB
-    t.assert_true(parser.parse(0x40, ump));   // MSB (center = 0x2000 = 8192)
+    t.assert_true(!parser.parse(0xE0, ump)); // Pitch Bend
+    t.assert_true(!parser.parse(0x00, ump)); // LSB
+    t.assert_true(parser.parse(0x40, ump));  // MSB (center = 0x2000 = 8192)
 
     t.assert_true(ump.is_pitch_bend());
     t.assert_eq(ump.pitch_bend_value(), 8192);
@@ -261,8 +262,8 @@ bool test_parser_program_change(TestContext& t) {
     Parser parser;
     UMP32 ump;
 
-    t.assert_true(!parser.parse(0xC7, ump));  // Program Change ch7
-    t.assert_true(parser.parse(0x2A, ump));   // Program 42
+    t.assert_true(!parser.parse(0xC7, ump)); // Program Change ch7
+    t.assert_true(parser.parse(0x2A, ump));  // Program 42
 
     t.assert_true(ump.is_program_change());
     t.assert_eq(ump.channel(), 7);
@@ -274,7 +275,7 @@ bool test_parser_reset(TestContext& t) {
     Parser parser;
     UMP32 ump;
 
-    t.assert_true(!parser.parse(0x90, ump));  // Start Note On
+    t.assert_true(!parser.parse(0x90, ump)); // Start Note On
     parser.reset();
 
     // Should need full message now
@@ -345,7 +346,7 @@ bool test_sysex_buffer_overflow(TestContext& t) {
     t.assert_true(buf.push(0x02));
     t.assert_true(buf.push(0x03));
     t.assert_true(buf.push(0x04));
-    t.assert_true(!buf.push(0x05));  // Overflow
+    t.assert_true(!buf.push(0x05)); // Overflow
     return true;
 }
 

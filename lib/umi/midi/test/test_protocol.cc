@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 // umidi Protocol Tests - SysEx Protocol, Auth, Session, Bootloader
 #include <umitest.hh>
-#include "protocol/umi_sysex.hh"
+
 #include "protocol/umi_auth.hh"
-#include "protocol/umi_firmware.hh"
 #include "protocol/umi_bootloader.hh"
+#include "protocol/umi_firmware.hh"
 #include "protocol/umi_session.hh"
+#include "protocol/umi_sysex.hh"
 
 using namespace umidi;
 using namespace umidi::protocol;
@@ -21,7 +22,7 @@ bool test_encoding_7bit_basic(TestContext& t) {
     uint8_t decoded[16];
 
     size_t enc_len = encode_7bit(input, sizeof(input), encoded);
-    t.assert_eq(enc_len, 8);  // 7 bytes -> 8 bytes
+    t.assert_eq(enc_len, 8); // 7 bytes -> 8 bytes
 
     size_t dec_len = decode_7bit(encoded, enc_len, decoded);
     t.assert_eq(dec_len, sizeof(input));
@@ -51,7 +52,7 @@ bool test_encoding_7bit_various_lengths(TestContext& t) {
     for (size_t len = 1; len <= 14; ++len) {
         uint8_t input[14];
         for (size_t i = 0; i < len; ++i) {
-            input[i] = static_cast<uint8_t>(i * 17);  // Some pattern
+            input[i] = static_cast<uint8_t>(i * 17); // Some pattern
         }
 
         uint8_t encoded[24];
@@ -72,7 +73,7 @@ bool test_encoding_size_calculation(TestContext& t) {
     t.assert_eq(encoded_size(7), 8);
     t.assert_eq(encoded_size(14), 16);
     t.assert_eq(encoded_size(1), 2);
-    t.assert_eq(encoded_size(8), 10);  // 7+1 -> 8+2
+    t.assert_eq(encoded_size(8), 10); // 7+1 -> 8+2
 
     t.assert_eq(decoded_size(8), 7);
     t.assert_eq(decoded_size(16), 14);
@@ -124,7 +125,7 @@ bool test_message_builder_with_data(TestContext& t) {
     MessageBuilder<64> builder;
 
     builder.begin(Command::STDOUT_DATA, 5);
-    uint8_t payload[] = {0x48, 0x65, 0x6C, 0x6C, 0x6F};  // "Hello"
+    uint8_t payload[] = {0x48, 0x65, 0x6C, 0x6C, 0x6F}; // "Hello"
     builder.add_data(payload, sizeof(payload));
     size_t len = builder.finalize();
 
@@ -157,8 +158,8 @@ bool test_message_builder_u32(TestContext& t) {
     size_t dec_len = msg.decode_payload(decoded, sizeof(decoded));
     t.assert_eq(dec_len, 4);
 
-    uint32_t value = (uint32_t(decoded[0]) << 24) | (uint32_t(decoded[1]) << 16) |
-                     (uint32_t(decoded[2]) << 8) | decoded[3];
+    uint32_t value =
+        (uint32_t(decoded[0]) << 24) | (uint32_t(decoded[1]) << 16) | (uint32_t(decoded[2]) << 8) | decoded[3];
     t.assert_eq(value, 0x12345678u);
     return true;
 }
@@ -221,10 +222,12 @@ bool test_stdio_basic(TestContext& t) {
 
     bool callback_called = false;
 
-    io.set_stdin_callback([](const uint8_t* /*data*/, size_t /*len*/, void* ctx) {
-        auto* called = static_cast<bool*>(ctx);
-        *called = true;
-    }, &callback_called);
+    io.set_stdin_callback(
+        [](const uint8_t* /*data*/, size_t /*len*/, void* ctx) {
+            auto* called = static_cast<bool*>(ctx);
+            *called = true;
+        },
+        &callback_called);
 
     // Build STDIN message
     MessageBuilder<64> builder;
@@ -294,10 +297,7 @@ bool test_firmware_header_size(TestContext& t) {
 
 bool test_firmware_header_builder(TestContext& t) {
     FirmwareHeaderBuilder builder;
-    builder.version(1, 2, 3)
-           .board("TEST_BOARD")
-           .image_size(1024)
-           .flags(FirmwareFlags::COMPRESSED);
+    builder.version(1, 2, 3).board("TEST_BOARD").image_size(1024).flags(FirmwareFlags::COMPRESSED);
 
     FirmwareHeader header = builder.build();
 
@@ -332,9 +332,7 @@ bool test_firmware_validator_header(TestContext& t) {
     validator.set_board_id("TEST_BOARD");
 
     FirmwareHeaderBuilder builder;
-    builder.version(1, 0, 0)
-           .board("TEST_BOARD")
-           .image_size(1024);
+    builder.version(1, 0, 0).board("TEST_BOARD").image_size(1024);
     FirmwareHeader header = builder.build();
 
     auto result = validator.validate_header(header);
@@ -347,9 +345,7 @@ bool test_firmware_validator_board_mismatch(TestContext& t) {
     validator.set_board_id("BOARD_A");
 
     FirmwareHeaderBuilder builder;
-    builder.version(1, 0, 0)
-           .board("BOARD_B")
-           .image_size(1024);
+    builder.version(1, 0, 0).board("BOARD_B").image_size(1024);
     FirmwareHeader header = builder.build();
 
     auto result = validator.validate_header(header);
@@ -400,8 +396,7 @@ bool test_platform_configs(TestContext& t) {
 
 bool test_slot_regions(TestContext& t) {
     // Verify slot A and B have same size
-    t.assert_eq(platforms::STM32F4_512K.slot_a.size,
-              platforms::STM32F4_512K.slot_b.size);
+    t.assert_eq(platforms::STM32F4_512K.slot_a.size, platforms::STM32F4_512K.slot_b.size);
     return true;
 }
 
@@ -425,10 +420,10 @@ bool test_session_timer_chunk_timeout(TestContext& t) {
     SessionTimer timer;
     timer.init(DEFAULT_TIMEOUTS);
 
-    timer.start_session(1);          // Start at t=1
-    timer.record_chunk(1);           // Record chunk at t=1 (must be > 0 for check)
+    timer.start_session(1); // Start at t=1
+    timer.record_chunk(1);  // Record chunk at t=1 (must be > 0 for check)
     t.assert_eq(timer.check(5000), TimeoutEvent::NONE);
-    t.assert_eq(timer.check(5002), TimeoutEvent::CHUNK_TIMEOUT);  // 5002 - 1 = 5001 >= 5000
+    t.assert_eq(timer.check(5002), TimeoutEvent::CHUNK_TIMEOUT); // 5002 - 1 = 5001 >= 5000
     return true;
 }
 
@@ -441,14 +436,14 @@ bool test_flow_control_sender(TestContext& t) {
     for (int i = 0; i < 4; ++i) {
         t.assert_true(fc.can_send());
         int seq = fc.enqueue(data, 1);
-        t.assert_true(seq >= 0);  // enqueue returns sequence number or -1 on failure
+        t.assert_true(seq >= 0); // enqueue returns sequence number or -1 on failure
     }
 
     // Window full
     t.assert_true(!fc.can_send());
 
     // ACK allows more
-    fc.process_ack(2);  // ACK up to seq 2
+    fc.process_ack(2); // ACK up to seq 2
     t.assert_true(fc.can_send());
     return true;
 }

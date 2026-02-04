@@ -12,7 +12,7 @@ using namespace umiusb;
 struct TestClass {
     bool configured = false;
     bool vendor_handled = false;
-    uint8_t bos_data[5] = {5, 0x0F, 5, 0, 1};  // Minimal BOS header
+    uint8_t bos_data[5] = {5, 0x0F, 5, 0, 1}; // Minimal BOS header
     bool has_bos = true;
 
     std::span<const uint8_t> config_descriptor() const {
@@ -22,14 +22,15 @@ struct TestClass {
     }
 
     std::span<const uint8_t> bos_descriptor() const {
-        if (has_bos) return {bos_data, sizeof(bos_data)};
+        if (has_bos)
+            return {bos_data, sizeof(bos_data)};
         return {};
     }
 
     bool handle_vendor_request(const SetupPacket& setup, std::span<uint8_t>& response) {
         if (setup.bRequest == 0x42) {
             vendor_handled = true;
-            response = response.subspan(0, 0);  // ZLP
+            response = response.subspan(0, 0); // ZLP
             return true;
         }
         return false;
@@ -37,19 +38,17 @@ struct TestClass {
 
     void on_configured(bool c) { configured = c; }
 
-    bool handle_request(const SetupPacket& /*setup*/, std::span<uint8_t>& /*response*/) {
-        return false;
-    }
+    bool handle_request(const SetupPacket& /*setup*/, std::span<uint8_t>& /*response*/) { return false; }
 
     void on_rx(uint8_t /*ep*/, std::span<const uint8_t> /*data*/) {}
 
-    template<typename HalT>
+    template <typename HalT>
     void configure_endpoints(HalT& /*hal*/) {}
 
-    template<typename HalT>
+    template <typename HalT>
     void on_sof(HalT& /*hal*/) {}
 
-    template<typename HalT>
+    template <typename HalT>
     void on_tx_complete(HalT& /*hal*/, uint8_t /*ep*/) {}
 };
 
@@ -70,7 +69,7 @@ int main() {
 
         // Simulate GET_DESCRIPTOR Device
         SetupPacket setup{};
-        setup.bmRequestType = 0x80;  // IN, Standard, Device
+        setup.bmRequestType = 0x80; // IN, Standard, Device
         setup.bRequest = bRequest::GetDescriptor;
         setup.wValue = (bDescriptorType::Device << 8);
         setup.wLength = 18;
@@ -117,7 +116,7 @@ int main() {
         dev.init();
 
         SetupPacket setup{};
-        setup.bmRequestType = 0xC0;  // IN, Vendor, Device
+        setup.bmRequestType = 0xC0; // IN, Vendor, Device
         setup.bRequest = 0x42;
         setup.wValue = 0;
         setup.wIndex = 0;

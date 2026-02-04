@@ -6,7 +6,7 @@ using sysbus
 mach create "umidi_test"
 
 # Load custom UMI-OS platform description
-machine LoadPlatformDescription $CWD/renode/stm32f4_test.repl
+machine LoadPlatformDescription $CWD/lib/umi/port/platform/renode/stm32f4_test.repl
 
 # Load the test ELF
 sysbus LoadELF $CWD/.build/umidi_test_renode.elf

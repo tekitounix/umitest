@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 // umi_boot Session Management Tests
 
-#include <umitest.hh>
 #include <umiboot/session.hh>
+#include <umitest.hh>
 
 using namespace umiboot;
 using namespace umitest;
@@ -32,12 +32,7 @@ bool test_timer_start_session(TestContext& t) {
 
 bool test_timer_session_timeout(TestContext& t) {
     TimeoutConfig config = {
-        .session_timeout_ms = 1000,
-        .chunk_timeout_ms = 0,
-        .ack_timeout_ms = 0,
-        .idle_timeout_ms = 0,
-        .max_retries = 3
-    };
+        .session_timeout_ms = 1000, .chunk_timeout_ms = 0, .ack_timeout_ms = 0, .idle_timeout_ms = 0, .max_retries = 3};
 
     SessionTimer timer;
     timer.init(config);
@@ -50,12 +45,7 @@ bool test_timer_session_timeout(TestContext& t) {
 
 bool test_timer_chunk_timeout(TestContext& t) {
     TimeoutConfig config = {
-        .session_timeout_ms = 0,
-        .chunk_timeout_ms = 500,
-        .ack_timeout_ms = 0,
-        .idle_timeout_ms = 0,
-        .max_retries = 3
-    };
+        .session_timeout_ms = 0, .chunk_timeout_ms = 500, .ack_timeout_ms = 0, .idle_timeout_ms = 0, .max_retries = 3};
 
     SessionTimer timer;
     timer.init(config);
@@ -69,12 +59,7 @@ bool test_timer_chunk_timeout(TestContext& t) {
 
 bool test_timer_ack_timeout(TestContext& t) {
     TimeoutConfig config = {
-        .session_timeout_ms = 0,
-        .chunk_timeout_ms = 0,
-        .ack_timeout_ms = 200,
-        .idle_timeout_ms = 0,
-        .max_retries = 3
-    };
+        .session_timeout_ms = 0, .chunk_timeout_ms = 0, .ack_timeout_ms = 200, .idle_timeout_ms = 0, .max_retries = 3};
 
     SessionTimer timer;
     timer.init(config);
@@ -88,12 +73,7 @@ bool test_timer_ack_timeout(TestContext& t) {
 
 bool test_timer_idle_timeout(TestContext& t) {
     TimeoutConfig config = {
-        .session_timeout_ms = 0,
-        .chunk_timeout_ms = 0,
-        .ack_timeout_ms = 0,
-        .idle_timeout_ms = 1000,
-        .max_retries = 3
-    };
+        .session_timeout_ms = 0, .chunk_timeout_ms = 0, .ack_timeout_ms = 0, .idle_timeout_ms = 1000, .max_retries = 3};
 
     SessionTimer timer;
     timer.init(config);
@@ -106,12 +86,7 @@ bool test_timer_idle_timeout(TestContext& t) {
 
 bool test_timer_activity_resets_idle(TestContext& t) {
     TimeoutConfig config = {
-        .session_timeout_ms = 0,
-        .chunk_timeout_ms = 0,
-        .ack_timeout_ms = 0,
-        .idle_timeout_ms = 1000,
-        .max_retries = 3
-    };
+        .session_timeout_ms = 0, .chunk_timeout_ms = 0, .ack_timeout_ms = 0, .idle_timeout_ms = 1000, .max_retries = 3};
 
     SessionTimer timer;
     timer.init(config);
@@ -138,12 +113,7 @@ bool test_timer_retry_count(TestContext& t) {
 
 bool test_timer_ack_received_clears(TestContext& t) {
     TimeoutConfig config = {
-        .session_timeout_ms = 0,
-        .chunk_timeout_ms = 0,
-        .ack_timeout_ms = 100,
-        .idle_timeout_ms = 0,
-        .max_retries = 3
-    };
+        .session_timeout_ms = 0, .chunk_timeout_ms = 0, .ack_timeout_ms = 100, .idle_timeout_ms = 0, .max_retries = 3};
 
     SessionTimer timer;
     timer.init(config);
@@ -152,19 +122,14 @@ bool test_timer_ack_received_clears(TestContext& t) {
 
     timer.record_ack_received();
 
-    t.assert_eq(timer.check(200), TimeoutEvent::NONE);  // No timeout
+    t.assert_eq(timer.check(200), TimeoutEvent::NONE); // No timeout
     t.assert_eq(timer.retry_count(), 0);
     return true;
 }
 
 bool test_timer_remaining_time(TestContext& t) {
     TimeoutConfig config = {
-        .session_timeout_ms = 1000,
-        .chunk_timeout_ms = 0,
-        .ack_timeout_ms = 0,
-        .idle_timeout_ms = 0,
-        .max_retries = 3
-    };
+        .session_timeout_ms = 1000, .chunk_timeout_ms = 0, .ack_timeout_ms = 0, .idle_timeout_ms = 0, .max_retries = 3};
 
     SessionTimer timer;
     timer.init(config);
@@ -208,11 +173,11 @@ bool test_flow_sender_window_full(TestContext& t) {
     sender.init(config);
 
     uint8_t data[] = {1, 2, 3};
-    sender.enqueue(data, 3);  // seq 0
-    sender.enqueue(data, 3);  // seq 1
+    sender.enqueue(data, 3); // seq 0
+    sender.enqueue(data, 3); // seq 1
 
     t.assert_true(!sender.can_send());
-    t.assert_eq(sender.enqueue(data, 3), -1);  // Window full
+    t.assert_eq(sender.enqueue(data, 3), -1); // Window full
     return true;
 }
 
@@ -244,13 +209,13 @@ bool test_flow_sender_process_ack(TestContext& t) {
     sender.init(DEFAULT_FLOW);
 
     uint8_t data[] = {1, 2, 3};
-    sender.enqueue(data, 3);  // seq 0
-    sender.enqueue(data, 3);  // seq 1
+    sender.enqueue(data, 3); // seq 0
+    sender.enqueue(data, 3); // seq 1
 
-    sender.process_ack(0);  // ACK seq 0
+    sender.process_ack(0); // ACK seq 0
     t.assert_eq(sender.pending_count(), 1);
 
-    sender.process_ack(1);  // ACK seq 1
+    sender.process_ack(1); // ACK seq 1
     t.assert_eq(sender.pending_count(), 0);
     t.assert_true(sender.all_acked());
     return true;
@@ -265,7 +230,7 @@ bool test_flow_sender_retransmit(TestContext& t) {
 
     uint8_t out[128];
     uint8_t seq;
-    sender.get_next_to_send(out, seq);  // Mark as sent
+    sender.get_next_to_send(out, seq); // Mark as sent
 
     // Retransmit
     sender.mark_for_retransmit();
@@ -306,12 +271,12 @@ bool test_flow_receiver_out_of_order(TestContext& t) {
     FlowControlReceiver receiver;
     receiver.reset();
 
-    t.assert_true(receiver.process_packet(0));  // OK
-    t.assert_true(receiver.process_packet(2));  // Out of order, buffered
-    t.assert_eq(receiver.expected_sequence(), 1);  // Still expecting 1
+    t.assert_true(receiver.process_packet(0));    // OK
+    t.assert_true(receiver.process_packet(2));    // Out of order, buffered
+    t.assert_eq(receiver.expected_sequence(), 1); // Still expecting 1
 
-    t.assert_true(receiver.process_packet(1));  // Fill the gap
-    t.assert_eq(receiver.expected_sequence(), 3);  // Advanced past buffered
+    t.assert_true(receiver.process_packet(1));    // Fill the gap
+    t.assert_eq(receiver.expected_sequence(), 3); // Advanced past buffered
     return true;
 }
 
@@ -320,7 +285,7 @@ bool test_flow_receiver_duplicate(TestContext& t) {
     receiver.reset();
 
     t.assert_true(receiver.process_packet(0));
-    t.assert_true(!receiver.process_packet(0));  // Duplicate
+    t.assert_true(!receiver.process_packet(0)); // Duplicate
     return true;
 }
 
@@ -374,12 +339,7 @@ bool test_session_complete(TestContext& t) {
 
 bool test_session_timeout_handling(TestContext& t) {
     TimeoutConfig config = {
-        .session_timeout_ms = 1000,
-        .chunk_timeout_ms = 0,
-        .ack_timeout_ms = 0,
-        .idle_timeout_ms = 0,
-        .max_retries = 3
-    };
+        .session_timeout_ms = 1000, .chunk_timeout_ms = 0, .ack_timeout_ms = 0, .idle_timeout_ms = 0, .max_retries = 3};
 
     FirmwareUpdateSession<4> session;
     session.init(config, DEFAULT_FLOW);

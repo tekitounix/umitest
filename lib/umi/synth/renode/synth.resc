@@ -6,7 +6,7 @@ using sysbus
 mach create "umi_synth"
 
 # Load custom UMI-OS platform description
-machine LoadPlatformDescription $CWD/renode/stm32f4_test.repl
+machine LoadPlatformDescription $CWD/lib/umi/port/platform/renode/stm32f4_test.repl
 
 # Load the synth example ELF
 sysbus LoadELF $CWD/.build/synth_example.elf

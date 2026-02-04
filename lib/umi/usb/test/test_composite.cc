@@ -19,8 +19,8 @@ struct StubAudioClass {
         // Build a minimal config descriptor
         desc_buf[0] = 9;
         desc_buf[1] = 0x02;
-        desc_buf[2] = 18;  // wTotalLength low
-        desc_buf[3] = 0;   // wTotalLength high
+        desc_buf[2] = 18; // wTotalLength low
+        desc_buf[3] = 0;  // wTotalLength high
         desc_buf[4] = num_ifaces;
         desc_buf[5] = 1;
         desc_buf[6] = 0;
@@ -28,36 +28,30 @@ struct StubAudioClass {
         desc_buf[8] = 50;
         // Fake interface descriptor
         desc_buf[9] = 9;
-        desc_buf[10] = 0x04;  // Interface
-        desc_buf[11] = 0;     // iface number
+        desc_buf[10] = 0x04; // Interface
+        desc_buf[11] = 0;    // iface number
         desc_size = 18;
     }
 
-    std::span<const uint8_t> config_descriptor() const {
-        return {desc_buf, desc_size};
-    }
+    std::span<const uint8_t> config_descriptor() const { return {desc_buf, desc_size}; }
 
     std::span<const uint8_t> bos_descriptor() const { return {}; }
 
-    bool handle_vendor_request(const SetupPacket& /*setup*/, std::span<uint8_t>& /*response*/) {
-        return false;
-    }
+    bool handle_vendor_request(const SetupPacket& /*setup*/, std::span<uint8_t>& /*response*/) { return false; }
 
     void on_configured(bool /*configured*/) {}
 
-    bool handle_request(const SetupPacket& /*setup*/, std::span<uint8_t>& /*response*/) {
-        return false;
-    }
+    bool handle_request(const SetupPacket& /*setup*/, std::span<uint8_t>& /*response*/) { return false; }
 
     void on_rx(uint8_t /*ep*/, std::span<const uint8_t> /*data*/) {}
 
-    template<typename HalT>
+    template <typename HalT>
     void configure_endpoints(HalT& /*hal*/) {}
 
-    template<typename HalT>
+    template <typename HalT>
     void on_sof(HalT& /*hal*/) {}
 
-    template<typename HalT>
+    template <typename HalT>
     void on_tx_complete(HalT& /*hal*/, uint8_t /*ep*/) {}
 };
 
@@ -109,9 +103,8 @@ int main() {
 
         // Track state through callbacks
         static bool midi_rx_called = false;
-        midi.set_midi_callback([](uint8_t /*cable*/, const uint8_t* /*data*/, uint8_t /*len*/) {
-            midi_rx_called = true;
-        });
+        midi.set_midi_callback(
+            [](uint8_t /*cable*/, const uint8_t* /*data*/, uint8_t /*len*/) { midi_rx_called = true; });
 
         // Send MIDI data to OUT endpoint
         uint8_t packet[] = {0x09, 0x90, 0x3C, 0x7F};

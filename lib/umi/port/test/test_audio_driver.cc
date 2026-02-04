@@ -11,9 +11,9 @@ using namespace umitest;
 #include <functional>
 #include <span>
 
-#include "hal/result.hh"
 #include "hal/audio.hh"
 #include "hal/codec.hh"
+#include "hal/result.hh"
 
 // ============================================================================
 // Stub AudioDevice with state tracking
@@ -79,7 +79,10 @@ struct TestCodec {
     bool muted_ = false;
     bool powered_ = false;
 
-    bool init() { initialized_ = true; return true; }
+    bool init() {
+        initialized_ = true;
+        return true;
+    }
     void power_on() { powered_ = true; }
     void power_off() { powered_ = false; }
     void set_volume(int vol_db) { volume_db_ = vol_db; }
