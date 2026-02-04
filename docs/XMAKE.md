@@ -281,6 +281,8 @@ xmake project -k vsxmake
 |----------|------|------|
 | `xmake check clang.tidy` | ⚠️ | clang-arm 21.1.1 の multilib.yaml に `IncludeDirs` キーが含まれているが、clang-tidy が認識できない（Arm Toolchain のバグ） |
 
+**解決策**: `~/.xmake/packages/c/clang-arm/21.1.1/*/lib/clang-runtimes/multilib.yaml` を削除またはリネームすると clang-tidy が正常に動作します
+
 #### ❌ 対話型のためスキップ（9コマンド）
 
 | コマンド | 理由 |
