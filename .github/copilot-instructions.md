@@ -156,9 +156,9 @@ xmake info                     # Show build configuration
 
 ### Core Libraries (`lib/`)
 
-- **umios/core/**: Fundamental types — AudioContext, Event, Processor concept
-- **umios/kernel/**: STM32F4 kernel, loader, MPU configuration
-- **umios/backend/**: Platform backends (cm for Cortex-M, wasm)
+- **umi/core/**: Fundamental types — AudioContext, Event, Processor concept
+- **umi/kernel/**: STM32F4 kernel, loader, MPU configuration
+- **umi/backend/**: Platform backends (cm for Cortex-M, wasm)
 - **umidsp/**: DSP components (oscillators, filters, envelopes) with optimized implementations
 - **umidi/**: MIDI support (UMP, MIDI 1.0, SysEx)
 - **umiboot/**: Bootloader and firmware verification
@@ -199,9 +199,9 @@ Complete binary separation between OS and application (`.umia`):
 
 ### Core APIs
 
-**AudioContext** (`lib/umios/core/audio_context.hh`): Unified interface for sample-accurate audio processing. Provides I/O buffers (std::span), events, and timing information.
+**AudioContext** (`lib/umi/core/audio_context.hh`): Unified interface for sample-accurate audio processing. Provides I/O buffers (std::span), events, and timing information.
 
-**Processor Concept** (`lib/umios/core/processor.hh`):
+**Processor Concept** (`lib/umi/core/processor.hh`):
 
 ```cpp
 template<typename P>
@@ -212,7 +212,7 @@ concept ProcessorLike = requires(P& p, AudioContext& ctx) {
 
 No inheritance required, no vtable. Extended via Port/Parameter descriptors.
 
-**Event System** (`lib/umios/core/event.hh`): EventType includes Midi, Param, Raw, ButtonDown/Up. Sample-accurate processing with buffer position specification.
+**Event System** (`lib/umi/core/event.hh`): EventType includes Midi, Param, Raw, ButtonDown/Up. Sample-accurate processing with buffer position specification.
 
 ### Examples (`examples/`)
 

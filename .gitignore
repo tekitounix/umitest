@@ -1,6 +1,5 @@
 # Build outputs
 build/
-build/renode_console.log
 
 # WASM build artifacts in examples
 examples/**/*.wasm
