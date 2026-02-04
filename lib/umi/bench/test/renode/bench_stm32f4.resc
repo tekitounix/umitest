@@ -1,0 +1,24 @@
+# Renode script for STM32F4 bench
+# Usage: renode --console --disable-xwt -e "include @lib/umi/bench/test/renode/bench_stm32f4.resc"
+
+using sysbus
+
+mach create "umi_stm32f4_bench"
+
+machine LoadPlatformDescription $CWD/lib/umi/port/platform/renode/stm32f4_test.repl
+
+sysbus LoadELF $CWD/build/bench_stm32f4/release/bench_stm32f4.elf
+
+sysbus WriteDoubleWord 0xE000ED08 0x08000000
+sysbus WriteDoubleWord 0x00000000 `sysbus ReadDoubleWord 0x08000000`
+sysbus WriteDoubleWord 0x00000004 `sysbus ReadDoubleWord 0x08000004`
+
+logFile $CWD/build/bench_stm32f4_uart.log
+usart2 CreateFileBackend $CWD/build/bench_stm32f4_uart.log true
+
+echo "=== STM32F4-Discovery Benchmark Starting ==="
+
+emulation RunFor "30"
+
+echo "=== Benchmark finished ==="
+quit

@@ -1,0 +1,24 @@
+# Renode script for comprehensive bench
+# Usage: renode --console --disable-xwt -e "include @lib/umi/bench/test/renode/comprehensive_bench.resc"
+
+using sysbus
+
+mach create "umi_comprehensive_bench"
+
+machine LoadPlatformDescription $CWD/lib/umi/port/platform/renode/stm32f4_test.repl
+
+sysbus LoadELF $CWD/build/comprehensive_bench/release/comprehensive_bench.elf
+
+sysbus WriteDoubleWord 0xE000ED08 0x08000000
+sysbus WriteDoubleWord 0x00000000 `sysbus ReadDoubleWord 0x08000000`
+sysbus WriteDoubleWord 0x00000004 `sysbus ReadDoubleWord 0x08000004`
+
+logFile $CWD/build/comprehensive_bench_uart.log
+usart2 CreateFileBackend $CWD/build/comprehensive_bench_uart.log true
+
+echo "=== Comprehensive Benchmark Starting ==="
+
+emulation RunFor "30"
+
+echo "=== Benchmark finished ==="
+quit

@@ -1,0 +1,24 @@
+# Renode script for DWT verification
+# Usage: renode --console --disable-xwt -e "include @lib/umi/bench/test/renode/verify_dwt.resc"
+
+using sysbus
+
+mach create "umi_bench_verify_dwt"
+
+machine LoadPlatformDescription $CWD/lib/umi/port/platform/renode/stm32f4_test.repl
+
+sysbus LoadELF $CWD/build/bench_verify_dwt/release/bench_verify_dwt.elf
+
+sysbus WriteDoubleWord 0xE000ED08 0x08000000
+sysbus WriteDoubleWord 0x00000000 `sysbus ReadDoubleWord 0x08000000`
+sysbus WriteDoubleWord 0x00000004 `sysbus ReadDoubleWord 0x08000004`
+
+logFile $CWD/build/bench_verify_dwt_uart.log
+usart2 CreateFileBackend $CWD/build/bench_verify_dwt_uart.log true
+
+echo "=== DWT Verification Starting ==="
+
+emulation RunFor "30"
+
+echo "=== Verification finished ==="
+quit
