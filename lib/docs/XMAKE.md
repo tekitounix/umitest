@@ -254,7 +254,7 @@ xmake project -k vsxmake
 
 ### 非対話型コマンド実行確認結果
 
-#### ✅ 実行成功（17コマンド）
+#### ✅ 実行成功（18コマンド）
 
 | コマンド | 結果 | 備考 |
 |----------|------|------|
@@ -267,6 +267,7 @@ xmake project -k vsxmake
 | `xmake show` | ✅ | 完了 |
 | `xmake deploy.webhost` | ✅ | 成功 |
 | `xmake check` | ✅ | 2 warnings (headerfiles not found) |
+| `xmake check clang.tidy` | ✅ | サマリに Suppressed 表示は出るが実行成功 |
 | `xmake format -n` | ✅ | format ok |
 | `xmake debugger.cleanup` | ✅ | 0 orphaned processes |
 | `xmake project -k compile_commands` | ✅ | compile_commands.json生成 |
@@ -274,27 +275,6 @@ xmake project -k vsxmake
 | `xmake flash.probes` | ✅ | STLINK-V3検出済み |
 | `xmake flash.status` | ✅ | PyOCD/OpenOCD検出済み |
 | `xmake pack` | ✅ | pack ok |
-
-#### ⚠️ ツールエラー（1コマンド）
-
-| コマンド | 結果 | 備考 |
-|----------|------|------|
-| `xmake check clang.tidy` | ⚠️ | clang-arm 21.1.0/21.1.1 の multilib.yaml に `IncludeDirs` キーが含まれているが、clang-tidy 20.x が認識できない |
-
-**検証結果**:
-| バージョン | IncludeDirs | パッチ対象 |
-|-----------|-------------|-----------|
-| 19.1.5 | ❌ なし | ❌ 不要 |
-| 20.1.0 | ❌ なし | ❌ 不要 |
-| 21.1.0 | ✅ あり | ✅ 要パッチ |
-| 21.1.1 | ✅ あり | ✅ 要パッチ |
-
-**注意**: multilib.yaml を削除するとコンパイラが標準ヘッダーを見つけられなくなり、ビルドが失敗する
-
-**根本的な解決策**:
-1. Arm Toolchain を 22.x 以降に更新（修正されている可能性）
-2. xmake の check プラグインを修正して `--target` フラグを渡す
-3. 当面は `xmake check clang.tidy` をスキップし、CI で別の静的解析を使用
 
 #### ❌ 対話型のためスキップ（9コマンド）
 
@@ -314,8 +294,8 @@ xmake project -k vsxmake
 
 ```
 総コマンド数: 40+
-├─ 非対話型実行成功: 16
-├─ ツールエラー: 1
+├─ 非対話型実行成功: 18
+├─ ツールエラー: 0
 ├─ 対話型スキップ: 9
 └─ 無効: 1
 ```
