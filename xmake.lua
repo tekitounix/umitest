@@ -69,10 +69,10 @@ option("kernel")
 option_end()
 
 -- =====================================================================
--- Includes
+-- Includes (Migrated Libraries Only)
 -- =====================================================================
 
--- Individual libraries (migrated from monolithic lib/umi)
+-- Individual libraries (lib/umi is being migrated)
 includes("lib/umimmio")
 includes("lib/umitest")
 includes("lib/umibench")
