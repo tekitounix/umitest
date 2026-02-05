@@ -9,21 +9,21 @@
 Checks: >
   -*,
   bugprone-*,-bugprone-dynamic-static-initializers,-bugprone-easily-swappable-parameters,
-  clang-analyzer-*,
-  performance-*,
-  modernize-*,-modernize-use-trailing-return-type,
+  clang-analyzer-*,-clang-analyzer-core.FixedAddressDereference,
+  performance-*,-performance-no-int-to-ptr,
+  modernize-*,-modernize-use-trailing-return-type,-modernize-use-std-print,
   readability-*,-readability-magic-numbers,-readability-uppercase-literal-suffix,-readability-identifier-length,
-  misc-*
+  misc-*,-misc-non-private-member-variables-in-classes
 
 WarningsAsErrors: 'bugprone-*,clang-analyzer-*,performance-move-const-arg'
-HeaderFilterRegex: '.*'
+HeaderFilterRegex: '(^|.*/)(lib/umibench|lib/umitest)/'
 SystemHeaders: false
 
 CheckOptions:
   # Functions/methods: lower_case
   - { key: readability-identifier-naming.FunctionCase,         value: lower_case }
   - { key: readability-identifier-naming.MethodCase,           value: lower_case }
-  - { key: readability-identifier-naming.FunctionIgnoredRegexp, value: '^_.*' }
+  - { key: readability-identifier-naming.FunctionIgnoredRegexp, value: '^_.*|.*_Handler$' }
   - { key: readability-identifier-naming.MethodIgnoredRegexp,  value: '^(operator|~).*' }
   
   # Variables: lower_case

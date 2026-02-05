@@ -2,9 +2,21 @@
 
 ## 問題: arm-embedded ツールチェーンとの互換性
 
-clang-arm 21.1.0/21.1.1 の multilib.yaml が clang-tidy 20.x と互換性がありません。
+clang-arm 21.1.0/21.1.1 の multilib.yaml に含まれる `IncludeDirs` キーが、clang-tidy 20.x で認識されない。
 
-## 解決策（選択肢）
+## エラーメッセージ
+
+```
+error: unknown key 'IncludeDirs' in multilib.yaml
+```
+
+または
+
+```
+error: no multilib found matching flags: --target=thumbv7em-unknown-none-eabihf ...
+```
+
+## 解決策
 
 ### 方法1: clang-tidy をアップデート（推奨）
 
@@ -15,41 +27,31 @@ brew upgrade llvm
 # Ubuntu/Debian
 wget https://apt.llvm.org/llvm.sh
 chmod +x llvm.sh
-sudo ./llvm.sh 20
+sudo ./llvm.sh 21
 ```
 
 LLVM 21.x 以降では multilib.yaml の IncludeDirs がサポートされています。
 
-### 方法2: ホストコンパイラでチェック
+### 方法2: ツールチェーンを変更
 
-組み込みコードを `--target=arm-none-eabi` なしでチェック（完全ではないが有用）：
+embedded ターゲットで `gcc-arm` を使用するように変更：
+
+```lua
+-- lib/yourlib/target/stm32f4/xmake.lua
+set_values("embedded.toolchain", "gcc-arm")
+```
+
+gcc-arm は multilib.yaml を使用しないため、clang-tidy との競合は発生しません。
+
+### 方法3: 組み込みターゲットを除外
 
 ```bash
-clang-tidy lib/umibench/**/*.cc -- -Ilib -std=c++23
+# ホストターゲットのみチェック
+xmake check clang.tidy
 ```
 
-### 方法3: CI でのみ実行
+デフォルトではホストターゲットのみがチェック対象です。
 
-ローカルではスキップし、CI 環境（Docker）で実行：
+## 関連コミット
 
-```yaml
-# .github/workflows/ci.yml
-- name: Static Analysis
-  uses: docker://llvm:21
-  with:
-    args: xmake check clang.tidy
-```
-
-### 方法4: 別の静的解析ツールを使用
-
-cppcheck などの代替ツール：
-
-```bash
-xmake check  # デフォルトチェッカーのみ
-```
-
-## 推奨
-
-- **開発時**: 方法4（xmake check のみ）
-- **PR前**: 方法1（clang-tidy アップデート）
-- **CI**: 方法3（Docker 環境）
+- arm-embedded-xmake-repo: 警告メッセージを追加
