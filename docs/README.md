@@ -66,9 +66,9 @@ docs/
 │
 ├── development/                 # 開発者向け
 │   ├── CODING_STYLE.md          # コーディングスタイル（→ lib/docs/ に移動）
-│   ├── LIBRARY_PACKAGING.md     # ライブラリ構造（→ lib/docs/LIBRARY_STRUCTURE.md に統合）
+│   ├── LIBRARY_PACKAGING.md     # ライブラリ構造（→ lib/docs/standards/LIBRARY_SPEC.md に統合）
 │   ├── SIMULATION.md            # シミュレーションバックエンド
-│   ├── DEBUG_GUIDE.md           # デバッグガイド（→ lib/docs/DEBUG_GUIDE.md に移動）
+│   ├── DEBUG_GUIDE.md           # デバッグガイド（→ lib/docs/guides/DEBUGGING_GUIDE.md に移動）
 │   ├── IMPLEMENTATION_PLAN.md   # 実装計画
 │   └── USB_AUDIO_REDESIGN_PLAN.md # USB Audio設計
 │
@@ -111,16 +111,16 @@ docs/
 | ドキュメント | 内容 |
 |-------------|------|
 | [guides/APPLICATION.md](guides/APPLICATION.md) | ユースケース別実装例（シンセ、エフェクト等） |
-| [lib/docs/TESTING.md](../lib/docs/TESTING.md) | テスト戦略（Host/WASM/Renode） |
+| [lib/docs/guides/TESTING_GUIDE.md](../lib/docs/guides/TESTING_GUIDE.md) | テスト戦略（Host/WASM/Renode） |
 
 ### 開発者向け
 
 | ドキュメント | 内容 |
 |-------------|------|
-| [lib/docs/CODING_STYLE.md](../lib/docs/CODING_STYLE.md) | コーディングスタイル（clang-format設定） |
-| [lib/docs/LIBRARY_STRUCTURE.md](../lib/docs/LIBRARY_STRUCTURE.md) | ライブラリ構造規約 |
+| [lib/docs/standards/CODING_RULE.md](../lib/docs/standards/CODING_RULE.md) | コーディングスタイル（clang-format設定） |
+| [lib/docs/standards/LIBRARY_SPEC.md](../lib/docs/standards/LIBRARY_SPEC.md) | ライブラリ構造規約 |
 | [development/SIMULATION.md](development/SIMULATION.md) | WASM/Renodeシミュレーション |
-| [lib/docs/DEBUG_GUIDE.md](../lib/docs/DEBUG_GUIDE.md) | デバッグガイド |
+| [lib/docs/guides/DEBUGGING_GUIDE.md](../lib/docs/guides/DEBUGGING_GUIDE.md) | デバッグガイド |
 | [development/IMPLEMENTATION_PLAN.md](development/IMPLEMENTATION_PLAN.md) | 実装計画と進捗 |
 
 ---
