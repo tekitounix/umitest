@@ -458,7 +458,7 @@ xmake test                          # 全テスト通過（Host/WASM/ARM）
 | `include/<lib>/` | **必須** | — | Doxygen充実 | — |
 | `tests/` | **必須** (1件) | — | 充実 | — |
 | `Doxyfile` | — | **最小** | 拡充 | — |
-| `.gitignore` | — | **必須** | — | — |
+| `.gitignore` | — | standalone時 | — | — |
 | `docs/INDEX.md` | — | **必須** | — | — |
 | `docs/DESIGN.md` | — | **必須** (§1-2) | 全章 | — |
 | `docs/TESTING.md` | — | **必須** | 拡充 | — |
@@ -469,7 +469,7 @@ xmake test                          # 全テスト通過（Host/WASM/ARM）
 | `docs/USAGE.md` | — | — | 推奨 | — |
 | `CHANGELOG.md` | — | — | — | **必須** |
 | `RELEASE.md` | — | — | — | **必須** |
-| `.github/workflows/` | — | — | — | **必須** |
+| `.github/workflows/` | — | — | — | standalone時 |
 | `platforms/` | — | — | — | 条件付き |
 
 ---
