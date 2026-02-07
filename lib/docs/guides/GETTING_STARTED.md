@@ -190,6 +190,9 @@ Doxygen 運用の詳細は [API Docs ガイド](API_DOCS_GUIDE.md) を参照。
 
 ### .gitignore
 
+> **モノレポ注記**: umi モノレポ内ではルートの `.gitignore` がカバーするため不要。
+> standalone リポジトリとして切り出す場合のみ作成する。
+
 ```
 build/
 .xmake/
@@ -375,7 +378,7 @@ doxygen Doxyfile                    # 警告ゼロ
 lib/<libname>/
 ├── CHANGELOG.md
 ├── RELEASE.md
-├── .github/
+├── .github/                       # standalone時のみ（モノレポではルートCIがカバー）
 │   └── workflows/
 │       ├── <libname>-ci.yml
 │       └── <libname>-doxygen.yml

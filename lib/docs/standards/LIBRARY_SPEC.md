@@ -31,7 +31,7 @@ lib/<libname>/                    # または単体repoのルート
 ├── RELEASE.md                    # [必須] リリースポリシー
 ├── Doxyfile                      # [必須] Doxygen設定
 ├── xmake.lua                     # [必須] ビルド定義
-├── .gitignore                    # [必須] Git除外設定
+├── .gitignore                    # [standalone時のみ] Git除外設定
 ├── .clang-format                 # [推奨] フォーマット設定
 ├── .clang-tidy                   # [推奨] 静的解析設定
 ├── .clangd                       # [推奨] LSP設定
@@ -84,10 +84,10 @@ lib/<libname>/                    # または単体repoのルート
 │               └── renode/
 │                   └── *.resc
 │
-└── .github/
+└── .github/                          # [standalone時のみ] モノレポではルートCIがカバー
     └── workflows/
-        ├── <libname>-ci.yml      # [必須] CIワークフロー
-        └── <libname>-doxygen.yml # [任意] ドキュメント自動生成
+        ├── <libname>-ci.yml      # CIワークフロー
+        └── <libname>-doxygen.yml # ドキュメント自動生成
 ```
 
 ### 2.1 namespace 対応表
