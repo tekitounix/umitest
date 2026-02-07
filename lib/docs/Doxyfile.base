@@ -1,0 +1,38 @@
+# UMI Library Common Doxyfile Settings
+# Each library's Doxyfile includes this via: @INCLUDE = ../docs/Doxyfile.base
+
+DOXYFILE_ENCODING      = UTF-8
+OUTPUT_DIRECTORY       = build/doxygen
+
+# Input
+INPUT                  = README.md docs include examples tests
+FILE_PATTERNS          = *.hh *.cc *.md
+RECURSIVE              = YES
+USE_MDFILE_AS_MAINPAGE = README.md
+EXCLUDE                = build
+
+# Extraction
+EXTRACT_ALL            = NO
+
+# Warnings (quality gates)
+WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_INCOMPLETE_DOC = YES
+
+# Output
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+
+# UMI unified theme
+HTML_COLORSTYLE        = AUTO_LIGHT
+HTML_COLORSTYLE_HUE    = 220
+HTML_COLORSTYLE_SAT    = 100
+HTML_COLORSTYLE_GAMMA  = 80
+
+# UX
+HTML_CODE_FOLDING      = YES
+HTML_COPY_CLIPBOARD    = YES
+
+# Code style
+TAB_SIZE               = 4
+SOURCE_BROWSER         = NO
+HAVE_DOT               = NO

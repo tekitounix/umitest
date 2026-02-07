@@ -1,8 +1,8 @@
 # UMI ライブラリ標準仕様
 
 **Version**: 1.0.0-draft  
-**基準ライブラリ**: `umibench` (v0.9.0-beta.1)  
-**適用対象**: `lib/umitest`, `lib/umimmio`, 今後の全ライブラリ
+**基準ライブラリ**: `umibench` (v0.1.0)  
+**適用対象**: `lib/umitest`, `lib/umimmio`, `lib/umirtm`, 今後の全ライブラリ
 
 ---
 
@@ -90,6 +90,20 @@ lib/<libname>/                    # または単体repoのルート
         └── <libname>-doxygen.yml # [任意] ドキュメント自動生成
 ```
 
+### 2.1 namespace 対応表
+
+| ライブラリ | namespace | include例 |
+|-----------|-----------|-----------|
+| `umitest` | `umi::test` | `#include <umitest/test.hh>` |
+| `umibench` | `umi::bench` | `#include <umibench/bench.hh>` |
+| `umimmio` | `umi::mmio` | `#include <umimmio/mmio.hh>` |
+| `umirtm` | `rt` | `#include <umirtm/rtm.hh>` |
+
+命名規則:
+- ライブラリ名: `umi` + 機能名（小文字）
+- namespace: `umi::` + 機能名
+- ディレクトリ/ヘッダ: `lib/<libname>/include/<libname>/`
+
 ---
 
 ## 3. xmake.lua 標準構造
@@ -99,7 +113,7 @@ lib/<libname>/                    # または単体repoのルート
 ```lua
 -- 単体repo判定
 local standalone_repo = os.projectdir() == os.scriptdir()
-_G.<LIBNAME>_STANDALONE_REPO = standalone_repo
+<LIBNAME>_STANDALONE_REPO = standalone_repo
 
 if standalone_repo then
     -- 単体repo時の設定
@@ -119,7 +133,7 @@ if standalone_repo then
 end
 
 -- 依存追加ヘルパー関数
-function _G.<libname>_add_<dep>_dep()
+function <libname>_add_<dep>_dep()
     if standalone_repo then
         add_packages("<dep>")
     else
@@ -474,7 +488,9 @@ xmake test
 
 ## License
 
-MIT ([LICENSE](LICENSE))
+MIT — Copyright (c) <year> SYNTHERNET (@tekitounix)
+
+See [LICENSE](LICENSE) for details.
 ```
 
 ### 5.2 docs/INDEX.md 標準構造
@@ -546,6 +562,49 @@ umibench/docs/TESTING.md を参照し、以下を含める：
 
 ## 8. Design Principles
 ```
+
+### 5.5 著作権・著者表記規約
+
+UMIプロジェクトでは、**権利帰属先**（copyright holder）と**コード寄与者**（author）を明確に区別する。
+
+#### LICENSE ファイル（権利帰属先）
+
+```
+Copyright (c) <year> SYNTHERNET (@tekitounix)
+```
+
+- **SYNTHERNET** は屋号（trade name）。法的な権利帰属先として使用
+- 年号は最終更新年（例: `2026`）
+- ライセンス種別は MIT を標準とする
+
+#### ソースファイル著作権コメント（短縮形）
+
+```cpp
+// SPDX-License-Identifier: MIT
+// Copyright (c) <year>, tekitounix
+```
+
+- ファイル先頭に記載（Doxygen `@file` ブロックの前）
+- ハンドル名 `tekitounix` を使用（簡潔な識別のため）
+
+#### @author Doxygen タグ（コード寄与者）
+
+```cpp
+/// @author Shota Moriguchi @tekitounix
+```
+
+- 個人名 + ハンドル名で記載
+- `@author` は**そのコードを書いた個人**を示す（複数可）
+- 権利帰属先（SYNTHERNET）とは役割が異なる
+
+#### 使い分けの指針
+
+| 表記場所       | 記載内容                              | 役割       |
+| -------------- | ------------------------------------- | ---------- |
+| LICENSE        | `SYNTHERNET (@tekitounix)`            | 権利帰属先 |
+| ソース先頭     | `tekitounix`                          | 著作権短縮 |
+| `@author` タグ | `Shota Moriguchi @tekitounix`         | コード寄与 |
+| README License | `MIT ([LICENSE](LICENSE))` のみ       | 参照       |
 
 ---
 
@@ -623,7 +682,7 @@ end
 セマンティックバージョンのみを記載：
 
 ```
-0.9.0-beta.1
+0.1.0
 ```
 
 ### 7.2 CHANGELOG.md 標準フォーマット
@@ -642,7 +701,7 @@ end
 ### Fixed
 - バグ修正
 
-## [0.9.0-beta.1] - 2026-02-07
+## [0.1.0] - 2026-02-07
 
 ### Added
 - 初期ベータリリース

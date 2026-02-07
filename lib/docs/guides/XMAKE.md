@@ -301,6 +301,14 @@ add_rules("plugin.compile_commands.autoupdate", {outputdir = ".", lsp = "clangd"
 | `xmake serve` | Web/WASMコンテンツ用HTTPサーバーを起動 | **対話型** | `-p <port>`, `-d <dir>`, `--open`, `--build` |
 | `xmake serve.rtt` | RTTログビューアーWebインターフェースを起動 | **対話型** | `-p <port>`, `--rtt-port` |
 
+### UMI カスタムタスク: Release
+
+| コマンド | 説明 | タイプ | 主なオプション |
+|----------|------|--------|----------------|
+| `xmake release` | ライブラリのバージョン更新・アーカイブ生成・タグ作成 | 非対話型 | `--ver=X.Y.Z`, `--libs=name`, `--dry-run`, `--no-test`, `--no-tag`, `--no-archive` |
+
+詳細は [Release ガイド](RELEASE.md) を参照。
+
 ### 非推奨タスク
 
 | コマンド | 代替方法 |
