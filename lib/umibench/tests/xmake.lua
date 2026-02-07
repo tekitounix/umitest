@@ -5,7 +5,7 @@ target("test_umibench")
     set_kind("binary")
     add_files("test_*.cc")
     add_deps("umibench_host")
-    add_deps("umitest")
+    umibench_add_umitest_dep()
 
 target("test_umibench_compile_fail")
     set_kind("phony")

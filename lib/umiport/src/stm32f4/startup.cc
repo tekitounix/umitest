@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 /// @file
-/// @brief STM32F4 startup and vector table initialization.
+/// @brief STM32F4 startup and vector table for library tests.
 
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
 
-#include "umibench/platform.hh"
+#include "platform.hh"
 
 extern "C" {
 extern uint32_t _sidata, _sdata, _edata, _sbss, _ebss, _estack;
@@ -54,7 +54,7 @@ extern "C" __attribute__((noreturn)) void Reset_Handler() {
     *cpacr |= (0xFU << 20);
     asm volatile("dsb\n isb" ::: "memory");
 
-    umi::bench::target::Platform::init();
+    umi::port::Platform::init();
     main();
     while (true) {
         asm volatile("wfi");

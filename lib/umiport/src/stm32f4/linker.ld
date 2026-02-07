@@ -1,4 +1,4 @@
-/* STM32F4 Linker Script for bench */
+/* STM32F4 Linker Script for library tests */
 
 ENTRY(_start)
 

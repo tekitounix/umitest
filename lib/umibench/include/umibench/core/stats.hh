@@ -13,11 +13,11 @@ namespace umi::bench {
 
 /// @brief Aggregated benchmark statistics.
 struct Stats {
-    std::uint64_t min = 0;         ///< Minimum measured sample.
-    std::uint64_t max = 0;         ///< Maximum measured sample.
-    std::uint64_t median = 0;      ///< Median sample (average of middle two for even sample counts).
-    std::uint32_t samples = 0;     ///< Number of collected samples.
-    std::uint32_t iterations = 1;  ///< Callable invocations per sample.
+    std::uint64_t min = 0;        ///< Minimum measured sample.
+    std::uint64_t max = 0;        ///< Maximum measured sample.
+    std::uint64_t median = 0;     ///< Median sample (average of middle two for even sample counts).
+    std::uint32_t samples = 0;    ///< Number of collected samples.
+    std::uint32_t iterations = 1; ///< Callable invocations per sample.
 
     double mean = 0.0;   ///< Arithmetic mean over all samples.
     double stddev = 0.0; ///< Standard deviation (population).
@@ -59,7 +59,7 @@ void insertion_sort(std::array<T, N>& arr) {
 /// @return Midpoint between lower and upper.
 template <typename T>
 constexpr T median_of_two(T lower, T upper) {
-    return lower + (upper - lower) / static_cast<T>(2);
+    return lower + ((upper - lower) / static_cast<T>(2));
 }
 
 } // namespace detail

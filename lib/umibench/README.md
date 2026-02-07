@@ -7,8 +7,8 @@ It lets you write one benchmark program style and run it on host, WebAssembly, a
 
 ## Release Status
 
-- Current version: `0.9.0-beta.1`
-- Stability: release-quality beta
+- Current version: `0.1.0`
+- Stability: initial release
 - Versioning policy: [`RELEASE.md`](RELEASE.md)
 - Changelog: [`CHANGELOG.md`](CHANGELOG.md)
 

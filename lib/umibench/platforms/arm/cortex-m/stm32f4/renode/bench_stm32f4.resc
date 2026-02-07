@@ -5,8 +5,8 @@ using sysbus
 
 mach create "umi_bench"
 
-# Load local STM32F4 platform description
-machine LoadPlatformDescription $CWD/lib/umibench/platforms/arm/cortex-m/stm32f4/renode/stm32f4_test.repl
+# Load STM32F4 platform description from umiport
+machine LoadPlatformDescription $CWD/lib/umiport/renode/stm32f4_test.repl
 
 # Load the benchmark ELF
 sysbus LoadELF $CWD/build/umibench_stm32f4_renode/release/umibench_stm32f4_renode.elf

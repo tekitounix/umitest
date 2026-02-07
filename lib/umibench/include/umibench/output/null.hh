@@ -11,10 +11,10 @@ namespace umi::bench {
 /// @brief Output backend that drops all bytes.
 struct NullOutput {
     static void init() {}
-    static void putc(char) {}
-    static void puts(const char*) {}
-    static void print_uint(std::uint64_t) {}
-    static void print_double(double) {}
+    static void putc(char /*unused*/) {}
+    static void puts(const char* /*unused*/) {}
+    static void print_uint(std::uint64_t /*unused*/) {}
+    static void print_double(double /*unused*/) {}
 };
 
 } // namespace umi::bench

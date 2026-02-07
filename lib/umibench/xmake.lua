@@ -1,9 +1,9 @@
 local standalone_repo = os.projectdir() == os.scriptdir()
-_G.UMIBENCH_STANDALONE_REPO = standalone_repo
+UMIBENCH_STANDALONE_REPO = standalone_repo
 
 if standalone_repo then
     set_project("umibench")
-    set_version("0.9.0-beta.1")
+    set_version("0.1.0")
     set_xmakever("2.8.0")
 
     set_languages("c++23")
@@ -17,7 +17,7 @@ if standalone_repo then
     add_requires("umitest", {optional = true})
 end
 
-function _G.umibench_add_umimmio_dep()
+function umibench_add_umimmio_dep()
     if standalone_repo then
         add_packages("umimmio")
     else
@@ -25,7 +25,7 @@ function _G.umibench_add_umimmio_dep()
     end
 end
 
-function _G.umibench_add_umitest_dep()
+function umibench_add_umitest_dep()
     if standalone_repo then
         add_packages("umitest")
     else

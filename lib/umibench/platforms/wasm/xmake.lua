@@ -17,7 +17,8 @@ target("umibench_wasm")
     add_tests("default")
 
     add_files("../../tests/test_*.cc")
-    add_deps("umibench_wasm_platform", "umitest")
+    add_deps("umibench_wasm_platform")
+    umibench_add_umitest_dep()
 
     add_cxflags("-fno-exceptions", "-fno-rtti", {force = true})
 

@@ -5,7 +5,6 @@
 /// @brief Timer concept used by measurement and runner APIs.
 
 #include <concepts>
-#include <cstdint>
 
 namespace umi::bench {
 

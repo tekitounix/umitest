@@ -10,11 +10,11 @@ namespace umibench::test {
 namespace {
 
 using umi::bench::OutputLike;
-using umi::bench::TimerLike;
 using umi::bench::report;
 using umi::bench::report_compact;
 using umi::bench::Runner;
 using umi::bench::Stats;
+using umi::bench::TimerLike;
 using umi::test::TestContext;
 
 bool test_platform_types(TestContext& t) {

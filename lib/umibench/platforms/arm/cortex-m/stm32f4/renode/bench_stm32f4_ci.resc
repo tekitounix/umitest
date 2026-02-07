@@ -4,7 +4,7 @@ using sysbus
 
 mach create "umibench_ci"
 
-machine LoadPlatformDescription $CWD/lib/umibench/platforms/arm/cortex-m/stm32f4/renode/stm32f4_test.repl
+machine LoadPlatformDescription $CWD/lib/umiport/renode/stm32f4_test.repl
 
 sysbus LoadELF $CWD/build/umibench_stm32f4_renode_gcc/release/umibench_stm32f4_renode_gcc.elf
 

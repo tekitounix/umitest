@@ -10,8 +10,8 @@
 namespace umibench::test {
 namespace {
 
-using umi::bench::Runner;
 using umi::bench::compute_stats;
+using umi::bench::Runner;
 using umi::test::TestContext;
 
 bool test_stats_single_sample(TestContext& t) {
@@ -94,8 +94,8 @@ bool test_stats_large_values(TestContext& t) {
 }
 
 bool test_stats_even_median_no_overflow(TestContext& t) {
-    const std::array<std::uint64_t, 2> samples = {
-        std::numeric_limits<std::uint64_t>::max(), std::numeric_limits<std::uint64_t>::max()};
+    const std::array<std::uint64_t, 2> samples = {std::numeric_limits<std::uint64_t>::max(),
+                                                  std::numeric_limits<std::uint64_t>::max()};
     const auto stats = compute_stats(samples);
     return t.assert_eq(stats.median, std::numeric_limits<std::uint64_t>::max());
 }

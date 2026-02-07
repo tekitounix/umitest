@@ -5,6 +5,8 @@
 /// @brief Public facade API for benchmark execution and result reporting.
 
 // Core
+#include <cstdint>
+
 #include "umibench/core/measure.hh"
 #include "umibench/core/runner.hh"
 #include "umibench/core/stats.hh"

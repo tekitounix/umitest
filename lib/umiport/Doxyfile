@@ -1,0 +1,4 @@
+@INCLUDE               = ../docs/Doxyfile.base
+PROJECT_NAME           = "umiport"
+PROJECT_NUMBER         = 0.1.0
+PROJECT_BRIEF          = "Shared platform infrastructure for STM32F4"

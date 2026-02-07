@@ -10,9 +10,9 @@ with pre-release tags during beta.
 
 ### Added
 
-- Placeholder for upcoming changes after `0.9.0-beta.1`.
+- Placeholder for upcoming changes after `0.1.0`.
 
-## [0.9.0-beta.1] - 2026-02-06
+## [0.1.0] - 2026-02-06
 
 ### Added
 

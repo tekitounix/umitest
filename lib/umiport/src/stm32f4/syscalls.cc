@@ -10,7 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "umibench/platform.hh"
+#include "platform.hh"
 
 extern "C" {
 
@@ -20,13 +20,10 @@ extern std::uint8_t _estack; // Top of stack (heap limit)
 static std::uint8_t* g_heap_ptr = &_end;
 
 /// @brief Grow heap region for dynamic allocation.
-/// @param incr Requested increment in bytes.
-/// @return Previous heap pointer, or `(void*)-1` on failure and sets `errno`.
 void* _sbrk(ptrdiff_t incr) {
     std::uint8_t* prev = g_heap_ptr;
     std::uint8_t* next = g_heap_ptr + incr;
 
-    // Keep 1KB safety margin from stack top.
     const auto stack_limit = reinterpret_cast<std::uintptr_t>(&_estack) - 1024u;
     if (reinterpret_cast<std::uintptr_t>(next) >= stack_limit) {
         errno = ENOMEM;
@@ -38,16 +35,12 @@ void* _sbrk(ptrdiff_t incr) {
 }
 
 /// @brief Write a byte buffer to stdout/stderr UART sink.
-/// @param fd File descriptor.
-/// @param buf Buffer pointer.
-/// @param len Buffer length.
-/// @return Number of bytes accepted.
 static int write_buf(int fd, const char* buf, int len) {
     if (fd != 1 && fd != 2) {
         return len;
     }
 
-    using Output = umi::bench::target::Platform::Output;
+    using Output = umi::port::Platform::Output;
     for (int i = 0; i < len; ++i) {
         const char c = buf[i];
         if (c == '\n') {
@@ -59,12 +52,13 @@ static int write_buf(int fd, const char* buf, int len) {
 }
 
 /// @brief Syscall write implementation.
-/// @param fd File descriptor.
-/// @param buf Buffer pointer.
-/// @param len Buffer length.
-/// @return Number of bytes accepted.
 int _write(int fd, const char* buf, int len) {
     return write_buf(fd, buf, len);
+}
+
+/// @brief POSIX write alias for libraries using `::write()` directly.
+int write(int fd, const void* buf, unsigned len) {
+    return write_buf(fd, static_cast<const char*>(buf), static_cast<int>(len));
 }
 
 /// @brief Write one character to the selected descriptor sink.
@@ -116,9 +110,6 @@ static int write_signed(int fd, long long value) {
 }
 
 /// @brief Minimal `vprintf` implementation for embedded target logs.
-/// @param format printf-style format string.
-/// @param args Variadic argument list.
-/// @return Number of written characters.
 int vprintf(const char* format, va_list args) {
     int written = 0;
     for (const char* p = format; *p != '\0'; ++p) {
@@ -211,8 +202,6 @@ int vprintf(const char* format, va_list args) {
 }
 
 /// @brief Minimal `printf` implementation backed by `vprintf`.
-/// @param format printf-style format string.
-/// @return Number of written characters.
 int printf(const char* format, ...) {
     va_list args;
     va_start(args, format);
@@ -222,16 +211,12 @@ int printf(const char* format, ...) {
 }
 
 /// @brief Output one character to stdout.
-/// @param c Character value.
-/// @return Echoed character value.
 int putchar(int c) {
     write_char(1, static_cast<char>(c));
     return c;
 }
 
 /// @brief Output one line to stdout.
-/// @param s Null-terminated string.
-/// @return Number of written characters including trailing newline.
 int puts(const char* s) {
     int written = write_cstr(1, s);
     written += write_char(1, '\n');
@@ -285,7 +270,6 @@ int _kill(int pid, int sig) {
 }
 
 /// @brief Terminate process by parking CPU forever.
-/// @param status Exit status.
 void _exit(int status) {
     (void)status;
     while (true) {

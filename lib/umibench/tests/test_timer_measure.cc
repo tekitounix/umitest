@@ -9,11 +9,11 @@
 namespace umibench::test {
 namespace {
 
-using umi::bench::TimerLike;
 using umi::bench::measure;
 using umi::bench::measure_corrected;
 using umi::bench::measure_corrected_n;
 using umi::bench::measure_n;
+using umi::bench::TimerLike;
 using umi::test::TestContext;
 
 bool test_chrono_timer_concept(TestContext& t) {

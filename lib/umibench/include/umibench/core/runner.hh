@@ -70,7 +70,7 @@ class Runner {
         if constexpr (N % 2 == 0) {
             const Counter lower = sorted[(N / 2) - 1];
             const Counter upper = sorted[N / 2];
-            baseline = lower + (upper - lower) / static_cast<Counter>(2);
+            baseline = lower + ((upper - lower) / static_cast<Counter>(2));
         } else {
             baseline = sorted[N / 2];
         }
