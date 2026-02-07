@@ -11,3 +11,5 @@ includes("lib/umimmio")
 includes("lib/umitest")
 includes("lib/umibench")
 includes("lib/umirtm")
+
+includes("tools/release.lua")
