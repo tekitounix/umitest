@@ -79,7 +79,7 @@ xmake release --ver=0.3.0 --no-tag --no-test
 
 ## 処理フロー
 
-`xmake release` は以下の 6 ステップを順番に実行します。
+`xmake release` は以下の 7 ステップを順番に実行します。
 
 ### Step 1: 事前チェック
 
@@ -113,13 +113,21 @@ xmake release --ver=0.3.0 --no-tag --no-test
 4. SHA256 チェックサムを `<name>-<version>.tar.gz.sha256` に出力
 5. ステージングディレクトリを削除
 
-### Step 5: git commit + タグ
+### Step 5: xmake-repo パッケージ定義更新
+
+`release_config.lua` の `packages` セクションからパッケージ定義を自動生成:
+
+- `xmake-repo/synthernet/packages/u/<name>/xmake.lua` を生成（既存なら上書き）
+- アーカイブの SHA256 から `add_versions("X.Y.Z", "<sha256>")` を自動追記
+- 既に同バージョンが登録済みの場合はスキップ
+
+### Step 6: git commit + タグ
 
 - `git add -A && git commit -m "release: vX.Y.Z"`
 - 統一タグ: `vX.Y.Z`
 - 個別タグ: `<name>/vX.Y.Z`（対象ライブラリごと）
 
-### Step 6: サマリー
+### Step 7: サマリー
 
 - 生成されたアーカイブのパス一覧
 - SHA256 ハッシュ（xmake-repo パッケージ定義への転記用）
@@ -177,14 +185,58 @@ build/packages/
 
 ## xmake-repo パッケージ更新
 
-リリース後、`synthernet-xmake-repo` のパッケージ定義に新バージョンを追加します。
+Step 5 でパッケージ定義とバージョンは自動生成されます。
+リリース後は xmake-repo サブモジュールの変更をコミットするだけです:
 
-リリースサマリーに表示される SHA256 を使用:
+```bash
+# umi ルートで
+git add xmake-repo/synthernet
+git commit -m "chore: update synthernet-xmake-repo for vX.Y.Z"
+git push origin main
+```
+
+手動でバージョンを追加する場合は、リリースサマリーに表示される SHA256 を使用:
 
 ```lua
 -- xmake-repo/synthernet/packages/u/<name>/xmake.lua
 add_versions("0.3.0", "<sha256>")
 ```
+
+## 外部ユーザーの利用方法
+
+外部ユーザーは synthernet-xmake-repo を追加するだけで UMI ライブラリを利用できます:
+
+```lua
+-- 外部ユーザーの xmake.lua
+add_repositories("synthernet https://github.com/user/synthernet-xmake-repo.git")
+
+add_requires("umimmio 0.2.0")
+add_requires("umitest 0.2.0")
+
+target("my_app")
+    set_kind("binary")
+    add_packages("umimmio")
+    add_packages("umitest")
+```
+
+各パッケージは独立しており、必要なものだけ指定すれば依存は自動解決されます。
+
+## FAQ
+
+### 一部のライブラリだけリリースしたい場合は？
+
+統一バージョンのため、CHANGELOG に "No changes" と明記すれば問題ありません。
+個別バージョニングが必要になった場合は個別タグ（`umimmio/v0.4.0` のみ）に切り替えます。
+
+### 外部ユーザーが umitest を使わずに umimmio だけ使えるか？
+
+使えます。`add_requires("umimmio")` の on_install は `include/` のみコピーするため、
+umitest への依存は発生しません。
+
+### umi 本体（umi.core, umi.dsp 等）もパッケージ配布する？
+
+現時点では不要です。umi 本体は embedded kernel と密結合しており、
+需要が出た時点で `umi-core`, `umi-dsp` 等として切り出します。
 
 ## トラブルシューティング
 
