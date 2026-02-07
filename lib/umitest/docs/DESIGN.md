@@ -1,6 +1,6 @@
 # umitest Design
 
-[Docs Home](INDEX.md) | [日本語](ja/DESIGN.md)
+[日本語](ja/DESIGN.md)
 
 ## 1. Vision
 
@@ -119,6 +119,35 @@ Notes:
 
 ## 5. Programming Model
 
+### 5.0 API Reference
+
+Public entrypoint: `include/umitest/test.hh`
+
+Core types:
+
+- `umi::test::Suite` — test runner and statistics
+- `umi::test::TestContext` — assertion context for structured tests
+- `umi::test::format_value()` — snprintf-based value formatter
+
+Available assertions (`assert_*` on TestContext, `check_*` on Suite):
+
+| Method | Checks |
+|--------|--------|
+| `assert_eq` / `check_eq` | `a == b` |
+| `assert_ne` / `check_ne` | `a != b` |
+| `assert_lt` / `check_lt` | `a < b` |
+| `assert_le` / `check_le` | `a <= b` |
+| `assert_gt` / `check_gt` | `a > b` |
+| `assert_ge` / `check_ge` | `a >= b` |
+| `assert_near` / `check_near` | `\|a - b\| < eps` |
+| `assert_true` / `check` | boolean condition |
+
+Headers:
+
+- `include/umitest/suite.hh` — Suite class + TestContext impl
+- `include/umitest/context.hh` — TestContext declaration
+- `include/umitest/format.hh` — format_value for diagnostic output
+
 ### 5.1 Minimal Path
 
 Required minimal flow:
@@ -214,6 +243,27 @@ This is compatible with CI pipelines and `xmake test`.
 3. All tests run on host via `xmake test`.
 4. Tests focus on semantic correctness, not timing.
 5. CI runs host tests on all supported platforms.
+
+### 8.1 Test Layout
+
+- `tests/test_main.cc`: test entrypoint
+- `tests/test_assertions.cc`: all assert_* methods (eq, ne, lt, le, gt, ge, near, true)
+- `tests/test_format.cc`: format_value for all supported types
+- `tests/test_suite_workflow.cc`: Suite lifecycle, run(), check_*, summary()
+
+### 8.2 Running Tests
+
+```bash
+xmake test                    # all targets
+xmake test 'test_umitest/*'  # umitest only
+```
+
+### 8.3 Quality Gates
+
+- All assertion tests pass on host
+- Format value tests cover all supported types
+- Suite workflow tests verify pass/fail counting and exit code semantics
+- Self-testing: umitest uses itself — any framework regression is immediately visible
 
 ---
 

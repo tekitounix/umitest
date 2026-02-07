@@ -1,24 +1,17 @@
 # umitest
 
-[English](../../README.md) | 日本語
+[English](../../README.md)
 
-`umitest` は C++23 向けのマクロゼロ、ヘッダオンリーテストフレームワークです。
-`std::source_location` による自動ソース位置取得で、テスト関数を通常の C++ コードとして記述できます。
+C++23 向けのマクロ不要・ヘッダオンリーのテストフレームワークです。
+`std::source_location` により、テスト関数を通常の C++ コードとして記述できます。
 
-## リリース状況
+## 特徴
 
-- 現在のバージョン: `0.1.0`
-- 安定性: 初回リリース
-- バージョニング方針: [`RELEASE.md`](../../RELEASE.md)
-- 変更履歴: [`CHANGELOG.md`](../../CHANGELOG.md)
-
-## なぜ umitest か
-
-- マクロゼロ — 全アサーションは通常の関数呼び出し
-- ヘッダオンリー — `#include <umitest/test.hh>` だけで使用可能
-- 組み込み対応 — 例外・ヒープ・RTTI 不使用
-- 2つのテストスタイル — 構造化 (`TestContext`) とインライン (`Suite::check_*`)
-- セルフテスト — umitest は自身をテストし、フレームワークのリグレッションを即座に検出
+- マクロ不要 — アサーションはすべて通常の関数呼び出し
+- ヘッダオンリー — `#include <umitest/test.hh>` だけで使える
+- 組み込み対応 — 例外・ヒープ・RTTI 不要
+- 2つのテストスタイル — 構造化（`TestContext`）とインライン（`Suite::check_*`）
+- セルフテスト — umitest 自身を使ってテストするため、フレームワークの退行が即座に検出可能
 
 ## クイックスタート
 
@@ -39,30 +32,17 @@ int main() {
 }
 ```
 
-## ビルド・テスト
+## ビルドとテスト
 
 ```bash
-xmake build test_umitest
-xmake test "test_umitest/*"
+xmake test
 ```
 
 ## ドキュメント
 
-- ドキュメント一覧（推奨エントリ）: [`docs/ja/INDEX.md`](INDEX.md)
-- はじめに: [`docs/ja/GETTING_STARTED.md`](GETTING_STARTED.md)
-- 使い方: [`docs/ja/USAGE.md`](USAGE.md)
-- テストと品質ゲート: [`docs/ja/TESTING.md`](TESTING.md)
-- サンプルガイド: [`docs/ja/EXAMPLES.md`](EXAMPLES.md)
-- 設計ノート: [`docs/ja/DESIGN.md`](DESIGN.md)
-
-英語版は [`docs/`](../INDEX.md) にあります。
-
-Doxygen HTML をローカル生成:
-
-```bash
-xmake doxygen -P . -o build/doxygen .
-```
+- [設計 & API](../DESIGN.md)
+- [共通ガイド](../../docs/INDEX.md)
 
 ## ライセンス
 
-MIT (`LICENSE`)
+MIT — [LICENSE](../../../LICENSE) を参照
