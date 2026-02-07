@@ -1,16 +1,9 @@
 # umirtm
 
-English | [日本語](docs/ja/README.md)
+[日本語](docs/ja/README.md)
 
-`umirtm` is a header-only Real-Time Monitor library for C++23.
-It provides SEGGER RTT compatible ring buffers, an embedded printf, and `{}` placeholder print — all with zero heap allocation.
-
-## Release Status
-
-- Current version: `0.1.0`
-- Stability: initial release
-- Versioning policy: [`RELEASE.md`](RELEASE.md)
-- Changelog: [`CHANGELOG.md`](CHANGELOG.md)
+A header-only Real-Time Monitor library for C++23.
+SEGGER RTT compatible ring buffers, an embedded printf, and `{}` placeholder print — all with zero heap allocation.
 
 ## Why umirtm
 
@@ -34,37 +27,31 @@ int main() {
 }
 ```
 
-## Public Headers
+## Build and Test
+
+```bash
+xmake test
+```
+
+## Public API
 
 - `umirtm/rtm.hh` — RTT monitor core (Monitor, Mode, terminal colors)
 - `umirtm/printf.hh` — Lightweight printf/snprintf (PrintConfig, format engine)
 - `umirtm/print.hh` — `{}` format print/println helper
 - `umirtm/rtm_host.hh` — Host-side bridge (stdout, shared memory, TCP)
 
-## Build and Test
+## Examples
 
-```bash
-xmake build test_umirtm
-xmake test "test_umirtm/*"
-```
+- [`examples/minimal.cc`](examples/minimal.cc) — basic RTT monitor usage
+- [`examples/printf_demo.cc`](examples/printf_demo.cc) — printf format examples
+- [`examples/print_demo.cc`](examples/print_demo.cc) — `{}` placeholder print
 
 ## Documentation
 
-- Documentation index (recommended entry): [`docs/INDEX.md`](docs/INDEX.md)
-- Getting started: [`docs/GETTING_STARTED.md`](docs/GETTING_STARTED.md)
-- Detailed usage: [`docs/USAGE.md`](docs/USAGE.md)
-- Testing and quality gates: [`docs/TESTING.md`](docs/TESTING.md)
-- Example guide: [`docs/EXAMPLES.md`](docs/EXAMPLES.md)
-- Design note: [`docs/DESIGN.md`](docs/DESIGN.md)
-
-Japanese versions are available under [`docs/ja/`](docs/ja/README.md).
-
-Generate Doxygen HTML locally:
-
-```bash
-xmake doxygen -P . -o build/doxygen .
-```
+- [Design & API](docs/DESIGN.md)
+- [Common Guides](../docs/INDEX.md)
+- API docs: `doxygen Doxyfile` → `build/doxygen/html/index.html`
 
 ## License
 
-MIT (`LICENSE`)
+MIT — See [LICENSE](../../LICENSE)

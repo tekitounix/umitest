@@ -1,6 +1,6 @@
 # umirtm Design
 
-[Docs Home](INDEX.md) | [日本語](ja/DESIGN.md)
+[日本語](ja/DESIGN.md)
 
 ## 1. Vision
 
@@ -124,6 +124,40 @@ Notes:
 
 ## 5. Programming Model
 
+### 5.0 API Reference
+
+Public entrypoint: `include/umirtm/rtm.hh`
+
+**Monitor API** (`rtm.hh`):
+
+| Method | Description |
+|--------|-------------|
+| `rtm::init(id)` | Initialise with control block ID string |
+| `rtm::write(str)` | Write string to up buffer. Returns bytes written |
+| `rtm::log(str)` | Write string, discard return value |
+| `rtm::read(span)` | Read from down buffer. Returns bytes read |
+| `rtm::read_byte()` | Read one byte (-1 if empty) |
+| `rtm::read_line(buf, len)` | Read line from down buffer |
+| `rtm::get_available()` | Bytes pending in up buffer |
+| `rtm::get_free_space()` | Free bytes in up buffer |
+
+**Printf API** (`printf.hh`):
+
+| Function | Description |
+|----------|-------------|
+| `rt::snprintf(buf, sz, fmt, ...)` | Format to buffer |
+| `rt::vsnprintf(buf, sz, fmt, va)` | va_list variant |
+| `rt::printf(fmt, ...)` | Format to stdout |
+
+Supported specifiers: `%d`, `%u`, `%x`, `%X`, `%o`, `%c`, `%s`, `%p`, `%f`, `%e`, `%g`, `%%`
+
+**Print API** (`print.hh`):
+
+| Function | Description |
+|----------|-------------|
+| `rt::print(fmt, args...)` | `{}` placeholder output to stdout |
+| `rt::println(fmt, args...)` | Same + newline |
+
 ### 5.1 Minimal Path
 
 Required minimal flow:
@@ -232,6 +266,27 @@ Optional (config-dependent): `%b`/`%B` (binary), `%n` (write-back).
 4. Print tests verify `{}` placeholder conversion and output.
 5. All tests run on host via `xmake test`.
 6. CI runs host tests on all supported platforms.
+
+### 8.1 Test Layout
+
+- `tests/test_main.cc`: test entrypoint
+- `tests/test_monitor.cc`: Monitor write/read, capacity, buffer wrapping, overflow modes
+- `tests/test_printf.cc`: printf/snprintf format specifiers and edge cases
+- `tests/test_print.cc`: `{}` placeholder conversion and output
+
+### 8.2 Running Tests
+
+```bash
+xmake test                    # all targets
+xmake test 'test_umirtm/*'   # umirtm only
+```
+
+### 8.3 Quality Gates
+
+- All host tests pass
+- Monitor tests verify buffer integrity under boundary conditions
+- Printf tests cover all enabled format specifiers per DefaultConfig
+- Print tests verify `{}` → `%` conversion correctness
 
 ---
 
