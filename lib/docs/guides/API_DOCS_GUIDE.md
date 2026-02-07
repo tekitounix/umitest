@@ -104,88 +104,29 @@ umibench の Doxyfile はデフォルト値を含む完全版（約3000行）。
 
 ## CI ワークフロー
 
-### 配置（2 箇所）
+Doxygen 生成は `.github/workflows/doxygen.yml` で統合管理されます。
+matrix strategy で全ライブラリを一括処理します。
 
-各ライブラリに対して CI workflow を 2 箇所に配置する:
+### 構成
 
-| 場所 | 用途 | Doxygen コマンド |
-|------|------|-----------------|
-| `.github/workflows/<libname>-doxygen.yml` | モノレポ CI | `xmake doxygen -P lib/<libname> -o build/doxygen lib/<libname>` |
-| `lib/<libname>/.github/workflows/<libname>-doxygen.yml` | 単体 repo CI | `xmake doxygen -P . -o build/doxygen .` |
+- **build ジョブ**: 各ライブラリの Doxyfile から `cd lib/<lib> && doxygen` で HTML を生成
+- **deploy ジョブ**: main ブランチへの push 時のみ GitHub Pages にデプロイ
 
-### ワークフロー構成
+### トリガー
 
-モノレポ版（`.github/workflows/<libname>-doxygen.yml`）:
+- `push`: main, develop ブランチの `lib/**` パス変更時
+- `pull_request`: 同上
+- `workflow_dispatch`: 手動実行
 
-```yaml
-name: <libname> Doxygen
+### Doxygen コマンド（CI 内部）
 
-on:
-  workflow_dispatch:
-  push:
-    branches: [main, develop]
-    paths:
-      - "lib/<libname>/**"
-      - ".github/workflows/<libname>-doxygen.yml"
-  pull_request:
-    paths:
-      - "lib/<libname>/**"
-      - ".github/workflows/<libname>-doxygen.yml"
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: <libname>-doxygen-pages
-  cancel-in-progress: true
-
-jobs:
-  build:
-    name: Build Doxygen HTML
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: xmake-io/github-action-setup-xmake@v1
-        with:
-          xmake-version: latest
-      - name: Install Doxygen
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y doxygen graphviz
-      - name: Generate docs
-        run: xmake doxygen -P lib/<libname> -o build/doxygen lib/<libname>
-      - uses: actions/upload-artifact@v4
-        with:
-          name: <libname>-doxygen-html
-          path: lib/<libname>/build/doxygen/html
-          if-no-files-found: error
-
-  deploy:
-    name: Deploy to GitHub Pages
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: <libname>-doxygen-html
-          path: site
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
-      - id: deployment
-        uses: actions/deploy-pages@v4
+```bash
+cd lib/<libname> && doxygen
 ```
 
-単体 repo 版との差分:
-- `paths:` フィルタが追加される（モノレポ版のみ）
-- `xmake doxygen -P lib/<libname>` → `xmake doxygen -P .`（単体版）
+> **注**: `xmake doxygen` ではなく、直接 `doxygen` を使用しています。
+> 各ライブラリの `Doxyfile` が `OUTPUT_DIRECTORY = build/doxygen` を指定しているため、
+> ライブラリディレクトリ内で実行するだけで正しく出力されます。
 
 ---
 

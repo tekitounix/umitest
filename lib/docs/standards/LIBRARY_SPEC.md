@@ -306,138 +306,39 @@ target_end()
 
 ---
 
-## 4. CI/CD 標準 (.github/workflows/)
+## 4. CI/CD 標準
 
-### 4.1 <libname>-ci.yml 標準構造
+### 4.1 モノレポ統合 CI（現行構成）
 
-```yaml
-name: <libname> CI
+モノレポでは統合ワークフローで全ライブラリをまとめて処理する:
 
-on:
-  workflow_dispatch:
-    inputs:
-      run_renode:
-        description: "Run optional Renode smoke check"
-        required: false
-        type: boolean
-        default: false
-  push:
-    branches: [main, develop]
-  pull_request:
+- `.github/workflows/ci.yml` — テスト・ビルド（host / WASM / ARM）
+- `.github/workflows/doxygen.yml` — Doxygen 生成・デプロイ（matrix strategy）
+- `.github/workflows/release.yml` — タグトリガーによる自動リリース
 
-jobs:
-  host-tests:
-    name: Host + Compile-fail Tests (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: xmake-io/github-action-setup-xmake@v1
-        with:
-          xmake-version: latest
-      - name: Run host tests
-        run: xmake test "test_<libname>/*"
-      - name: Run compile-fail tests
-        run: xmake test "test_<libname>_compile_fail/*"
+#### 必須ジョブ
 
-  wasm-tests:
-    name: WASM Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: xmake-io/github-action-setup-xmake@v1
-        with:
-          xmake-version: latest
-      - uses: mymindstorm/setup-emsdk@v14
-        with:
-          version: 3.1.50
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-      - name: Run wasm tests
-        run: |
-          source "$EMSDK/emsdk_env.sh"
-          xmake test "<libname>_wasm/*"
+| ジョブ | 内容 |
+|--------|------|
+| **host-tests** | `xmake test`（ubuntu + macos matrix） |
+| **wasm-tests** | Emscripten + Node.js で `xmake test "*_wasm/*"` |
+| **arm-build** | GCC クロスビルド確認 |
 
-  arm-build:
-    name: ARM Cross Build (GCC)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: xmake-io/github-action-setup-xmake@v1
-        with:
-          xmake-version: latest
-      - name: Install ARM toolchain
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-arm-none-eabi libnewlib-arm-none-eabi
-      - name: Build ARM target
-        run: xmake build <libname>_<board>_renode_gcc
+#### 手動ジョブ
 
-  renode-smoke:
-    name: Renode Smoke Check (Manual)
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.run_renode == 'true'
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-      - uses: xmake-io/github-action-setup-xmake@v1
-        with:
-          xmake-version: latest
-      - name: Install ARM toolchain
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-arm-none-eabi libnewlib-arm-none-eabi
-      - name: Install Renode
-        run: |
-          wget https://github.com/renode/renode/releases/download/v1.14.0/renode-1.14.0.linux-portable.tar.gz
-          tar xzf renode-1.14.0.linux-portable.tar.gz
-          echo "$PWD/renode_1.14.0_portable" >> "$GITHUB_PATH"
-      - name: Build ARM target
-        run: xmake build <libname>_<board>_renode_gcc
-      - name: Run Renode script
-        run: |
-          timeout 120s renode --console --disable-xwt -e \
-            "include @$PWD/platforms/arm/cortex-m/<board>/renode/<script>.resc"
-      - name: Verify UART output
-        run: |
-          test -s build/<libname>_<board>_renode_gcc/release/uart.log
-```
+| ジョブ | トリガー |
+|--------|---------|
+| **renode-smoke** | `workflow_dispatch` + `run_renode=true` |
 
-### 4.2 <libname>-doxygen.yml 標準構造
+### 4.2 standalone 用テンプレート（切り出し時）
 
-```yaml
-name: <libname> Doxygen
+standalone リポジトリとして切り出す場合は、以下のテンプレートを参考に
+`<libname>/.github/workflows/` に配置する:
 
-on:
-  push:
-    branches: [main]
-  pull_request:
+**CI テスト**: `xmake test` で host テストを実行。
+**Doxygen**: `cd lib/<libname> && doxygen` で生成し GitHub Pages にデプロイ。
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: xmake-io/github-action-setup-xmake@v1
-        with:
-          xmake-version: latest
-      - name: Generate documentation
-        run: xmake doxygen -P . -o build/doxygen .
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: <libname>-doxygen
-          path: build/doxygen/html
-      - name: Deploy to GitHub Pages
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: build/doxygen/html
+詳細は実際のモノレポ統合 CI (`.github/workflows/ci.yml`, `doxygen.yml`) を参照。
 ```
 
 ---

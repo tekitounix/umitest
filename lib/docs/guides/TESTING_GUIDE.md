@@ -188,31 +188,29 @@ target_end()
 
 ## 4. CI/CD パイプライン
 
-### GitHub Actions（ライブラリ別ワークフロー）
+### GitHub Actions（統合 CI）
 
-各ライブラリは専用ワークフローを持つことを推奨。
-`umibench` は `.github/workflows/umibench-ci.yml` を使用。
+全ライブラリのテストは `.github/workflows/ci.yml` で統合管理されます。
 
-#### umibench で CI 自動化されるもの
+#### 自動実行ジョブ
 
 | ジョブ | 内容 | 実行コマンド |
 |--------|------|-------------|
-| **host-tests** | Host ユニット + compile-fail (ubuntu, macos) | `xmake test "test_umibench/*"` + `xmake test "test_umibench_compile_fail/*"` |
-| **wasm-tests** | WASM ビルド + Node.js 実行 | `xmake test "umibench_wasm/*"` |
-| **arm-build** | ARM GCC クロスビルド確認 | `xmake build umibench_stm32f4_renode_gcc` |
+| **host-tests** | Host ユニット + compile-fail (ubuntu, macos) | `xmake test` |
+| **wasm-tests** | WASM ビルド + Node.js 実行 | `xmake test "*_wasm/*"` |
+| **arm-build** | ARM GCC クロスビルド確認 | 各ライブラリの `*_stm32f4_renode_gcc` ターゲット |
 
-#### 任意・手動ジョブ（umibench）
+#### 手動ジョブ
 
 | 項目 | 理由 | 実行方法 |
 |------|------|---------|
-| **Renode エミュレーション** | エミュレータ/環境依存が強い | `workflow_dispatch` + `run_renode=true`（`renode-smoke`） |
+| **Renode エミュレーション** | エミュレータ/環境依存が強い | `workflow_dispatch` + `run_renode=true` |
 | **実機テスト** | ハードウェアが必要 | `xmake flash -t <target>` + pyOCD/GDB |
-| **対話的デバッグ** | 人間の操作が必要 | `xmake debugger -t <target>` |
 
 ### 実行タイミング
 
-- **push**: main, develop ブランチへのプッシュ時
-- **PR**: 上記ブランチへのPR作成/更新時
+- **push**: main, develop ブランチへのプッシュ時（`lib/**` パス変更のみ）
+- **PR**: 上記ブランチへの PR 作成/更新時
 
 ---
 
