@@ -396,7 +396,30 @@ clang-tidy -p . src/main.cc
 
 ---
 
+## エラーハンドリング
+
+- `Result<T>` またはエラーコードを優先する。
+- カーネル/オーディオパスでは例外を使用しない。
+- 外部入力（ユーザー入力、外部 API）のバウンダリでのみバリデーションを行う。
+- 内部コードやフレームワーク保証は信頼する。
+
+---
+
+## リアルタイム安全性
+
+`process()` やオーディオコールバック内では以下を**厳守**する（違反は未定義動作やオーディオグリッチの原因）:
+
+| 禁止事項 | 理由 |
+|----------|------|
+| ヒープ割り当て (`new`, `malloc`, `std::vector` growth) | レイテンシ不定 |
+| ブロッキング同期 (`mutex`, `semaphore`) | デッドロック・レイテンシ |
+| 例外 (`throw`) | スタックアンワインド不可 |
+| stdio (`printf`, `cout`) | ブロッキング I/O |
+
+---
+
 ## 関連ドキュメント
 
 - [Library Spec](LIBRARY_SPEC.md) - ライブラリ構造規約
 - [Testing Guide](../guides/TESTING_GUIDE.md) - テスト戦略
+- [API Comment Rule](API_COMMENT_RULE.md) - コメント規約
