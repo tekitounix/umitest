@@ -5,7 +5,7 @@
 - [02_CATEGORY_INDEX.md](02_CATEGORY_INDEX.md) — PAL カテゴリ一覧 (C1–C14)
 - [03_ARCHITECTURE.md](03_ARCHITECTURE.md) — PAL アーキテクチャ提案
 - [04_ANALYSIS.md](04_ANALYSIS.md) — 既存 PAL アプローチの横断分析
-- [../07_HW_DATA_PIPELINE.md](../07_HW_DATA_PIPELINE.md) — HW データ統合パイプライン
+- [../pipeline/hw_data_pipeline.md](../pipeline/hw_data_pipeline.md) — HW データ統合パイプライン
 
 ---
 
@@ -826,8 +826,8 @@ Phase 3 (マルチプラットフォーム):
 
 | プロジェクト | 成功要因 | UMI への適用 |
 |------------|---------|-------------|
-| **stm32-rs** | YAML パッチフォーマットの標準化とコミュニティ維持 | svdtools 互換パッチを採用 (判断済み: 03_ARCHITECTURE §3.3) |
-| **embassy stm32-data** | 複数ソース (CubeMX + SVD + HAL ヘッダ) の統合と IP バージョン管理 | 中間表現 JSON の設計に反映 (07_HW_DATA_PIPELINE §4.4) |
+| **stm32-rs** | YAML パッチフォーマットの標準化とコミュニティ維持 | svdtools 互換パッチを採用 (判断済み: pal/03_ARCHITECTURE §3.3) |
+| **embassy stm32-data** | 複数ソース (CubeMX + SVD + HAL ヘッダ) の統合と IP バージョン管理 | 中間表現 JSON の設計に反映 (../pipeline/hw_data_pipeline.md §4.4) |
 | **modm** | 「コンパイルして実行」による CMSIS ヘッダ抽出 | T2 ツールの実装方式として採用 |
 | **modm** | ロスレスマージによる 1,171 デバイスの 106 ファイル圧縮 | 将来のマルチデバイス展開時に参考 |
 | **Rust cortex-m** | コアペリフェラルの手書き (アーキテクチャ数が少ないため現実的) | C1 Phase 1 の戦略として採用 |
@@ -998,7 +998,7 @@ SDK_2.x.x_MIMXRT1060-EVK/
 
 ## 11. umi_mmio 既存資産の詳細
 
-07_HW_DATA_PIPELINE §3.1 で分析済みだが、本ドキュメントのコンテキストで再整理する。
+../pipeline/hw_data_pipeline.md §3.1 で分析済みだが、本ドキュメントのコンテキストで再整理する。
 
 | 資産 | 入力 | 出力 | 再利用可能性 | 再利用方法 |
 |------|------|------|-------------|----------|

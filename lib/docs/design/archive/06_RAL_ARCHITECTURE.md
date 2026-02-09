@@ -1,12 +1,12 @@
 # 06. RAL (Register Access Layer) アーキテクチャ提案
 
-> **移動済み**: 本ドキュメントは [pal/03_ARCHITECTURE.md](pal/03_ARCHITECTURE.md) に移動しました。
+> **移動済み**: 本ドキュメントは [../pal/03_ARCHITECTURE.md](../pal/03_ARCHITECTURE.md) に移動しました。
 > RAL → PAL (Peripheral Access Layer) に命名変更済み。
 
 **ステータス:** 設計中
 **関連文書:**
-- [pal/03_ARCHITECTURE.md](pal/03_ARCHITECTURE.md) — PAL アーキテクチャ提案 (最新版)
-- [pal/04_ANALYSIS.md](pal/04_ANALYSIS.md) — 既存 PAL アプローチの横断分析
+- [../pal/03_ARCHITECTURE.md](../pal/03_ARCHITECTURE.md) — PAL アーキテクチャ提案 (最新版)
+- [../pal/04_ANALYSIS.md](../pal/04_ANALYSIS.md) — 既存 PAL アプローチの横断分析
 - umimmio/docs/DESIGN.md — 現行 umimmio 設計
 
 ---

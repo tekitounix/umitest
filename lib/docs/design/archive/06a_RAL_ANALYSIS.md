@@ -1,12 +1,12 @@
 # 06a. RAL (Register Access Layer) 横断分析
 
-> **移動済み**: 本ドキュメントは [pal/04_ANALYSIS.md](pal/04_ANALYSIS.md) に移動しました。
+> **移動済み**: 本ドキュメントは [../pal/04_ANALYSIS.md](../pal/04_ANALYSIS.md) に移動しました。
 > RAL → PAL (Peripheral Access Layer) に命名変更済み。
 
 **ステータス:** 分析完了
 **関連文書:**
-- [pal/03_ARCHITECTURE.md](pal/03_ARCHITECTURE.md) — PAL アーキテクチャ提案 (最新版)
-- [pal/04_ANALYSIS.md](pal/04_ANALYSIS.md) — 既存 PAL アプローチの横断分析 (最新版)
+- [../pal/03_ARCHITECTURE.md](../pal/03_ARCHITECTURE.md) — PAL アーキテクチャ提案 (最新版)
+- [../pal/04_ANALYSIS.md](../pal/04_ANALYSIS.md) — 既存 PAL アプローチの横断分析 (最新版)
 - umimmio/docs/DESIGN.md — 現行 umimmio 設計
 
 ---

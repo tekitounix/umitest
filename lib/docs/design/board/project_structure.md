@@ -1,9 +1,9 @@
-# 05. ユーザープロジェクト構成
+# ユーザープロジェクト構成
 
 **ステータス:** 設計中
 **関連文書:**
-- [03_ARCHITECTURE.md](03_ARCHITECTURE.md) — パッケージ構成と依存関係
-- [04_BOARD_CONFIG.md](04_BOARD_CONFIG.md) — ボード定義とコード生成
+- [../foundations/architecture.md](../foundations/architecture.md) — パッケージ構成と依存関係
+- [config.md](config.md) — ボード定義とコード生成
 
 ---
 

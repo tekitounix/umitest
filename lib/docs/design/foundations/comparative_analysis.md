@@ -2,7 +2,7 @@
 
 **ステータス:** 完了
 **作成日:** 2026-02-09
-**前提文書:** archive/BSP_ANALYSIS.md, archive/PLATFORM_COMPARISON.md, archive/HAL_INTERFACE_ANALYSIS.md, archive/review/compare.md, archive/review/compare_device.md
+**前提文書:** ../archive/BSP_ANALYSIS.md, ../archive/PLATFORM_COMPARISON.md, ../archive/HAL_INTERFACE_ANALYSIS.md, ../archive/review/compare.md, ../archive/review/compare_device.md
 **目的:** 調査した 13+ のフレームワークとレビュー結果を横断的に比較し、UMI の設計判断の根拠を体系化する
 
 ---
@@ -333,8 +333,8 @@ embedded-hal 1.0 は `transaction()` を基本にし `write`/`read` はデフォ
 
 | 文書 | 内容 |
 |------|------|
-| archive/BSP_ANALYSIS.md | 5 アーキタイプ分類、3 ユースケース評価、共通問題パターン |
-| archive/PLATFORM_COMPARISON.md | 13 システムの詳細調査・横断比較表 |
-| archive/HAL_INTERFACE_ANALYSIS.md | 10 HAL のインターフェイス比較、根源的設計原理 |
-| archive/review/compare.md | 7 レビュアーの合意分析、改善優先度 |
-| archive/review/compare_device.md | デバイスドライバ配置分析、パッケージ構成決定 |
+| ../archive/BSP_ANALYSIS.md | 5 アーキタイプ分類、3 ユースケース評価、共通問題パターン |
+| ../archive/PLATFORM_COMPARISON.md | 13 システムの詳細調査・横断比較表 |
+| ../archive/HAL_INTERFACE_ANALYSIS.md | 10 HAL のインターフェイス比較、根源的設計原理 |
+| ../archive/review/compare.md | 7 レビュアーの合意分析、改善優先度 |
+| ../archive/review/compare_device.md | デバイスドライバ配置分析、パッケージ構成決定 |

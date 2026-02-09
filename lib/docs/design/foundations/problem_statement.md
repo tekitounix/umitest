@@ -5,18 +5,18 @@
 
 | ソース文書 | 内容 |
 |-----------|------|
-| `archive/review/ARCHITECTURE.md` | 元のアーキテクチャ設計（構造的課題を含む） |
-| `archive/review/compare.md` | 7レビューの横断比較（コンセンサス問題の抽出） |
-| `archive/HAL_INTERFACE_ANALYSIS.md` | HAL Concept設計の詳細分析 |
-| `archive/BSP_ANALYSIS.md` | BSPアーキテクチャのパターン・問題分析 |
+| `../archive/review/ARCHITECTURE.md` | 元のアーキテクチャ設計（構造的課題を含む） |
+| `../archive/review/compare.md` | 7レビューの横断比較（コンセンサス問題の抽出） |
+| `../archive/HAL_INTERFACE_ANALYSIS.md` | HAL Concept設計の詳細分析 |
+| `../archive/BSP_ANALYSIS.md` | BSPアーキテクチャのパターン・問題分析 |
 
 補助資料:
 
 | ソース文書 | 内容 |
 |-----------|------|
-| `archive/XMAKE_RULE_ORDERING.md` | xmakeルールのライフサイクル順序問題 |
-| `archive/HARDWARE_DATA_CONSOLIDATION.md` | ハードウェアデータの二重管理問題 |
-| `archive/review/review_claudecode.md` | 実装コードとの突き合わせレビュー |
+| `../archive/XMAKE_RULE_ORDERING.md` | xmakeルールのライフサイクル順序問題 |
+| `../archive/HARDWARE_DATA_CONSOLIDATION.md` | ハードウェアデータの二重管理問題 |
+| `../archive/review/review_claudecode.md` | 実装コードとの突き合わせレビュー |
 
 ---
 

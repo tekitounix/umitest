@@ -2,16 +2,16 @@
 
 > **分割・移動済み**: 本ドキュメントの内容は `pal/` ディレクトリに分割・拡充されました。
 >
-> - [pal/00_OVERVIEW.md](pal/00_OVERVIEW.md) — PAL ドキュメント全体マップ
-> - [pal/01_LAYER_MODEL.md](pal/01_LAYER_MODEL.md) — 4 層モデル
-> - [pal/02_CATEGORY_INDEX.md](pal/02_CATEGORY_INDEX.md) — C1–C13 カテゴリ一覧 + 完全性チェックリスト
-> - [pal/categories/](pal/categories/) — 各カテゴリの詳細 + 生成ヘッダのコード例
+> - [../pal/00_OVERVIEW.md](../pal/00_OVERVIEW.md) — PAL ドキュメント全体マップ
+> - [../pal/01_LAYER_MODEL.md](../pal/01_LAYER_MODEL.md) — 4 層モデル
+> - [../pal/02_CATEGORY_INDEX.md](../pal/02_CATEGORY_INDEX.md) — C1–C14 カテゴリ一覧 + 完全性チェックリスト
+> - [../pal/categories/](../pal/categories/) — 各カテゴリの詳細 + 生成ヘッダのコード例
 
 **ステータス:** pal/ に移行済み
 **関連文書:**
-- [pal/03_ARCHITECTURE.md](pal/03_ARCHITECTURE.md) — PAL アーキテクチャ提案
-- [pal/04_ANALYSIS.md](pal/04_ANALYSIS.md) — 既存 PAL アプローチの横断分析
-- [07_HW_DATA_PIPELINE.md](07_HW_DATA_PIPELINE.md) — HW 定義データ統合パイプライン
+- [../pal/03_ARCHITECTURE.md](../pal/03_ARCHITECTURE.md) — PAL アーキテクチャ提案
+- [../pal/04_ANALYSIS.md](../pal/04_ANALYSIS.md) — 既存 PAL アプローチの横断分析
+- [../pipeline/hw_data_pipeline.md](../pipeline/hw_data_pipeline.md) — HW 定義データ統合パイプライン
 
 > **命名変更**: RAL (Register Access Layer) → **PAL (Peripheral Access Layer)** に統一。
 
@@ -21,7 +21,7 @@
 
 PAL が生成・提供すべきハードウェア定義の **完全な分類** を確立する。
 
-データソースの調達方法や生成パイプラインの設計（→ 07_HW_DATA_PIPELINE.md の役割）ではなく、
+データソースの調達方法や生成パイプラインの設計（→ ../pipeline/hw_data_pipeline.md の役割）ではなく、
 **「何が必要か」の全体像** を明確にすることが目的である。
 
 対象プラットフォーム:
@@ -616,6 +616,6 @@ Phase 2 + O1–O5 + ベンダー固有カテゴリ
 
 ## 8. 次のステップ
 
-1. **07_HW_DATA_PIPELINE.md** — 各カテゴリに対するデータソースの対応表と生成パイプライン設計
+1. **../pipeline/hw_data_pipeline.md** — 各カテゴリに対するデータソースの対応表と生成パイプライン設計
 2. **06_RAL_ARCHITECTURE.md** → **06_PAL_ARCHITECTURE.md** — PAL のコード構造と API 設計
 3. 各プラットフォームの SVD ファイル品質評価とギャップ分析
