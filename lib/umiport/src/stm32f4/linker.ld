@@ -93,8 +93,17 @@ SECTIONS
         . = ALIGN(4);
         _ebss = .;
         __bss_end__ = _ebss;
-        _end = .;
     } > SRAM
+
+    .noinit (NOLOAD) :
+    {
+        . = ALIGN(4);
+        *(.noinit)
+        *(.noinit*)
+        . = ALIGN(4);
+    } > SRAM
+
+    _end = .;
 
     .heap :
     {

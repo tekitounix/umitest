@@ -9,8 +9,22 @@
 #include <cstdarg>
 #include <cstddef>
 #include <cstdint>
+#include <span>
 
 #include "platform.hh"
+
+// link-time injection: umirtm output via Platform::Output::putc()
+// Declaration matches umirtm/detail/write.hh — kept inline to avoid
+// coupling syscalls.cc to umirtm headers.
+namespace umi::rt::detail {
+
+void write_bytes(std::span<const std::byte> data) {
+    for (auto byte : data) {
+        umi::port::Platform::Output::putc(static_cast<char>(byte));
+    }
+}
+
+} // namespace umi::rt::detail
 
 extern "C" {
 

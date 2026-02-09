@@ -11,6 +11,8 @@
 
 extern "C" {
 extern uint32_t _sidata, _sdata, _edata, _sbss, _ebss, _estack;
+extern void (*__init_array_start[])();
+extern void (*__init_array_end[])();
 /// @brief Reset handler entry point.
 void Reset_Handler();
 /// @brief Default interrupt handler.
@@ -53,6 +55,12 @@ extern "C" __attribute__((noreturn)) void Reset_Handler() {
     auto* const cpacr = reinterpret_cast<volatile std::uint32_t*>(cpacr_addr);
     *cpacr |= (0xFU << 20);
     asm volatile("dsb\n isb" ::: "memory");
+
+    // NOLINTBEGIN(cert-dcl51-cpp)
+    for (auto** fn = __init_array_start; fn < __init_array_end; ++fn) {
+        (*fn)();
+    }
+    // NOLINTEND(cert-dcl51-cpp)
 
     umi::port::Platform::init();
     main();
