@@ -298,7 +298,10 @@ bool test_return_value_exceeds_buffer(TestContext& t) {
 
 bool test_return_value_empty_format(TestContext& t) {
     std::array<char, 128> buf{};
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-zero-length"
     int n = rt::snprintf<rt::DefaultConfig>(buf.data(), buf.size(), "");
+#pragma GCC diagnostic pop
     return t.assert_eq(n, 0);
 }
 

@@ -76,7 +76,10 @@ bool test_printf_char_format(TestContext& t) {
 
 bool test_snprintf_empty_format(TestContext& t) {
     std::array<char, 32> buf{};
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-zero-length"
     rt::snprintf<rt::DefaultConfig>(buf.data(), buf.size(), "");
+#pragma GCC diagnostic pop
     return t.assert_eq(std::string_view{buf.data()}, std::string_view{""});
 }
 

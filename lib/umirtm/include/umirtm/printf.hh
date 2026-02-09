@@ -9,10 +9,10 @@
 /// callback-based output.
 #pragma once
 
-#include <unistd.h>
-
 #include <array>
 #include <cstdarg>
+
+#include "detail/write.hh"
 
 #include "printf_convert.hh"
 
@@ -182,8 +182,8 @@ int snprintf(char* buffer, std::size_t bufsz, const char* format, ...) {
 /// @return Number of characters written.
 inline int vprintf(const char* format, va_list args) {
     auto pc = [](int c, void*) {
-        char ch = static_cast<char>(c);
-        ::write(1, &ch, 1);
+        auto byte = static_cast<std::byte>(static_cast<unsigned char>(c));
+        umi::rt::detail::write_bytes(std::span{&byte, 1});
     };
     return detail::vpprintf_impl<DefaultConfig>(pc, nullptr, format, args);
 }
