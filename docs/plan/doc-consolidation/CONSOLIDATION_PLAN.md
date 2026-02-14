@@ -434,18 +434,25 @@ Stage B（lib/ 配下、実装計画と同期）:
 
 ## 9. 成果物チェックリスト
 
-### Stage A
+### Stage A — ✅ 完了
 
-- [ ] 不要ファイル ~21 件の削除/archive 移動
-- [ ] カーネル文書の正本一本化
-- [ ] SysEx プロトコル文書の統合
-- [ ] dev/ の名前変更・移動
-- [ ] 壊れたリンクの全修正
-- [ ] docs/README.md の全面書き直し
-- [ ] CLAUDE.md の参照テーブル更新
-- [ ] copilot-instructions.md のパス修正
+- [x] 不要ファイル ~21 件の削除/archive 移動 (A-1)
+- [x] カーネル文書の正本一本化 (A-2)
+- [x] SysEx プロトコル文書の統合 (A-3)
+- [x] dev/ の名前変更・移動 (A-4)
+- [x] USB/MIDI ドキュメントの住み分け (A-5)
+- [x] docs/README.md の全面書き直し (A-6)
+- [x] CLAUDE.md の参照テーブル更新 (A-6)
+- [x] copilot-instructions.md のパス修正 (A-6)
+- [x] 壊れたリンクの全修正 (A-6 + B-0b/B-0c)
 
-### Stage B
+### Stage B-0 — ✅ 完了（実装非依存の前倒し作業）
+
+- [x] lib/umi/bench_old/ の削除（umibench に完全置換済み）
+- [x] lib/docs/ の壊れたリンク修正（5箇所）
+- [x] lib/umi/fs/docs/ の壊れたリンク修正（1箇所）
+
+### Stage B — 未着手（実装計画と同期して実行）
 
 - [ ] lib/docs/ の再配置（Phase 0 同期）
 - [ ] L0+L1 6 ライブラリの UMI Strict Profile ドキュメント完成（Phase 1）

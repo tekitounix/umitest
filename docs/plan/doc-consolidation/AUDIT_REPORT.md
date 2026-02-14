@@ -102,4 +102,31 @@ CONSOLIDATION_PLAN v2.0.0 は v1.0 の主要問題を全て解消し、LIBRARY_S
 2. ~~CAT_G_LIBRARY_DOCS.md の全面改訂~~ → v2.0 に改訂済み
 3. ~~CAT_A〜F の小規模修正~~ → 前提仕様ヘッダ・Phase 番号統一・クリーンスレート注記 等
 
-**全監査項目が解決済み。Stage A の実行を即座に開始できる。**
+**全監査項目が解決済み。**
+
+---
+
+## 5. Stage A 実行結果
+
+Stage A は `docs/consolidation-stage-a` ブランチ上で全6フェーズを完了した。
+
+| Phase | 内容 | コミット | 変更ファイル数 |
+|-------|------|---------|-------------|
+| A-1 | 重複除去・クリーンアップ | `c604d24` | 21 |
+| A-2 | カーネル文書の正本一本化 | `9c72fe4` | 14 |
+| A-3 | SysEx プロトコル文書の統合 | `c89e5d6` | 5 |
+| A-4 | dev/ の整理（名前変更・clang 統合） | `1c88313` | 5 |
+| A-5 | USB/MIDI ドキュメントの住み分け | `87639c5` | 2 |
+| A-6 | 目次・ナビゲーション再構築 | `5661f3d` | 3 |
+
+### Stage B-0 前倒し作業
+
+実装計画に依存しない以下の作業を追加実施:
+
+- `lib/umi/bench_old/` の削除（umibench に完全置換済み）
+- `lib/docs/` の壊れたリンク修正（5箇所: GETTING_STARTED.md ×2, interrupt_model.md ×1, testing_hw.md ×2）
+- `lib/umi/fs/docs/SLIM_STORAGE_PLAN.md` の壊れたリンク修正（1箇所）
+
+### Stage B の状態
+
+Stage B の残作業は全て IMPLEMENTATION_PLAN v1.1.0 の各 Phase と同期して実行する必要がある。現時点で実行可能な作業は全て完了した。
