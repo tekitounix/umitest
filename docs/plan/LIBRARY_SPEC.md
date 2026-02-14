@@ -1,6 +1,6 @@
 # UMI ライブラリ構成 設計仕様書
 
-**バージョン:** 1.3.0
+**バージョン:** 1.4.0
 **作成日:** 2026-02-14
 **最終監査日:** 2026-02-14
 
@@ -691,31 +691,59 @@ kernel は service に依存しない。service が kernel を使用する。こ
 
 ##### umios xmake ターゲット
 
+umios 内部の依存方向（kernel → service の逆依存禁止）を**ビルドシステムレベルで強制する**ため、xmake ターゲットを内部層ごとに分割する:
+
 ```lua
 -- lib/umios/xmake.lua
-target("umios")
+
+-- カーネルコア: umicore のみに依存（umiport にも依存しない）
+target("umios.kernel")
     set_kind("headeronly")
-    add_deps("umicore", "umiport")
-    add_headerfiles("include/(umios/**.hh)")
+    add_deps("umicore")
+    add_headerfiles("include/(umios/kernel/**.hh)", "include/(umios/ipc/**.hh)")
     add_includedirs("include", { public = true })
 target_end()
 
+-- サービス層: kernel + umicore + umiport に依存
+target("umios.runtime")
+    set_kind("headeronly")
+    add_deps("umios.kernel", "umicore")
+    add_headerfiles("include/(umios/runtime/**.hh)", "include/(umios/service/**.hh)", "include/(umios/app/**.hh)")
+    add_includedirs("include", { public = true })
+target_end()
+
+-- アダプタ層: 全層を結合（umiport が必要）
+target("umios.adapter")
+    set_kind("headeronly")
+    add_deps("umios.runtime", "umiport")
+    add_headerfiles("include/(umios/adapter/**.hh)")
+    add_includedirs("include", { public = true })
+target_end()
+
+-- 統合ターゲット: 全層を束ねる便利ターゲット
+target("umios")
+    set_kind("headeronly")
+    add_deps("umios.kernel", "umios.runtime", "umios.adapter")
+target_end()
+
 -- サービスローダー (static: .cc ファイルを含む)
-target("umios.service")
+target("umios.loader")
     set_kind("static")
-    add_deps("umios")
+    add_deps("umios.runtime")
     add_files("src/service/loader.cc")
 target_end()
 
 -- 暗号ライブラリ (static: .cc ファイルを含む)
 target("umios.crypto")
     set_kind("static")
-    add_deps("umios")
+    add_deps("umios.kernel")
     add_files("src/crypto/sha256.cc", "src/crypto/sha512.cc", "src/crypto/ed25519.cc")
 target_end()
 ```
 
-> **設計判断:** `loader.cc` はリンク時にアプリケーションターゲットから参照される実体を含むため、ヘッダオンリーではなく static ターゲットとして分離する。アプリケーションは `add_deps("umios.service")` で明示的にリンクする。
+> **設計判断:** `umios.kernel` は `umicore` のみに依存し、`umiport` には依存しない。これにより kernel/ から service/ や adapter/ への `#include` は**コンパイルエラー**になる。内部アーキテクチャの依存方向がコードレビューではなくビルドシステムで保証される。
+>
+> `loader.cc` はリンク時にアプリケーションターゲットから参照される実体を含むため、ヘッダオンリーではなく static ターゲットとして分離する。アプリケーションは `add_deps("umios.loader")` で明示的にリンクする。
 
 ---
 
@@ -974,6 +1002,46 @@ return {
 }
 ```
 
+**スキーマバリデーション:**
+
+`rules/board.lua` は MCU DB と board.lua の読み込み時に必須フィールドを検証する。不足・型不一致はビルドエラーとする:
+
+```lua
+-- rules/validate.lua (board.lua から呼び出し)
+local required_mcu_fields = {
+    { "core",     "string" },
+    { "vendor",   "string" },
+    { "family",   "string" },
+    { "memory",   "table"  },
+    { "clock",    "table"  },
+}
+
+local required_memory_fields = {
+    { "origin", "number" },
+    { "length", "string" },
+}
+
+function validate_mcu_db(mcu, path)
+    for _, field in ipairs(required_mcu_fields) do
+        local name, expected_type = field[1], field[2]
+        assert(mcu[name] ~= nil,
+            format("MCU DB '%s': missing required field '%s'", path, name))
+        assert(type(mcu[name]) == expected_type,
+            format("MCU DB '%s': field '%s' must be %s, got %s",
+                   path, name, expected_type, type(mcu[name])))
+    end
+    -- memory 各リージョンの検証
+    for region, spec in pairs(mcu.memory) do
+        for _, field in ipairs(required_memory_fields) do
+            assert(spec[field[1]] ~= nil,
+                format("MCU DB '%s': memory.%s missing '%s'", path, region, field[1]))
+        end
+    end
+end
+```
+
+これにより、新しい MCU やボードを追加する際にフィールド忘れが**ビルド時に即座に検出**される。
+
 #### 7.3.2 PAL コード生成タスク
 
 PAL 生成は通常ビルドとは**分離された明示的タスク**として実行する:
@@ -1141,21 +1209,22 @@ v2.0.0 で任意とされている項目のうち、UMI では必須に格上げ
 | shell を umicore に吸収 | ✗ (2ファイル) | △ (基盤ユーティリティ) | ○ | △ | **吸収**: 分割しない基準「3ファイル以下」に該当 |
 | umiport に umi::board 名前空間 | — | ○ (arch/mcu と board の責務分離) | ○ | — | **採用**: ボード固有定義は port 層の一部だが名前空間で区別 |
 
-### 10.1 ADR: umios → umiport 直接依存
+### 10.1 ADR: umios 内部ターゲット分割
 
-**背景:** 初期調査（archive/INVESTIGATION.md, archive/ANALYSIS.md）では「kernel は umicore のみに依存」を高評価した。本仕様では umios が umiport に直接依存する設計を採用している。
+**背景:** 初期調査（archive/INVESTIGATION.md, archive/ANALYSIS.md）では「kernel は umicore のみに依存」を高評価した。v1.3.0 ではコードレビューによる依存方向の担保を想定していたが、レビューでは**設計意図がコードとして表現されない**ため、ビルドシステムレベルでの強制に方針を変更した。
 
 **検討した案:**
 
 | 案 | 構造 | 利点 | 欠点 |
 |---|------|------|------|
-| **A: 独立性優先** | umios.kernel → umicore のみ、umios.adapter → umiport | kernel 単体テストが容易、port 差し替えが明示的 | xmake ターゲットが増加、adapter↔kernel の接合が複雑化 |
-| **B: 統合優先（採用）** | umios → umicore + umiport | ターゲット構成が単純、adapter が port API を直接利用可能 | kernel テスト時に port のスタブが必要 |
+| **A: 単一ターゲット** | umios → umicore + umiport | ターゲット構成が単純 | kernel→service の逆依存をコードレビューでしか防げない |
+| **B: 内部分割（採用）** | umios.kernel → umicore のみ、umios.adapter → umiport | 依存方向がコンパイルエラーで保証される、kernel 単体テストが容易 | xmake ターゲットが増加（6ターゲット） |
 
 **採用理由:**
-1. umios の adapter 層は umiport の HAL 実装を直接呼び出す（SysTick, GPIO, UART 等）。これは kernel ではなく adapter の責務であり、umios 全体として umiport に依存するのは自然
-2. kernel 内部は umiport に依存しない設計を維持する（§5 の umios 内部アーキテクチャ参照）。依存方向の制約は xmake ターゲット分割ではなくコードレビューで担保する
-3. 案 A の分割は将来的に必要になった時点で実施可能（後方互換を壊さない）
+1. kernel → service の逆依存は「組込みリアルタイムOS として致命的な設計欠陥」であり、コードレビューではなくビルドで防ぐべき
+2. `umios.kernel` は `umicore` のみに依存するため、umiport のスタブなしで kernel 単体テストが可能
+3. `umios.adapter` のみが `umiport` に依存する構造は、プラットフォームポーティングの範囲を明確にする
+4. ターゲット数の増加（3→6）は、依存方向の保証に対して十分に小さいコスト
 
 ---
 
