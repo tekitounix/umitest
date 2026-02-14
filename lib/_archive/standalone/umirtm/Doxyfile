@@ -1,4 +1,0 @@
-@INCLUDE               = ../docs/Doxyfile.base
-PROJECT_NAME           = "umirtm"
-PROJECT_NUMBER         = 0.1.0
-PROJECT_BRIEF          = "SEGGER RTT compatible monitor library"

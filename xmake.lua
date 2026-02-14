@@ -1,18 +1,35 @@
-set_project("umi")
-set_version("0.3.0")   -- クリーンスレート: 0.2.0 → 0.3.0
-set_xmakever("2.8.0")
+local standalone_repo = os.projectdir() == os.scriptdir()
+UMITEST_STANDALONE_REPO = standalone_repo
 
-set_languages("c++23")
-add_rules("mode.debug", "mode.release")
-set_warnings("all", "extra", "error")
+if standalone_repo then
+    set_project("umitest")
+    set_version("0.1.0")
+    set_xmakever("2.8.0")
 
--- Phase 1 で順次追加
--- includes("lib/umitest")
--- includes("lib/umibench")
--- includes("lib/umirtm")
--- includes("lib/umimmio")
--- includes("lib/umicore")
--- includes("lib/umihal")
+    set_languages("c++23")
+    add_rules("mode.debug", "mode.release")
+    add_rules("plugin.compile_commands.autoupdate", {outputdir = ".", lsp = "clangd"})
+    set_warnings("all", "extra", "error")
 
-includes("tools/release.lua")
-includes("tools/dev-sync.lua")
+    add_requires("arm-embedded", {optional = true})
+    add_requires("umimmio", {optional = true})
+end
+
+function umitest_add_umimmio_dep()
+    if standalone_repo then
+        add_packages("umimmio")
+    else
+        add_deps("umimmio")
+    end
+end
+
+target("umitest")
+    set_kind("headeronly")
+    add_headerfiles("include/(umitest/**.hh)")
+    add_includedirs("include", { public = true })
+
+-- Host tests + ARM embedded targets
+includes("tests")
+
+-- WASM target
+includes("platforms/wasm")

@@ -1,4 +1,0 @@
-@INCLUDE               = ../docs/Doxyfile.base
-PROJECT_NAME           = "umimmio"
-PROJECT_NUMBER         = 0.1.0
-PROJECT_BRIEF          = "UMI Memory-mapped I/O library"
