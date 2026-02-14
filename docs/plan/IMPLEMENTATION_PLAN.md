@@ -11,12 +11,13 @@
 
 ### 1.1 基本原則
 
-**互換性を考慮せず、LIBRARY_SPEC v1.3.0 に完全準拠した12ライブラリを新規構築する。**
+**互換性を考慮せず、LIBRARY_SPEC v1.4.0 に完全準拠した12ライブラリを新規構築する。**
 
 - 現行の `lib/` と `lib/umi/` を**アーカイブ**し、参照元として保持する
 - 新規 `lib/` にゼロから12ライブラリを構築する
 - 現行コードが再利用できる場合は**コピーして必要な修正を加える**（git mv ではなく cp + edit）
 - ビルドシステム (xmake.lua) も新規作成する
+- **`lib/docs/` 内の標準・ガイドに必ず従う**（下記 §1.4 参照）
 
 ### 1.2 アーカイブ戦略
 
@@ -56,11 +57,37 @@ examples/
 
 各ライブラリが以下を**全て**満たすこと:
 
-- [ ] LIBRARY_SPEC v1.3.0 §8.1 UMI Strict Profile 準拠
+- [ ] LIBRARY_SPEC v1.4.0 §8.1 UMI Strict Profile 準拠
 - [ ] `xmake build <target>` 成功
 - [ ] `xmake test` で当該ライブラリのテストが通過
 - [ ] §4.2 依存マトリクスと `add_deps` が一致
 - [ ] Doxygen 生成がエラーなし
+- [ ] `lib/docs/standards/CODING_RULE.md` に準拠（命名規則、フォーマット、constexpr ルール等）
+- [ ] `lib/docs/standards/API_COMMENT_RULE.md` に準拠（Doxygen コメント形式）
+- [ ] `lib/docs/guides/TESTING_GUIDE.md` に準拠（テスト戦略・パターン）
+
+### 1.4 準拠必須ドキュメント
+
+実装時に必ず参照し、従うこと。これらは `lib/docs/` に配置されたプロジェクト標準であり、本計画書や LIBRARY_SPEC と同等の拘束力を持つ。
+
+**標準 (`lib/docs/standards/`):**
+
+| ドキュメント | 適用場面 |
+|-------------|---------|
+| `CODING_RULE.md` | C++ コードの記述全般 — 命名規則、フォーマット、constexpr、エラー処理、リアルタイム安全性 |
+| `API_COMMENT_RULE.md` | Doxygen コメントの記述 — `@file`, `@brief`, `@tparam`, `@param`, `@return` 等の形式 |
+| `LIBRARY_SPEC.md` | ライブラリの構造・ディレクトリ規約（※ `docs/plan/LIBRARY_SPEC.md` v1.4.0 が上位仕様） |
+
+**ガイド (`lib/docs/guides/`):**
+
+| ドキュメント | 適用場面 |
+|-------------|---------|
+| `TESTING_GUIDE.md` | テストコードの記述 — テスト戦略、パターン、umitest/umibench の使い方 |
+| `BUILD_GUIDE.md` | xmake ビルド設定 — ターゲット定義、クロスコンパイル、WASM |
+| `DEBUGGING_GUIDE.md` | 組込みデバッグ — pyOCD, GDB, RTT の設定・手順 |
+| `CODE_QUALITY_GUIDE.md` | 品質基準 — 静的解析、レビュー観点 |
+
+> **注:** 各フェーズの実装作業で迷った場合は、まず上記ドキュメントを確認すること。特に `CODING_RULE.md` と `API_COMMENT_RULE.md` はコードを書く前に必ず目を通す。
 
 ---
 
