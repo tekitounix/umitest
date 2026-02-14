@@ -6,11 +6,31 @@
 
 ---
 
-## 0. 注記
+## 0. 概要
+
+UMI-DATA はプリセット、パターン、ソング、サンプル等の**ユーザーデータ交換**を標準化する。
+搬送は [UMI_SYSEX_TRANSPORT.md](UMI_SYSEX_TRANSPORT.md) の共通規約に従う。
+
+### データカテゴリ
+
+| Category | ID | 説明 |
+|---|---|---|
+| Preset | 0x01 | シンセパッチ |
+| Pattern | 0x02 | シーケンスパターン |
+| Song | 0x03 | ソングデータ |
+| Sample | 0x04 | オーディオサンプル |
+| Wavetable | 0x05 | ウェーブテーブル |
+| Project | 0x06 | プロジェクト全体 |
+| Config | 0x07 | 設定データ |
+| Custom | 0x10-0x7F | ベンダー固有 |
+
+UMI-DATA のバイナリは 7-bit エンコードして SysEx Payload に格納する。
+チャンク転送・ACK は本仕様で定義し、トランスポートのフロー制御と併用する。
+
+### 注記
 
 - 本仕様は旧 UXMP-DATA 仕様を UMI-SysEx 配下へ移行したもの。
 - 互換性維持のため、本文中の **UXMP-JSON / uxmp://** 表記は当面維持する。
-- 搬送は [UMI_SYSEX_TRANSPORT.md](UMI_SYSEX_TRANSPORT.md) に従う。
 
 ---
 

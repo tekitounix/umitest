@@ -123,7 +123,7 @@ int main() {
 
 ## License
 
-MIT — See [LICENSE](../../LICENSE)
+MIT — See [LICENSE](../../../LICENSE)
 ```
 
 ### Phase 1 検証
@@ -215,7 +215,7 @@ Phase 1 の最小 README を以下のテンプレートに合わせて拡充:
 
 ## License
 
-MIT — See [LICENSE](../../LICENSE)
+MIT — See [LICENSE](../../../LICENSE)
 ```
 
 ### Phase 2 検証

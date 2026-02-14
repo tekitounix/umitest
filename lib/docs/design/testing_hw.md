@@ -7,14 +7,14 @@
 - [hal/concept_design.md](hal/concept_design.md) — HAL Concept 定義 (テスト対象の契約)
 - [foundations/architecture.md](foundations/architecture.md) — パッケージ構成
 - [board/architecture.md](board/architecture.md) — ボード定義 (テスト環境の構成)
-- [../../guides/TESTING_GUIDE.md](../../guides/TESTING_GUIDE.md) — 既存テストガイド (ホストテスト中心)
+- [../guides/TESTING_GUIDE.md](../guides/TESTING_GUIDE.md) — 既存テストガイド (ホストテスト中心)
 - [init_sequence.md](init_sequence.md) — 初期化シーケンス (テスト前提条件)
 
 ---
 
 ## 1. 目的
 
-既存の [TESTING_GUIDE.md](../../guides/TESTING_GUIDE.md) はホスト上のユニットテストを扱う。
+既存の [TESTING_GUIDE.md](../guides/TESTING_GUIDE.md) はホスト上のユニットテストを扱う。
 本文書は **HAL/PAL/Board 固有のテスト戦略** — ハードウェア抽象化層の品質保証を設計する。
 
 ---

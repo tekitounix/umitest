@@ -1,9 +1,9 @@
 # UMI ライブラリ クリーンスレート実装計画書
 
-**バージョン:** 1.1.0
+**バージョン:** 1.2.0
 **作成日:** 2026-02-14
 **最終更新日:** 2026-02-14
-**前提仕様:** [LIBRARY_SPEC.md](LIBRARY_SPEC.md) v1.3.0
+**前提仕様:** [LIBRARY_SPEC.md](LIBRARY_SPEC.md) v1.4.0
 
 ---
 
@@ -11,12 +11,13 @@
 
 ### 1.1 基本原則
 
-**互換性を考慮せず、LIBRARY_SPEC v1.3.0 に完全準拠した12ライブラリを新規構築する。**
+**互換性を考慮せず、LIBRARY_SPEC v1.4.0 に完全準拠した12ライブラリを新規構築する。**
 
 - 現行の `lib/` と `lib/umi/` を**アーカイブ**し、参照元として保持する
 - 新規 `lib/` にゼロから12ライブラリを構築する
 - 現行コードが再利用できる場合は**コピーして必要な修正を加える**（git mv ではなく cp + edit）
 - ビルドシステム (xmake.lua) も新規作成する
+- **`lib/docs/` 内の標準・ガイドに必ず従う**（下記 §1.4 参照）
 
 ### 1.2 アーカイブ戦略
 
@@ -56,11 +57,37 @@ examples/
 
 各ライブラリが以下を**全て**満たすこと:
 
-- [ ] LIBRARY_SPEC v1.3.0 §8.1 UMI Strict Profile 準拠
+- [ ] LIBRARY_SPEC v1.4.0 §8.1 UMI Strict Profile 準拠
 - [ ] `xmake build <target>` 成功
 - [ ] `xmake test` で当該ライブラリのテストが通過
 - [ ] §4.2 依存マトリクスと `add_deps` が一致
 - [ ] Doxygen 生成がエラーなし
+- [ ] `lib/docs/standards/CODING_RULE.md` に準拠（命名規則、フォーマット、constexpr ルール等）
+- [ ] `lib/docs/standards/API_COMMENT_RULE.md` に準拠（Doxygen コメント形式）
+- [ ] `lib/docs/guides/TESTING_GUIDE.md` に準拠（テスト戦略・パターン）
+
+### 1.4 準拠必須ドキュメント
+
+実装時に必ず参照し、従うこと。これらは `lib/docs/` に配置されたプロジェクト標準であり、本計画書や LIBRARY_SPEC と同等の拘束力を持つ。
+
+**標準 (`lib/docs/standards/`):**
+
+| ドキュメント | 適用場面 |
+|-------------|---------|
+| `CODING_RULE.md` | C++ コードの記述全般 — 命名規則、フォーマット、constexpr、エラー処理、リアルタイム安全性 |
+| `API_COMMENT_RULE.md` | Doxygen コメントの記述 — `@file`, `@brief`, `@tparam`, `@param`, `@return` 等の形式 |
+| `LIBRARY_SPEC.md` | ライブラリの構造・ディレクトリ規約（※ `docs/plan/LIBRARY_SPEC.md` v1.4.0 が上位仕様） |
+
+**ガイド (`lib/docs/guides/`):**
+
+| ドキュメント | 適用場面 |
+|-------------|---------|
+| `TESTING_GUIDE.md` | テストコードの記述 — テスト戦略、パターン、umitest/umibench の使い方 |
+| `BUILD_GUIDE.md` | xmake ビルド設定 — ターゲット定義、クロスコンパイル、WASM |
+| `DEBUGGING_GUIDE.md` | 組込みデバッグ — pyOCD, GDB, RTT の設定・手順 |
+| `CODE_QUALITY_GUIDE.md` | 品質基準 — 静的解析、レビュー観点 |
+
+> **注:** 各フェーズの実装作業で迷った場合は、まず上記ドキュメントを確認すること。特に `CODING_RULE.md` と `API_COMMENT_RULE.md` はコードを書く前に必ず目を通す。
 
 ---
 
@@ -97,17 +124,21 @@ examples/
 
 ## 3. フェーズ構成
 
-依存関係の下位から上位へ実装する。Phase 2 は 3 サブフェーズに分割。
+依存関係の下位から上位へ実装する。Phase 2 は 2 サブフェーズ + 延期マイルストーンに分割。
 
 ```
 Phase 0 : アーカイブ + ビルド基盤
 Phase 1 : L0 + L1 (依存なし: 6ライブラリ)
 Phase 2a: umiport 骨格 + 手書き PAL (最小動作スライス)
-Phase 2b: MCU データベース + ボード定義の Lua 化
-Phase 2c: PAL コード生成パイプライン + umidevice
+Phase 2b: MCU データベース + ボード定義の Lua 化 + umidevice
 Phase 3 : L3 (umidsp + umidi + umiusb)
 Phase 4 : L4 + バンドル + 統合検証 (umios + umi.base 等)
+
+延期マイルストーン（複数 MCU ファミリ対応時に実行）:
+Phase 2c: PAL コード生成パイプライン (SVD → umimmio C++)
 ```
+
+> **Phase 2c 延期の理由:** PAL コード生成パイプライン（SVD パーサー + Python + Jinja2 + パッチシステム）は、STM32F4 一つのみの段階では ROI が合わない。Phase 2a の手書き PAL で十分に動作し、ドライバ開発に支障はない。3つ以上の MCU ファミリ（STM32H7, RP2040 等）を対応する必要が生じた時点で着手する。gen/ のディレクトリ構造と設計は LIBRARY_SPEC §6.4, §7.3.2 に規定済みであり、延期しても設計意図は保持される。
 
 ---
 
@@ -346,12 +377,12 @@ lib/umihal/
 
 **目的:** ハードウェア抽象化レイヤーを構築する。最大の構造変更を伴うフェーズ。
 
-umiport は単なるドライバ集ではなく「ハードウェアポーティングキット」全体を包含する (LIBRARY_SPEC §5 参照)。構造の複雑さに対応するため、Phase 2 を **3 サブフェーズ** に分割する:
+umiport は単なるドライバ集ではなく「ハードウェアポーティングキット」全体を包含する (LIBRARY_SPEC §5 参照)。構造の複雑さに対応するため、Phase 2 を **2 サブフェーズ + 延期マイルストーン** に分割する:
 
 ```
 Phase 2a: umiport 骨格 + 手書き PAL (最小動作スライス)
-Phase 2b: MCU データベース + ボード定義の Lua 化
-Phase 2c: PAL コード生成パイプライン
+Phase 2b: MCU データベース + ボード定義の Lua 化 + umidevice
+[延期]  Phase 2c: PAL コード生成パイプライン（3+ MCU ファミリ対応時に着手）
 ```
 
 ### P2-1a: umiport 骨格 + 手書き PAL（Phase 2a）
@@ -494,54 +525,13 @@ lib/umiport/
 - [ ] `--board=<board>` 指定でビルドが完結する（MCU → arch → ツールチェイン自動解決）
 - [ ] board.lua → C++ 生成チェーン（board.hh, clock_config.hh, memory.ld）が正常動作
 
-### P2-1c: PAL コード生成パイプライン（Phase 2c）
+### ~~P2-1c: PAL コード生成パイプライン~~ → 延期マイルストーン
 
-**目的:** SVD → umimmio C++ ヘッダの自動生成を確立する (LIBRARY_SPEC §6.4, §7.3.2)。
-
-**追加構造:**
-```
-lib/umiport/
-├── gen/                                   # PAL コード生成ツール (LIBRARY_SPEC §7.3.2)
-│   ├── umipal-gen                         #   Python メインスクリプト
-│   ├── parsers/
-│   │   ├── svd_parser.py                  #   SVD XML パーサー
-│   │   └── cmsis_header_parser.py         #   CMSIS ヘッダパーサー
-│   ├── models/
-│   │   └── device_model.py                #   統一中間表現 (Unified Device Model)
-│   ├── templates/
-│   │   ├── peripheral.hh.j2              #   ペリフェラルレジスタテンプレート
-│   │   ├── vectors.hh.j2                 #   割り込みベクターテンプレート
-│   │   └── memory.hh.j2                  #   メモリマップテンプレート
-│   └── data/
-│       ├── svd/STM32F407.svd
-│       └── patches/stm32f4.yaml           #   SVD パッチ (stm32-rs 形式)
-│
-└── rules/
-    └── pal_generator.lua                  #   PAL 再生成タスク定義 (追加)
-```
-
-**作業:**
-1. 既存ツール資産 (`lib/_archive/` 内の svd2ral, cmsis-dev-extractor 等) を参照し `gen/` を構築
-2. Unified Device Model (統一中間表現) を設計
-3. Jinja2 テンプレートを作成（peripheral.hh.j2, vectors.hh.j2, memory.hh.j2）
-4. `rules/pal_generator.lua` に `xmake pal-gen` タスクを定義
-5. Phase 2a の手書き PAL (`pal/mcu/stm32f4/periph/*.hh`) を生成物に置換
-6. 生成物を git 管理下に配置（差分ベース更新）
-
-**生成対象 (PAL Phase 1 スコープ):**
-
-| カテゴリ | 入力 | 出力 | 優先度 |
-|---------|------|------|:------:|
-| C6 ペリフェラルレジスタ | SVD + パッチ | `pal/mcu/stm32f4/periph/*.hh` | 1 |
-| C4 割り込みベクター | CMSIS ヘッダ | `pal/mcu/stm32f4/vectors.hh` | 2 |
-| C5 メモリマップ | MCU DB (Lua) | `pal/mcu/stm32f4/memory.hh` | 2 |
-
-**検証:**
-- [ ] `xmake pal-gen --family stm32f4` が正常完了する
-- [ ] 生成された PAL ヘッダが umimmio テンプレート (`Device<>`, `Register<>`, `Field<>`) を正しくインスタンス化する
-- [ ] PAL 生成物と手書きドライバの分離が維持されている（pal/ 内にドライバロジックが混入していない）
-- [ ] 生成物で `xmake build stm32f4_os` が成功する
-- [ ] 生成物が git 管理下にあり、差分レビュー可能である
+> **延期:** Phase 2c は複数 MCU ファミリ対応が必要になった時点で着手する。設計仕様は LIBRARY_SPEC §6.4, §7.3.2, §11.2 に規定済み。Phase 2a の手書き PAL で STM32F4 は十分に動作するため、本フェーズ計画のクリティカルパスから除外する。
+>
+> **着手条件:** 3つ以上の MCU ファミリ（STM32H7, RP2040 等）への対応が決定した時点
+>
+> **スコープ（着手時）:** SVD パーサー、Unified Device Model、Jinja2 テンプレート、xmake pal-gen タスク、手書き PAL の生成物への段階的置換。詳細は LIBRARY_SPEC §7.3.2 を参照。
 
 ### P2-2: umidevice（L2 — 新規構築）
 
@@ -583,14 +573,10 @@ lib/umidevice/
 - [ ] umiport, umidevice が `xmake build` + `xmake test` 通過
 - [ ] 依存: umiport → {umihal, umimmio}、umidevice → {umihal, umimmio}
 - [ ] 組込みビルド (`is_plat("cross")`) とホストビルドの両方が成功
-- [ ] PAL / コード生成検証 (LIBRARY_SPEC §9.5):
-  - [ ] `xmake pal-gen --family stm32f4` が正常完了する
-  - [ ] 生成 PAL ヘッダが umimmio テンプレートを正しくインスタンス化する
-  - [ ] PAL 生成物と手書きドライバの分離が維持されている
-  - [ ] MCU DB スキーマが LIBRARY_SPEC §7.3.1 に準拠する
-  - [ ] `--board=<board>` 指定でビルドが完結する（MCU → arch → ツールチェイン自動解決）
-  - [ ] board.lua → C++ 生成チェーンが正常動作する
-  - [ ] 生成物が git 管理下にあり、差分レビュー可能である
+- [ ] 手書き PAL (pal/) とドライバ (driver/) が明確に分離されている
+- [ ] MCU DB スキーマバリデーション (LIBRARY_SPEC §7.3.1) が rules/board.lua に実装されている
+- [ ] `--board=<board>` 指定でビルドが完結する（MCU → arch → ツールチェイン自動解決）
+- [ ] board.lua → C++ 生成チェーン（board.hh, clock_config.hh, memory.ld）が正常動作する
 
 ---
 
@@ -821,49 +807,93 @@ lib/umios/
     └── minimal/
 ```
 
-**xmake.lua:**
+**xmake.lua（内部ターゲット分割: LIBRARY_SPEC §5 L4, §10.1 ADR）:**
 ```lua
-target("umios")
+-- カーネルコア: umicore のみに依存（umiport にも依存しない）
+-- kernel/ と ipc/ のみを公開 — service/ への逆依存をビルドエラーにする
+target("umios.kernel")
     set_kind("headeronly")
-    add_deps("umicore", "umiport")
-    add_headerfiles("include/(umios/**.hh)")
+    add_deps("umicore")
+    add_headerfiles("include/(umios/kernel/**.hh)", "include/(umios/ipc/**.hh)")
     add_includedirs("include", { public = true })
 target_end()
 
-target("umios.service")
+-- サービス層: kernel + umicore に依存
+-- runtime/, service/, app/ を公開
+target("umios.runtime")
+    set_kind("headeronly")
+    add_deps("umios.kernel", "umicore")
+    add_headerfiles("include/(umios/runtime/**.hh)",
+                    "include/(umios/service/**.hh)",
+                    "include/(umios/app/**.hh)")
+    add_includedirs("include", { public = true })
+target_end()
+
+-- アダプタ層: 全層を結合（umiport が必要）
+target("umios.adapter")
+    set_kind("headeronly")
+    add_deps("umios.runtime", "umiport")
+    add_headerfiles("include/(umios/adapter/**.hh)")
+    add_includedirs("include", { public = true })
+target_end()
+
+-- 統合ターゲット（従来の umios と同等）
+target("umios")
+    set_kind("headeronly")
+    add_deps("umios.kernel", "umios.runtime", "umios.adapter")
+target_end()
+
+-- サービスローダー (static)
+target("umios.loader")
     set_kind("static")
-    add_deps("umios")
+    add_deps("umios.runtime")
     add_files("src/service/loader.cc")
 target_end()
 
+-- 暗号ライブラリ (static)
 target("umios.crypto")
     set_kind("static")
-    add_deps("umios")
+    add_deps("umios.kernel")
     add_files("src/crypto/sha256.cc", "src/crypto/sha512.cc", "src/crypto/ed25519.cc")
 target_end()
+```
+
+**ターゲット依存グラフ:**
+```
+umios.kernel  ← umicore のみ（umiport 非依存を保証）
+umios.runtime ← umios.kernel + umicore
+umios.adapter ← umios.runtime + umiport（umiport はここで初めて登場）
+umios         ← kernel + runtime + adapter（統合ターゲット）
+umios.loader  ← umios.runtime（static ライブラリ）
+umios.crypto  ← umios.kernel（static ライブラリ）
 ```
 
 **作業:**
 1. 内部 5 層構造 (kernel → ipc → runtime → service → adapter) を構築
 2. 各モジュールから選択的にコピー
-3. **kernel → service の依存逆転を維持:** SyscallHandler はテンプレートパラメータで注入
+3. **kernel → service の依存逆転をビルドシステムで強制:** `umios.kernel` は `umicore` のみに依存し、`service/` ヘッダを一切公開しない。SyscallHandler はテンプレートパラメータで注入
 4. boot/ の内容を適切に配置（include/umios/ 直下、または adapter/ の一部として）
 5. fs/ を src/ 内部に配置（StorageService と密結合: §10）
-6. crypto/ を src/crypto/ に配置（カーネル署名検証専用: §10）
-7. `add_deps("umicore", "umiport")` を設定（§10.1 ADR 参照）
-8. 全ドキュメント新規作成
+6. crypto/ を src/crypto/ に配置（カーネル署名検証専用: §10。`umios.crypto` → `umios.kernel` のみに依存）
+7. 6ターゲット分割: `umios.kernel`, `umios.runtime`, `umios.adapter`, `umios`（統合）, `umios.loader`, `umios.crypto`（LIBRARY_SPEC §5 L4, §10.1 ADR）
+8. `umios.adapter` のみが `umiport` に依存する構造を維持
+9. 全ドキュメント新規作成
 
 **注意点:**
 - **最大規模のフェーズ**（参照元合計 ~25,000 行）
-- 内部の依存方向（kernel が service に依存しない）をコードレビューで担保
+- 内部の依存方向（kernel が service に依存しない）を**ビルドシステムのターゲット分割で強制**（LIBRARY_SPEC §10.1 ADR: コードレビューでなくコンパイルエラーで検出）
 - fs/ は WASM で非カーネル利用が必要になった場合、再分離を検討（§10）
 
 **検証:**
-- [ ] `xmake build umios` 成功
-- [ ] `xmake build umios.service` 成功
+- [ ] `xmake build umios.kernel` 成功（`umicore` のみに依存）
+- [ ] `xmake build umios.runtime` 成功
+- [ ] `xmake build umios.adapter` 成功
+- [ ] `xmake build umios` 成功（統合ターゲット）
+- [ ] `xmake build umios.loader` 成功
 - [ ] `xmake build umios.crypto` 成功
 - [ ] 統合テスト: カーネル起動 → SysTick → タスクスケジュール
-- [ ] kernel/ から service/ への直接依存がないこと（grep で検証）
+- [ ] `umios.kernel` が `umiport` に依存していないこと（xmake.lua の `add_deps` で検証）
+- [ ] `umios.kernel` の公開ヘッダに `service/` が含まれていないこと
 
 ### P4-2: バンドルターゲット
 
@@ -915,7 +945,7 @@ examples/
 
 **作業:**
 1. `examples/stm32f4_os/` を新規作成:
-   - `xmake.lua` を作成: `add_deps("umi.embedded.full", "umios.service", "umios.crypto")` のみで依存解決
+   - `xmake.lua` を作成: `add_deps("umi.embedded.full", "umios.loader", "umios.crypto")` のみで依存解決
    - `_archive/examples/stm32f4_kernel/` から Processor 実装をコピー・修正
    - 手動 `add_includedirs` や `add_files` は一切使わない（全て `add_deps` で解決）
 2. `examples/headless_webhost/` を新規作成:
@@ -959,20 +989,24 @@ rm -rf _archive/examples/
 ## 4. フェーズ間の依存関係
 
 ```
-Phase 0 ─→ Phase 1 ─→ Phase 2a ─→ Phase 2b ─→ Phase 2c ─→ Phase 3 ─→ Phase 4
-(基盤)     (L0+L1)    (umiport    (MCU DB     (PAL 生成)    (L3)       (L4+統合)
-           6 libs      骨格+手書)  +board.lua) +umidevice   3 libs      1 lib+bundles
+Phase 0 ─→ Phase 1 ─→ Phase 2a ─→ Phase 2b ─→ Phase 3 ─→ Phase 4
+(基盤)     (L0+L1)    (umiport    (MCU DB       (L3)       (L4+統合)
+           6 libs      骨格+手書)  +board.lua    3 libs      1 lib+bundles
+                                   +umidevice)
+
+                                   [延期] Phase 2c: PAL コード生成
+                                   （3+ MCU ファミリ対応時に着手）
 ```
 
-**注:** Phase 2a 完了後、umidevice は Phase 2b/2c と並列着手可能。Phase 3 は Phase 2a 完了のみを前提とする（PAL 生成パイプラインとは独立）。
+**注:** Phase 3 は Phase 2a 完了のみを前提とする（MCU DB やボード定義の Lua 化とは独立）。Phase 2c は延期マイルストーンであり、クリティカルパスに含まれない。
 
 **Phase 1 内の並列性:**
 - P1-1〜P1-4（コピー系）は並列実行可能
 - P1-5 (umicore)、P1-6 (umihal) は独立しており並列実行可能
 
 **Phase 2 内の並列性と順序:**
-- P2-1a (umiport 骨格 + 手書き PAL) → P2-1b (MCU DB + Lua 化) → P2-1c (PAL 生成) は順次実行
-- P2-2 (umidevice) は P2-1a 完了後に着手可能（P2-1b/2c とは並列実行可能）
+- P2-1a (umiport 骨格 + 手書き PAL) → P2-1b (MCU DB + Lua 化 + umidevice) は順次実行
+- P2-2 (umidevice) は P2-1a 完了後に着手可能（P2-1b と並列実行可能）
 - umiport が最大規模のため、P2-1a を最優先で先行着手する
 
 **Phase 3 内の並列性:**
@@ -986,7 +1020,7 @@ Phase 0 ─→ Phase 1 ─→ Phase 2a ─→ Phase 2b ─→ Phase 2c ─→ Ph
 | リスク | 影響 | 対策 |
 |--------|------|------|
 | umiport の 2 軸構造化 (pal/driver + arch/core/mcu) が想定以上に複雑 | Phase 2 遅延 | Phase 2a/2b/2c のサブフェーズ分割で段階的に構築。Phase 2a で手書き PAL により最小動作を先行確立 |
-| umios の内部依存方向が崩れる | 設計品質低下 | `kernel/` から `service/` への `#include` を grep で定期検証 |
+| umios の内部依存方向が崩れる | 設計品質低下 | `umios.kernel` ターゲットが `umicore` のみに依存する分割構造により、ビルドシステムで強制（LIBRARY_SPEC §10.1 ADR） |
 | 現行 examples のビルドが通らない | Phase 4 遅延 | P4-3 で手動 include パスを段階的に `add_deps` に置換 |
 | fs の WASM 対応で再分離が必要 | Phase 4 スコープ拡大 | 本計画では umios 内部に配置。再分離は別計画として分離 |
 | テストカバレッジの低下 | 品質リスク | 各フェーズで最低限のテストを必須化。アーカイブ内のテストを参照 |
@@ -1000,11 +1034,11 @@ Phase 0 ─→ Phase 1 ─→ Phase 2a ─→ Phase 2b ─→ Phase 2c ─→ Ph
 | Phase 0 | アーカイブ + ビルド基盤 | 0 |
 | Phase 1 | umitest, umibench, umirtm, umimmio, umicore, umihal | 6 |
 | Phase 2a | umiport (骨格 + 手書き PAL) | 1 (部分) |
-| Phase 2b | umiport (MCU DB + board.lua 生成チェーン) | — (継続) |
-| Phase 2c | umiport (PAL コード生成パイプライン) + umidevice | 2 |
+| Phase 2b | umiport (MCU DB + board.lua 生成チェーン) + umidevice | 2 |
 | Phase 3 | umidsp, umidi, umiusb | 3 |
-| Phase 4 | umios + バンドル + examples 再接続 + 全体検証 | 1 (+3 bundles) |
+| Phase 4 | umios (6ターゲット分割) + バンドル + examples 再接続 + 全体検証 | 1 (+3 bundles) |
 | **合計** | | **12 ライブラリ** |
+| *延期* | *Phase 2c: umiport PAL コード生成パイプライン（3+ MCU ファミリ対応時）* | *—* |
 
 ---
 
@@ -1024,3 +1058,15 @@ umidi          ○    ×     ×     ×      ×      ×    —     ×    ×
 umiusb         ○    ×     ×     ×      ×      ○    ×     —    ×
 umios          ○    ×     ×     ○      ×      ×    ×     ×    —
 ```
+
+**umios 内部ターゲットの依存（LIBRARY_SPEC §5 L4, §10.1 ADR）:**
+```
+umios.kernel   → umicore                 （umiport 非依存を保証）
+umios.runtime  → umios.kernel, umicore
+umios.adapter  → umios.runtime, umiport  （umiport はここで初めて登場）
+umios          → umios.kernel, umios.runtime, umios.adapter（統合）
+umios.loader   → umios.runtime           （static）
+umios.crypto   → umios.kernel            （static）
+```
+
+> 上記マトリクスの `umios → {core ○, port ○}` は統合ターゲット `umios` の推移的依存を示す。実際のビルドでは `umios.kernel` が `umicore` のみに依存し、`umiport` への依存は `umios.adapter` に限定される。

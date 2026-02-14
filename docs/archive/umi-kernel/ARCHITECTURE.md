@@ -532,7 +532,7 @@ class HardwareBackend extends BackendInterface {
 | `config midi transpose <-24..24>` | トランスポーズ設定 |
 | `config audio gain <0-100>` | オーディオゲイン設定 |
 | `config power sleep <min>` | スリープタイムアウト設定 |
-| `diag watchdog [feed|enable|disable]` | ウォッチドッグ制御 |
+| `diag watchdog [feed\|enable\|disable]` | ウォッチドッグ制御 |
 | `diag reset` | システムリセット |
 
 #### 7.1.4 工場コマンド (FACTORY)

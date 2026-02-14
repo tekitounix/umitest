@@ -131,7 +131,7 @@ Read these **when the task matches** — not all at once.
 | Writing or modifying tests | `lib/docs/guides/TESTING_GUIDE.md` — test strategy and patterns |
 | Debugging embedded targets | `lib/docs/guides/DEBUGGING_GUIDE.md` — pyOCD, GDB, RTT setup |
 | Editing xmake-repo rules/plugins | `xmake-repo/synthernet/README.md` — package architecture and dev-sync |
-| Working on AudioContext API | `docs/new/DESIGN_CONTEXT_API.md` — API design decisions |
-| Working on STM32F4 system design | `docs/new/UMI_SYSTEM_ARCHITECTURE.md` — OS/app architecture |
-| Understanding overall architecture | `docs/refs/specs/ARCHITECTURE.md` — high-level design |
-| Working on process() constraints | `docs/refs/reference/API_APPLICATION.md` — real-time API rules |
+| Working on AudioContext API | `docs/archive/DESIGN_CONTEXT_API.md` — API design decisions |
+| Working on STM32F4 system design | `docs/archive/UMI_SYSTEM_ARCHITECTURE.md` — OS/app architecture |
+| Understanding overall architecture | `docs/refs/ARCHITECTURE.md` — high-level design |
+| Working on process() constraints | `docs/refs/API_APPLICATION.md` — real-time API rules |

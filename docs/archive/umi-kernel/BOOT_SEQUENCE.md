@@ -451,22 +451,22 @@ system_task_entry [Task, 優先度1]
 |----------|------|
 | `examples/stm32f4_kernel/src/main.cc` | カーネルメイン |
 | `examples/stm32f4_kernel/kernel.ld` | リンカスクリプト |
-| `lib/umios/kernel/umi_kernel.hh` | カーネルコア（O(1)スケジューラ、FPUポリシー含む） |
-| `lib/umios/kernel/shared_memory.hh` | 共有メモリ |
-| `lib/umios/kernel/shell_commands.hh` | シェルコマンド |
-| `lib/umios/kernel/loader.hh` | アプリローダー |
-| `lib/umios/kernel/protection.hh` | MPU抽象化レイヤー |
-| `lib/umios/kernel/metrics.hh` | パフォーマンス計測（DWT） |
-| `lib/umios/kernel/port/cm4/switch.hh` | Cortex-M4 コンテキストスイッチ |
-| `lib/umios/kernel/port/cm4/context.hh` | Cortex-M4 コンテキスト管理 |
+| `lib/umi/kernel/umi_kernel.hh` | カーネルコア（O(1)スケジューラ、FPUポリシー含む） |
+| `lib/umi/kernel/shared_memory.hh` | 共有メモリ |
+| `lib/umi/kernel/shell_commands.hh` | シェルコマンド |
+| `lib/umi/kernel/loader.hh` | アプリローダー |
+| `lib/umi/kernel/protection.hh` | MPU抽象化レイヤー |
+| `lib/umi/kernel/metrics.hh` | パフォーマンス計測（DWT） |
+| `lib/umi/kernel/port/cm4/switch.hh` | Cortex-M4 コンテキストスイッチ |
+| `lib/umi/kernel/port/cm4/context.hh` | Cortex-M4 コンテキスト管理 |
 
 ### 6.3 アプリケーション
 
 | ファイル | 説明 |
 |----------|------|
-| `lib/umios/app/syscall.hh` | Syscall API |
-| `lib/umios/app/crt0.cc` | スタートアップ |
-| `lib/umios/app/app_header.hh` | ヘッダーフォーマット |
+| `lib/umi/app/syscall.hh` | Syscall API |
+| `lib/umi/app/crt0.cc` | スタートアップ |
+| `lib/umi/app/app_header.hh` | ヘッダーフォーマット |
 
 ### 6.4 Web
 
@@ -480,13 +480,13 @@ system_task_entry [Task, 優先度1]
 
 | ファイル | 説明 |
 |----------|------|
-| `lib/umios/backend/cm/stm32f4/gpio.hh` | GPIO |
-| `lib/umios/backend/cm/stm32f4/i2s.hh` | I2S Audio |
-| `lib/umios/backend/cm/stm32f4/i2c.hh` | I2C |
-| `lib/umios/backend/cm/stm32f4/cs43l22.hh` | Audio Codec |
-| `lib/umios/backend/cm/stm32f4/pdm_mic.hh` | PDM Microphone |
-| `lib/umios/backend/cm/stm32f4/rcc.hh` | クロック制御 |
-| `lib/umios/backend/cm/stm32f4/power.hh` | 電力管理・Tickless |
+| `lib/umi/port/mcu/stm32f4/gpio.hh` | GPIO |
+| `lib/umi/port/mcu/stm32f4/i2s.hh` | I2S Audio |
+| `lib/umi/port/mcu/stm32f4/i2c.hh` | I2C |
+| `lib/umi/port/mcu/stm32f4/cs43l22.hh` | Audio Codec |
+| `lib/umi/port/mcu/stm32f4/pdm_mic.hh` | PDM Microphone |
+| `lib/umi/port/mcu/stm32f4/rcc.hh` | クロック制御 |
+| `lib/umi/port/mcu/stm32f4/power.hh` | 電力管理・Tickless |
 | `lib/umiusb/include/audio_interface.hh` | USB Audio |
 
 ---

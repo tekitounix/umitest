@@ -2,7 +2,7 @@
 
 ## 背景
 
-[19-storage-service.md](../../../docs/umios-architecture/19-storage-service.md) は内蔵/SPI Flash 向けに littlefs を採用する設計で、以下を要件としている：
+[19-storage-service.md](../../../../docs/umios-architecture/04-services/19-storage-service.md) は内蔵/SPI Flash 向けに littlefs を採用する設計で、以下を要件としている：
 
 - 電断安全性（COW メカニズム）
 - ウェアレベリング
