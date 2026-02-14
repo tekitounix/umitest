@@ -263,17 +263,17 @@ xmake webhost-serve
 - **Location:** `tests/`
 - **Naming:** `test_*.cc`
 - **Run:** `xmake run test_kernel`
-- **Details:** `docs/refs/guides/TESTING.md`
+- **Details:** `lib/docs/guides/TESTING_GUIDE.md`
 
 ## Key Documentation
 
-| Document                                 | Content                       |
-| ---------------------------------------- | ----------------------------- |
-| `docs/refs/specs/ARCHITECTURE.md`        | High-level architecture       |
-| `docs/new/UMI_SYSTEM_ARCHITECTURE.md`    | STM32F4 detailed design       |
-| `lib/docs/standards/CODING_RULE.md`      | Detailed style guide          |
-| `lib/docs/standards/LIBRARY_SPEC.md`     | Library structure conventions |
-| `lib/docs/guides/TESTING_GUIDE.md`       | Test strategy                 |
-| `lib/docs/guides/DEBUGGING_GUIDE.md`     | Debugging (pyOCD, GDB, RTT)   |
-| `docs/new/DESIGN_CONTEXT_API.md`         | AudioContext API design       |
-| `docs/refs/reference/API_APPLICATION.md` | `process()` constraints       |
+| Document                                     | Content                       |
+| -------------------------------------------- | ----------------------------- |
+| `docs/refs/ARCHITECTURE.md`                  | High-level architecture       |
+| `docs/archive/UMI_SYSTEM_ARCHITECTURE.md`    | STM32F4 detailed design       |
+| `lib/docs/standards/CODING_RULE.md`          | Detailed style guide          |
+| `lib/docs/standards/LIBRARY_SPEC.md`         | Library structure conventions |
+| `lib/docs/guides/TESTING_GUIDE.md`           | Test strategy                 |
+| `lib/docs/guides/DEBUGGING_GUIDE.md`         | Debugging (pyOCD, GDB, RTT)   |
+| `docs/archive/DESIGN_CONTEXT_API.md`         | AudioContext API design       |
+| `docs/refs/API_APPLICATION.md`               | `process()` constraints       |
