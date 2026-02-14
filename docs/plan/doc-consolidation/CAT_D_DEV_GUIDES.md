@@ -1,8 +1,11 @@
 # CAT_D: 開発ガイド — 統合内容要約
 
 **カテゴリ:** D. 開発ガイド
-**配置先:** `lib/docs/`（ライブラリ標準・ガイド）+ `docs/dev/` + `docs/guides/`
+**配置先:** `lib/docs/`（ライブラリ標準・ガイド）+ `docs/dev/`
+**前提仕様:** [LIBRARY_SPEC.md](../LIBRARY_SPEC.md) v1.3.0 / [IMPLEMENTATION_PLAN.md](../IMPLEMENTATION_PLAN.md) v1.1.0
 **関連:** [CONSOLIDATION_PLAN.md](CONSOLIDATION_PLAN.md) | [DOCUMENT_INVENTORY.md](DOCUMENT_INVENTORY.md)
+
+> **注意:** `lib/docs/` は Stage B Phase 0 で `lib/_archive/docs/` に退避後、新 `lib/docs/` にコピー再配置される（CONSOLIDATION_PLAN §5.2）。高品質なため内容はほぼそのまま継承される。
 
 ---
 
@@ -22,7 +25,7 @@
 | # | ファイル | 行数 | 有用性 | 統廃合アクション |
 |---|---------|------|--------|-----------------|
 | 1 | CODING_RULE.md | ~429 | ★ | **保持（正本）** CLAUDE.md から参照 |
-| 2 | LIBRARY_SPEC.md | ~200 | ★ | **保持（正本）** v2.0.0 |
+| 2 | LIBRARY_SPEC.md | ~200 | ★ | **保持（正本）** ※ lib/docs/ 版。docs/plan/LIBRARY_SPEC.md v1.3.0 とは別文書 |
 | 3 | API_COMMENT_RULE.md | ~150 | ★ | **保持（正本）** |
 
 ### 2.2 lib/docs/guides/ — ガイド群（7ファイル）
@@ -49,7 +52,7 @@
 |---|---------|------|--------|-----------------|
 | 12 | GUIDELINE.md | ~200 | ▽ | **名前変更** → DESIGN_PATTERNS.md |
 | 13 | IMPLEMENTATION_PLAN.md | ~436 | ◆ | **保持** — Phase 0-7 実装計画 |
-| 14 | SIMULATION.md | ~220 | ◆ | **移動** → docs/guides/SIMULATION.md |
+| 14 | SIMULATION.md | ~220 | ◆ | **保持** — docs/dev/ に現状維持 |
 | 15 | RUST.md | ~128 | ◆ | **保持** — 言語比較参考資料 |
 | 16 | DEBUG_VSCODE_CORTEX_DEBUG.md | ~182 | ★ | **保持** — DEBUGGING_GUIDE と補完 |
 
@@ -217,43 +220,42 @@ lib/docs/ ← 集約場所
     ├── RELEASE_GUIDE.md ← リリース手順
     │     └── RELEASE.md（補完：ポリシー）
     ├── CODE_QUALITY_GUIDE.md ← ツール設定
-    │     ├── ← clang_tooling_evaluation.md（統合元）
-    │     ├── ← CLANG_TIDY_SETUP.md（統合元）
-    │     └── ← CLANG_ARM_MULTILIB_WORKAROUND.md（統合元）
     └── API_DOCS_GUIDE.md ← ドキュメント生成
 
 docs/dev/ ← 開発者向け（設計・計画）
 ├── DESIGN_PATTERNS.md ← 旧 GUIDELINE.md（名前変更）
 ├── IMPLEMENTATION_PLAN.md ← 実装計画
-├── RUST.md ← 言語比較
-└── docs/guides/SIMULATION.md ← docs/dev/ から移動
+├── CLANG_SETUP.md ← CLANG_TIDY_SETUP + CLANG_ARM_MULTILIB_WORKAROUND 統合
+├── CODE_QUALITY_NOTES.md ← 旧 clang_tooling_evaluation.md
+├── SIMULATION.md ← 保持
+└── RUST.md ← 言語比較
 ```
 
 ---
 
 ## 5. 統廃合アクション
 
-### Phase 4 実行項目（dev/ と lib/docs/ の整理）
+### Phase A-4 実行項目（dev/ と clang 系の整理）
 
 | ステップ | アクション | 対象 |
 |---------|-----------|------|
-| 4.1 | GUIDELINE.md → DESIGN_PATTERNS.md に名前変更 | docs/dev/ |
-| 4.2 | SIMULATION.md を docs/guides/ に移動 | docs/dev/ → docs/guides/ |
-| 4.3 | clang 関連3ファイルの内容を CODE_QUALITY_GUIDE.md に統合 | docs/ 直下 → lib/docs/guides/ |
-| 4.4 | 統合元の3ファイルを削除 | docs/ 直下 |
+| A-4.1 | GUIDELINE.md → DESIGN_PATTERNS.md に名前変更 | docs/dev/ |
+| A-4.2 | clang 関連3ファイルの内容を docs/dev/CLANG_SETUP.md に統合 | docs/ 直下 → docs/dev/ |
+| A-4.3 | clang_tooling_evaluation.md → docs/dev/CODE_QUALITY_NOTES.md として保持 | docs/ 直下 → docs/dev/ |
+| A-4.4 | 統合元の2ファイル（CLANG_TIDY_SETUP.md, CLANG_ARM_MULTILIB_WORKAROUND.md）を削除 | docs/ 直下 |
 
 ### 統合の詳細
 
-#### 4.3 clang 関連統合の手順
+#### A-4.2 clang 関連統合の手順
 
-1. `CODE_QUALITY_GUIDE.md` に以下を追加:
-   - clang-format 評価結果（clang_tooling_evaluation.md の関連セクション）
+1. `docs/dev/CLANG_SETUP.md` を新規作成し以下を統合:
    - clang-tidy セットアップ手順（CLANG_TIDY_SETUP.md 全文）
    - ARM multilib ワークアラウンド（CLANG_ARM_MULTILIB_WORKAROUND.md 全文）
-2. 重複する情報は CODING_RULE.md を正本として、CODE_QUALITY_GUIDE.md からリンク
-3. 統合後、元の3ファイルを削除
+2. `clang_tooling_evaluation.md` → `docs/dev/CODE_QUALITY_NOTES.md` に移動（独立評価レポートとして保持）
+3. 重複する情報は CODING_RULE.md を正本として、各ファイルからリンク
+4. 統合元の2ファイルを削除
 
-### Phase 6 で必要な更新
+### Phase A-6 で必要な更新
 
 | 対象 | 更新内容 |
 |------|---------|
@@ -276,8 +278,7 @@ docs/dev/ ← 開発者向け（設計・計画）
 
 ## 7. 推奨事項
 
-1. **clang 関連の即時統合** — 3ファイルの散在は開発者を混乱させる。CODE_QUALITY_GUIDE.md に集約
+1. **clang 関連の即時統合** — docs/dev/CLANG_SETUP.md に集約、clang_tooling_evaluation.md は CODE_QUALITY_NOTES.md に移動
 2. **GUIDELINE.md の名前変更** — 「ガイドライン」という名前で CODING_RULE.md と混同される
-3. **SIMULATION.md の移動** — dev/ より guides/ の方が適切（開発手法ガイド）
-4. **lib/docs/ の完成度は高い** — 大規模な変更は不要。clang 統合のみで大幅改善
-5. **CLAUDE.md の参照パスは現状正しい** — Phase 4 実行後も変更不要
+3. **lib/docs/ の完成度は高い** — 大規模な変更は不要。Stage B Phase 0 でコピー再配置後もほぼそのまま継承
+4. **CLAUDE.md の参照パスは現状正しい** — Phase A-4 実行後も変更不要

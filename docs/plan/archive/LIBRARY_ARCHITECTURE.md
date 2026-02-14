@@ -8,8 +8,9 @@
 | 文書 | 内容 |
 |------|------|
 | **[LIBRARY_SPEC.md](LIBRARY_SPEC.md)** | 理想的なライブラリ構成の**設計仕様書**。12ライブラリの構造、レイヤーモデル、依存関係、名前空間規約、xmakeビルドシステム、品質基準を定義する。 |
-| **[MIGRATION_PLAN.md](MIGRATION_PLAN.md)** | 現状の診断と**移行計画書**。10の主要問題、依存関係違反、M0～M6の段階的移行フェーズ、後方互換性戦略、リスク管理、バージョン戦略を定義する。 |
-| **[LIBRARY_SPEC_EVALUATION.md](LIBRARY_SPEC_EVALUATION.md)** | 設計仕様書の**評価レポート**。P0〜P2の指摘事項8件と章別評価を定義する。 |
+| **[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)** | クリーンスレート**実装計画書**。現行コードをアーカイブし、5フェーズで12ライブラリを新規構築する手順を定義する。 |
+| **[PAL_INTEGRATION_ANALYSIS.md](PAL_INTEGRATION_ANALYSIS.md)** | PAL/コード生成パイプラインと12ライブラリ構成の**統合分析**。LIBRARY_SPEC と IMPLEMENTATION_PLAN への反映方針を定義する。 |
+| **[MIGRATION_PLAN.md](MIGRATION_PLAN.md)** | （参考）互換性を考慮した移行計画書。IMPLEMENTATION_PLAN.md が正本。 |
 
 ## アーカイブ（調査過程）
 

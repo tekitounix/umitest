@@ -2,7 +2,10 @@
 
 **カテゴリ:** E. HAL/ドライバ設計
 **配置先:** `lib/docs/design/`（既存構成維持）
+**前提仕様:** [LIBRARY_SPEC.md](../LIBRARY_SPEC.md) v1.3.0 / [IMPLEMENTATION_PLAN.md](../IMPLEMENTATION_PLAN.md) v1.1.0
 **関連:** [CONSOLIDATION_PLAN.md](CONSOLIDATION_PLAN.md) | [DOCUMENT_INVENTORY.md](DOCUMENT_INVENTORY.md)
+
+> **注意:** `lib/docs/design/` は Stage B Phase 0 で `lib/_archive/docs/design/` に退避後、新 `lib/docs/design/` にコピー再配置される（CONSOLIDATION_PLAN §5.2）。高品質（監査スコア 100%）なため内容はそのまま継承される。
 
 ---
 

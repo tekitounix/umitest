@@ -1,8 +1,12 @@
 # UMI ドキュメント完全インベントリ
 
 **作成日:** 2026-02-14
+**最終更新日:** 2026-02-14
 **対象:** プロジェクト固有の全ドキュメント（.refs/, .venv/, xmake-repo/ 外部参照を除く）
-**総ファイル数:** 約210ファイル
+**総ファイル数:** 約309ファイル
+**前提仕様:** [LIBRARY_SPEC.md](../LIBRARY_SPEC.md) v1.3.0 / [IMPLEMENTATION_PLAN.md](../IMPLEMENTATION_PLAN.md) v1.1.0
+
+> **注意:** IMPLEMENTATION_PLAN v1.1.0 のクリーンスレート戦略により、`lib/` 配下のドキュメントは Phase 0 で `lib/_archive/` にアーカイブされ、新規12ライブラリの `docs/` として再構築される。本インベントリの lib/ セクションは**現行の配置**を記録しており、最終的なパスは CONSOLIDATION_PLAN v2.0.0 §5 を参照のこと。
 
 ---
 
@@ -371,18 +375,55 @@
 
 ---
 
+## 17. docs/plan/ — 計画文書
+
+### 17.1 docs/plan/ 直下
+
+| # | ファイル | 有用性 | 要約 | 備考 |
+|---|---------|--------|------|------|
+| 296 | LIBRARY_SPEC.md | ★ | UMI ライブラリ構成 設計仕様書 v1.3.0（12ライブラリ、5レイヤー、PAL統合） | **権威ある正本** |
+| 297 | IMPLEMENTATION_PLAN.md | ★ | クリーンスレート実装計画書 v1.1.0（Phase 0-4、2a/2b/2c サブフェーズ） | **権威ある正本** |
+
+### 17.2 docs/plan/archive/ (6ファイル)
+
+| # | ファイル | 有用性 | 要約 | 備考 |
+|---|---------|--------|------|------|
+| 298 | INVESTIGATION.md | ◆ | 初期調査・分析結果 | 旧版計画文書 |
+| 299 | ANALYSIS.md | ◆ | 構造分析 | 旧版計画文書 |
+| 300 | PROPOSAL.md | ◆ | 統合提案 | 旧版計画文書 |
+| 301 | PAL_INTEGRATION_ANALYSIS.md | ◆ | PAL統合分析 | LIBRARY_SPEC v1.3.0 に反映済み |
+| 302 | MIGRATION_PLAN.md | ◆ | 移行計画 | IMPLEMENTATION_PLAN v1.1.0 に統合済み |
+| 303 | LIBRARY_ARCHITECTURE.md | ◆ | ライブラリアーキテクチャ | LIBRARY_SPEC v1.3.0 に統合済み |
+
+### 17.3 docs/plan/doc-consolidation/ (10ファイル)
+
+| # | ファイル | 有用性 | 要約 | 備考 |
+|---|---------|--------|------|------|
+| 304 | CONSOLIDATION_PLAN.md | ★ | ドキュメント統廃合計画 v2.0.0 | 本セット |
+| 305 | DOCUMENT_INVENTORY.md | ★ | 完全ドキュメントインベントリ | 本ファイル |
+| 306 | AUDIT_REPORT.md | ★ | 監査レポート v2.0 | 本セット |
+| 307 | CAT_A_CORE_SPECS.md | ★ | コア仕様カテゴリ要約 | |
+| 308 | CAT_B_OS_DESIGN.md | ★ | OS設計カテゴリ要約 | |
+| 309 | CAT_C_PROTOCOLS.md | ★ | プロトコルカテゴリ要約 | |
+| 310 | CAT_D_DEV_GUIDES.md | ★ | 開発ガイドカテゴリ要約 | |
+| 311 | CAT_E_HAL_DESIGN.md | ★ | HAL/ドライバ設計カテゴリ要約 | |
+| 312 | CAT_F_DSP_TECHNICAL.md | ★ | DSP/技術資料カテゴリ要約 | |
+| 313 | CAT_G_LIBRARY_DOCS.md | ★ | ライブラリドキュメントカテゴリ要約 v2.0 | 12ライブラリ構成に改訂済み |
+
+---
+
 ## 統計サマリ
 
 | 有用性 | ファイル数 | 割合 |
 |--------|-----------|------|
-| ★ 高 | ~130 | 44% |
-| ◆ 中 | ~90 | 30% |
-| ▽ 低 | ~40 | 14% |
-| ✗ 不要 | ~35 | 12% |
+| ★ 高 | ~150 | 48% |
+| ◆ 中 | ~90 | 29% |
+| ▽ 低 | ~35 | 11% |
+| ✗ 不要 | ~34 | 11% |
 
 ### 主要な問題パターン
 
-1. **カーネル文書の3重管理** — docs/umi-kernel/, docs/archive/umi-kernel/, docs/umios-architecture/02-kernel/ に同種内容が分散（うち4ファイルは完全同一コピー）
+1. **カーネル文書の3重管理** — docs/umi-kernel/, docs/archive/umi-kernel/, docs/umios-architecture/02-kernel/ に同種内容が分散（うち5ファイルは完全同一コピー）
 2. **docs/README.md のリンク壊滅** — 25+のリンクが壊れている（旧ディレクトリ構造を参照）
 3. **USB/MIDI/SysExの分散** — 同ドメインのドキュメントがdocs/, docs/archive/, lib/umi/*/docs/に分散
 4. **コーディング規約系の散在** — CODING_RULE, GUIDELINE, clang_tooling_evaluation, CODE_QUALITY_GUIDEが分散
@@ -390,3 +431,4 @@
 6. **UXMP→SysEx移行の残骸** — 3ファイルが「移行済み」にも関わらず残存
 7. **archiveの不完全性** — archiveされたファイルが非archiveディレクトリにも完全コピーで残存
 8. **copilot-instructions.mdの壊れたパス** — 存在しないdocs/refs/specs/等を参照
+9. **lib/ クリーンスレートとの不整合** — IMPLEMENTATION_PLAN v1.1.0 により lib/ 全体がアーカイブ・再構築されるが、現行の lib/umi/*/docs/ のインベントリはそのまま残存

@@ -1,7 +1,8 @@
 # CAT_C: プロトコル — 統合内容要約
 
 **カテゴリ:** C. プロトコル
-**配置先:** `docs/umi-sysex/`（SysExプロトコル）+ `docs/umi-usb/`（USB Audio）
+**配置先:** `docs/umi-sysex/`（SysExプロトコル）+ `docs/umi-usb/`（USB Audio → Stage A で archive 移動）
+**前提仕様:** [LIBRARY_SPEC.md](../LIBRARY_SPEC.md) v1.3.0 / [IMPLEMENTATION_PLAN.md](../IMPLEMENTATION_PLAN.md) v1.1.0
 **関連:** [CONSOLIDATION_PLAN.md](CONSOLIDATION_PLAN.md) | [DOCUMENT_INVENTORY.md](DOCUMENT_INVENTORY.md)
 
 ---
@@ -212,20 +213,20 @@ USB Audio/MIDI
 
 ## 5. 統廃合アクション
 
-### Phase 3 実行項目（SysEx/プロトコル文書の整理）
+### Phase A-3 実行項目（SysEx/プロトコル文書の整理）
 
 | ステップ | アクション | 対象 |
 |---------|-----------|------|
-| 3.1 | DATA.md の49行を DATA_SPEC.md 冒頭に統合、DATA.md を削除 | umi-sysex/ |
-| 3.2 | IMPLEMENTATION_NOTES の内容を STATUS.md に統合、NOTES を削除 | umi-sysex/ |
-| 3.3 | archive 内の旧プロトコル文書5件を削除 | archive/ |
+| A-3.1 | DATA.md の49行を DATA_SPEC.md 冒頭に統合、DATA.md を削除 | umi-sysex/ |
+| A-3.2 | IMPLEMENTATION_NOTES の内容を STATUS.md に統合、NOTES を削除 | umi-sysex/ |
+| A-3.3 | archive 内の旧プロトコル文書5件を削除 | archive/ |
 
-### Phase 5 実行項目（USB/MIDI の住み分け）
+### Phase A-5 実行項目（USB/MIDI の住み分け）
 
 | ステップ | アクション | 対象 |
 |---------|-----------|------|
-| 5.1 | docs/umi-usb/ の2ファイルを archive に移動 | umi-usb/ |
-| 5.2 | lib/umi/usb/docs/ を USB 関連の正本として確立 | lib/umi/usb/docs/ |
+| A-5.1 | docs/umi-usb/ の2ファイルを archive に移動 | umi-usb/ |
+| A-5.2 | lib/umi/usb/docs/ は Stage B Phase 3 で新構造に移行されるため、現時点では正本の確立のみ | lib/umi/usb/docs/ |
 
 ### 統合後の構成
 

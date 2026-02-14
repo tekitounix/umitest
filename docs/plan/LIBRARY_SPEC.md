@@ -1,10 +1,10 @@
 # UMI ライブラリ構成 設計仕様書
 
-**バージョン:** 1.2.0
+**バージョン:** 1.3.0
 **作成日:** 2026-02-14
 **最終監査日:** 2026-02-14
 
-本文書は UMI の理想的なライブラリ構成を定義する**設計仕様書**である。現状の問題分析や移行手順は [MIGRATION_PLAN.md](MIGRATION_PLAN.md) を参照。
+本文書は UMI の理想的なライブラリ構成を定義する**設計仕様書**である。実装手順は [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) を参照。
 
 ---
 
@@ -81,9 +81,9 @@ L0  Infrastructure     ← umitest, umibench, umirtm (開発支援)
 | umicore | `umi::core`, `umi` (トップレベル Concept) |
 | umihal | `umi::hal` |
 | umimmio | `umi::mmio` |
-| umiport | `umi::port`, `umi::board` (ボード固有) |
+| umiport | `umi::port`, `umi::board` (ボード固有), `umi::pal` (PAL 生成物) |
 | umidevice | `umi::device` |
-| umirtm | `umi::rt` |
+| umirtm | `umi::rtm` |
 | umitest | `umi::test` |
 | umibench | `umi::bench` |
 | umidsp | `umi::dsp` |
@@ -114,7 +114,7 @@ L0  Infrastructure     ← umitest, umibench, umirtm (開発支援)
                         │                               │
                         │                               │
      umiport ───────────┼───────────────────────────────┘  L2
-     (arch,mcu,board)   │
+     (pal,driver,board)  │
      deps: umihal       │    umidevice
            + umimmio    │    (codecs, drivers)
                         │    deps: umihal + umimmio
@@ -224,7 +224,7 @@ lib/umitest/
 #### umirtm — リアルタイムモニタ
 
 - **責務:** RTT/SWO ベースのデバッグ出力
-- **名前空間:** `umi::rt`
+- **名前空間:** `umi::rtm`
 - **依存:** なし
 
 ---
@@ -266,6 +266,7 @@ lib/umicore/
   - `ProcessorLike` concept もここ — 実装は各ライブラリが提供
   - `Event` / `EventQueue` もここ — ルーティングロジックは umios に
   - `irq.hh` は既存 `lib/umi/core/irq.hh` を **移設** する。現行ファイルは backend-agnostic なインターフェース定義（`umi::irq::Handler`, `init()`, `set_handler()` 等）を持つ。移設時に API 差分を整理し、MCU 固有の実装（`lib/umi/port/common/irq.cc`）は umiport に残す
+  - **irq.hh と PAL の関係:** umicore の `irq.hh` は backend-agnostic な割り込みインターフェースを定義し、PAL カテゴリ C4 (割り込みベクター) は MCU 固有の `IRQn` enum とベクターテーブルを生成する。この 2 層構造により、ドライバは umicore の抽象インターフェースのみに依存し、MCU 固有の割り込み番号は PAL 経由で解決する
 
 #### umihal — HAL Concept 定義
 
@@ -316,12 +317,43 @@ lib/umihal/
 - **責務:** メモリマップドI/O レジスタへの型安全なアクセス
 - **名前空間:** `umi::mmio`
 - **依存:** なし
+- **PAL 生成基盤としての役割:** umimmio が提供する `Device<>`, `Register<>`, `Field<>` テンプレートは、PAL コード生成パイプライン（§6.4）の出力先として機能する。PAL は SVD データから umimmio テンプレートのインスタンス化コードを自動生成する:
+
+```cpp
+// umimmio が提供するテンプレート (lib/umimmio/)
+template <mm::Addr BaseAddr>
+struct Device { ... };
+
+template <typename Parent, uint32_t Offset, uint32_t Bits, typename Access, uint32_t Reset>
+struct Register { ... };
+
+// PAL が生成するインスタンス (lib/umiport/include/umiport/pal/)
+template <mm::Addr BaseAddr>
+struct GPIOx : mm::Device<mm::RW, mm::DirectTransportTag> {
+    struct MODER : mm::Register<GPIOx, 0x00, 32, mm::RW, 0xA800'0000> {
+        struct MODER0 : mm::Field<MODER, 0, 2> {};
+    };
+};
+using GPIOA = GPIOx<0x4002'0000>;
+```
 
 ---
 
 ### L2: Platform (ハードウェア抽象化)
 
-#### umiport — プラットフォームポート
+#### umiport — ハードウェアポーティングキット
+
+umiport は単なるドライバ集ではなく、**ハードウェアポーティングキット全体**を包含する:
+
+| 構成要素 | 内容 | 種別 |
+|---------|------|:----:|
+| **PAL** | レジスタアクセス定義 (umimmio テンプレートのインスタンス化) | 生成 / 手書き |
+| **ドライバ** | HAL Concept を充足する MCU 固有実装 (PAL を使用) | 手書き |
+| **MCU データベース** | MCU スペック (メモリ、クロック、ペリフェラル一覧) | Lua |
+| **ボード定義** | ボード設定 (HSE、ピン、ペリフェラル選択) | Lua + C++ (生成) |
+| **コード生成ツール** | SVD → umimmio C++ の自動生成パイプライン | Python |
+| **xmake ルール** | ボード選択・MCU DB 解決・PAL 生成タスク | Lua |
+| **ビルド成果物** | startup.cc, memory.ld, clock_config.hh 等 | 生成 |
 
 ```
 lib/umiport/
@@ -333,45 +365,98 @@ lib/umiport/
 │   ├── INDEX.md
 │   ├── TESTING.md
 │   └── ja/
+│
 ├── include/umiport/
-│   ├── port.hh              # umbrella header
-│   ├── arch/
-│   │   ├── cm4/             # Cortex-M4 (context switch, handlers)
-│   │   └── cm7/             # Cortex-M7 (cache, context)
-│   ├── mcu/
-│   │   ├── stm32f4/         # STM32F4 ペリフェラル (RCC, GPIO, I2S, etc.)
-│   │   └── stm32h7/         # STM32H7 ペリフェラル
-│   ├── board/
-│   │   ├── host/            # ホスト環境
-│   │   ├── wasm/            # WASM 環境
-│   │   ├── stm32f4_disco/   # STM32F4 Discovery
-│   │   ├── stm32f4_renode/  # Renode シミュレータ
-│   │   ├── daisy_seed/      # Daisy Seed
-│   │   └── daisy_pod/       # Daisy Pod
-│   ├── platform/
-│   │   ├── embedded/        # 組込みカーネル環境 (syscall, protection)
-│   │   ├── wasm/            # WASM 実行環境
-│   │   └── renode/          # Renode 環境
-│   └── common/              # 共通ユーティリティ (NVIC, SCB, DWT, IRQ)
+│   ├── port.hh                          # umbrella header
+│   │
+│   ├── pal/                             # PAL 生成物ルート (§6.4 参照)
+│   │   ├── arch/arm/cortex_m/           #   L1: アーキテクチャ共通
+│   │   │   ├── nvic.hh                  #     仕様固定 (手書き or 生成)
+│   │   │   ├── scb.hh
+│   │   │   └── systick.hh
+│   │   ├── core/cortex_m4f/             #   L2: コアプロファイル固有
+│   │   │   ├── dwt.hh                   #     DWT, FPU, MPU 等
+│   │   │   └── fpu.hh
+│   │   └── mcu/stm32f4/                #   L3: MCU ファミリ固有
+│   │       └── periph/                  #     SVD から生成
+│   │           ├── gpio.hh
+│   │           ├── rcc.hh
+│   │           ├── i2s.hh
+│   │           └── usart.hh
+│   │
+│   ├── driver/                          # 手書きドライバ (PAL を #include)
+│   │   ├── arch/arm/cortex_m/           #   アーキテクチャ共通ドライバ
+│   │   │   └── dwt.hh                   #     サイクルカウンタ
+│   │   └── mcu/stm32f4/                #   MCU 固有ドライバ
+│   │       ├── gpio_driver.hh           #     GpioLike concept を充足
+│   │       ├── uart_driver.hh           #     UartLike concept を充足
+│   │       ├── i2s_driver.hh
+│   │       ├── system_init.hh           #     クロック初期化 (PLL パラメータは board.lua から生成)
+│   │       └── usb_otg.hh              #     USB OTG FS (UsbDeviceLike を充足)
+│   │
+│   ├── board/                           # ボード定義 (Lua + C++ 二重構造)
+│   │   ├── host/                        #   ホスト環境
+│   │   │   └── platform.hh
+│   │   ├── wasm/                        #   WASM 環境
+│   │   │   └── platform.hh
+│   │   └── stm32f4_disco/              #   組込みボード
+│   │       ├── platform.hh              #     生成: HAL Concept 充足型
+│   │       ├── board.hh                 #     生成: constexpr 定数 (HSE, sysclk 等)
+│   │       ├── pin_config.hh            #     生成: GPIO AF テーブル
+│   │       └── clock_config.hh          #     生成: PLL M/N/P/Q (自動探索)
+│   │
+│   ├── platform/                        # 実行環境固有コード
+│   │   ├── embedded/                    #   組込みカーネル環境 (syscall, protection)
+│   │   └── wasm/                        #   WASM 実行環境
+│   │
+│   └── common/                          # 共通ユーティリティ
+│       └── irq.hh                       #   MCU 固有割り込みディスパッチ
+│
 ├── src/
-│   ├── arch/
-│   │   ├── cm4/handlers.cc
-│   │   └── cm7/handlers.cc
+│   ├── arch/cm4/handlers.cc
 │   ├── common/irq.cc
-│   ├── stm32f4/
-│   │   ├── syscalls.cc
-│   │   └── usb_otg.cc       # STM32 OTG FS USB HAL 実装
+│   ├── mcu/stm32f4/syscalls.cc
 │   ├── host/write.cc
 │   └── wasm/write.cc
-├── rules/
-│   └── board.lua            # ボード選択ルール
-└── tests/
+│
+├── database/                            # MCU/ボード定義データベース (§7.3 参照)
+│   ├── mcu/
+│   │   └── stm32f4/
+│   │       └── stm32f407vg.lua          #   MCU スペック (メモリ, クロック, ペリフェラル)
+│   └── boards/
+│       └── stm32f4_disco/
+│           └── board.lua                #   ボード設定 (HSE, ピン, 使用ペリフェラル)
+│
+├── gen/                                 # PAL コード生成ツール (§6.4, §7.3 参照)
+│   ├── umipal-gen                       #   Python メインスクリプト
+│   ├── parsers/
+│   │   ├── svd_parser.py                #   SVD XML パーサー
+│   │   └── cmsis_header_parser.py       #   CMSIS ヘッダパーサー
+│   ├── models/
+│   │   └── device_model.py              #   統一中間表現 (Unified Device Model)
+│   ├── templates/
+│   │   ├── peripheral.hh.j2             #   ペリフェラルレジスタテンプレート
+│   │   ├── vectors.hh.j2               #   割り込みベクターテンプレート
+│   │   └── memory.hh.j2                #   メモリマップテンプレート
+│   └── data/
+│       ├── svd/STM32F407.svd
+│       └── patches/stm32f4.yaml         #   SVD パッチ (stm32-rs 形式)
+│
+├── rules/                               # xmake ビルドルール (§7.3 参照)
+│   ├── board.lua                        #   ボード選択 → MCU 特定 → ツールチェイン決定
+│   └── pal_generator.lua               #   PAL 再生成タスク定義
+│
+├── tests/
+└── examples/
 ```
 
-- **責務:** 全プラットフォームのハードウェア抽象化実装
-- **名前空間:** `umi::port` (アーキテクチャ), `umi::board` (ボード固有)
-- **依存:** umihal (L1), umimmio (L1, optional)
-- **4層構造:** arch (CPU) → mcu (SoC) → board (基板) → platform (実行環境)
+- **責務:** 全プラットフォームのハードウェアポーティング（PAL 生成、ドライバ、データベース、ビルドルール）
+- **名前空間:** `umi::port` (ドライバ), `umi::board` (ボード固有), `umi::pal` (PAL 生成物)
+- **依存:** umihal (L1), umimmio (L1)
+- **設計判断:**
+  - **pal/ と driver/ の分離:** pal/ は生成物（または手書きの生成相当品）、driver/ は PAL を使って HAL Concept を充足する手書きコード。この分離により、生成パイプライン導入前でも手書き PAL で動作し、段階的に自動生成に移行できる
+  - **database/ の配置:** MCU DB と board.lua は umiport 内に配置する。xmake ビルドシステムと Python 生成ツールの両方から参照される共有データソースであり、umiport が「ハードウェアの真実のソース」として機能する
+  - **gen/ の配置:** コード生成ツールは umiport 内に配置する。生成物の出力先 (pal/) と入力データ (database/) が同一ライブラリ内にあるため、ツール・データ・出力の一貫性が保たれる
 
 #### umidevice — デバイスドライバ
 
@@ -658,7 +743,7 @@ lib/<libname>/
 └── xmake.lua                 # プラットフォーム選択ロジック
 ```
 
-> **標準仕様との差分:** `lib/docs/standards/LIBRARY_SPEC.md` v2.0.0 では `platforms/arm/cortex-m/<board>/` を使用しているが、これは umiport 固有の 4 層構造（§6.3）に対応した表記である。一般ライブラリでは上記の `platforms/embedded/` を使用する。umiport のみが `arch/mcu/board/platform` の 4 層構造を持つ。
+> **標準仕様との差分:** `lib/docs/standards/LIBRARY_SPEC.md` v2.0.0 では `platforms/arm/cortex-m/<board>/` を使用しているが、これは umiport 固有の構造（§6.3）に対応した表記である。一般ライブラリでは上記の `platforms/embedded/` を使用する。umiport のみが `pal/`, `driver/`, `board/`, `platform/` の種別軸と `arch/core/mcu` のスコープ軸を持つ特殊構造を取る。
 
 ### 6.2 プラットフォーム選択メカニズム
 
@@ -673,27 +758,112 @@ else
 end
 ```
 
-### 6.3 umiport の特殊な 4 層構造
+### 6.3 umiport の特殊構造
 
-umiport のみ、ハードウェアの階層に対応した特殊構造を持つ:
+umiport のみ、ハードウェアの階層に対応した特殊構造を持つ。主要な分類軸は以下の2つ:
+
+**スコープ軸 (PAL/ドライバ共通):**
 
 ```
-arch/     → CPU アーキテクチャ (cm4, cm7)
-mcu/      → SoC 固有 (stm32f4, stm32h7)
-board/    → ボード固有 (stm32f4_disco, daisy_seed)
-platform/ → 実行環境 (embedded, wasm, renode)
+arch/     → CPU アーキテクチャ (arm/cortex_m)
+core/     → コアプロファイル (cortex_m4f, cortex_m7)
+mcu/      → MCU ファミリ (stm32f4, stm32h7)
 ```
 
-この 4 層は xmake の `board.lua` ルールで動的に選択される:
+**種別軸:**
 
-```lua
--- board.lua (簡略版)
-function on_load(target)
-    local board = target:values("umiport.board")
-    target:add("includedirs", "include/umiport/board/" .. board)
-    -- MCU/arch は board 設定から自動推論
-end
 ```
+pal/      → 生成物: umimmio テンプレートのインスタンス化 (レジスタ定義)
+driver/   → 手書き: PAL を使って HAL Concept を充足するドライバ実装
+board/    → ボード固有定義 (Lua + C++ 二重構造)
+platform/ → 実行環境固有 (embedded, wasm)
+```
+
+これらは xmake の `board.lua` ルール (§7.3) で動的に選択される。
+
+### 6.4 HAL Concept → PAL → ドライバの 3 層パターン
+
+組込みプラットフォームにおけるハードウェア抽象化は、以下の 3 層で構成される:
+
+```
+Layer 1: HAL Concept (umihal)
+    定義のみ。実装なし。
+    例: GpioLike concept — set_mode(), write(), read()
+
+         │ concept を充足
+         ▼
+
+Layer 3: ドライバ (umiport/driver/)
+    手書き。PAL レジスタ定義を使って HAL Concept を実装。
+    例: GpioDriver<GPIOA> — PAL の MODER, ODR, BSRR を操作して GpioLike を充足
+
+         │ PAL を #include
+         ▼
+
+Layer 2: PAL 生成物 (umiport/pal/)
+    生成 (or 手書き)。umimmio テンプレートのインスタンス化。
+    例: GPIOx<0x4002'0000>::MODER::MODER0 — SVD から自動生成
+```
+
+**具体例:**
+
+```cpp
+// [Layer 1] umihal: Concept 定義 (lib/umihal/)
+template <typename T>
+concept GpioLike = requires(T gpio, uint8_t pin, GpioMode mode) {
+    gpio.set_mode(pin, mode);
+    gpio.write(pin, true);
+    { gpio.read(pin) } -> std::same_as<bool>;
+};
+
+// [Layer 2] PAL: レジスタ定義 (lib/umiport/include/umiport/pal/mcu/stm32f4/)
+//   SVD から自動生成、または手書き
+template <mm::Addr BaseAddr>
+struct GPIOx : mm::Device<mm::RW, mm::DirectTransportTag> {
+    struct MODER : mm::Register<GPIOx, 0x00, 32, mm::RW, 0xA800'0000> { ... };
+    struct ODR   : mm::Register<GPIOx, 0x14, 32, mm::RW, 0x0000'0000> { ... };
+    struct BSRR  : mm::Register<GPIOx, 0x18, 32, mm::WO, 0x0000'0000> { ... };
+};
+using GPIOA = GPIOx<0x4002'0000>;
+
+// [Layer 3] ドライバ: HAL Concept を充足 (lib/umiport/include/umiport/driver/mcu/stm32f4/)
+template <typename GpioRegs>
+struct GpioDriver {
+    constexpr void set_mode(uint8_t pin, GpioMode mode) {
+        GpioRegs::MODER::write_field(pin * 2, 2, static_cast<uint32_t>(mode));
+    }
+    constexpr void write(uint8_t pin, bool value) { ... }
+    constexpr bool read(uint8_t pin) { ... }
+};
+static_assert(GpioLike<GpioDriver<GPIOA>>);  // Concept 充足を保証
+```
+
+**この 3 層分離の利点:**
+- PAL は生成パイプラインの導入前でも手書きで動作する
+- ドライバは PAL の実装方法（手書き / 生成）に依存しない
+- HAL Concept は全プラットフォームで共通であり、ドライバの差し替えが型安全
+
+### 6.5 board.lua → C++ 生成チェーン
+
+ボード定義は **Lua (データ定義) + C++ (コンパイル時定数)** の二重構造を持つ:
+
+```
+database/boards/stm32f4_disco/board.lua    (入力: ボード設定)
+database/mcu/stm32f4/stm32f407vg.lua       (入力: MCU スペック)
+        │
+        │  xmake rules/board.lua が解決
+        ▼
+include/umiport/board/stm32f4_disco/
+├── board.hh            ← constexpr 定数 (HSE_FREQ, SYSCLK 等)
+├── platform.hh         ← HAL Concept 充足型の typedef
+├── clock_config.hh     ← PLL M/N/P/Q (HSE + target sysclk から自動探索)
+├── pin_config.hh       ← GPIO AF テーブル
+└── memory.ld           ← リンカスクリプト (FLASH/RAM origin, length)
+```
+
+**PLL 自動探索:** board.lua に `hse_freq` と `target_sysclk` を指定すると、MCU DB のクロック制約から有効な PLL M/N/P/Q パラメータを自動探索し `clock_config.hh` に出力する。
+
+**生成タイミング:** board 定義の C++ ファイルは `xmake build` 時に自動生成される（PAL コード生成とは異なり、ビルドの一部として実行）。
 
 ---
 
@@ -732,7 +902,7 @@ includes("lib/umios")
 includes("lib/umi")
 
 -- Applications
-includes("examples/stm32f4_kernel")
+includes("examples/stm32f4_os")
 includes("examples/headless_webhost")
 
 -- Tools
@@ -755,7 +925,110 @@ target_end()
 includes("tests")
 ```
 
-### 7.3 便利バンドル
+### 7.3 umiport のビルド統合
+
+umiport は通常のライブラリビルドに加え、MCU データベースの解決と PAL コード生成の2つの追加ビルドメカニズムを持つ。
+
+#### 7.3.1 MCU DB 解決チェーン
+
+ボード選択から MCU スペック、ツールチェイン決定までの解決フロー:
+
+```
+ユーザー指定: --board=stm32f4_disco
+     │
+     ▼
+database/boards/stm32f4_disco/board.lua    ← ボード定義
+     │  mcu = "stm32f407vg"
+     ▼
+database/mcu/stm32f4/stm32f407vg.lua       ← MCU スペック
+     │  core = "cortex-m4f"
+     │  vendor = "st"
+     │  family = "stm32f4"
+     ▼
+rules/board.lua                            ← xmake ルール
+     ├── ツールチェイン → arm-none-eabi-gcc
+     ├── includedirs   → pal/mcu/stm32f4/, driver/mcu/stm32f4/, board/stm32f4_disco/
+     ├── memory.ld     → database から生成
+     └── defines       → HSE_VALUE, SYSCLK 等
+```
+
+**MCU DB スキーマ (Lua):**
+
+```lua
+-- database/mcu/stm32f4/stm32f407vg.lua
+return {
+    core     = "cortex-m4f",
+    vendor   = "st",
+    family   = "stm32f4",
+    memory   = {
+        FLASH  = { origin = 0x08000000, length = "1M"  },
+        SRAM   = { origin = 0x20000000, length = "128K" },
+        CCM    = { origin = 0x10000000, length = "64K"  },
+    },
+    clock    = {
+        hse_range  = { 4e6, 26e6 },
+        sysclk_max = 168e6,
+        pll_src    = { "HSI", "HSE" },
+    },
+    svd_file = "STM32F407.svd",
+}
+```
+
+#### 7.3.2 PAL コード生成タスク
+
+PAL 生成は通常ビルドとは**分離された明示的タスク**として実行する:
+
+```bash
+# PAL 生成 (ソースツリーに出力、git 管理下)
+xmake pal-gen --family stm32f4
+
+# 通常ビルド (生成済み PAL ヘッダを使用)
+xmake build stm32f4_os
+```
+
+**分離の理由:**
+- PAL 生成は SVD ファイルと Python ツールに依存する（通常ビルドとは異なるツールチェイン）
+- 生成物は git 管理下に置き、レビュー可能にする（差分ベース更新）
+- 開発者は PAL を再生成せずにドライバ開発を進められる
+
+```lua
+-- rules/pal_generator.lua (xmake タスク定義)
+task("pal-gen")
+    set_menu({
+        usage = "xmake pal-gen [options]",
+        description = "Generate PAL headers from SVD/CMSIS data",
+        options = {
+            {nil, "family", "v", nil, "MCU family (e.g., stm32f4)"},
+            {nil, "dry-run", "k", nil, "Show what would be generated"},
+        }
+    })
+    on_run(function ()
+        -- gen/umipal-gen を呼び出し
+        -- 出力先: include/umiport/pal/mcu/<family>/periph/
+        os.exec("python3 gen/umipal-gen --family %s", option.get("family"))
+    end)
+task_end()
+```
+
+#### 7.3.3 ボード定義の C++ 生成
+
+board.lua → C++ ヘッダの生成はビルド時に自動実行される（PAL 生成とは異なり `xmake build` の一部）:
+
+```lua
+-- rules/board.lua (ビルド時生成)
+rule("umiport.board")
+    on_load(function (target)
+        local board = target:values("umiport.board")
+        local board_lua = path.join("database/boards", board, "board.lua")
+        local mcu_lua   = resolve_mcu(board_lua)  -- MCU DB からスペック取得
+
+        -- board.hh, platform.hh, clock_config.hh, memory.ld を生成
+        generate_board_headers(target, board_lua, mcu_lua)
+    end)
+rule_end()
+```
+
+### 7.4 便利バンドル
 
 ```lua
 -- lib/umi/xmake.lua
@@ -844,6 +1117,16 @@ v2.0.0 で任意とされている項目のうち、UMI では必須に格上げ
 - [ ] L0 ライブラリへの `add_deps` がテストターゲット外に存在しない
 - [ ] L3 内の依存方向が umiusb → umidsp のみ（逆方向なし）
 
+### 9.5 PAL / コード生成検証
+
+- [ ] `xmake pal-gen --family stm32f4` が正常完了する
+- [ ] 生成された PAL ヘッダが umimmio テンプレート (`Device<>`, `Register<>`, `Field<>`) を正しくインスタンス化する
+- [ ] PAL 生成物と手書きドライバの分離が維持されている（pal/ 内にドライバロジックが混入していない）
+- [ ] MCU DB (`database/mcu/`) のスキーマが §7.3.1 に準拠する
+- [ ] `--board=<board>` 指定でビルドが完結する（MCU → arch → ツールチェイン自動解決）
+- [ ] board.lua → C++ 生成チェーン（board.hh, clock_config.hh, memory.ld）が正常動作する
+- [ ] 生成物が git 管理下にあり、差分レビュー可能である
+
 ---
 
 ## 10. 設計判断の根拠
@@ -860,7 +1143,7 @@ v2.0.0 で任意とされている項目のうち、UMI では必須に格上げ
 
 ### 10.1 ADR: umios → umiport 直接依存
 
-**背景:** 初期調査（INVESTIGATION.md, ANALYSIS.md）では「kernel は umicore のみに依存」を高評価した。本仕様では umios が umiport に直接依存する設計を採用している。
+**背景:** 初期調査（archive/INVESTIGATION.md, archive/ANALYSIS.md）では「kernel は umicore のみに依存」を高評価した。本仕様では umios が umiport に直接依存する設計を採用している。
 
 **検討した案:**
 
@@ -878,6 +1161,8 @@ v2.0.0 で任意とされている項目のうち、UMI では必須に格上げ
 
 ## 11. 将来拡張候補
 
+### 11.1 ライブラリ昇格候補
+
 以下のモジュールは現時点では12ライブラリ構成に含めないが、将来的にスタンドアロンライブラリへの昇格を検討する。
 
 | モジュール | 現行パス | 候補名 | 想定レイヤー | 昇格条件 |
@@ -886,8 +1171,22 @@ v2.0.0 で任意とされている項目のうち、UMI では必須に格上げ
 | グラフィックス | lib/umi/gfx/ + lib/umi/ui/ | umigfx | L3 (Domain) | UI/描画の需要が確定し、12ファイル1,159行を超える規模に成長した時点 |
 
 **移行期間中の扱い:**
-- coro: lib/umi/coro/ に保持。MIGRATION_PLAN Phase M5 で判断
+- coro: lib/umi/coro/ に保持。IMPLEMENTATION_PLAN Phase 4 で判断
 - gfx/ui: lib/umi/gfx/ および lib/umi/ui/ に保持。移行対象外
+
+### 11.2 PAL コード生成の段階的拡張
+
+PAL コード生成パイプライン (§6.4, §7.3.2) は初期リリースでは最小スコープ (C4, C5, C6) に限定する。以下のフェーズで段階的に拡張する:
+
+| フェーズ | カテゴリ | 内容 | 前提条件 |
+|---------|---------|------|---------|
+| **PAL Phase 1** (初期) | C4, C5, C6 | 割り込みベクター、メモリマップ、ペリフェラルレジスタ | SVD パーサー + CMSIS ヘッダパーサー |
+| **PAL Phase 2** | C7 + C8 | GPIO MUX (AF テーブル) + クロックツリー | Open Pin Data パーサー完成 |
+| **PAL Phase 3** | C9〜C14 | DMA チャネル、電力管理、セキュリティ等 | 主要ドライバが安定、データソース整備 |
+| **PAL Phase 4** | — | RP2040 対応 | ARM 以外のアーキテクチャ対応 |
+| **PAL Phase 5** | — | ESP32 対応 (RISC-V + Xtensa) | マルチ ISA 対応の gen/ 拡張 |
+
+**カテゴリ参照:** PAL カテゴリ C1〜C14 の詳細は `lib/docs/design/pal/02_CATEGORY_INDEX.md` を参照。
 
 ---
 
@@ -899,3 +1198,8 @@ v2.0.0 で任意とされている項目のうち、UMI では必須に格上げ
 | **ライブラリ** | lib/ 直下のスタンドアロン単位。LIBRARY_SPEC v2.0.0 に準拠する (例: lib/umidsp/) |
 | **バンドル** | 複数ライブラリをまとめて依存追加する便利ターゲット (例: umi.base) |
 | **DAG** | 有向非巡回グラフ。ライブラリ依存関係の循環を禁止する制約 |
+| **PAL** | Peripheral Access Layer。umimmio テンプレートのインスタンス化によるレジスタアクセス定義。SVD データから自動生成、または手書き。`umiport/include/umiport/pal/` に配置 |
+| **MCU DB** | MCU データベース。MCU スペック (メモリ, クロック, ペリフェラル) を Lua テーブルで定義したファイル群。`umiport/database/mcu/` に配置 |
+| **Unified Device Model** | PAL コード生成パイプラインの中間表現。SVD/CMSIS 等の異なるデータソースを統一的に表現する Python データ構造 |
+| **board.lua** | ボード定義ファイル (Lua)。MCU 選択、HSE 周波数、ピン割り当て等を記述。xmake ビルドルールと C++ ヘッダ生成の入力となる |
+| **SVD** | System View Description。ARM が定義する MCU ペリフェラル記述 XML フォーマット。PAL 生成の主要入力 |

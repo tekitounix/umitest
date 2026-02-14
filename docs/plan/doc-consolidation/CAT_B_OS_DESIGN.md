@@ -2,7 +2,10 @@
 
 **カテゴリ:** B. OS設計
 **配置先:** `docs/umi-kernel/` + `docs/umios-architecture/`
+**前提仕様:** [LIBRARY_SPEC.md](../LIBRARY_SPEC.md) v1.3.0 / [IMPLEMENTATION_PLAN.md](../IMPLEMENTATION_PLAN.md) v1.1.0
 **関連:** [CONSOLIDATION_PLAN.md](CONSOLIDATION_PLAN.md) | [DOCUMENT_INVENTORY.md](DOCUMENT_INVENTORY.md)
+
+> **注意:** IMPLEMENTATION_PLAN v1.1.0 により、コードパス `lib/umi/kernel/` 等は Phase 0 で `lib/_archive/` に退避される。本文書内のコードパスは**現行の配置**を記録している。また、`examples/stm32f4_kernel/` は `stm32f4_os` として再構築される。
 
 ---
 

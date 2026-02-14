@@ -2,6 +2,7 @@
 
 **カテゴリ:** F. DSP/技術資料
 **配置先:** `docs/dsp/`（DSP 技術資料）+ `docs/hw_io/`（HW I/O 処理設計）
+**前提仕様:** [LIBRARY_SPEC.md](../LIBRARY_SPEC.md) v1.3.0 / [IMPLEMENTATION_PLAN.md](../IMPLEMENTATION_PLAN.md) v1.1.0
 **関連:** [CONSOLIDATION_PLAN.md](CONSOLIDATION_PLAN.md) | [DOCUMENT_INVENTORY.md](DOCUMENT_INVENTORY.md)
 
 ---
