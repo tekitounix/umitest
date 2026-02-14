@@ -116,14 +116,14 @@
 
 ## 4. 既存文書の移行方針
 
-### 4.1 移行元
-- docs/umi-kernel/OVERVIEW.md
-- docs/umi-kernel/ARCHITECTURE.md
-- docs/umi-kernel/BOOT_SEQUENCE.md
-- docs/umi-kernel/DESIGN_DECISIONS.md
-- docs/umi-kernel/IMPLEMENTATION_PLAN.md
-- docs/umi-kernel/MEMORY.md
-- docs/umi-kernel/LIBRARY_CONTENTS.md
+### 4.1 移行元（→ archive 移動済み）
+- ~~docs/umi-kernel/OVERVIEW.md~~ → docs/archive/umi-kernel/
+- ~~docs/umi-kernel/ARCHITECTURE.md~~ → docs/archive/umi-kernel/
+- ~~docs/umi-kernel/BOOT_SEQUENCE.md~~ → docs/archive/umi-kernel/
+- ~~docs/umi-kernel/DESIGN_DECISIONS.md~~ → docs/archive/umi-kernel/
+- ~~docs/umi-kernel/IMPLEMENTATION_PLAN.md~~ → docs/archive/umi-kernel/
+- ~~docs/umi-kernel/MEMORY.md~~ → docs/archive/umi-kernel/
+- ~~docs/umi-kernel/LIBRARY_CONTENTS.md~~ → 削除済み（PROJECT_STRUCTURE.md に包含）
 
 ### 4.2 移行先ルール
 - 仕様の正本は spec/ 配下に集約（重複は排除）

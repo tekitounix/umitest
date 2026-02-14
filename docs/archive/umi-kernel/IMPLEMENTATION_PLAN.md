@@ -187,7 +187,7 @@ int32_t handle_syscall(uint32_t nr, uint32_t a0, uint32_t a1, uint32_t a2) {
 ### 1.4 MPU 設定
 
 ```cpp
-// lib/umios/kernel/mpu_config.hh
+// lib/umi/kernel/mpu_config.hh
 
 /// アプリ用MPU設定（非特権モードで実行）
 void configure_app_mpu(const AppHeader* header, void* app_base) {
@@ -215,10 +215,10 @@ void configure_app_mpu(const AppHeader* header, void* app_base) {
 ```
 
 ### 作業項目
-- [ ] `lib/umios/kernel/app_header.hh` 作成
-- [ ] `lib/umios/kernel/loader.hh` / `loader.cc` 作成
-- [ ] `lib/umios/kernel/syscall_handler.hh` 作成
-- [ ] `lib/umios/kernel/mpu_config.hh` 作成
+- [ ] `lib/umi/kernel/app_header.hh` 作成
+- [ ] `lib/umi/kernel/loader.hh` / `loader.cc` 作成
+- [ ] `lib/umi/kernel/syscall_handler.hh` 作成
+- [ ] `lib/umi/kernel/mpu_config.hh` 作成
 - [ ] `examples/stm32f4_kernel/` 作成（カーネルバイナリ）
 
 ### 参照ドキュメント
@@ -236,7 +236,7 @@ void configure_app_mpu(const AppHeader* header, void* app_base) {
 ### 2.1 アプリスタートアップ (crt0)
 
 ```cpp
-// lib/umios/app/crt0.cc
+// lib/umi/app/crt0.cc
 
 extern "C" {
 
@@ -264,7 +264,7 @@ void _start() {
 ### 2.2 Syscall ラッパー
 
 ```cpp
-// lib/umios/app/syscall.hh
+// lib/umi/app/syscall.hh
 
 namespace umi::syscall {
 
@@ -292,7 +292,7 @@ inline void log(const char* msg) { call(Nr::Log, (uint32_t)msg, strlen(msg)); }
 ### 2.3 アプリ API
 
 ```cpp
-// lib/umios/app/umi_app.hh
+// lib/umi/app/umi_app.hh
 
 namespace umi {
 
@@ -322,7 +322,7 @@ inline void send_event(const Event& ev) {
 ### 2.4 アプリリンカスクリプト
 
 ```ld
-/* lib/umios/app/app.ld */
+/* lib/umi/app/app.ld */
 
 MEMORY {
     /* カーネルがロード時に設定 */
@@ -344,11 +344,11 @@ SECTIONS {
 ```
 
 ### 作業項目
-- [ ] `lib/umios/app/crt0.cc` 作成
-- [ ] `lib/umios/app/syscall.hh` 作成
-- [ ] `lib/umios/app/umi_app.hh` 作成
-- [ ] `lib/umios/app/app.ld` 作成（リンカスクリプト）
-- [ ] `lib/umios/app/xmake.lua` 作成（アプリSDKビルド設定）
+- [ ] `lib/umi/app/crt0.cc` 作成
+- [ ] `lib/umi/app/syscall.hh` 作成
+- [ ] `lib/umi/app/umi_app.hh` 作成
+- [ ] `lib/umi/app/app.ld` 作成（リンカスクリプト）
+- [ ] `lib/umi/app/xmake.lua` 作成（アプリSDKビルド設定）
 
 ### 参照ドキュメント
 - [UMIM_SPEC.md](../UMIM_SPEC.md) - バイナリ形式
@@ -364,34 +364,34 @@ SECTIONS {
 ### 3.1 xmake.lua 構成
 
 ```lua
--- lib/umios/kernel/xmake.lua
-target("umios_kernel")
+-- lib/umi/kernel/xmake.lua
+target("umi_kernel")
     set_kind("static")
     add_files("*.cc")
     add_includedirs(".", {public = true})
-    add_defines("UMIOS_KERNEL=1")
+    add_defines("UMI_KERNEL=1")
 
--- lib/umios/app/xmake.lua  
-target("umios_app_sdk")
+-- lib/umi/app/xmake.lua  
+target("umi_app_sdk")
     set_kind("static")
     add_files("crt0.cc")
     add_includedirs(".", {public = true})
-    add_defines("UMIOS_APP=1")
+    add_defines("UMI_APP=1")
     set_toolchains("arm-none-eabi")
 
 -- examples/stm32f4_kernel/xmake.lua
 target("stm32f4_kernel")
     set_kind("binary")
-    add_deps("umios_kernel", "bsp_stm32f4_disco")
+    add_deps("umi_kernel", "bsp_stm32f4_disco")
     add_files("src/*.cc")
     add_ldflags("-T", "kernel.ld")
 
 -- examples/synth_app/xmake.lua
 target("synth_app")
     set_kind("binary")
-    add_deps("umios_app_sdk")
+    add_deps("umi_app_sdk")
     add_files("src/*.cc")
-    add_ldflags("-T", "$(projectdir)/lib/umios/app/app.ld")
+    add_ldflags("-T", "$(projectdir)/lib/umi/app/app.ld")
     set_extension(".umia")
     after_build(function (target)
         -- バイナリからヘッダ付き .umia を生成
@@ -415,8 +415,8 @@ pyocd flash -t stm32f407vg -a 0x08040000 build/synth_app/release/synth_app.umia
 ```
 
 ### 作業項目
-- [ ] `lib/umios/kernel/xmake.lua` 更新
-- [ ] `lib/umios/app/xmake.lua` 作成
+- [ ] `lib/umi/kernel/xmake.lua` 更新
+- [ ] `lib/umi/app/xmake.lua` 作成
 - [ ] `examples/stm32f4_kernel/xmake.lua` 作成
 - [ ] `examples/synth_app/xmake.lua` 作成
 - [ ] `scripts/make_umia.py` 作成（バイナリ変換）
@@ -434,8 +434,8 @@ pyocd flash -t stm32f407vg -a 0x08040000 build/synth_app/release/synth_app.umia
 ```cpp
 // examples/stm32f4_kernel/src/main.cc
 
-#include <umios/kernel/umi_kernel.hh>
-#include <umios/kernel/loader.hh>
+#include <umi/kernel/umi_kernel.hh>
+#include <umi/kernel/loader.hh>
 #include <bsp/stm32f4_disco.hh>
 
 // アプリイメージ（Flash の別領域に配置）

@@ -1,38 +1,29 @@
-# UMI-OS Kernel ドキュメント
+# Archive
 
-このディレクトリはUMI-OSカーネルの設計・実装に関するドキュメント集です。
+このディレクトリは、正本に統合済みまたは役割終了したドキュメントのアーカイブです。
+git 履歴で内容を参照できます。
 
-## 学習パス
+## 保持ファイル
 
-### 初めての方
+| サブディレクトリ | 内容 | 正本の参照先 |
+|----------------|------|-------------|
+| umi-kernel/ | カーネル設計文書の旧版（6ファイル + service/） | docs/umi-kernel/spec/ |
+| umi-api/ | 旧 API 設計（AudioContext, Application, EventState） | docs/refs/ |
+| umidi/ | MIDI イベントシステム設計、ジッター補償 | lib/umi/midi/docs/ |
+| 現状.md | コードベース照合結果 | — |
+| UMIOS_DESIGN_DECISIONS.md | OS 設計判断 | docs/umi-kernel/adr.md |
+| DESIGN_CONTEXT_API.md | AudioContext API 設計 | docs/refs/ |
+| STM32F4_KERNEL_FLOW.md | STM32F4 カーネルフロー | docs/umi-kernel/platform/stm32f4.md |
+| OPTIMIZATION_PLAN.md | 最適化計画（LTO 等） | — |
+| UMI_SYSTEM_ARCHITECTURE.md | システムアーキテクチャ全体像 | docs/umios-architecture/ |
 
-1. [OVERVIEW.md](OVERVIEW.md) — カーネル全体像の把握
-2. [CONTEXT_API.md](CONTEXT_API.md) — アプリ開発者向けAPI理解
+## 削除済み（git 履歴に保存）
 
-### カーネル開発者
-
-1. [ARCHITECTURE.md](ARCHITECTURE.md) — 詳細アーキテクチャ
-2. [DESIGN_DECISIONS.md](DESIGN_DECISIONS.md) — 設計背景理解
-3. [STM32F4_IMPLEMENTATION.md](STM32F4_IMPLEMENTATION.md) — 実装詳細
-
-### コードベース理解
-
-1. [LIBRARY_CONTENTS.md](LIBRARY_CONTENTS.md) — lib/umi/ の分類と依存関係
-
-## 各ドキュメントの役割
-
-| ドキュメント | 内容 | 対象読者 |
-|-------------|------|---------|
-| [OVERVIEW.md](OVERVIEW.md) | カーネル概要、4タスク構成、メモリレイアウト | 初学者 |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | RTOS Core、Syscall、SharedMemory、Web UI、シェル | カーネル開発者 |
-| [DESIGN_DECISIONS.md](DESIGN_DECISIONS.md) | 設計判断の根拠（ADR集） | カーネル開発者 |
-| [STM32F4_IMPLEMENTATION.md](STM32F4_IMPLEMENTATION.md) | 起動フロー、ISR、DMA、ペリフェラル詳細 | カーネル移植者 |
-| [CONTEXT_API.md](CONTEXT_API.md) | AudioContext/Processor/Controller API | アプリ開発者 |
-| [LIBRARY_CONTENTS.md](LIBRARY_CONTENTS.md) | lib/umi/の分類と依存関係 | コントリビューター |
-
-## 関連ドキュメント
-
-- [NOMENCLATURE.md](../NOMENCLATURE.md) — プロジェクト全体の用語体系
-- [UMI_STATUS_PROTOCOL.md](../UMI_STATUS_PROTOCOL.md) — SysExプロトコル設計
-- [UMIOS_STORAGE.md](../UMIOS_STORAGE.md) — ストレージ設計（将来）
-- [PLAN_APP_MEMORY_AND_FAULT.md](../PLAN_APP_MEMORY_AND_FAULT.md) — メモリ/Fault設計（将来）
+- UXMP_SPECIFICATION.md, UXMP_DATA_SPECIFICATION.md, UXMP提案書.md → SysEx に統合済み
+- UMI_STATUS_PROTOCOL.md → 現行実装と不一致
+- UMI_SYSEX_PROTOCOL.md → docs/umi-sysex/ に統合済み
+- KERNEL_SCHEDULER_REDESIGN.md → 実装済み
+- WEB_UI_REDESIGN.md → 反映済み
+- PLAN_AUDIOCONTEXT_REFACTOR.md → 完了済み
+- UMIOS_CONTENTS.md, LIBRARY_CONTENTS.md → PROJECT_STRUCTURE.md に包含
+- umix/ → SysEx プロトコルに統合済み
