@@ -1,9 +1,10 @@
+#pragma once
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026, tekitounix
 /// @file
 /// @brief ANSI color constants and snprintf-based value formatter.
 /// @author Shota Moriguchi @tekitounix
-#pragma once
 
 #include <cstddef>
 #include <cstdio>

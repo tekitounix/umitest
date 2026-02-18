@@ -1,9 +1,10 @@
+#pragma once
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026, tekitounix
 /// @file
 /// @brief Assertion context passed to run() test functions.
 /// @author Shota Moriguchi @tekitounix
-#pragma once
 
 #include <source_location>
 

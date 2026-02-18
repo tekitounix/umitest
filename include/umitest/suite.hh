@@ -1,9 +1,10 @@
+#pragma once
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026, tekitounix
 /// @file
 /// @brief Test runner that collects pass/fail statistics and prints results.
 /// @author Shota Moriguchi @tekitounix
-#pragma once
 
 #include <array>
 #include <cmath>
