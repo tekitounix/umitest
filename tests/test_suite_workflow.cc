@@ -5,6 +5,8 @@
 ///          run() and check() interact properly, and that summary() returns
 ///          the expected exit code.
 
+#include <numbers>
+
 #include "test_fixture.hh"
 
 namespace umitest::test {
@@ -89,7 +91,7 @@ bool test_inline_checks_comprehensive(TestContext& t) {
     all_ok &= sub.check_le(2, 2);
     all_ok &= sub.check_gt(3, 2);
     all_ok &= sub.check_ge(3, 3);
-    all_ok &= sub.check_near(1.0f, 1.0001f);
+    all_ok &= sub.check_near(1.0F, 1.0001F);
 
     // All inline checks returned true
     bool ok = t.assert_true(all_ok, "all inline checks passed");
@@ -103,8 +105,8 @@ bool test_inline_checks_comprehensive(TestContext& t) {
 // =============================================================================
 
 bool test_lambda_captures(TestContext& t) {
-    int value = 42;
-    double pi = 3.14159;
+    int const value = 42;
+    double pi = std::numbers::pi;
 
     Suite sub("sub-lambda");
     sub.run("capture-value", [value](TestContext& ctx) {
@@ -112,7 +114,7 @@ bool test_lambda_captures(TestContext& t) {
         return true;
     });
     sub.run("capture-ref", [&pi](TestContext& ctx) {
-        ctx.assert_near(pi, 3.14159);
+        ctx.assert_near(pi, std::numbers::pi);
         return true;
     });
     return t.assert_eq(sub.summary(), 0);

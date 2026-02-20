@@ -10,6 +10,7 @@
 #include <cmath>
 #include <cstdio>
 #include <source_location>
+
 #include <umitest/context.hh>
 #include <umitest/format.hh>
 
@@ -158,8 +159,15 @@ class Suite {
         format_value(va.data(), va.size(), a);
         format_value(vb.data(), vb.size(), b);
         std::printf("  %sFAIL: %s %s %s (got %s, expected %s)%s\n    at %s:%u\n",
-                    red, va.data(), op, vb.data(), va.data(), vb.data(), reset,
-                    loc.file_name(), static_cast<unsigned>(loc.line()));
+                    red,
+                    va.data(),
+                    op,
+                    vb.data(),
+                    va.data(),
+                    vb.data(),
+                    reset,
+                    loc.file_name(),
+                    static_cast<unsigned>(loc.line()));
     }
 
     /// @brief Record an approximate-equality failure with formatted values.
@@ -170,8 +178,13 @@ class Suite {
         format_value(va.data(), va.size(), a);
         format_value(vb.data(), vb.size(), b);
         std::printf("  %sFAIL: got %s, expected %s (eps=%.6g)%s\n    at %s:%u\n",
-                    red, va.data(), vb.data(), eps, reset,
-                    loc.file_name(), static_cast<unsigned>(loc.line()));
+                    red,
+                    va.data(),
+                    vb.data(),
+                    eps,
+                    reset,
+                    loc.file_name(),
+                    static_cast<unsigned>(loc.line()));
     }
 
   private:

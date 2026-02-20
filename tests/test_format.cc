@@ -72,9 +72,9 @@ bool test_format_char_special(TestContext& t) {
 
 bool test_format_unsigned(TestContext& t) {
     bool ok = true;
-    ok &= t.assert_eq(fmt(0u), std::string_view{"0"});
-    ok &= t.assert_eq(fmt(42u), std::string_view{"42"});
-    ok &= t.assert_eq(fmt(255u), std::string_view{"255"});
+    ok &= t.assert_eq(fmt(0U), std::string_view{"0"});
+    ok &= t.assert_eq(fmt(42U), std::string_view{"42"});
+    ok &= t.assert_eq(fmt(255U), std::string_view{"255"});
     ok &= t.assert_eq(fmt(static_cast<uint16_t>(65535)), std::string_view{"65535"});
     return ok;
 }
@@ -118,7 +118,7 @@ bool test_format_float_precision(TestContext& t) {
 // Enum formatting
 // =============================================================================
 
-enum class Color : int { RED = 0, GREEN = 42, BLUE = 255 };
+enum class Color : std::uint8_t { RED = 0, GREEN = 42, BLUE = 255 };
 
 bool test_format_enum(TestContext& t) {
     bool ok = true;
@@ -128,7 +128,7 @@ bool test_format_enum(TestContext& t) {
     return ok;
 }
 
-enum class BigEnum : int64_t { NEG = -1000, ZERO = 0, BIG = 100000 };
+enum class BigEnum : std::int32_t { NEG = -1000, ZERO = 0, BIG = 100000 };
 
 bool test_format_enum_wide(TestContext& t) {
     bool ok = true;
@@ -143,19 +143,19 @@ bool test_format_enum_wide(TestContext& t) {
 // =============================================================================
 
 bool test_format_pointer(TestContext& t) {
-    int x = 0;
+    int const x = 0;
     std::array<char, 128> buf{};
     format_value(buf.data(), buf.size(), &x);
     auto sv = std::string_view{buf.data()};
 
     bool ok = true;
     // Should produce a hex address like "0x..." or similar
-    ok &= t.assert_true(sv.size() > 0, "non-empty pointer format");
+    ok &= t.assert_true(!sv.empty(), "non-empty pointer format");
 
     // Null pointer
     format_value(buf.data(), buf.size(), static_cast<int*>(nullptr));
     sv = std::string_view{buf.data()};
-    ok &= t.assert_true(sv.size() > 0, "null pointer formatted");
+    ok &= t.assert_true(!sv.empty(), "null pointer formatted");
     return ok;
 }
 
@@ -168,7 +168,7 @@ struct Opaque {
 };
 
 bool test_format_unknown_type(TestContext& t) {
-    Opaque obj{42};
+    Opaque const obj{42};
     std::array<char, 128> buf{};
     format_value(buf.data(), buf.size(), obj);
     auto sv = std::string_view{buf.data()};

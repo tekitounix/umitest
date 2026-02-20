@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <limits>
+#include <numbers>
 
 #include "test_fixture.hh"
 
@@ -19,19 +20,19 @@ using umi::test::TestContext;
 bool test_assert_true_basic(TestContext& t) {
     bool ok = true;
     ok &= t.assert_true(true);
-    ok &= t.assert_true(1 == 1);
+    ok &= t.assert_true(1 == 1U);
     ok &= t.assert_true(42 > 0, "positive number");
-    ok &= t.assert_true(0 == 0, "zero equals zero");
+    ok &= t.assert_true(0 == 0U, "zero equals zero");
     ok &= t.assert_true(-1 < 0, "negative is less than zero");
     return ok;
 }
 
 bool test_assert_true_with_expressions(TestContext& t) {
-    int x = 10;
+    int const x = 10;
     bool ok = true;
     ok &= t.assert_true(x > 0);
     ok &= t.assert_true(x * x == 100);
-    ok &= t.assert_true(static_cast<unsigned>(x) == 10u);
+    ok &= t.assert_true(static_cast<unsigned>(x) == 10U);
     return ok;
 }
 
@@ -52,8 +53,8 @@ bool test_assert_eq_integers(TestContext& t) {
 
 bool test_assert_eq_unsigned(TestContext& t) {
     bool ok = true;
-    ok &= t.assert_eq(0u, 0u);
-    ok &= t.assert_eq(255u, 255u);
+    ok &= t.assert_eq(0U, 0U);
+    ok &= t.assert_eq(255U, 255U);
     ok &= t.assert_eq(UINT16_MAX, UINT16_MAX);
     ok &= t.assert_eq(UINT64_MAX, UINT64_MAX);
     return ok;
@@ -74,7 +75,7 @@ bool test_assert_ne_basic(TestContext& t) {
     ok &= t.assert_ne(-1, 1);
     ok &= t.assert_ne('a', 'b');
     ok &= t.assert_ne(INT32_MIN, INT32_MAX);
-    ok &= t.assert_ne(0u, UINT32_MAX);
+    ok &= t.assert_ne(0U, UINT32_MAX);
     return ok;
 }
 
@@ -105,10 +106,10 @@ bool test_comparisons_integers(TestContext& t) {
 
 bool test_comparisons_unsigned(TestContext& t) {
     bool ok = true;
-    ok &= t.assert_lt(0u, 1u);
-    ok &= t.assert_lt(0u, UINT32_MAX);
+    ok &= t.assert_lt(0U, 1U);
+    ok &= t.assert_lt(0U, UINT32_MAX);
     ok &= t.assert_le(UINT32_MAX, UINT32_MAX);
-    ok &= t.assert_gt(UINT32_MAX, 0u);
+    ok &= t.assert_gt(UINT32_MAX, 0U);
     ok &= t.assert_ge(UINT32_MAX, UINT32_MAX);
     return ok;
 }
@@ -119,10 +120,10 @@ bool test_comparisons_unsigned(TestContext& t) {
 
 bool test_assert_near_floats(TestContext& t) {
     bool ok = true;
-    ok &= t.assert_near(0.0f, 0.0f);
-    ok &= t.assert_near(1.0f, 1.0001f);
-    ok &= t.assert_near(-1.0f, -1.0001f);
-    ok &= t.assert_near(3.14, 3.14159, 0.01);
+    ok &= t.assert_near(0.0F, 0.0F);
+    ok &= t.assert_near(1.0F, 1.0001F);
+    ok &= t.assert_near(-1.0F, -1.0001F);
+    ok &= t.assert_near(3.14, std::numbers::pi, 0.01);
     ok &= t.assert_near(1e10, 1e10 + 1.0, 10.0);
     return ok;
 }
@@ -139,7 +140,7 @@ bool test_assert_near_custom_epsilon(TestContext& t) {
 // Enums
 // =============================================================================
 
-enum class Priority : int { LOW = -1, NORMAL = 0, HIGH = 1, CRITICAL = 100 };
+enum class Priority : std::int8_t { LOW = -1, NORMAL = 0, HIGH = 1, CRITICAL = 100 };
 
 bool test_enum_comparisons(TestContext& t) {
     bool ok = true;
@@ -158,19 +159,24 @@ bool test_enum_comparisons(TestContext& t) {
 
 bool test_early_return_chain(TestContext& t) {
     // This is the idiomatic pattern for dependent assertions
-    if (!t.assert_true(true, "precondition"))
+    if (!t.assert_true(true, "precondition")) {
         return false;
-    if (!t.assert_eq(1, 1))
+    }
+    if (!t.assert_eq(1, 1)) {
         return false;
-    if (!t.assert_lt(0, 1))
+    }
+    if (!t.assert_lt(0, 1)) {
         return false;
+    }
 
     // Multi-step computation verification
-    int result = 2 * 3 + 4;
-    if (!t.assert_eq(result, 10))
+    int const result = (2 * 3) + 4;
+    if (!t.assert_eq(result, 10)) {
         return false;
-    if (!t.assert_gt(result, 0))
+    }
+    if (!t.assert_gt(result, 0)) {
         return false;
+    }
     return true;
 }
 
@@ -193,10 +199,10 @@ bool test_mixed_inline_and_context(TestContext& t) {
 // =============================================================================
 
 bool test_pointer_assertions(TestContext& t) {
-    int a = 1;
-    int b = 2;
-    int* pa = &a;
-    int* pb = &b;
+    int const a = 1;
+    int const b = 2;
+    int const* pa = &a;
+    int const* pb = &b;
 
     bool ok = true;
     ok &= t.assert_eq(pa, pa);
