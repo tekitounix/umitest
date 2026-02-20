@@ -5,7 +5,6 @@
 #include <array>
 #include <cstdint>
 #include <cstring>
-#include <limits>
 #include <string_view>
 
 #include "test_fixture.hh"

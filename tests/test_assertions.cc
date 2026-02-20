@@ -3,7 +3,6 @@
 /// @brief Comprehensive assertion tests with boundary values and edge cases.
 
 #include <cstdint>
-#include <limits>
 #include <numbers>
 
 #include "test_fixture.hh"
