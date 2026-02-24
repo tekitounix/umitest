@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// Copyright (c) 2026, tekitounix
 /// @file
 /// @brief Structured test using sections and inline checks.
 

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// Copyright (c) 2026, tekitounix
 /// @file
 /// @brief Test runner entry point for umitest self-tests.
 

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// Copyright (c) 2026, tekitounix
 /// @file
 /// @brief Shared test declarations for umitest self-tests.
 #pragma once

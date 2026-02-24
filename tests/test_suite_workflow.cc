@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// Copyright (c) 2026, tekitounix
 /// @file
 /// @brief Tests for Suite workflow: counting, sections, inline checks, summary.
 /// @details Verifies that Suite correctly tracks pass/fail counts, that

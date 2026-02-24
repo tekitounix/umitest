@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// Copyright (c) 2026, tekitounix
 /// @file
 /// @brief Comprehensive assertion tests with boundary values and edge cases.
 
