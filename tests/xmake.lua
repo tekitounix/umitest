@@ -4,7 +4,7 @@ target("test_umitest")
     add_tests("default")
     set_default(true)
     add_files("test_main.cc", "test_assertions.cc", "test_suite_workflow.cc", "test_format.cc")
-    add_deps("umitest")
+    add_deps("umitest", "umiport_host")
 target_end()
 
 target("test_umitest_compile_fail")
@@ -61,7 +61,7 @@ if os.isdir(path.join(os.projectdir(), "lib", "umiport")) then
 
         add_files("test_*.cc")
 
-        add_deps("umitest", "umiport")
+        add_deps("umitest", "umiport", "umiport_stm32f4_renode")
         umitest_add_umimmio_dep()
     target_end()
 
@@ -77,7 +77,7 @@ if os.isdir(path.join(os.projectdir(), "lib", "umiport")) then
 
         add_files("test_*.cc")
 
-        add_deps("umitest", "umiport")
+        add_deps("umitest", "umiport", "umiport_stm32f4_renode")
         umitest_add_umimmio_dep()
     target_end()
 end

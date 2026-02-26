@@ -3,14 +3,15 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026, tekitounix
 /// @file
-/// @brief Test runner that collects pass/fail statistics and prints results.
+/// @brief Stdio-free test runner using platform-resolved OutputLike backend.
 /// @author Shota Moriguchi @tekitounix
 
 #include <array>
 #include <cmath>
-#include <cstdio>
+#include <cstring>
 #include <source_location>
 
+#include <umiport/platform.hh> // IWYU pragma: keep (build-resolved Output)
 #include <umitest/context.hh>
 #include <umitest/format.hh>
 
@@ -27,14 +28,25 @@ namespace umi::test {
 ///
 /// Supports two styles: structured tests via run() with TestContext,
 /// and inline checks via check_*() methods.
+/// Output is emitted via the build-resolved platform's Output backend (stdio-free).
 class Suite {
+    using Output = umi::port::Platform::Output;
+
   public:
     explicit Suite(const char* name) : name(name) {}
 
     // -- Section --
 
     /// @brief Print a visual section header to group related tests.
-    static void section(const char* title) { std::printf("\n%s[%s]%s\n", cyan, title, reset); }
+    static void section(const char* title) {
+        Output::putc('\n');
+        Output::puts(cyan);
+        Output::putc('[');
+        Output::puts(title);
+        Output::putc(']');
+        Output::puts(reset);
+        Output::putc('\n');
+    }
 
     // -- run() : structured test with TestContext --
 
@@ -47,11 +59,20 @@ class Suite {
         TestContext ctx;
         ctx.clear_failed();
         const bool returned_ok = fn(ctx);
+        Output::puts("  ");
+        Output::puts(test_name);
+        Output::puts("... ");
         if (!returned_ok || ctx.has_failed()) {
-            std::printf("  %s... %sFAIL%s\n", test_name, red, reset);
+            Output::puts(red);
+            Output::puts("FAIL");
+            Output::puts(reset);
+            Output::putc('\n');
             failed++;
         } else {
-            std::printf("  %s... %sOK%s\n", test_name, green, reset);
+            Output::puts(green);
+            Output::puts("OK");
+            Output::puts(reset);
+            Output::putc('\n');
             passed++;
         }
     }
@@ -129,13 +150,38 @@ class Suite {
     /// @return 0 if all passed, 1 if any failed.
     int summary() {
         const int total = passed + failed;
-        std::printf("\n%s=================================%s\n", cyan, reset);
+        Output::putc('\n');
+        Output::puts(cyan);
+        Output::puts("=================================");
+        Output::puts(reset);
+        Output::putc('\n');
         if (failed == 0) {
-            std::printf("%s%s: %d/%d passed%s\n", green, name, passed, total, reset);
+            Output::puts(green);
+            Output::puts(name);
+            Output::puts(": ");
+            Output::print_uint(static_cast<std::uint64_t>(passed));
+            Output::putc('/');
+            Output::print_uint(static_cast<std::uint64_t>(total));
+            Output::puts(" passed");
+            Output::puts(reset);
+            Output::putc('\n');
         } else {
-            std::printf("%s%s: %d/%d passed, %d FAILED%s\n", red, name, passed, total, failed, reset);
+            Output::puts(red);
+            Output::puts(name);
+            Output::puts(": ");
+            Output::print_uint(static_cast<std::uint64_t>(passed));
+            Output::putc('/');
+            Output::print_uint(static_cast<std::uint64_t>(total));
+            Output::puts(" passed, ");
+            Output::print_uint(static_cast<std::uint64_t>(failed));
+            Output::puts(" FAILED");
+            Output::puts(reset);
+            Output::putc('\n');
         }
-        std::printf("%s=================================%s\n", cyan, reset);
+        Output::puts(cyan);
+        Output::puts("=================================");
+        Output::puts(reset);
+        Output::putc('\n');
         return failed > 0 ? 1 : 0;
     }
 
@@ -143,12 +189,19 @@ class Suite {
 
     /// @brief Record a simple failure with optional message.
     static void record_fail(std::source_location loc, const char* msg = nullptr) {
+        Output::puts("  ");
+        Output::puts(red);
+        Output::puts("FAIL");
         if (msg != nullptr) {
-            std::printf(
-                "  %sFAIL: %s%s\n    at %s:%u\n", red, msg, reset, loc.file_name(), static_cast<unsigned>(loc.line()));
-        } else {
-            std::printf("  %sFAIL%s at %s:%u\n", red, reset, loc.file_name(), static_cast<unsigned>(loc.line()));
+            Output::puts(": ");
+            Output::puts(msg);
         }
+        Output::puts(reset);
+        Output::puts("\n    at ");
+        Output::puts(loc.file_name());
+        Output::putc(':');
+        Output::print_uint(static_cast<std::uint64_t>(loc.line()));
+        Output::putc('\n');
     }
 
     /// @brief Record a comparison failure with formatted values.
@@ -158,16 +211,25 @@ class Suite {
         std::array<char, 64> vb{};
         format_value(va.data(), va.size(), a);
         format_value(vb.data(), vb.size(), b);
-        std::printf("  %sFAIL: %s %s %s (got %s, expected %s)%s\n    at %s:%u\n",
-                    red,
-                    va.data(),
-                    op,
-                    vb.data(),
-                    va.data(),
-                    vb.data(),
-                    reset,
-                    loc.file_name(),
-                    static_cast<unsigned>(loc.line()));
+        Output::puts("  ");
+        Output::puts(red);
+        Output::puts("FAIL: ");
+        Output::puts(va.data());
+        Output::putc(' ');
+        Output::puts(op);
+        Output::putc(' ');
+        Output::puts(vb.data());
+        Output::puts(" (got ");
+        Output::puts(va.data());
+        Output::puts(", expected ");
+        Output::puts(vb.data());
+        Output::putc(')');
+        Output::puts(reset);
+        Output::puts("\n    at ");
+        Output::puts(loc.file_name());
+        Output::putc(':');
+        Output::print_uint(static_cast<std::uint64_t>(loc.line()));
+        Output::putc('\n');
     }
 
     /// @brief Record an approximate-equality failure with formatted values.
@@ -175,16 +237,25 @@ class Suite {
     static void record_fail_near(const A& a, const B& b, double eps, std::source_location loc) {
         std::array<char, 64> va{};
         std::array<char, 64> vb{};
+        std::array<char, 32> ve{};
         format_value(va.data(), va.size(), a);
         format_value(vb.data(), vb.size(), b);
-        std::printf("  %sFAIL: got %s, expected %s (eps=%.6g)%s\n    at %s:%u\n",
-                    red,
-                    va.data(),
-                    vb.data(),
-                    eps,
-                    reset,
-                    loc.file_name(),
-                    static_cast<unsigned>(loc.line()));
+        detail::format_double(ve.data(), ve.size(), eps);
+        Output::puts("  ");
+        Output::puts(red);
+        Output::puts("FAIL: got ");
+        Output::puts(va.data());
+        Output::puts(", expected ");
+        Output::puts(vb.data());
+        Output::puts(" (eps=");
+        Output::puts(ve.data());
+        Output::putc(')');
+        Output::puts(reset);
+        Output::puts("\n    at ");
+        Output::puts(loc.file_name());
+        Output::putc(':');
+        Output::print_uint(static_cast<std::uint64_t>(loc.line()));
+        Output::putc('\n');
     }
 
   private:

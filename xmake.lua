@@ -27,9 +27,7 @@ target("umitest")
     set_kind("headeronly")
     add_headerfiles("include/(umitest/**.hh)")
     add_includedirs("include", { public = true })
+    add_deps("umiprt")
 
 -- Host tests + ARM embedded targets
 includes("tests")
-
--- WASM target
-includes("platforms/wasm")
