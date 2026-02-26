@@ -7,6 +7,7 @@
 /// @author Shota Moriguchi @tekitounix
 
 #include <array>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -40,6 +41,19 @@ constexpr const char* reset = "";
 // =============================================================================
 
 namespace detail {
+
+/// @brief Copy a C-string into a buffer with bounds check.
+/// @param buf Output buffer.
+/// @param size Buffer size.
+/// @param s Source C-string.
+inline void copy_cstr(char* buf, std::size_t size, const char* s) {
+    std::size_t len = std::strlen(s);
+    if (len >= size) {
+        len = size - 1;
+    }
+    std::memcpy(buf, s, len);
+    buf[len] = '\0';
+}
 
 /// @brief Format unsigned integer to decimal string in buffer.
 /// @param buf Output buffer.
@@ -136,7 +150,7 @@ inline const char* format_double(char* buf, std::size_t size, double v) {
     for (int i = 0; i < frac_digits; ++i) {
         mult *= 10.0;
     }
-    auto frac_int = static_cast<std::uint64_t>(frac * mult + 0.5);
+    auto frac_int = static_cast<std::uint64_t>(std::llround(frac * mult));
 
     // Format with leading zeros
     std::array<char, 8> fbuf{};
@@ -223,21 +237,9 @@ void format_value(char* buf, std::size_t size, const T& v) {
         return;
     }
     if constexpr (std::is_same_v<T, bool>) {
-        const char* s = v ? "true" : "false";
-        std::size_t len = std::strlen(s);
-        if (len >= size) {
-            len = size - 1;
-        }
-        std::memcpy(buf, s, len);
-        buf[len] = '\0';
+        detail::copy_cstr(buf, size, v ? "true" : "false");
     } else if constexpr (std::is_same_v<T, std::nullptr_t>) {
-        const char* s = "nullptr";
-        std::size_t len = std::strlen(s);
-        if (len >= size) {
-            len = size - 1;
-        }
-        std::memcpy(buf, s, len);
-        buf[len] = '\0';
+        detail::copy_cstr(buf, size, "nullptr");
     } else if constexpr (std::is_same_v<T, char>) {
         // "'c' (d)"
         if (size < 8) {
@@ -278,13 +280,7 @@ void format_value(char* buf, std::size_t size, const T& v) {
     } else if constexpr (std::is_pointer_v<T>) {
         detail::format_hex(buf, size, reinterpret_cast<std::uintptr_t>(v));
     } else {
-        const char* s = "(?)";
-        std::size_t len = 3;
-        if (len >= size) {
-            len = size - 1;
-        }
-        std::memcpy(buf, s, len);
-        buf[len] = '\0';
+        detail::copy_cstr(buf, size, "(?)");
     }
 }
 
