@@ -58,6 +58,7 @@ if os.isdir(path.join(os.projectdir(), "lib", "umiport")) then
         set_values("embedded.optimize", "size")
         set_values("embedded.toolchain", "clang-arm")
         set_values("umiport.board", "stm32f4-renode")
+        set_values("umiport.handlers", "false") -- no OS kernel
 
         add_files("test_*.cc")
 
@@ -74,6 +75,7 @@ if os.isdir(path.join(os.projectdir(), "lib", "umiport")) then
         set_values("embedded.optimize", "size")
         set_values("embedded.toolchain", "gcc-arm")
         set_values("umiport.board", "stm32f4-renode")
+        set_values("umiport.handlers", "false") -- no OS kernel
 
         add_files("test_*.cc")
 
