@@ -2,6 +2,7 @@
 // Copyright (c) 2026, tekitounix
 /// @file
 /// @brief Demonstration of all assertion methods in umitest.
+/// @author Shota Moriguchi @tekitounix
 
 #include <umitest/test.hh>
 

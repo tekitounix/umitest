@@ -2,6 +2,7 @@
 // Copyright (c) 2026, tekitounix
 /// @file
 /// @brief Test runner entry point for umitest self-tests.
+/// @author Shota Moriguchi @tekitounix
 
 #include "test_fixture.hh"
 

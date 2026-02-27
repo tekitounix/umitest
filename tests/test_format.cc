@@ -2,6 +2,7 @@
 // Copyright (c) 2026, tekitounix
 /// @file
 /// @brief Tests for format_value output across all supported types.
+/// @author Shota Moriguchi @tekitounix
 
 #include <array>
 #include <cstdint>

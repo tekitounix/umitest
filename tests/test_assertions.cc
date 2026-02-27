@@ -2,6 +2,7 @@
 // Copyright (c) 2026, tekitounix
 /// @file
 /// @brief Comprehensive assertion tests with boundary values and edge cases.
+/// @author Shota Moriguchi @tekitounix
 
 #include <cstdint>
 #include <numbers>

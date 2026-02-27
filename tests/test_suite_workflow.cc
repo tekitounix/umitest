@@ -2,6 +2,7 @@
 // Copyright (c) 2026, tekitounix
 /// @file
 /// @brief Tests for Suite workflow: counting, sections, inline checks, summary.
+/// @author Shota Moriguchi @tekitounix
 /// @details Verifies that Suite correctly tracks pass/fail counts, that
 ///          run() and check() interact properly, and that summary() returns
 ///          the expected exit code.

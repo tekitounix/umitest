@@ -2,6 +2,7 @@
 // Copyright (c) 2026, tekitounix
 /// @file
 /// @brief Minimal test example — one suite, one test.
+/// @author Shota Moriguchi @tekitounix
 
 #include <umitest/test.hh>
 

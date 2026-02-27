@@ -2,6 +2,7 @@
 // Copyright (c) 2026, tekitounix
 /// @file
 /// @brief Shared test declarations for umitest self-tests.
+/// @author Shota Moriguchi @tekitounix
 #pragma once
 
 #include <umitest/test.hh>

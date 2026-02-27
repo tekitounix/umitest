@@ -2,6 +2,7 @@
 // Copyright (c) 2026, tekitounix
 /// @file
 /// @brief Structured test using sections and inline checks.
+/// @author Shota Moriguchi @tekitounix
 
 #include <umitest/test.hh>
 

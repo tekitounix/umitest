@@ -2,6 +2,7 @@
 // Copyright (c) 2026, tekitounix
 /// @file
 /// @brief Negative compile test: check_near with non-numeric types must fail.
+/// @author Shota Moriguchi @tekitounix
 /// @details check_near uses static_cast<double>, which fails for non-numeric types.
 
 #include <umitest/test.hh>
