@@ -11,7 +11,7 @@ if standalone_repo then
     add_rules("plugin.compile_commands.autoupdate", {outputdir = ".", lsp = "clangd"})
     set_warnings("all", "extra", "error")
 
-    add_requires("arm-embedded", {optional = true})
+    add_requires("umibuild", {optional = true})
     add_requires("umimmio", {optional = true})
 end
 
@@ -27,7 +27,6 @@ target("umitest")
     set_kind("headeronly")
     add_headerfiles("include/(umitest/**.hh)")
     add_includedirs("include", { public = true })
-    add_deps("umiprt")
 
 -- Host tests + ARM embedded targets
 includes("tests")
