@@ -64,9 +64,6 @@ lib/umitest/
 ├── docs/
 │   ├── INDEX.md
 │   ├── DESIGN.md
-│   ├── GETTING_STARTED.md
-│   ├── USAGE.md
-│   ├── EXAMPLES.md
 │   ├── TESTING.md
 │   └── ja/
 ├── examples/
@@ -80,9 +77,11 @@ lib/umitest/
 │   └── format.hh        # format_value for diagnostic output
 └── tests/
     ├── test_main.cc
+    ├── test_fixture.hh
     ├── test_assertions.cc
     ├── test_format.cc
     ├── test_suite_workflow.cc
+    ├── compile_fail/
     └── xmake.lua
 ```
 
@@ -127,7 +126,7 @@ Core types:
 
 - `umi::test::Suite` — test runner and statistics
 - `umi::test::TestContext` — assertion context for structured tests
-- `umi::test::format_value()` — snprintf-based value formatter
+- `umi::test::format_value()` — stdio-free value formatter
 
 Available assertions (`assert_*` on TestContext, `check_*` on Suite):
 

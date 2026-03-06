@@ -64,9 +64,6 @@ lib/umitest/
 ├── docs/
 │   ├── INDEX.md
 │   ├── DESIGN.md
-│   ├── GETTING_STARTED.md
-│   ├── USAGE.md
-│   ├── EXAMPLES.md
 │   ├── TESTING.md
 │   └── ja/
 ├── examples/
@@ -80,9 +77,11 @@ lib/umitest/
 │   └── format.hh        # 診断出力用 format_value
 └── tests/
     ├── test_main.cc
+    ├── test_fixture.hh
     ├── test_assertions.cc
     ├── test_format.cc
     ├── test_suite_workflow.cc
+    ├── compile_fail/
     └── xmake.lua
 ```
 
@@ -127,7 +126,7 @@ lib/umitest/
 
 - `umi::test::Suite` — テストランナーと統計
 - `umi::test::TestContext` — 構造化テスト用アサーションコンテキスト
-- `umi::test::format_value()` — snprintf ベースの値フォーマッタ
+- `umi::test::format_value()` — stdio-free の値フォーマッタ
 
 利用可能なアサーション（TestContext の `assert_*`、Suite の `check_*`）：
 

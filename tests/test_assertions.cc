@@ -226,6 +226,36 @@ bool test_boolean_assertions(TestContext& t) {
     return ok;
 }
 
+// =============================================================================
+// assert_false
+// =============================================================================
+
+bool test_assert_false_basic(TestContext& t) {
+    bool ok = true;
+    ok &= t.assert_false(false);
+    ok &= t.assert_false(1 == 2);
+    ok &= t.assert_false(0 > 1, "zero not greater than one");
+    return ok;
+}
+
+// =============================================================================
+// Mixed signed/unsigned comparisons (std::cmp_* path)
+// =============================================================================
+
+bool test_mixed_sign_comparisons(TestContext& t) {
+    bool ok = true;
+    ok &= t.assert_eq(0, 0U);
+    ok &= t.assert_eq(42, 42U);
+    ok &= t.assert_ne(-1, 0U);
+    ok &= t.assert_lt(0, 1U);
+    ok &= t.assert_le(0, 0U);
+    ok &= t.assert_gt(1U, 0);
+    ok &= t.assert_ge(0U, 0);
+    // Edge case: -1 vs UINT32_MAX — must not compare as equal
+    ok &= t.assert_ne(-1, UINT32_MAX);
+    return ok;
+}
+
 } // namespace
 
 void run_assertion_tests(umi::test::Suite& suite) {
@@ -255,6 +285,12 @@ void run_assertion_tests(umi::test::Suite& suite) {
     umi::test::Suite::section("Real-world patterns");
     suite.run("early return chain", test_early_return_chain);
     suite.run("mixed assertions", test_mixed_inline_and_context);
+
+    umi::test::Suite::section("assert_false");
+    suite.run("basic false checks", test_assert_false_basic);
+
+    umi::test::Suite::section("Mixed sign comparisons");
+    suite.run("signed vs unsigned", test_mixed_sign_comparisons);
 }
 
 } // namespace umitest::test

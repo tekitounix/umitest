@@ -166,6 +166,21 @@ bool test_context_failed_flag(TestContext& t) {
     return ok;
 }
 
+// =============================================================================
+// check_false
+// =============================================================================
+
+bool test_check_false_basic(TestContext& t) {
+    Suite sub("sub-check-false");
+    bool all_ok = true;
+    all_ok &= sub.check_false(false);
+    all_ok &= sub.check_false(1 == 2);
+
+    bool ok = t.assert_true(all_ok, "all check_false calls passed");
+    ok &= t.assert_eq(sub.summary(), 0);
+    return ok;
+}
+
 } // namespace
 
 void run_suite_workflow_tests(umi::test::Suite& suite) {
@@ -187,6 +202,9 @@ void run_suite_workflow_tests(umi::test::Suite& suite) {
 
     Suite::section("TestContext behavior");
     suite.run("failed flag tracking", test_context_failed_flag);
+
+    Suite::section("check_false");
+    suite.run("basic false checks", test_check_false_basic);
 }
 
 } // namespace umitest::test

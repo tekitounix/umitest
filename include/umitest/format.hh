@@ -78,7 +78,7 @@ inline const char* format_uint(char* buf, std::size_t size, std::uint64_t v) {
     buf[pos] = '\0';
     // Reverse in-place
     for (std::size_t i = 0, j = pos - 1; i < j; ++i, --j) {
-        char tmp = buf[i];
+        const char tmp = buf[i];
         buf[i] = buf[j];
         buf[j] = tmp;
     }
@@ -123,20 +123,20 @@ inline const char* format_double(char* buf, std::size_t size, double v) {
     }
 
     auto integer_part = static_cast<std::uint64_t>(v);
-    double frac = v - static_cast<double>(integer_part);
+    const double frac = v - static_cast<double>(integer_part);
 
     // Format integer part
     std::array<char, 24> ibuf{};
     format_uint(ibuf.data(), ibuf.size(), integer_part);
-    std::size_t ilen = std::strlen(ibuf.data());
+    const std::size_t ilen = std::strlen(ibuf.data());
     for (std::size_t i = 0; i < ilen && (pos + 1) < size; ++i) {
         buf[pos++] = ibuf[i];
     }
 
     // Significant digits: total 6, minus those used by integer part
     constexpr int total_sig = 6;
-    int sig_used = (integer_part == 0) ? 0 : static_cast<int>(ilen);
-    int frac_digits = total_sig - sig_used;
+    const int sig_used = (integer_part == 0) ? 0 : static_cast<int>(ilen);
+    const int frac_digits = total_sig - sig_used;
 
     if (frac_digits <= 0 || frac == 0.0) {
         buf[pos] = '\0';
@@ -155,7 +155,7 @@ inline const char* format_double(char* buf, std::size_t size, double v) {
     // Format with leading zeros
     std::array<char, 8> fbuf{};
     format_uint(fbuf.data(), fbuf.size(), frac_int);
-    std::size_t flen = std::strlen(fbuf.data());
+    const std::size_t flen = std::strlen(fbuf.data());
     // Pad leading zeros
     for (int i = 0; i < frac_digits - static_cast<int>(flen); ++i) {
         if ((pos + 1) < size) {
@@ -212,7 +212,7 @@ inline const char* format_hex(char* buf, std::size_t size, std::uintptr_t v) {
     }
 
     for (std::size_t i = 0; i < n; ++i) {
-        int nibble = static_cast<int>((v >> ((n - 1 - i) * 4)) & 0xF);
+        const int nibble = static_cast<int>((v >> ((n - 1 - i) * 4)) & 0xF);
         buf[pos++] = "0123456789abcdef"[nibble];
     }
     buf[pos] = '\0';
@@ -254,7 +254,7 @@ void format_value(char* buf, std::size_t size, const T& v) {
         buf[pos++] = '(';
         std::array<char, 8> ibuf{};
         detail::format_int(ibuf.data(), ibuf.size(), static_cast<int>(v));
-        std::size_t ilen = std::strlen(ibuf.data());
+        const std::size_t ilen = std::strlen(ibuf.data());
         for (std::size_t i = 0; i < ilen && (pos + 1) < size; ++i) {
             buf[pos++] = ibuf[i];
         }

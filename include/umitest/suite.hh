@@ -8,17 +8,88 @@
 
 #include <array>
 #include <cmath>
+#include <cstdint>
 #include <cstring>
 #include <source_location>
+#include <type_traits>
+#include <utility>
 
 #include <umiport/platform.hh> // IWYU pragma: keep (build-resolved Output)
 #include <umitest/context.hh>
 #include <umitest/format.hh>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-compare"
-
 namespace umi::test {
+
+// =============================================================================
+// Safe comparison helpers — use std::cmp_* for mixed-sign integer comparisons
+// =============================================================================
+
+namespace detail {
+
+/// @brief Type predicate: eligible for std::cmp_* safe integer comparison.
+/// @details Excludes bool and character types per [utility.intcmp] requirements.
+template <typename T>
+constexpr bool is_safe_cmp_v =
+    std::is_integral_v<std::remove_cv_t<T>> && !std::is_same_v<std::remove_cv_t<T>, bool> &&
+    !std::is_same_v<std::remove_cv_t<T>, char> && !std::is_same_v<std::remove_cv_t<T>, wchar_t> &&
+    !std::is_same_v<std::remove_cv_t<T>, char8_t> && !std::is_same_v<std::remove_cv_t<T>, char16_t> &&
+    !std::is_same_v<std::remove_cv_t<T>, char32_t>;
+
+template <typename A, typename B>
+constexpr bool safe_eq(const A& a, const B& b) {
+    if constexpr (is_safe_cmp_v<A> && is_safe_cmp_v<B>) {
+        return std::cmp_equal(a, b);
+    } else {
+        return a == b;
+    }
+}
+
+template <typename A, typename B>
+constexpr bool safe_ne(const A& a, const B& b) {
+    if constexpr (is_safe_cmp_v<A> && is_safe_cmp_v<B>) {
+        return std::cmp_not_equal(a, b);
+    } else {
+        return a != b;
+    }
+}
+
+template <typename A, typename B>
+constexpr bool safe_lt(const A& a, const B& b) {
+    if constexpr (is_safe_cmp_v<A> && is_safe_cmp_v<B>) {
+        return std::cmp_less(a, b);
+    } else {
+        return a < b;
+    }
+}
+
+template <typename A, typename B>
+constexpr bool safe_le(const A& a, const B& b) {
+    if constexpr (is_safe_cmp_v<A> && is_safe_cmp_v<B>) {
+        return std::cmp_less_equal(a, b);
+    } else {
+        return a <= b;
+    }
+}
+
+template <typename A, typename B>
+constexpr bool safe_gt(const A& a, const B& b) {
+    if constexpr (is_safe_cmp_v<A> && is_safe_cmp_v<B>) {
+        return std::cmp_greater(a, b);
+    } else {
+        return a > b;
+    }
+}
+
+template <typename A, typename B>
+constexpr bool safe_ge(const A& a, const B& b) {
+    if constexpr (is_safe_cmp_v<A> && is_safe_cmp_v<B>) {
+        return std::cmp_greater_equal(a, b);
+    } else {
+        return a >= b;
+    }
+}
+
+} // namespace detail
 
 // =============================================================================
 // Suite — test runner and statistics
@@ -91,44 +162,46 @@ class Suite {
     }
 
     /// @brief Inline boolean check (false expected). Increments pass or fail count.
-    bool check_false(bool cond, const char* msg = nullptr, std::source_location loc = std::source_location::current()) {
+    bool check_false(bool cond,
+                     const char* msg = "expected false",
+                     std::source_location loc = std::source_location::current()) {
         return check(!cond, msg, loc);
     }
 
     /// @brief Inline equality check.
     template <typename A, typename B>
     bool check_eq(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
-        return check_cmp(a, b, "==", [](auto& x, auto& y) { return x == y; }, loc);
+        return check_cmp(a, b, "==", detail::safe_eq<A, B>, loc);
     }
 
     /// @brief Inline inequality check.
     template <typename A, typename B>
     bool check_ne(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
-        return check_cmp(a, b, "!=", [](auto& x, auto& y) { return x != y; }, loc);
+        return check_cmp(a, b, "!=", detail::safe_ne<A, B>, loc);
     }
 
     /// @brief Inline less-than check.
     template <typename A, typename B>
     bool check_lt(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
-        return check_cmp(a, b, "<", [](auto& x, auto& y) { return x < y; }, loc);
+        return check_cmp(a, b, "<", detail::safe_lt<A, B>, loc);
     }
 
     /// @brief Inline less-or-equal check.
     template <typename A, typename B>
     bool check_le(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
-        return check_cmp(a, b, "<=", [](auto& x, auto& y) { return x <= y; }, loc);
+        return check_cmp(a, b, "<=", detail::safe_le<A, B>, loc);
     }
 
     /// @brief Inline greater-than check.
     template <typename A, typename B>
     bool check_gt(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
-        return check_cmp(a, b, ">", [](auto& x, auto& y) { return x > y; }, loc);
+        return check_cmp(a, b, ">", detail::safe_gt<A, B>, loc);
     }
 
     /// @brief Inline greater-or-equal check.
     template <typename A, typename B>
     bool check_ge(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
-        return check_cmp(a, b, ">=", [](auto& x, auto& y) { return x >= y; }, loc);
+        return check_cmp(a, b, ">=", detail::safe_ge<A, B>, loc);
     }
 
     /// @brief Inline approximate-equality check.
@@ -308,32 +381,32 @@ bool TestContext::assert_cmp(const A& a, const B& b, const char* op, Cmp cmp, st
 
 template <typename A, typename B>
 bool TestContext::assert_eq(const A& a, const B& b, std::source_location loc) {
-    return assert_cmp(a, b, "==", [](auto& x, auto& y) { return x == y; }, loc);
+    return assert_cmp(a, b, "==", detail::safe_eq<A, B>, loc);
 }
 
 template <typename A, typename B>
 bool TestContext::assert_ne(const A& a, const B& b, std::source_location loc) {
-    return assert_cmp(a, b, "!=", [](auto& x, auto& y) { return x != y; }, loc);
+    return assert_cmp(a, b, "!=", detail::safe_ne<A, B>, loc);
 }
 
 template <typename A, typename B>
 bool TestContext::assert_lt(const A& a, const B& b, std::source_location loc) {
-    return assert_cmp(a, b, "<", [](auto& x, auto& y) { return x < y; }, loc);
+    return assert_cmp(a, b, "<", detail::safe_lt<A, B>, loc);
 }
 
 template <typename A, typename B>
 bool TestContext::assert_le(const A& a, const B& b, std::source_location loc) {
-    return assert_cmp(a, b, "<=", [](auto& x, auto& y) { return x <= y; }, loc);
+    return assert_cmp(a, b, "<=", detail::safe_le<A, B>, loc);
 }
 
 template <typename A, typename B>
 bool TestContext::assert_gt(const A& a, const B& b, std::source_location loc) {
-    return assert_cmp(a, b, ">", [](auto& x, auto& y) { return x > y; }, loc);
+    return assert_cmp(a, b, ">", detail::safe_gt<A, B>, loc);
 }
 
 template <typename A, typename B>
 bool TestContext::assert_ge(const A& a, const B& b, std::source_location loc) {
-    return assert_cmp(a, b, ">=", [](auto& x, auto& y) { return x >= y; }, loc);
+    return assert_cmp(a, b, ">=", detail::safe_ge<A, B>, loc);
 }
 
 template <typename A, typename B>
@@ -347,5 +420,3 @@ bool TestContext::assert_near(const A& a, const B& b, double eps, std::source_lo
 }
 
 } // namespace umi::test
-
-#pragma GCC diagnostic pop

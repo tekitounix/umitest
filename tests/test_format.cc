@@ -178,6 +178,39 @@ bool test_format_unknown_type(TestContext& t) {
     return t.assert_eq(sv, std::string_view{"(?)"});
 }
 
+// =============================================================================
+// string_view formatting
+// =============================================================================
+
+bool test_format_string_view(TestContext& t) {
+    std::array<char, 128> buf{};
+    format_value(buf.data(), buf.size(), std::string_view{"hello"});
+    auto sv = std::string_view{buf.data()};
+    bool ok = true;
+    ok &= t.assert_eq(sv, std::string_view{"\"hello\""});
+
+    // Empty string_view
+    format_value(buf.data(), buf.size(), std::string_view{""});
+    sv = std::string_view{buf.data()};
+    ok &= t.assert_eq(sv, std::string_view{"\"\""});
+    return ok;
+}
+
+// =============================================================================
+// UINT64_MAX / nullptr formatting
+// =============================================================================
+
+bool test_format_uint64_max(TestContext& t) {
+    return t.assert_eq(fmt(UINT64_MAX), std::string_view{"18446744073709551615"});
+}
+
+bool test_format_nullptr(TestContext& t) {
+    std::array<char, 128> buf{};
+    format_value(buf.data(), buf.size(), nullptr);
+    auto sv = std::string_view{buf.data()};
+    return t.assert_eq(sv, std::string_view{"nullptr"});
+}
+
 } // namespace
 
 void run_format_tests(umi::test::Suite& suite) {
@@ -204,6 +237,13 @@ void run_format_tests(umi::test::Suite& suite) {
 
     umi::test::Suite::section("format_value: pointer");
     suite.run("non-null / null", test_format_pointer);
+
+    umi::test::Suite::section("format_value: string_view");
+    suite.run("basic / empty", test_format_string_view);
+
+    umi::test::Suite::section("format_value: boundary");
+    suite.run("UINT64_MAX", test_format_uint64_max);
+    suite.run("nullptr", test_format_nullptr);
 
     umi::test::Suite::section("format_value: unknown");
     suite.run("opaque type", test_format_unknown_type);
