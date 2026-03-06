@@ -10,7 +10,7 @@ target_end()
 target("test_umitest_compile_fail")
     set_kind("phony")
     set_default(false)
-    add_tests("near_non_numeric")
+    add_tests("near_non_numeric", "assert_near_non_numeric")
 
     on_test(function()
         import("lib.detect.find_tool")
@@ -20,7 +20,7 @@ target("test_umitest_compile_fail")
 
         local include_dir = path.join(os.scriptdir(), "..", "include")
 
-        local test_cases = {"near_non_numeric"}
+        local test_cases = {"near_non_numeric", "assert_near_non_numeric"}
         for _, name in ipairs(test_cases) do
             local source = path.join(os.scriptdir(), "compile_fail", name .. ".cc")
             local object = os.tmpfile() .. ".o"

@@ -139,6 +139,11 @@ inline const char* format_double(char* buf, std::size_t size, double v) {
     const int frac_digits = total_sig - sig_used;
 
     if (frac_digits <= 0 || frac == 0.0) {
+        // Append ".0" so floating-point values are distinguishable from integers
+        if ((pos + 3) <= size) {
+            buf[pos++] = '.';
+            buf[pos++] = '0';
+        }
         buf[pos] = '\0';
         return buf;
     }
@@ -219,6 +224,41 @@ inline const char* format_hex(char* buf, std::size_t size, std::uintptr_t v) {
     return buf;
 }
 
+/// @brief Write escaped representation of a char into buf.
+/// @param buf Output buffer (caller ensures sufficient space).
+/// @param v Character to escape.
+/// @return Number of bytes written.
+inline std::size_t escape_char(char* buf, char v) {
+    std::size_t pos = 0;
+    if (v == '\0') {
+        buf[pos++] = '\\';
+        buf[pos++] = '0';
+    } else if (v == '\n') {
+        buf[pos++] = '\\';
+        buf[pos++] = 'n';
+    } else if (v == '\r') {
+        buf[pos++] = '\\';
+        buf[pos++] = 'r';
+    } else if (v == '\t') {
+        buf[pos++] = '\\';
+        buf[pos++] = 't';
+    } else if (v == '\\') {
+        buf[pos++] = '\\';
+        buf[pos++] = '\\';
+    } else if (v == '\'') {
+        buf[pos++] = '\\';
+        buf[pos++] = '\'';
+    } else if (static_cast<unsigned char>(v) < 0x20 || v == 0x7F) {
+        buf[pos++] = '\\';
+        buf[pos++] = 'x';
+        buf[pos++] = "0123456789abcdef"[(static_cast<unsigned char>(v) >> 4) & 0xF];
+        buf[pos++] = "0123456789abcdef"[static_cast<unsigned char>(v) & 0xF];
+    } else {
+        buf[pos++] = v;
+    }
+    return pos;
+}
+
 } // namespace detail
 
 // =============================================================================
@@ -241,14 +281,14 @@ void format_value(char* buf, std::size_t size, const T& v) {
     } else if constexpr (std::is_same_v<T, std::nullptr_t>) {
         detail::copy_cstr(buf, size, "nullptr");
     } else if constexpr (std::is_same_v<T, char>) {
-        // "'c' (d)"
-        if (size < 8) {
+        // "'c' (d)" for printable, "'\x' (d)" for control characters
+        if (size < 14) {
             buf[0] = '\0';
             return;
         }
         std::size_t pos = 0;
         buf[pos++] = '\'';
-        buf[pos++] = v;
+        pos += detail::escape_char(buf + pos, v);
         buf[pos++] = '\'';
         buf[pos++] = ' ';
         buf[pos++] = '(';
@@ -276,7 +316,12 @@ void format_value(char* buf, std::size_t size, const T& v) {
     } else if constexpr (std::is_floating_point_v<T>) {
         detail::format_double(buf, size, static_cast<double>(v));
     } else if constexpr (std::is_enum_v<T>) {
-        detail::format_int(buf, size, static_cast<std::int64_t>(static_cast<std::underlying_type_t<T>>(v)));
+        using U = std::underlying_type_t<T>;
+        if constexpr (std::is_unsigned_v<U>) {
+            detail::format_uint(buf, size, static_cast<std::uint64_t>(static_cast<U>(v)));
+        } else {
+            detail::format_int(buf, size, static_cast<std::int64_t>(static_cast<U>(v)));
+        }
     } else if constexpr (std::is_pointer_v<T>) {
         detail::format_hex(buf, size, reinterpret_cast<std::uintptr_t>(v));
     } else {

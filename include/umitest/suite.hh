@@ -205,7 +205,9 @@ class Suite {
     }
 
     /// @brief Inline approximate-equality check.
+    /// @pre A and B must be arithmetic types (integral or floating-point).
     template <typename A, typename B>
+        requires(std::is_arithmetic_v<A> && std::is_arithmetic_v<B>)
     bool
     check_near(const A& a, const B& b, double eps = 0.001, std::source_location loc = std::source_location::current()) {
         if (std::abs(static_cast<double>(a) - static_cast<double>(b)) < eps) {
@@ -286,17 +288,12 @@ class Suite {
         format_value(vb.data(), vb.size(), b);
         Output::puts("  ");
         Output::puts(red);
-        Output::puts("FAIL: ");
+        Output::puts("FAIL: expected ");
         Output::puts(va.data());
         Output::putc(' ');
         Output::puts(op);
         Output::putc(' ');
         Output::puts(vb.data());
-        Output::puts(" (got ");
-        Output::puts(va.data());
-        Output::puts(", expected ");
-        Output::puts(vb.data());
-        Output::putc(')');
         Output::puts(reset);
         Output::puts("\n    at ");
         Output::puts(loc.file_name());
@@ -410,6 +407,7 @@ bool TestContext::assert_ge(const A& a, const B& b, std::source_location loc) {
 }
 
 template <typename A, typename B>
+    requires(std::is_arithmetic_v<A> && std::is_arithmetic_v<B>)
 bool TestContext::assert_near(const A& a, const B& b, double eps, std::source_location loc) {
     if (std::abs(static_cast<double>(a) - static_cast<double>(b)) < eps) {
         return true;

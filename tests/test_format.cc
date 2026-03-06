@@ -42,29 +42,32 @@ bool test_format_bool(TestContext& t) {
 // =============================================================================
 
 bool test_format_char(TestContext& t) {
-    std::array<char, 128> buf{};
-    format_value(buf.data(), buf.size(), 'A');
-    // Should contain 'A' and (65)
-    auto sv = std::string_view{buf.data()};
     bool ok = true;
-    ok &= t.assert_true(sv.find('A') != std::string_view::npos, "contains char A");
-    ok &= t.assert_true(sv.find("65") != std::string_view::npos, "contains decimal 65");
+    ok &= t.assert_eq(fmt('A'), std::string_view{"'A' (65)"});
+    ok &= t.assert_eq(fmt('Z'), std::string_view{"'Z' (90)"});
+    ok &= t.assert_eq(fmt(' '), std::string_view{"' ' (32)"});
     return ok;
 }
 
 bool test_format_char_special(TestContext& t) {
-    std::array<char, 128> buf{};
-    format_value(buf.data(), buf.size(), '\0');
-    // NUL char: snprintf "'%c' (%d)" produces "'\0' (0)" — embedded NUL truncates string_view.
-    // Verify the buffer has '(0)' after the embedded NUL by scanning the raw buffer.
-    bool found_zero = false;
-    for (std::size_t i = 0; i < buf.size() - 1; ++i) {
-        if (buf[i] == '(' && buf[i + 1] == '0') {
-            found_zero = true;
-            break;
-        }
-    }
-    return t.assert_true(found_zero, "contains (0) for NUL char in raw buffer");
+    bool ok = true;
+    // NUL char: now escaped as '\0' so string_view works correctly
+    ok &= t.assert_eq(fmt('\0'), std::string_view{"'\\0' (0)"});
+    // Newline
+    ok &= t.assert_eq(fmt('\n'), std::string_view{"'\\n' (10)"});
+    // Tab
+    ok &= t.assert_eq(fmt('\t'), std::string_view{"'\\t' (9)"});
+    // Carriage return
+    ok &= t.assert_eq(fmt('\r'), std::string_view{"'\\r' (13)"});
+    // Backslash
+    ok &= t.assert_eq(fmt('\\'), std::string_view{"'\\\\' (92)"});
+    // Single-quote escape
+    ok &= t.assert_eq(fmt('\''), std::string_view{"'\\'' (39)"});
+    // Non-printable (BEL = 0x07)
+    ok &= t.assert_eq(fmt('\x07'), std::string_view{"'\\x07' (7)"});
+    // DEL (0x7F)
+    ok &= t.assert_eq(fmt('\x7F'), std::string_view{"'\\x7f' (127)"});
+    return ok;
 }
 
 // =============================================================================
@@ -90,6 +93,9 @@ bool test_format_signed(TestContext& t) {
     ok &= t.assert_eq(fmt(-1), std::string_view{"-1"});
     ok &= t.assert_eq(fmt(42), std::string_view{"42"});
     ok &= t.assert_eq(fmt(-100), std::string_view{"-100"});
+    // INT64_MIN boundary: exercises -(v+1)+1 path in format_int
+    ok &= t.assert_eq(fmt(INT64_MIN), std::string_view{"-9223372036854775808"});
+    ok &= t.assert_eq(fmt(INT64_MAX), std::string_view{"9223372036854775807"});
     return ok;
 }
 
@@ -99,19 +105,21 @@ bool test_format_signed(TestContext& t) {
 
 bool test_format_float(TestContext& t) {
     bool ok = true;
-    // format_value uses "%.6g" — check a few known values
-    ok &= t.assert_eq(fmt(0.0), std::string_view{"0"});
-    ok &= t.assert_eq(fmt(1.0), std::string_view{"1"});
+    // format_value outputs ".0" suffix for whole-number floats to distinguish from integers
+    ok &= t.assert_eq(fmt(0.0), std::string_view{"0.0"});
+    ok &= t.assert_eq(fmt(1.0), std::string_view{"1.0"});
+    ok &= t.assert_eq(fmt(-1.0), std::string_view{"-1.0"});
     ok &= t.assert_eq(fmt(3.14), std::string_view{"3.14"});
     ok &= t.assert_eq(fmt(-2.5), std::string_view{"-2.5"});
     return ok;
 }
 
 bool test_format_float_precision(TestContext& t) {
-    // %.6g shows up to 6 significant digits
-    auto sv = fmt(1.23456789);
     bool ok = true;
-    ok &= t.assert_true(sv.find("1.23457") != std::string_view::npos, "rounded to 6 sig figs");
+    // 6 significant digits with rounding
+    ok &= t.assert_eq(fmt(1.23456789), std::string_view{"1.23457"});
+    // Small fractional value
+    ok &= t.assert_eq(fmt(0.123456), std::string_view{"0.123456"});
     return ok;
 }
 
@@ -150,13 +158,14 @@ bool test_format_pointer(TestContext& t) {
     auto sv = std::string_view{buf.data()};
 
     bool ok = true;
-    // Should produce a hex address like "0x..." or similar
-    ok &= t.assert_true(!sv.empty(), "non-empty pointer format");
+    // Must start with "0x" prefix
+    ok &= t.assert_true(sv.starts_with("0x"), "pointer has 0x prefix");
+    ok &= t.assert_true(sv.size() > 2, "pointer has hex digits after 0x");
 
-    // Null pointer
+    // Null pointer → "0x0"
     format_value(buf.data(), buf.size(), static_cast<int*>(nullptr));
     sv = std::string_view{buf.data()};
-    ok &= t.assert_true(!sv.empty(), "null pointer formatted");
+    ok &= t.assert_eq(sv, std::string_view{"0x0"});
     return ok;
 }
 

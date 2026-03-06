@@ -7,6 +7,7 @@
 /// @author Shota Moriguchi @tekitounix
 
 #include <source_location>
+#include <type_traits>
 
 namespace umi::test {
 
@@ -64,8 +65,10 @@ class TestContext {
     bool assert_ge(const A& a, const B& b, std::source_location loc = std::source_location::current());
 
     /// @brief Assert approximate equality within epsilon.
+    /// @pre A and B must be arithmetic types (integral or floating-point).
     /// @param eps Maximum allowed absolute difference.
     template <typename A, typename B>
+        requires(std::is_arithmetic_v<A> && std::is_arithmetic_v<B>)
     bool
     assert_near(const A& a, const B& b, double eps = 0.001, std::source_location loc = std::source_location::current());
 

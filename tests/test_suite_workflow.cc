@@ -167,6 +167,33 @@ bool test_context_failed_flag(TestContext& t) {
 }
 
 // =============================================================================
+// check_near failure path
+// =============================================================================
+
+bool test_check_near_failure(TestContext& t) {
+    Suite sub("sub-check-near-fail");
+    // Values differ by 1.0, well outside default eps=0.001
+    bool result = sub.check_near(1.0, 2.0);
+
+    bool ok = t.assert_false(result, "check_near should return false");
+    ok &= t.assert_eq(sub.summary(), 1);
+    return ok;
+}
+
+// =============================================================================
+// assert_near failure detection via has_failed
+// =============================================================================
+
+bool test_assert_near_failure_detected(TestContext& t) {
+    Suite sub("sub-assert-near-fail");
+    sub.run("near-fails", [](TestContext& ctx) {
+        ctx.assert_near(1.0, 100.0); // intentional failure
+        return true;                 // context failure overrides
+    });
+    return t.assert_eq(sub.summary(), 1);
+}
+
+// =============================================================================
 // check_false
 // =============================================================================
 
@@ -202,6 +229,10 @@ void run_suite_workflow_tests(umi::test::Suite& suite) {
 
     Suite::section("TestContext behavior");
     suite.run("failed flag tracking", test_context_failed_flag);
+
+    Suite::section("Near failure paths");
+    suite.run("check_near failure", test_check_near_failure);
+    suite.run("assert_near failure detected", test_assert_near_failure_detected);
 
     Suite::section("check_false");
     suite.run("basic false checks", test_check_false_basic);

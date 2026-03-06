@@ -239,6 +239,19 @@ bool test_assert_false_basic(TestContext& t) {
 }
 
 // =============================================================================
+// assert_near — integer types (arithmetic_v allows integers)
+// =============================================================================
+
+bool test_assert_near_integers(TestContext& t) {
+    bool ok = true;
+    ok &= t.assert_near(10, 10);
+    ok &= t.assert_near(10, 11, 2.0);
+    ok &= t.assert_near(-5, -4, 2.0);
+    ok &= t.assert_near(0, 0, 0.001);
+    return ok;
+}
+
+// =============================================================================
 // Mixed signed/unsigned comparisons (std::cmp_* path)
 // =============================================================================
 
@@ -278,6 +291,7 @@ void run_assertion_tests(umi::test::Suite& suite) {
     umi::test::Suite::section("assert_near");
     suite.run("float basic", test_assert_near_floats);
     suite.run("custom epsilon", test_assert_near_custom_epsilon);
+    suite.run("integer types", test_assert_near_integers);
 
     umi::test::Suite::section("Enum types");
     suite.run("enum comparisons", test_enum_comparisons);
