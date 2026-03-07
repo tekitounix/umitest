@@ -13,9 +13,15 @@ This page is the canonical documentation entry for both GitHub and Doxygen.
 
 - Public entrypoint: `include/umitest/test.hh`
 - Core components:
-  - `include/umitest/suite.hh` — TestSuite, test registration and execution
-  - `include/umitest/context.hh` — TestContext, assertion state tracking
+  - `include/umitest/suite.hh` — BasicSuite<R>, test registration and execution
+  - `include/umitest/context.hh` — TestContext, soft + fatal assertion checks
+  - `include/umitest/check.hh` — constexpr bool free functions
   - `include/umitest/format.hh` — format_value for diagnostic output
+  - `include/umitest/reporter.hh` — ReporterLike concept
+  - `include/umitest/failure.hh` — FailureView struct
+  - `include/umitest/reporters/stdio.hh` — StdioReporter (ANSI color)
+  - `include/umitest/reporters/plain.hh` — PlainReporter (no color)
+  - `include/umitest/reporters/null.hh` — NullReporter (silent)
 
 ## Local Generation
 

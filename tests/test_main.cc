@@ -9,9 +9,11 @@
 int main() {
     umi::test::Suite suite("umitest");
 
-    umitest::test::run_assertion_tests(suite);
-    umitest::test::run_suite_workflow_tests(suite);
+    umitest::test::run_check_tests(suite);
     umitest::test::run_format_tests(suite);
+    umitest::test::run_context_tests(suite);
+    umitest::test::run_suite_tests(suite);
+    umitest::test::run_reporter_tests(suite);
 
     return suite.summary();
 }

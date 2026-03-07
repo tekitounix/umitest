@@ -9,13 +9,10 @@
 
 namespace umitest::test {
 
-/// @brief Register assertion edge-case tests.
-void run_assertion_tests(umi::test::Suite& suite);
-
-/// @brief Register Suite workflow and counting tests.
-void run_suite_workflow_tests(umi::test::Suite& suite);
-
-/// @brief Register format_value output tests.
+void run_check_tests(umi::test::Suite& suite);
 void run_format_tests(umi::test::Suite& suite);
+void run_context_tests(umi::test::Suite& suite);
+void run_suite_tests(umi::test::Suite& suite);
+void run_reporter_tests(umi::test::Suite& suite);
 
 } // namespace umitest::test

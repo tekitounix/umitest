@@ -6,11 +6,12 @@
 
 `umitest` is a zero-macro, header-only test framework for C++23:
 
-1. Test code is written as ordinary C++ functions returning `bool`.
+1. Test code is written as void lambdas passed to `suite.run()`.
 2. No preprocessor macros — `std::source_location` replaces `__FILE__`/`__LINE__`.
 3. No external build dependencies — include and use.
 4. Works on host, WASM, and embedded targets without modification.
 5. Output is human-readable colored terminal text suitable for CI logs.
+6. Reporter-parameterized — `BasicSuite<R>` separates test logic from output format.
 
 ---
 
@@ -33,8 +34,8 @@ This ensures compatibility with bare-metal environments where dynamic allocation
 
 ### 2.4 No Exceptions
 
-Assertions do not throw. Test functions return `bool`.
-TestContext tracks failure state internally via `mark_failed()`.
+Assertions do not throw. TestContext tracks failure state internally via `mark_failed()`.
+Lambdas passed to `run()` must return `void`.
 
 ### 2.5 Dependency Boundaries
 
@@ -71,17 +72,27 @@ lib/umitest/
 │   ├── assertions.cc
 │   └── check_style.cc
 ├── include/umitest/
-│   ├── test.hh          # Umbrella header
-│   ├── suite.hh         # Suite class + TestContext impl
-│   ├── context.hh       # TestContext declaration
-│   └── format.hh        # format_value for diagnostic output
+│   ├── test.hh          # Umbrella header (Suite = BasicSuite<StdioReporter>)
+│   ├── suite.hh         # BasicSuite<R> template
+│   ├── context.hh       # TestContext (soft + fatal checks)
+│   ├── check.hh         # constexpr bool free functions
+│   ├── format.hh        # format_value for diagnostic output
+│   ├── failure.hh       # FailureView struct
+│   ├── reporter.hh      # ReporterLike concept
+│   └── reporters/
+│       ├── stdio.hh     # StdioReporter (ANSI color)
+│       ├── plain.hh     # PlainReporter (no color)
+│       └── null.hh      # NullReporter (silent)
 └── tests/
     ├── test_main.cc
     ├── test_fixture.hh
-    ├── test_assertions.cc
+    ├── test_check.cc
+    ├── test_context.cc
+    ├── test_suite.cc
+    ├── test_reporter.cc
     ├── test_format.cc
-    ├── test_suite_workflow.cc
-    ├── compile_fail/
+    ├── smoke/           # Baseline compilation tests
+    ├── compile_fail/    # Constraint violation tests
     └── xmake.lua
 ```
 
@@ -95,6 +106,7 @@ lib/umitest/
 │   ├── test.hh
 │   ├── suite.hh
 │   ├── context.hh
+│   ├── check.hh
 │   ├── format.hh
 │   └── matchers.hh       # Future: composable matchers (contains, starts_with)
 ├── examples/
@@ -105,6 +117,8 @@ lib/umitest/
 └── tests/
     ├── test_main.cc
     ├── test_*.cc
+    ├── smoke/
+    ├── compile_fail/
     └── xmake.lua
 ```
 
@@ -112,7 +126,7 @@ Notes:
 
 1. Public headers stay under `include/umitest/`.
 2. Future matchers are opt-in via separate header — no bloat on minimal usage.
-3. Suite and TestContext remain the only two user-facing types.
+3. `BasicSuite<R>` and `TestContext` remain the only two user-facing types.
 
 ---
 
@@ -124,60 +138,64 @@ Public entrypoint: `include/umitest/test.hh`
 
 Core types:
 
-- `umi::test::Suite` — test runner and statistics
-- `umi::test::TestContext` — assertion context for structured tests
+- `umi::test::Suite` — `BasicSuite<StdioReporter>`, default test runner
+- `umi::test::PlainSuite` — `BasicSuite<PlainReporter>`, no ANSI color
+- `umi::test::TestContext` — assertion context passed to test lambdas
 - `umi::test::format_value()` — stdio-free value formatter
 
-Available assertions (`assert_*` on TestContext, `check_*` on Suite):
+TestContext checks (soft checks continue on failure, fatal checks return `false`):
 
-| Method | Checks |
-|--------|--------|
-| `assert_eq` / `check_eq` | `a == b` |
-| `assert_ne` / `check_ne` | `a != b` |
-| `assert_lt` / `check_lt` | `a < b` |
-| `assert_le` / `check_le` | `a <= b` |
-| `assert_gt` / `check_gt` | `a > b` |
-| `assert_ge` / `check_ge` | `a >= b` |
-| `assert_near` / `check_near` | `\|a - b\| < eps` |
-| `assert_true` / `check` | boolean condition |
+| Soft check | Fatal check | Checks |
+|------------|-------------|--------|
+| `eq(a, b)` | `require_eq(a, b)` | `a == b` |
+| `ne(a, b)` | `require_ne(a, b)` | `a != b` |
+| `lt(a, b)` | `require_lt(a, b)` | `a < b` |
+| `le(a, b)` | `require_le(a, b)` | `a <= b` |
+| `gt(a, b)` | `require_gt(a, b)` | `a > b` |
+| `ge(a, b)` | `require_ge(a, b)` | `a >= b` |
+| `near(a, b, eps)` | `require_near(a, b, eps)` | `|a - b| < eps` |
+| `is_true(c)` | `require_true(c)` | boolean true |
+| `is_false(c)` | `require_false(c)` | boolean false |
+
+Free functions (`check.hh`): `check_eq`, `check_ne`, `check_lt`, `check_le`, `check_gt`, `check_ge`, `check_near`, `check_true`, `check_false` — pure `constexpr bool` for `static_assert` or custom logic.
 
 Headers:
 
-- `include/umitest/suite.hh` — Suite class + TestContext impl
-- `include/umitest/context.hh` — TestContext declaration
+- `include/umitest/test.hh` — umbrella (includes suite + reporters)
+- `include/umitest/suite.hh` — `BasicSuite<R>` template
+- `include/umitest/context.hh` — TestContext with soft + fatal checks
+- `include/umitest/check.hh` — constexpr free functions
 - `include/umitest/format.hh` — format_value for diagnostic output
+- `include/umitest/reporter.hh` — ReporterLike concept
+- `include/umitest/failure.hh` — FailureView struct
 
 ### 5.1 Minimal Path
 
 Required minimal flow:
 
 1. Construct `Suite`.
-2. Define test function taking `TestContext&` and returning `bool`.
-3. Call `suite.run("name", fn)`.
-4. Return `suite.summary()` from `main`.
+2. Call `suite.run("name", [](auto& t) { ... })` with a void lambda.
+3. Return `suite.summary()` from `main`.
 
-### 5.2 Two Testing Styles
+### 5.2 Testing Style
 
-**Structured style** (with `TestContext`):
+Tests are written as void lambdas passed to `suite.run()`:
 
 ```cpp
-bool test_foo(TestContext& t) {
-    t.assert_eq(1 + 1, 2);
-    return true;
-}
-
 Suite s("foo");
-s.run("test_foo", test_foo);
+s.run("test_foo", [](auto& t) {
+    t.eq(1 + 1, 2);
+    t.is_true(true);
+});
 ```
 
-**Inline style** (direct `check_*` on Suite):
+Fatal checks enable early-return guard patterns:
 
 ```cpp
-Suite s("bar");
-s.section("arithmetic");
-s.check_eq(1 + 1, 2);
-s.check_ne(1, 2);
-return s.summary();
+s.run("test_bar", [](auto& t) {
+    if (!t.require_true(ptr != nullptr)) return;
+    t.eq(ptr->value, 42);
+});
 ```
 
 ### 5.3 Advanced Path
@@ -185,30 +203,32 @@ return s.summary();
 Advanced usage includes:
 
 1. `section()` for logical grouping within output,
-2. `check_near()` / `assert_near()` for floating-point comparison,
-3. custom `format_value` specializations for user types,
-4. multiple Suites in a single test binary for independent statistics.
+2. `near()` / `require_near()` for floating-point comparison,
+3. `note()` for contextual annotations (RAII scoped),
+4. custom `format_value` specializations for user types,
+5. multiple Suites in a single test binary for independent statistics,
+6. custom reporters via `BasicSuite<MyReporter>`.
 
 ---
 
 ## 6. Assertion Semantics
 
-### 6.1 TestContext Assertions
+### 6.1 Soft Checks
 
-All `assert_*` methods on TestContext:
+All soft check methods on TestContext (`eq`, `ne`, `lt`, `le`, `gt`, `ge`, `near`, `is_true`, `is_false`):
 
-1. Return `bool` — `true` if the assertion passed, `false` if it failed.
+1. Return `bool` — `true` if the check passed, `false` if it failed.
 2. On failure, call `mark_failed()` to set the context failure flag.
-3. On failure, print source location and compared values to stdout.
+3. On failure, report source location and compared values via the reporter.
 4. Do NOT throw, abort, or longjmp. Test execution continues.
 
-### 6.2 Suite Inline Checks
+### 6.2 Fatal Checks
 
-All `check_*` methods on Suite:
+All `require_*` methods on TestContext:
 
-1. Return `bool` — same semantics as assertions.
-2. Directly increment the `passed` or `failed` counter.
-3. No TestContext is involved; simpler for quick checks.
+1. Return `bool` — same as soft checks.
+2. On failure, additionally mark the context as fatally failed.
+3. Intended for guard patterns: `if (!t.require_true(precond)) return;`
 
 ### 6.3 Value Formatting
 
@@ -221,7 +241,7 @@ Supported types: integral, floating-point, bool, char, const char*, std::string_
 
 ### 7.1 Human-Readable Report
 
-Terminal output with ANSI color codes:
+Terminal output with ANSI color codes (StdioReporter):
 
 1. Section headers in cyan.
 2. Pass results in green (`OK`).
@@ -233,12 +253,20 @@ Terminal output with ANSI color codes:
 `summary()` returns `0` if all tests passed, `1` if any failed.
 This is compatible with CI pipelines and `xmake test`.
 
+### 7.3 Reporter Architecture
+
+`BasicSuite<R>` is parameterized by a reporter satisfying `ReporterLike`:
+
+- `StdioReporter` — ANSI colored stdout output (default via `Suite`)
+- `PlainReporter` — plain text without escape codes
+- `NullReporter` — silent, for testing the framework itself
+
 ---
 
 ## 8. Test Strategy
 
 1. umitest is self-testing: `tests/` use umitest itself to verify behavior.
-2. Test files are split by concern: assertions, format, suite workflow.
+2. Test files are split by concern: check functions, context, suite, reporter, format.
 3. All tests run on host via `xmake test`.
 4. Tests focus on semantic correctness, not timing.
 5. CI runs host tests on all supported platforms.
@@ -246,9 +274,13 @@ This is compatible with CI pipelines and `xmake test`.
 ### 8.1 Test Layout
 
 - `tests/test_main.cc`: test entrypoint
-- `tests/test_assertions.cc`: all assert_* methods (eq, ne, lt, le, gt, ge, near, true)
+- `tests/test_check.cc`: constexpr free functions (check_eq, check_lt, check_near, etc.)
+- `tests/test_context.cc`: TestContext soft + fatal checks
+- `tests/test_suite.cc`: BasicSuite lifecycle, run(), section(), summary()
+- `tests/test_reporter.cc`: reporter output verification
 - `tests/test_format.cc`: format_value for all supported types
-- `tests/test_suite_workflow.cc`: Suite lifecycle, run(), check_*, summary()
+- `tests/smoke/`: baseline compilation tests (4 files)
+- `tests/compile_fail/`: constraint violation tests (20 files)
 
 ### 8.2 Running Tests
 
@@ -259,9 +291,10 @@ xmake test 'test_umitest/*'  # umitest only
 
 ### 8.3 Quality Gates
 
-- All assertion tests pass on host
+- All self-tests pass on host
+- Smoke baseline files compile successfully
+- Compile-fail tests reject invalid code at compile time
 - Format value tests cover all supported types
-- Suite workflow tests verify pass/fail counting and exit code semantics
 - Self-testing: umitest uses itself — any framework regression is immediately visible
 
 ---
@@ -272,16 +305,15 @@ Examples represent learning stages:
 
 1. `minimal`: shortest complete test.
 2. `assertions`: all assertion methods demonstrated.
-3. `check_style`: sections and inline check style.
+3. `check_style`: sections and structured test patterns.
 
 ---
 
 ## 10. Near-Term Improvement Plan
 
 1. Add composable matchers for string/container checks.
-2. Add compile-fail test for read-only assertions if applicable.
-3. Expand `format_value` for user-defined types via ADL customization point.
-4. Add benchmarking integration example (umitest + umibench combined).
+2. Expand `format_value` for user-defined types via ADL customization point.
+3. Add benchmarking integration example (umitest + umibench combined).
 
 ---
 
@@ -291,4 +323,5 @@ Examples represent learning stages:
 2. Header-only — include and use, no build step.
 3. Embedded-safe — no heap, no exceptions, no RTTI.
 4. Explicit failure location — `std::source_location` in every assertion.
-5. Two styles, one framework — structured (TestContext) and inline (Suite checks) coexist.
+5. Reporter-parameterized — output format is decoupled from test logic.
+6. Compile-time contracts — type constraints prevent misuse at build time.

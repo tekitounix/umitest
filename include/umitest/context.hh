@@ -3,82 +3,358 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026, tekitounix
 /// @file
-/// @brief Assertion context passed to run() test functions.
+/// @brief TestContext — check context passed to run() test functions.
 /// @author Shota Moriguchi @tekitounix
 
+#include <algorithm>
+#include <array>
+#include <concepts>
 #include <source_location>
+#include <span>
 #include <type_traits>
+
+#include <umitest/check.hh>
+#include <umitest/failure.hh>
+#include <umitest/format.hh>
 
 namespace umi::test {
 
-// =============================================================================
-// TestContext — used inside run() test functions
-// =============================================================================
-
-/// @brief Assertion context passed to run() test functions.
-///
-/// Tracks per-test failure state. Each assert method returns false on failure
-/// and marks the context as failed. Suite aggregates pass/fail counts.
+/// @brief Check context passed to run() test functions.
+/// @details Non-copyable, non-movable. Constructed by BasicSuite::run() only.
 class TestContext {
   public:
-    TestContext() = default;
+    using FailCallback = void (*)(const FailureView& failure, void* ctx);
 
-    /// @brief Check whether any assertion has failed in this context.
-    [[nodiscard]] bool has_failed() const { return failed; }
-    /// @brief Reset failure state (called before each test).
-    void clear_failed() { failed = false; }
+    /// @brief RAII note guard. Pops note on destruction. Move-only.
+    class NoteGuard {
+      public:
+        NoteGuard(const NoteGuard&) = delete;
+        NoteGuard& operator=(const NoteGuard&) = delete;
+        NoteGuard(NoteGuard&& other) noexcept : ctx(other.ctx), active(other.active) { other.active = false; }
+        NoteGuard& operator=(NoteGuard&&) = delete;
+        ~NoteGuard() {
+            if (active) {
+                ctx.pop_note();
+            }
+        }
 
-    /// @brief Assert that a condition is true.
-    /// @param cond Condition to check.
-    /// @param msg Optional failure message.
-    /// @return true if the condition held.
-    bool assert_true(bool cond, const char* msg = nullptr, std::source_location loc = std::source_location::current());
+      private:
+        friend class TestContext;
+        NoteGuard(TestContext& ctx) : ctx(ctx), active(true) {}
+        TestContext& ctx;
+        bool active;
+    };
 
-    /// @brief Assert that a condition is false.
-    /// @param cond Condition to check.
-    /// @param msg Optional failure message.
-    /// @return true if the condition was false.
-    bool assert_false(bool cond, const char* msg = nullptr, std::source_location loc = std::source_location::current());
+    TestContext(const TestContext&) = delete;
+    TestContext& operator=(const TestContext&) = delete;
+    TestContext(TestContext&&) = delete;
+    TestContext& operator=(TestContext&&) = delete;
+    ~TestContext() = default;
 
-    /// @brief Assert equality (a == b).
+    /// @brief true if no check has failed.
+    [[nodiscard]] bool ok() const { return !failed; }
+
+    // -- Note --
+
+    /// @brief Push a context note. Returns RAII guard that pops on destruction.
+    /// @param msg null-terminated string that must outlive the NoteGuard scope.
+    [[nodiscard]] NoteGuard note(const char* msg) {
+        push_note(msg != nullptr ? msg : "(null)");
+        return NoteGuard(*this);
+    }
+
+    // -- Soft checks --
+
+    bool is_true(bool cond, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_true(cond))
+            return true;
+        report_bool_fail("true", loc);
+        return false;
+    }
+
+    bool is_false(bool cond, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_false(cond))
+            return true;
+        report_bool_fail("false", loc);
+        return false;
+    }
+
     template <typename A, typename B>
-    bool assert_eq(const A& a, const B& b, std::source_location loc = std::source_location::current());
+        requires(std::equality_comparable_with<A, B> &&
+                 !detail::excluded_char_pointer_v<std::remove_cvref_t<A>, std::remove_cvref_t<B>>)
+    bool eq(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_eq(a, b))
+            return true;
+        report_compare_fail(a, "eq", b, loc);
+        return false;
+    }
 
-    /// @brief Assert inequality (a != b).
-    template <typename A, typename B>
-    bool assert_ne(const A& a, const B& b, std::source_location loc = std::source_location::current());
+    bool eq(const char* a, const char* b, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_eq(a, b))
+            return true;
+        report_compare_fail(a, "eq", b, loc);
+        return false;
+    }
 
-    /// @brief Assert less-than (a < b).
     template <typename A, typename B>
-    bool assert_lt(const A& a, const B& b, std::source_location loc = std::source_location::current());
+        requires(std::equality_comparable_with<A, B> &&
+                 !detail::excluded_char_pointer_v<std::remove_cvref_t<A>, std::remove_cvref_t<B>>)
+    bool ne(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_ne(a, b))
+            return true;
+        report_compare_fail(a, "ne", b, loc);
+        return false;
+    }
 
-    /// @brief Assert less-or-equal (a <= b).
-    template <typename A, typename B>
-    bool assert_le(const A& a, const B& b, std::source_location loc = std::source_location::current());
+    bool ne(const char* a, const char* b, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_ne(a, b))
+            return true;
+        report_compare_fail(a, "ne", b, loc);
+        return false;
+    }
 
-    /// @brief Assert greater-than (a > b).
     template <typename A, typename B>
-    bool assert_gt(const A& a, const B& b, std::source_location loc = std::source_location::current());
+        requires(std::totally_ordered_with<A, B> && !std::is_pointer_v<std::decay_t<A>> &&
+                 !std::is_pointer_v<std::decay_t<B>>)
+    bool lt(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_lt(a, b))
+            return true;
+        report_compare_fail(a, "lt", b, loc);
+        return false;
+    }
 
-    /// @brief Assert greater-or-equal (a >= b).
     template <typename A, typename B>
-    bool assert_ge(const A& a, const B& b, std::source_location loc = std::source_location::current());
+        requires(std::totally_ordered_with<A, B> && !std::is_pointer_v<std::decay_t<A>> &&
+                 !std::is_pointer_v<std::decay_t<B>>)
+    bool le(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_le(a, b))
+            return true;
+        report_compare_fail(a, "le", b, loc);
+        return false;
+    }
 
-    /// @brief Assert approximate equality within epsilon.
-    /// @pre A and B must be arithmetic types (integral or floating-point).
-    /// @param eps Maximum allowed absolute difference.
     template <typename A, typename B>
-        requires(std::is_arithmetic_v<A> && std::is_arithmetic_v<B>)
-    bool
-    assert_near(const A& a, const B& b, double eps = 0.001, std::source_location loc = std::source_location::current());
+        requires(std::totally_ordered_with<A, B> && !std::is_pointer_v<std::decay_t<A>> &&
+                 !std::is_pointer_v<std::decay_t<B>>)
+    bool gt(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_gt(a, b))
+            return true;
+        report_compare_fail(a, "gt", b, loc);
+        return false;
+    }
+
+    template <typename A, typename B>
+        requires(std::totally_ordered_with<A, B> && !std::is_pointer_v<std::decay_t<A>> &&
+                 !std::is_pointer_v<std::decay_t<B>>)
+    bool ge(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_ge(a, b))
+            return true;
+        report_compare_fail(a, "ge", b, loc);
+        return false;
+    }
+
+    template <std::floating_point A, std::floating_point B>
+    bool near(const A& a,
+              const B& b,
+              std::common_type_t<A, B> eps = static_cast<std::common_type_t<A, B>>(0.001),
+              std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_near(a, b, eps))
+            return true;
+        report_near_fail(a, b, eps, loc);
+        return false;
+    }
+
+    // -- Fatal checks --
+
+    bool require_true(bool cond, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_true(cond))
+            return true;
+        report_bool_fail("true", loc, true);
+        return false;
+    }
+
+    bool require_false(bool cond, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_false(cond))
+            return true;
+        report_bool_fail("false", loc, true);
+        return false;
+    }
+
+    template <typename A, typename B>
+        requires(std::equality_comparable_with<A, B> &&
+                 !detail::excluded_char_pointer_v<std::remove_cvref_t<A>, std::remove_cvref_t<B>>)
+    bool require_eq(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_eq(a, b))
+            return true;
+        report_compare_fail(a, "eq", b, loc, true);
+        return false;
+    }
+
+    bool require_eq(const char* a, const char* b, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_eq(a, b))
+            return true;
+        report_compare_fail(a, "eq", b, loc, true);
+        return false;
+    }
+
+    template <typename A, typename B>
+        requires(std::equality_comparable_with<A, B> &&
+                 !detail::excluded_char_pointer_v<std::remove_cvref_t<A>, std::remove_cvref_t<B>>)
+    bool require_ne(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_ne(a, b))
+            return true;
+        report_compare_fail(a, "ne", b, loc, true);
+        return false;
+    }
+
+    bool require_ne(const char* a, const char* b, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_ne(a, b))
+            return true;
+        report_compare_fail(a, "ne", b, loc, true);
+        return false;
+    }
+
+    template <typename A, typename B>
+        requires(std::totally_ordered_with<A, B> && !std::is_pointer_v<std::decay_t<A>> &&
+                 !std::is_pointer_v<std::decay_t<B>>)
+    bool require_lt(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_lt(a, b))
+            return true;
+        report_compare_fail(a, "lt", b, loc, true);
+        return false;
+    }
+
+    template <typename A, typename B>
+        requires(std::totally_ordered_with<A, B> && !std::is_pointer_v<std::decay_t<A>> &&
+                 !std::is_pointer_v<std::decay_t<B>>)
+    bool require_le(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_le(a, b))
+            return true;
+        report_compare_fail(a, "le", b, loc, true);
+        return false;
+    }
+
+    template <typename A, typename B>
+        requires(std::totally_ordered_with<A, B> && !std::is_pointer_v<std::decay_t<A>> &&
+                 !std::is_pointer_v<std::decay_t<B>>)
+    bool require_gt(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_gt(a, b))
+            return true;
+        report_compare_fail(a, "gt", b, loc, true);
+        return false;
+    }
+
+    template <typename A, typename B>
+        requires(std::totally_ordered_with<A, B> && !std::is_pointer_v<std::decay_t<A>> &&
+                 !std::is_pointer_v<std::decay_t<B>>)
+    bool require_ge(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_ge(a, b))
+            return true;
+        report_compare_fail(a, "ge", b, loc, true);
+        return false;
+    }
+
+    template <std::floating_point A, std::floating_point B>
+    bool require_near(const A& a,
+                      const B& b,
+                      std::common_type_t<A, B> eps = static_cast<std::common_type_t<A, B>>(0.001),
+                      std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_near(a, b, eps))
+            return true;
+        report_near_fail(a, b, eps, loc, true);
+        return false;
+    }
+
+    // -- Construction and stats (BasicSuite::run() use only, not user API) --
+
+    /// @pre name != nullptr
+    /// @pre cb != nullptr
+    explicit TestContext(const char* name, FailCallback cb, void* ctx) : test_name(name), fail_cb(cb), fail_ctx(ctx) {}
+
+    [[nodiscard]] int checked_count() const { return checked; }
+    [[nodiscard]] int failed_count() const { return fail_count; }
 
   private:
-    void mark_failed() { failed = true; }
+    static constexpr int max_notes = 4;
+    std::array<const char*, max_notes> note_stack{};
+    int note_depth = 0;
 
-    template <typename A, typename B, typename Cmp>
-    bool assert_cmp(const A& a, const B& b, const char* op, Cmp cmp, std::source_location loc);
+    void push_note(const char* msg) {
+        if (note_depth < max_notes) {
+            note_stack[static_cast<std::size_t>(note_depth)] = msg;
+        }
+        ++note_depth;
+    }
 
+    void pop_note() { --note_depth; }
+
+    std::span<const char* const> active_notes() const {
+        auto n = std::min(note_depth, max_notes);
+        return {note_stack.data(), static_cast<std::size_t>(n)};
+    }
+
+    void report_bool_fail(const char* kind, std::source_location loc, bool fatal = false) {
+        FailureView fv{test_name, loc, fatal, kind, nullptr, nullptr, nullptr, active_notes()};
+        fail_cb(fv, fail_ctx);
+        failed = true;
+        ++fail_count;
+    }
+
+    template <typename A, typename B>
+    void report_compare_fail(const A& a, const char* kind, const B& b, std::source_location loc, bool fatal = false) {
+        std::array<char, detail::fail_message_capacity> lhs_buf{};
+        std::array<char, detail::fail_message_capacity> rhs_buf{};
+        detail::format_value(lhs_buf.data(), lhs_buf.size(), a);
+        detail::format_value(rhs_buf.data(), rhs_buf.size(), b);
+        FailureView fv{test_name, loc, fatal, kind, lhs_buf.data(), rhs_buf.data(), nullptr, active_notes()};
+        fail_cb(fv, fail_ctx);
+        failed = true;
+        ++fail_count;
+    }
+
+    template <std::floating_point A, std::floating_point B>
+    void report_near_fail(
+        const A& a, const B& b, std::common_type_t<A, B> eps, std::source_location loc, bool fatal = false) {
+        std::array<char, detail::fail_message_capacity> lhs_buf{};
+        std::array<char, detail::fail_message_capacity> rhs_buf{};
+        std::array<char, 64> extra_buf{};
+        detail::format_value(lhs_buf.data(), lhs_buf.size(), a);
+        detail::format_value(rhs_buf.data(), rhs_buf.size(), b);
+        detail::format_near_extra(extra_buf.data(), extra_buf.size(), a, b, eps);
+        FailureView fv{test_name, loc, fatal, "near", lhs_buf.data(), rhs_buf.data(), extra_buf.data(), active_notes()};
+        fail_cb(fv, fail_ctx);
+        failed = true;
+        ++fail_count;
+    }
+
+    const char* test_name;
+    FailCallback fail_cb;
+    void* fail_ctx;
     bool failed = false;
+    int checked = 0;
+    int fail_count = 0;
 };
 
 } // namespace umi::test
