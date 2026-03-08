@@ -6,6 +6,7 @@
 /// @brief BoundedWriter and stdio-free value formatter with constexpr support.
 /// @author Shota Moriguchi @tekitounix
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <concepts>
@@ -55,7 +56,7 @@ class BoundedWriter {
     }
 
     constexpr void puts(std::string_view sv) {
-        for (char c : sv) {
+        for (const char c : sv) {
             put(c);
         }
     }
@@ -110,7 +111,7 @@ constexpr void format_int(BoundedWriter& w, std::int64_t v) {
 /// @brief Reverse chars in-place within an array range [0, len).
 constexpr void reverse_chars(char* buf, int len) {
     for (int i = 0, j = len - 1; i < j; ++i, --j) {
-        char t = buf[i];
+        const char t = buf[i];
         buf[i] = buf[j];
         buf[j] = t;
     }
@@ -153,7 +154,7 @@ constexpr void format_frac_part(BoundedWriter& w, double frac, int frac_digits) 
 /// @brief Format the normal (non-special) part of a double.
 constexpr void format_double_normal(BoundedWriter& w, double v) {
     auto integer_part = static_cast<std::uint64_t>(v);
-    double frac = v - static_cast<double>(integer_part);
+    const double frac = v - static_cast<double>(integer_part);
 
     std::array<char, 24> ibuf{};
     int ilen = 0;
@@ -173,8 +174,8 @@ constexpr void format_double_normal(BoundedWriter& w, double v) {
     }
 
     constexpr int total_sig = 6;
-    int sig_used = (integer_part == 0) ? 0 : ilen;
-    int frac_digits = total_sig - sig_used;
+    const int sig_used = (integer_part == 0) ? 0 : ilen;
+    const int frac_digits = total_sig - sig_used;
 
     if (frac_digits <= 0 || frac == 0.0) {
         w.put('.');
@@ -240,7 +241,7 @@ constexpr void format_hex(BoundedWriter& w, std::uintptr_t v) {
         tmp >>= 4;
     }
     for (int i = n - 1; i >= 0; --i) {
-        int nibble = static_cast<int>((v >> (i * 4)) & 0xF);
+        const int nibble = static_cast<int>((v >> (i * 4)) & 0xF);
         w.put("0123456789abcdef"[nibble]);
     }
 }
@@ -281,7 +282,7 @@ constexpr void escape_char(BoundedWriter& w, char v) {
 /// @brief Write a quoted and escaped string from string_view.
 constexpr void format_string(BoundedWriter& w, std::string_view sv) {
     w.put('"');
-    for (char c : sv) {
+    for (const char c : sv) {
         escape_char(w, c);
     }
     w.put('"');

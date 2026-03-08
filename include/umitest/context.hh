@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <array>
 #include <concepts>
+#include <cstddef>
 #include <source_location>
 #include <span>
 #include <type_traits>
@@ -40,9 +41,9 @@ class TestContext {
 
       private:
         friend class TestContext;
-        NoteGuard(TestContext& ctx) : ctx(ctx), active(true) {}
+        NoteGuard(TestContext& ctx) : ctx(ctx) {}
         TestContext& ctx;
-        bool active;
+        bool active = true;
     };
 
     TestContext(const TestContext&) = delete;
@@ -67,16 +68,18 @@ class TestContext {
 
     bool is_true(bool cond, std::source_location loc = std::source_location::current()) {
         ++checked;
-        if (check_true(cond))
+        if (check_true(cond)) {
             return true;
+        }
         report_bool_fail("true", loc);
         return false;
     }
 
     bool is_false(bool cond, std::source_location loc = std::source_location::current()) {
         ++checked;
-        if (check_false(cond))
+        if (check_false(cond)) {
             return true;
+        }
         report_bool_fail("false", loc);
         return false;
     }
@@ -86,16 +89,18 @@ class TestContext {
                  !detail::excluded_char_pointer_v<std::remove_cvref_t<A>, std::remove_cvref_t<B>>)
     bool eq(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
         ++checked;
-        if (check_eq(a, b))
+        if (check_eq(a, b)) {
             return true;
+        }
         report_compare_fail(a, "eq", b, loc);
         return false;
     }
 
     bool eq(const char* a, const char* b, std::source_location loc = std::source_location::current()) {
         ++checked;
-        if (check_eq(a, b))
+        if (check_eq(a, b)) {
             return true;
+        }
         report_compare_fail(a, "eq", b, loc);
         return false;
     }
@@ -105,16 +110,18 @@ class TestContext {
                  !detail::excluded_char_pointer_v<std::remove_cvref_t<A>, std::remove_cvref_t<B>>)
     bool ne(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
         ++checked;
-        if (check_ne(a, b))
+        if (check_ne(a, b)) {
             return true;
+        }
         report_compare_fail(a, "ne", b, loc);
         return false;
     }
 
     bool ne(const char* a, const char* b, std::source_location loc = std::source_location::current()) {
         ++checked;
-        if (check_ne(a, b))
+        if (check_ne(a, b)) {
             return true;
+        }
         report_compare_fail(a, "ne", b, loc);
         return false;
     }
@@ -124,8 +131,9 @@ class TestContext {
                  !std::is_pointer_v<std::decay_t<B>>)
     bool lt(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
         ++checked;
-        if (check_lt(a, b))
+        if (check_lt(a, b)) {
             return true;
+        }
         report_compare_fail(a, "lt", b, loc);
         return false;
     }
@@ -135,8 +143,9 @@ class TestContext {
                  !std::is_pointer_v<std::decay_t<B>>)
     bool le(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
         ++checked;
-        if (check_le(a, b))
+        if (check_le(a, b)) {
             return true;
+        }
         report_compare_fail(a, "le", b, loc);
         return false;
     }
@@ -146,8 +155,9 @@ class TestContext {
                  !std::is_pointer_v<std::decay_t<B>>)
     bool gt(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
         ++checked;
-        if (check_gt(a, b))
+        if (check_gt(a, b)) {
             return true;
+        }
         report_compare_fail(a, "gt", b, loc);
         return false;
     }
@@ -157,8 +167,9 @@ class TestContext {
                  !std::is_pointer_v<std::decay_t<B>>)
     bool ge(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
         ++checked;
-        if (check_ge(a, b))
+        if (check_ge(a, b)) {
             return true;
+        }
         report_compare_fail(a, "ge", b, loc);
         return false;
     }
@@ -169,8 +180,9 @@ class TestContext {
               std::common_type_t<A, B> eps = static_cast<std::common_type_t<A, B>>(0.001),
               std::source_location loc = std::source_location::current()) {
         ++checked;
-        if (check_near(a, b, eps))
+        if (check_near(a, b, eps)) {
             return true;
+        }
         report_near_fail(a, b, eps, loc);
         return false;
     }
@@ -179,16 +191,18 @@ class TestContext {
 
     bool require_true(bool cond, std::source_location loc = std::source_location::current()) {
         ++checked;
-        if (check_true(cond))
+        if (check_true(cond)) {
             return true;
+        }
         report_bool_fail("true", loc, true);
         return false;
     }
 
     bool require_false(bool cond, std::source_location loc = std::source_location::current()) {
         ++checked;
-        if (check_false(cond))
+        if (check_false(cond)) {
             return true;
+        }
         report_bool_fail("false", loc, true);
         return false;
     }
@@ -198,16 +212,18 @@ class TestContext {
                  !detail::excluded_char_pointer_v<std::remove_cvref_t<A>, std::remove_cvref_t<B>>)
     bool require_eq(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
         ++checked;
-        if (check_eq(a, b))
+        if (check_eq(a, b)) {
             return true;
+        }
         report_compare_fail(a, "eq", b, loc, true);
         return false;
     }
 
     bool require_eq(const char* a, const char* b, std::source_location loc = std::source_location::current()) {
         ++checked;
-        if (check_eq(a, b))
+        if (check_eq(a, b)) {
             return true;
+        }
         report_compare_fail(a, "eq", b, loc, true);
         return false;
     }
@@ -217,16 +233,18 @@ class TestContext {
                  !detail::excluded_char_pointer_v<std::remove_cvref_t<A>, std::remove_cvref_t<B>>)
     bool require_ne(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
         ++checked;
-        if (check_ne(a, b))
+        if (check_ne(a, b)) {
             return true;
+        }
         report_compare_fail(a, "ne", b, loc, true);
         return false;
     }
 
     bool require_ne(const char* a, const char* b, std::source_location loc = std::source_location::current()) {
         ++checked;
-        if (check_ne(a, b))
+        if (check_ne(a, b)) {
             return true;
+        }
         report_compare_fail(a, "ne", b, loc, true);
         return false;
     }
@@ -236,8 +254,9 @@ class TestContext {
                  !std::is_pointer_v<std::decay_t<B>>)
     bool require_lt(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
         ++checked;
-        if (check_lt(a, b))
+        if (check_lt(a, b)) {
             return true;
+        }
         report_compare_fail(a, "lt", b, loc, true);
         return false;
     }
@@ -247,8 +266,9 @@ class TestContext {
                  !std::is_pointer_v<std::decay_t<B>>)
     bool require_le(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
         ++checked;
-        if (check_le(a, b))
+        if (check_le(a, b)) {
             return true;
+        }
         report_compare_fail(a, "le", b, loc, true);
         return false;
     }
@@ -258,8 +278,9 @@ class TestContext {
                  !std::is_pointer_v<std::decay_t<B>>)
     bool require_gt(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
         ++checked;
-        if (check_gt(a, b))
+        if (check_gt(a, b)) {
             return true;
+        }
         report_compare_fail(a, "gt", b, loc, true);
         return false;
     }
@@ -269,8 +290,9 @@ class TestContext {
                  !std::is_pointer_v<std::decay_t<B>>)
     bool require_ge(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
         ++checked;
-        if (check_ge(a, b))
+        if (check_ge(a, b)) {
             return true;
+        }
         report_compare_fail(a, "ge", b, loc, true);
         return false;
     }
@@ -281,8 +303,9 @@ class TestContext {
                       std::common_type_t<A, B> eps = static_cast<std::common_type_t<A, B>>(0.001),
                       std::source_location loc = std::source_location::current()) {
         ++checked;
-        if (check_near(a, b, eps))
+        if (check_near(a, b, eps)) {
             return true;
+        }
         report_near_fail(a, b, eps, loc, true);
         return false;
     }
@@ -310,13 +333,20 @@ class TestContext {
 
     void pop_note() { --note_depth; }
 
-    std::span<const char* const> active_notes() const {
-        auto n = std::min(note_depth, max_notes);
+    [[nodiscard]] std::span<const char* const> active_notes() const {
+        const auto n = std::min(note_depth, max_notes);
         return {note_stack.data(), static_cast<std::size_t>(n)};
     }
 
     void report_bool_fail(const char* kind, std::source_location loc, bool fatal = false) {
-        FailureView fv{test_name, loc, fatal, kind, nullptr, nullptr, nullptr, active_notes()};
+        const FailureView fv{.test_name = test_name,
+                             .loc = loc,
+                             .is_fatal = fatal,
+                             .kind = kind,
+                             .lhs = nullptr,
+                             .rhs = nullptr,
+                             .extra = nullptr,
+                             .notes = active_notes()};
         fail_cb(fv, fail_ctx);
         failed = true;
         ++fail_count;
@@ -328,7 +358,14 @@ class TestContext {
         std::array<char, detail::fail_message_capacity> rhs_buf{};
         detail::format_value(lhs_buf.data(), lhs_buf.size(), a);
         detail::format_value(rhs_buf.data(), rhs_buf.size(), b);
-        FailureView fv{test_name, loc, fatal, kind, lhs_buf.data(), rhs_buf.data(), nullptr, active_notes()};
+        const FailureView fv{.test_name = test_name,
+                             .loc = loc,
+                             .is_fatal = fatal,
+                             .kind = kind,
+                             .lhs = lhs_buf.data(),
+                             .rhs = rhs_buf.data(),
+                             .extra = nullptr,
+                             .notes = active_notes()};
         fail_cb(fv, fail_ctx);
         failed = true;
         ++fail_count;
@@ -343,7 +380,14 @@ class TestContext {
         detail::format_value(lhs_buf.data(), lhs_buf.size(), a);
         detail::format_value(rhs_buf.data(), rhs_buf.size(), b);
         detail::format_near_extra(extra_buf.data(), extra_buf.size(), a, b, eps);
-        FailureView fv{test_name, loc, fatal, "near", lhs_buf.data(), rhs_buf.data(), extra_buf.data(), active_notes()};
+        const FailureView fv{.test_name = test_name,
+                             .loc = loc,
+                             .is_fatal = fatal,
+                             .kind = "near",
+                             .lhs = lhs_buf.data(),
+                             .rhs = rhs_buf.data(),
+                             .extra = extra_buf.data(),
+                             .notes = active_notes()};
         fail_cb(fv, fail_ctx);
         failed = true;
         ++fail_count;
