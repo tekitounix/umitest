@@ -10,6 +10,7 @@
 #include <utility>
 
 #include <umitest/context.hh>
+#include <umitest/failure.hh>
 #include <umitest/reporter.hh>
 
 namespace umi::test {
@@ -53,7 +54,13 @@ class BasicSuite {
     /// @brief Print final summary and return exit code.
     /// @return 0 if all passed, 1 if any failed.
     [[nodiscard]] int summary() {
-        SummaryView sv{suite_name, passed, failed, total_checked, total_failed_checks};
+        const SummaryView sv{
+            .suite_name = suite_name,
+            .cases_passed = passed,
+            .cases_failed = failed,
+            .assertions_checked = total_checked,
+            .assertions_failed = total_failed_checks,
+        };
         reporter.summary(sv);
         return failed > 0 ? 1 : 0;
     }

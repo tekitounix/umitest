@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <string_view>
 
+#include <umitest/failure.hh>
 #include <umitest/reporter.hh>
 
 namespace umi::test {
@@ -49,7 +50,7 @@ class StdioReporter {
     }
 
     void summary(const SummaryView& sv) const {
-        int total = sv.cases_passed + sv.cases_failed;
+        const int total = sv.cases_passed + sv.cases_failed;
         std::printf("\n%s=================================%s\n", cyan, reset_code);
         if (sv.cases_failed == 0) {
             std::printf("%scases: %d/%d passed%s\n", green, sv.cases_passed, total, reset_code);
@@ -63,7 +64,7 @@ class StdioReporter {
 
   private:
     static constexpr const char* op_for_kind(const char* kind) {
-        std::string_view k(kind);
+        const std::string_view k(kind);
         if (k == "eq") {
             return "==";
         }

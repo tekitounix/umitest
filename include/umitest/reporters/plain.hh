@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <string_view>
 
+#include <umitest/failure.hh>
 #include <umitest/reporter.hh>
 
 namespace umi::test {
@@ -44,7 +45,7 @@ class PlainReporter {
     }
 
     void summary(const SummaryView& sv) const {
-        int total = sv.cases_passed + sv.cases_failed;
+        const int total = sv.cases_passed + sv.cases_failed;
         std::printf("\n=================================\n");
         std::printf("cases: %d/%d passed\n", sv.cases_passed, total);
         std::printf("assertions: %d checked, %d failed\n", sv.assertions_checked, sv.assertions_failed);
@@ -53,7 +54,7 @@ class PlainReporter {
 
   private:
     static constexpr const char* op_for_kind(const char* kind) {
-        std::string_view k(kind);
+        const std::string_view k(kind);
         if (k == "eq") {
             return "==";
         }
