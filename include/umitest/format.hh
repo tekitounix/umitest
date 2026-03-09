@@ -8,13 +8,14 @@
 
 #include <algorithm>
 #include <array>
+#include <charconv>
 #include <cmath>
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
-#include <cstdio>
 #include <string>
 #include <string_view>
+#include <system_error>
 #include <type_traits>
 
 namespace umi::test {
@@ -108,87 +109,8 @@ constexpr void format_int(BoundedWriter& w, std::int64_t v) {
     format_uint(w, abs_val);
 }
 
-/// @brief Reverse chars in-place within an array range [0, len).
-constexpr void reverse_chars(char* buf, int len) {
-    for (int i = 0, j = len - 1; i < j; ++i, --j) {
-        const char t = buf[i];
-        buf[i] = buf[j];
-        buf[j] = t;
-    }
-}
-
-/// @brief Format the fractional part of a double.
-constexpr void format_frac_part(BoundedWriter& w, double frac, int frac_digits) {
-    double mult = 1.0;
-    for (int i = 0; i < frac_digits; ++i) {
-        mult *= 10.0;
-    }
-    auto frac_int = static_cast<std::uint64_t>(std::llround(frac * mult));
-
-    std::array<char, 8> fbuf{};
-    int flen = 0;
-    if (frac_int == 0) {
-        fbuf[0] = '0';
-        flen = 1;
-    } else {
-        std::uint64_t tmp = frac_int;
-        while (tmp > 0) {
-            fbuf[static_cast<std::size_t>(flen++)] = static_cast<char>('0' + (tmp % 10));
-            tmp /= 10;
-        }
-        reverse_chars(fbuf.data(), flen);
-    }
-
-    for (int i = 0; i < frac_digits - flen; ++i) {
-        w.put('0');
-    }
-    int last_nonzero = flen - 1;
-    while (last_nonzero > 0 && fbuf[static_cast<std::size_t>(last_nonzero)] == '0') {
-        --last_nonzero;
-    }
-    for (int i = 0; i <= last_nonzero; ++i) {
-        w.put(fbuf[static_cast<std::size_t>(i)]);
-    }
-}
-
-/// @brief Format the normal (non-special) part of a double.
-constexpr void format_double_normal(BoundedWriter& w, double v) {
-    auto integer_part = static_cast<std::uint64_t>(v);
-    const double frac = v - static_cast<double>(integer_part);
-
-    std::array<char, 24> ibuf{};
-    int ilen = 0;
-    if (integer_part == 0) {
-        ibuf[0] = '0';
-        ilen = 1;
-    } else {
-        std::uint64_t tmp = integer_part;
-        while (tmp > 0) {
-            ibuf[static_cast<std::size_t>(ilen++)] = static_cast<char>('0' + (tmp % 10));
-            tmp /= 10;
-        }
-        reverse_chars(ibuf.data(), ilen);
-    }
-    for (int i = 0; i < ilen; ++i) {
-        w.put(ibuf[static_cast<std::size_t>(i)]);
-    }
-
-    constexpr int total_sig = 6;
-    const int sig_used = (integer_part == 0) ? 0 : ilen;
-    const int frac_digits = total_sig - sig_used;
-
-    if (frac_digits <= 0 || frac == 0.0) {
-        w.put('.');
-        w.put('0');
-        return;
-    }
-
-    w.put('.');
-    format_frac_part(w, frac, frac_digits);
-}
-
-/// @brief Format double with up to 6 significant digits.
-constexpr void format_double(BoundedWriter& w, double v) {
+/// @brief Format double using shortest round-trip decimal form.
+inline void format_double(BoundedWriter& w, double v) {
     if (std::isnan(v)) {
         w.puts("nan");
         return;
@@ -205,25 +127,23 @@ constexpr void format_double(BoundedWriter& w, double v) {
         return;
     }
 
-    if (v < 0.0) {
-        w.put('-');
-        v = -v;
-    }
-
-    if (v >= 1e19) {
-        int exp = 0;
-        double scaled = v;
-        while (scaled >= 10.0) {
-            scaled /= 10.0;
-            ++exp;
-        }
-        format_double_normal(w, scaled);
-        w.put('e');
-        format_uint(w, static_cast<std::uint64_t>(exp));
+    std::array<char, 64> buf{};
+    auto* begin = buf.data();
+    auto* end = buf.data() + buf.size();
+    auto [ptr, ec] = std::to_chars(begin, end, v);
+    if (ec != std::errc{}) {
+        w.puts("(float)");
         return;
     }
 
-    format_double_normal(w, v);
+    const std::string_view sv(begin, static_cast<std::size_t>(ptr - begin));
+    w.puts(sv);
+
+    // Preserve the existing ".0" style for whole-number finite values.
+    if (sv.find_first_of(".eE") == std::string_view::npos) {
+        w.put('.');
+        w.put('0');
+    }
 }
 
 /// @brief Format pointer as hex.

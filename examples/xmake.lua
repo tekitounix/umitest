@@ -1,6 +1,6 @@
 target("test_umitest_examples")
-    add_rules("host.test")
-    set_default(true)
+    set_kind("binary")
+    set_default(false)
     add_deps("umitest")
 
     for _, f in ipairs(os.files(path.join(os.scriptdir(), "*.cc"))) do

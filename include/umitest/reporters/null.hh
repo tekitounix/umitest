@@ -6,6 +6,7 @@
 /// @brief NullReporter — discards all output. Zero dependency.
 /// @author Shota Moriguchi @tekitounix
 
+#include <umitest/failure.hh>
 #include <umitest/reporter.hh>
 
 namespace umi::test {

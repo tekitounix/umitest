@@ -23,6 +23,7 @@ class BasicSuite {
     /// @pre name is null-terminated and valid for the lifetime of this BasicSuite.
     explicit BasicSuite(const char* name, R reporter = R{}) : suite_name(name), reporter(std::move(reporter)) {}
 
+    /// @brief Begin a named section for visual grouping in output.
     void section(const char* title) { reporter.section(title); }
 
     /// @brief Run a structured test.

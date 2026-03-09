@@ -1,4 +1,0 @@
-@INCLUDE               = ../docs/Doxyfile.base
-PROJECT_NAME           = "umitest"
-PROJECT_NUMBER         = 0.1.0
-PROJECT_BRIEF          = "Zero-macro lightweight C++23 test framework"

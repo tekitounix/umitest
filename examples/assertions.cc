@@ -4,6 +4,8 @@
 /// @brief Demonstration of all assertion methods in umitest.
 /// @author Shota Moriguchi @tekitounix
 
+#include <stdexcept>
+
 #include <umitest/test.hh>
 
 int main() {
@@ -33,9 +35,21 @@ int main() {
     });
 
     suite.run("fatal checks — abort test on failure", [](auto& t) {
-        int* ptr = nullptr;
+        const int* ptr = nullptr;
         t.require_true(ptr == nullptr);
         t.require_eq(1 + 1, 2);
+    });
+
+    suite.run("exception assertions", [](auto& t) {
+        t.template throws<std::runtime_error>([] { throw std::runtime_error("oops"); });
+        t.throws([] { throw 42; });
+        t.nothrow([] {});
+    });
+
+    suite.run("string assertions", [](auto& t) {
+        t.str_contains("hello world", "world");
+        t.str_starts_with("hello world", "hello");
+        t.str_ends_with("hello world", "world");
     });
 
     suite.run("context notes for debugging", [](auto& t) {

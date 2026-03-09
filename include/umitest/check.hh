@@ -64,7 +64,7 @@ constexpr bool safe_eq(const A& a, const B& b) {
                 }
             }
         }
-        return a == b;
+        return std::decay_t<const A>(a) == std::decay_t<const B>(b);
     } else {
         return a == b;
     }
@@ -188,6 +188,25 @@ bool check_near(const A& a, const B& b, std::common_type_t<A, B> eps = static_ca
         return true;
     }
     return std::abs(ca - cb) <= eps;
+}
+
+// =============================================================================
+// String checks — constexpr string_view operations
+// =============================================================================
+
+/// @brief Check that haystack contains needle.
+constexpr bool check_str_contains(std::string_view haystack, std::string_view needle) {
+    return haystack.find(needle) != std::string_view::npos;
+}
+
+/// @brief Check that s starts with prefix.
+constexpr bool check_str_starts_with(std::string_view s, std::string_view prefix) {
+    return s.starts_with(prefix);
+}
+
+/// @brief Check that s ends with suffix.
+constexpr bool check_str_ends_with(std::string_view s, std::string_view suffix) {
+    return s.ends_with(suffix);
 }
 
 } // namespace umi::test

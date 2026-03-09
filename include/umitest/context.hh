@@ -12,6 +12,7 @@
 #include <cstddef>
 #include <source_location>
 #include <span>
+#include <string_view>
 #include <type_traits>
 
 #include <umitest/check.hh>
@@ -187,6 +188,95 @@ class TestContext {
         return false;
     }
 
+    // -- Exception checks (available only when exceptions are enabled) --
+
+#if defined(__cpp_exceptions) || defined(__EXCEPTIONS)
+
+    /// @brief Check that fn() throws an exception of type E.
+    template <typename E, typename F>
+        requires std::invocable<F>
+    bool throws(F&& fn, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        try {
+            fn();
+        } catch (const E&) {
+            return true;
+        } catch (...) {
+            report_exception_fail("throws_as", "wrong exception type", loc);
+            return false;
+        }
+        report_exception_fail("throws_as", "no exception thrown", loc);
+        return false;
+    }
+
+    /// @brief Check that fn() throws any exception.
+    template <typename F>
+        requires std::invocable<F>
+    bool throws(F&& fn, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        try {
+            fn();
+        } catch (...) {
+            return true;
+        }
+        report_exception_fail("throws", "no exception thrown", loc);
+        return false;
+    }
+
+    /// @brief Check that fn() does not throw.
+    template <typename F>
+        requires std::invocable<F>
+    bool nothrow(F&& fn, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        try {
+            fn();
+            return true;
+        } catch (...) {
+            report_exception_fail("nothrow", "unexpected exception thrown", loc);
+            return false;
+        }
+    }
+
+#endif // __cpp_exceptions || __EXCEPTIONS
+
+    // -- String checks --
+
+    /// @brief Check that haystack contains needle.
+    bool str_contains(std::string_view haystack,
+                      std::string_view needle,
+                      std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_str_contains(haystack, needle)) {
+            return true;
+        }
+        report_string_fail("str_contains", haystack, needle, loc);
+        return false;
+    }
+
+    /// @brief Check that s starts with prefix.
+    bool str_starts_with(std::string_view s,
+                         std::string_view prefix,
+                         std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_str_starts_with(s, prefix)) {
+            return true;
+        }
+        report_string_fail("str_starts_with", s, prefix, loc);
+        return false;
+    }
+
+    /// @brief Check that s ends with suffix.
+    bool str_ends_with(std::string_view s,
+                       std::string_view suffix,
+                       std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_str_ends_with(s, suffix)) {
+            return true;
+        }
+        report_string_fail("str_ends_with", s, suffix, loc);
+        return false;
+    }
+
     // -- Fatal checks --
 
     bool require_true(bool cond, std::source_location loc = std::source_location::current()) {
@@ -310,6 +400,91 @@ class TestContext {
         return false;
     }
 
+#if defined(__cpp_exceptions) || defined(__EXCEPTIONS)
+
+    /// @brief Fatal: check that fn() throws an exception of type E.
+    template <typename E, typename F>
+        requires std::invocable<F>
+    bool require_throws(F&& fn, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        try {
+            fn();
+        } catch (const E&) {
+            return true;
+        } catch (...) {
+            report_exception_fail("throws_as", "wrong exception type", loc, true);
+            return false;
+        }
+        report_exception_fail("throws_as", "no exception thrown", loc, true);
+        return false;
+    }
+
+    /// @brief Fatal: check that fn() throws any exception.
+    template <typename F>
+        requires std::invocable<F>
+    bool require_throws(F&& fn, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        try {
+            fn();
+        } catch (...) {
+            return true;
+        }
+        report_exception_fail("throws", "no exception thrown", loc, true);
+        return false;
+    }
+
+    /// @brief Fatal: check that fn() does not throw.
+    template <typename F>
+        requires std::invocable<F>
+    bool require_nothrow(F&& fn, std::source_location loc = std::source_location::current()) {
+        ++checked;
+        try {
+            fn();
+            return true;
+        } catch (...) {
+            report_exception_fail("nothrow", "unexpected exception thrown", loc, true);
+            return false;
+        }
+    }
+
+#endif // __cpp_exceptions || __EXCEPTIONS
+
+    /// @brief Fatal: check that haystack contains needle.
+    bool require_str_contains(std::string_view haystack,
+                              std::string_view needle,
+                              std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_str_contains(haystack, needle)) {
+            return true;
+        }
+        report_string_fail("str_contains", haystack, needle, loc, true);
+        return false;
+    }
+
+    /// @brief Fatal: check that s starts with prefix.
+    bool require_str_starts_with(std::string_view s,
+                                 std::string_view prefix,
+                                 std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_str_starts_with(s, prefix)) {
+            return true;
+        }
+        report_string_fail("str_starts_with", s, prefix, loc, true);
+        return false;
+    }
+
+    /// @brief Fatal: check that s ends with suffix.
+    bool require_str_ends_with(std::string_view s,
+                               std::string_view suffix,
+                               std::source_location loc = std::source_location::current()) {
+        ++checked;
+        if (check_str_ends_with(s, suffix)) {
+            return true;
+        }
+        report_string_fail("str_ends_with", s, suffix, loc, true);
+        return false;
+    }
+
     // -- Construction and stats (BasicSuite::run() use only, not user API) --
 
     /// @pre name != nullptr
@@ -387,6 +562,42 @@ class TestContext {
                              .lhs = lhs_buf.data(),
                              .rhs = rhs_buf.data(),
                              .extra = extra_buf.data(),
+                             .notes = active_notes()};
+        fail_cb(fv, fail_ctx);
+        failed = true;
+        ++fail_count;
+    }
+
+    void report_exception_fail(const char* kind, const char* detail, std::source_location loc, bool fatal = false) {
+        const FailureView fv{.test_name = test_name,
+                             .loc = loc,
+                             .is_fatal = fatal,
+                             .kind = kind,
+                             .lhs = detail,
+                             .rhs = nullptr,
+                             .extra = nullptr,
+                             .notes = active_notes()};
+        fail_cb(fv, fail_ctx);
+        failed = true;
+        ++fail_count;
+    }
+
+    void report_string_fail(const char* kind,
+                            std::string_view haystack,
+                            std::string_view needle,
+                            std::source_location loc,
+                            bool fatal = false) {
+        std::array<char, detail::fail_message_capacity> lhs_buf{};
+        std::array<char, detail::fail_message_capacity> rhs_buf{};
+        detail::format_value(lhs_buf.data(), lhs_buf.size(), haystack);
+        detail::format_value(rhs_buf.data(), rhs_buf.size(), needle);
+        const FailureView fv{.test_name = test_name,
+                             .loc = loc,
+                             .is_fatal = fatal,
+                             .kind = kind,
+                             .lhs = lhs_buf.data(),
+                             .rhs = rhs_buf.data(),
+                             .extra = nullptr,
                              .notes = active_notes()};
         fail_cb(fv, fail_ctx);
         failed = true;

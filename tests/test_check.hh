@@ -1,3 +1,5 @@
+#pragma once
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026, tekitounix
 /// @file
@@ -8,8 +10,7 @@
 #include <string>
 
 #include <umitest/check.hh>
-
-#include "test_fixture.hh"
+#include <umitest/test.hh>
 
 // Compile-time verification
 static_assert(umi::test::check_true(true));
@@ -54,75 +55,75 @@ static_assert(umi::test::check_ne(static_cast<const char*>(nullptr), "hello"));
 
 namespace umitest::test {
 
-void run_check_tests(umi::test::Suite& s) {
-    s.section("check functions");
+inline void run_check_tests(umi::test::Suite& suite) {
+    suite.section("check functions");
 
-    s.run("check_eq runtime", [](auto& ctx) {
-        ctx.is_true(umi::test::check_eq(1, 1));
-        ctx.is_true(!umi::test::check_eq(1, 2));
+    suite.run("check_eq runtime", [](auto& t) {
+        t.is_true(umi::test::check_eq(1, 1));
+        t.is_true(!umi::test::check_eq(1, 2));
 
         // C string content comparison at runtime (distinct addresses, same content)
         const char* a = "hello";
         const char* b = "hello";
         // Force distinct addresses by copying to mutable storage
-        std::string sa = "hello";
-        std::string sb = "hello";
-        ctx.is_true(umi::test::check_eq(sa.c_str(), sb.c_str()));
-        ctx.is_true(umi::test::check_eq(a, "hello"));
-        ctx.is_true(umi::test::check_eq("hello", b));
+        const std::string sa = "hello";
+        const std::string sb = "hello";
+        t.is_true(umi::test::check_eq(sa.c_str(), sb.c_str()));
+        t.is_true(umi::test::check_eq(a, "hello"));
+        t.is_true(umi::test::check_eq("hello", b));
     });
 
-    s.run("check_eq string vs const char*", [](auto& ctx) {
-        std::string str = "hello";
+    suite.run("check_eq string vs const char*", [](auto& t) {
+        const std::string str = "hello";
         const char* ptr = "hello";
-        ctx.is_true(umi::test::check_eq(str, ptr));
-        ctx.is_true(umi::test::check_eq(ptr, str));
+        t.is_true(umi::test::check_eq(str, ptr));
+        t.is_true(umi::test::check_eq(ptr, str));
 
         const char* null = nullptr;
-        ctx.is_false(umi::test::check_eq(str, null));
-        ctx.is_false(umi::test::check_eq(null, str));
+        t.is_false(umi::test::check_eq(str, null));
+        t.is_false(umi::test::check_eq(null, str));
     });
 
-    s.run("check_eq nullptr_t vs const char*", [](auto& ctx) {
+    suite.run("check_eq nullptr_t vs const char*", [](auto& t) {
         const char* null_ptr = nullptr;
-        ctx.is_true(umi::test::check_eq(nullptr, null_ptr));
-        ctx.is_false(umi::test::check_eq(nullptr, "hello"));
+        t.is_true(umi::test::check_eq(nullptr, null_ptr));
+        t.is_false(umi::test::check_eq(nullptr, "hello"));
     });
 
-    s.run("check_ne C strings", [](auto& ctx) {
-        ctx.is_true(umi::test::check_ne("hello", "world"));
-        ctx.is_false(umi::test::check_ne("hello", "hello"));
+    suite.run("check_ne C strings", [](auto& t) {
+        t.is_true(umi::test::check_ne("hello", "world"));
+        t.is_false(umi::test::check_ne("hello", "hello"));
     });
 
-    s.run("check_lt/le/gt/ge integers", [](auto& ctx) {
-        ctx.is_true(umi::test::check_lt(1, 2));
-        ctx.is_false(umi::test::check_lt(2, 1));
-        ctx.is_true(umi::test::check_le(1, 1));
-        ctx.is_true(umi::test::check_gt(2, 1));
-        ctx.is_true(umi::test::check_ge(1, 1));
+    suite.run("check_lt/le/gt/ge integers", [](auto& t) {
+        t.is_true(umi::test::check_lt(1, 2));
+        t.is_false(umi::test::check_lt(2, 1));
+        t.is_true(umi::test::check_le(1, 1));
+        t.is_true(umi::test::check_gt(2, 1));
+        t.is_true(umi::test::check_ge(1, 1));
     });
 
-    s.run("check_near basic", [](auto& ctx) {
-        ctx.is_true(umi::test::check_near(1.0, 1.0005));
-        ctx.is_false(umi::test::check_near(1.0, 2.0));
+    suite.run("check_near basic", [](auto& t) {
+        t.is_true(umi::test::check_near(1.0, 1.0005));
+        t.is_false(umi::test::check_near(1.0, 2.0));
     });
 
-    s.run("check_near inf", [](auto& ctx) {
+    suite.run("check_near inf", [](auto& t) {
         auto inf = std::numeric_limits<double>::infinity();
-        ctx.is_true(umi::test::check_near(inf, inf));
-        ctx.is_false(umi::test::check_near(inf, -inf));
+        t.is_true(umi::test::check_near(inf, inf));
+        t.is_false(umi::test::check_near(inf, -inf));
     });
 
-    s.run("check_near nan", [](auto& ctx) {
+    suite.run("check_near nan", [](auto& t) {
         auto nan = std::numeric_limits<double>::quiet_NaN();
-        ctx.is_false(umi::test::check_near(nan, nan));
-        ctx.is_false(umi::test::check_near(nan, 1.0));
+        t.is_false(umi::test::check_near(nan, nan));
+        t.is_false(umi::test::check_near(nan, 1.0));
     });
 
-    s.run("check_near negative eps", [](auto& ctx) { ctx.is_false(umi::test::check_near(1.0, 1.0, -0.1)); });
+    suite.run("check_near negative eps", [](auto& t) { t.is_false(umi::test::check_near(1.0, 1.0, -0.1)); });
 
-    s.run("check_near exact equality independent of eps",
-          [](auto& ctx) { ctx.is_true(umi::test::check_near(1.0, 1.0, 0.0)); });
+    suite.run("check_near exact equality independent of eps",
+              [](auto& t) { t.is_true(umi::test::check_near(1.0, 1.0, 0.0)); });
 }
 
 } // namespace umitest::test

@@ -7,7 +7,6 @@
 /// @author Shota Moriguchi @tekitounix
 
 #include <cstdio>
-#include <string_view>
 
 #include <umitest/failure.hh>
 #include <umitest/reporter.hh>
@@ -34,6 +33,8 @@ class StdioReporter {
         const char* op = op_for_kind(fv.kind);
         if (fv.lhs != nullptr && fv.rhs != nullptr) {
             std::printf("  %sFAIL [%s]: expected %s %s %s%s\n", red, fv.test_name, fv.lhs, op, fv.rhs, reset_code);
+        } else if (fv.lhs != nullptr) {
+            std::printf("  %sFAIL [%s]: %s: %s%s\n", red, fv.test_name, op, fv.lhs, reset_code);
         } else {
             std::printf("  %sFAIL [%s]: expected %s%s\n", red, fv.test_name, fv.kind, reset_code);
         }
@@ -60,33 +61,6 @@ class StdioReporter {
         }
         std::printf("assertions: %d checked, %d failed\n", sv.assertions_checked, sv.assertions_failed);
         std::printf("%s=================================%s\n", cyan, reset_code);
-    }
-
-  private:
-    static constexpr const char* op_for_kind(const char* kind) {
-        const std::string_view k(kind);
-        if (k == "eq") {
-            return "==";
-        }
-        if (k == "ne") {
-            return "!=";
-        }
-        if (k == "lt") {
-            return "<";
-        }
-        if (k == "le") {
-            return "<=";
-        }
-        if (k == "gt") {
-            return ">";
-        }
-        if (k == "ge") {
-            return ">=";
-        }
-        if (k == "near") {
-            return "~=";
-        }
-        return "?";
     }
 };
 

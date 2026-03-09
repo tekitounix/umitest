@@ -1,3 +1,5 @@
+#pragma once
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026, tekitounix
 /// @file
@@ -5,15 +7,18 @@
 /// @author Shota Moriguchi @tekitounix
 
 #include <array>
+#include <cstddef>
 #include <string>
+#include <utility>
 
+#include <umitest/failure.hh>
+#include <umitest/reporter.hh>
 #include <umitest/reporters/null.hh>
 #include <umitest/suite.hh>
-
-#include "test_fixture.hh"
+#include <umitest/test.hh>
 
 namespace umitest::test {
-namespace {
+namespace detail_test {
 
 /// @brief Recording reporter for meta-testing (§16).
 class RecordingReporter {
@@ -57,12 +62,14 @@ class RecordingReporter {
 
 static_assert(umi::test::ReporterLike<RecordingReporter>);
 
-} // namespace
+} // namespace detail_test
 
-void run_context_tests(umi::test::Suite& s) {
-    s.section("TestContext");
+inline void run_context_tests(umi::test::Suite& suite) {
+    using detail_test::RecordingReporter;
 
-    s.run("soft check pass increments checked", [](auto& t) {
+    suite.section("TestContext");
+
+    suite.run("soft check pass increments checked", [](auto& t) {
         umi::test::BasicSuite<umi::test::NullReporter> inner("inner");
         inner.run("x", [](auto& ctx) {
             ctx.eq(1, 1);
@@ -73,7 +80,7 @@ void run_context_tests(umi::test::Suite& s) {
         t.eq(inner.summary(), 0);
     });
 
-    s.run("soft check fail records failure", [](auto& t) {
+    suite.run("soft check fail records failure", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
         inner.run("deliberately fail", [](auto& ctx) { ctx.eq(1, 2); });
@@ -83,7 +90,7 @@ void run_context_tests(umi::test::Suite& s) {
         t.eq(r.records[0].kind, std::string("eq"));
     });
 
-    s.run("soft check fail continues", [](auto& t) {
+    suite.run("soft check fail continues", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
         inner.run("multi fail", [](auto& ctx) {
@@ -95,7 +102,7 @@ void run_context_tests(umi::test::Suite& s) {
         t.eq(r.recorded, 2);
     });
 
-    s.run("fatal check sets is_fatal", [](auto& t) {
+    suite.run("fatal check sets is_fatal", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
         inner.run("fatal", [](auto& ctx) {
@@ -108,7 +115,7 @@ void run_context_tests(umi::test::Suite& s) {
         t.is_true(r.records[0].is_fatal);
     });
 
-    s.run("note appears in failure", [](auto& t) {
+    suite.run("note appears in failure", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
         inner.run("with note", [](auto& ctx) {
@@ -121,7 +128,7 @@ void run_context_tests(umi::test::Suite& s) {
         t.eq(r.records[0].first_note, std::string("parsing header"));
     });
 
-    s.run("note pops on scope exit", [](auto& t) {
+    suite.run("note pops on scope exit", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
         inner.run("note scope", [](auto& ctx) {
@@ -135,7 +142,7 @@ void run_context_tests(umi::test::Suite& s) {
         t.eq(r.records[0].note_count, 0);
     });
 
-    s.run("note nullptr becomes (null)", [](auto& t) {
+    suite.run("note nullptr becomes (null)", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
         inner.run("null note", [](auto& ctx) {
@@ -146,7 +153,7 @@ void run_context_tests(umi::test::Suite& s) {
         t.eq(r.records[0].first_note, std::string("(null)"));
     });
 
-    s.run("check_near failure reports extra", [](auto& t) {
+    suite.run("check_near failure reports extra", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
         inner.run("near fail", [](auto& ctx) { ctx.near(1.0, 2.0); });
@@ -155,7 +162,7 @@ void run_context_tests(umi::test::Suite& s) {
         t.eq(r.records[0].kind, std::string("near"));
     });
 
-    s.run("is_true / is_false", [](auto& t) {
+    suite.run("is_true / is_false", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
         inner.run("bool checks", [](auto& ctx) {
@@ -168,7 +175,7 @@ void run_context_tests(umi::test::Suite& s) {
         t.eq(r.records[1].kind, std::string("false"));
     });
 
-    s.run("ordering checks", [](auto& t) {
+    suite.run("ordering checks", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
         inner.run("lt/le/gt/ge", [](auto& ctx) {
@@ -183,6 +190,111 @@ void run_context_tests(umi::test::Suite& s) {
         t.eq(r.records[1].kind, std::string("le"));
         t.eq(r.records[2].kind, std::string("gt"));
         t.eq(r.records[3].kind, std::string("ge"));
+    });
+
+    suite.run("require_true pass", [](auto& t) {
+        const bool result = t.require_true(true);
+        t.is_true(result);
+    });
+
+    suite.run("require_true fail", [](auto& t) {
+        RecordingReporter rec;
+        umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
+        inner.run("x", [](auto& ctx) { ctx.require_true(false); });
+        const auto& r = inner.get_reporter();
+        t.eq(r.recorded, 1);
+        t.is_true(r.records[0].is_fatal);
+        t.eq(r.records[0].kind, std::string("true"));
+    });
+
+    suite.run("require_false pass", [](auto& t) {
+        const bool result = t.require_false(false);
+        t.is_true(result);
+    });
+
+    suite.run("require_false fail", [](auto& t) {
+        RecordingReporter rec;
+        umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
+        inner.run("x", [](auto& ctx) { ctx.require_false(true); });
+        const auto& r = inner.get_reporter();
+        t.eq(r.recorded, 1);
+        t.is_true(r.records[0].is_fatal);
+        t.eq(r.records[0].kind, std::string("false"));
+    });
+
+    suite.run("require_ne pass", [](auto& t) {
+        const bool result = t.require_ne(1, 2);
+        t.is_true(result);
+    });
+
+    suite.run("require_ne fail", [](auto& t) {
+        RecordingReporter rec;
+        umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
+        inner.run("x", [](auto& ctx) { ctx.require_ne(1, 1); });
+        const auto& r = inner.get_reporter();
+        t.eq(r.recorded, 1);
+        t.is_true(r.records[0].is_fatal);
+        t.eq(r.records[0].kind, std::string("ne"));
+    });
+
+    suite.run("require_le pass", [](auto& t) {
+        const bool result = t.require_le(1, 2);
+        t.is_true(result);
+    });
+
+    suite.run("require_le fail", [](auto& t) {
+        RecordingReporter rec;
+        umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
+        inner.run("x", [](auto& ctx) { ctx.require_le(2, 1); });
+        const auto& r = inner.get_reporter();
+        t.eq(r.recorded, 1);
+        t.is_true(r.records[0].is_fatal);
+        t.eq(r.records[0].kind, std::string("le"));
+    });
+
+    suite.run("require_gt pass", [](auto& t) {
+        const bool result = t.require_gt(2, 1);
+        t.is_true(result);
+    });
+
+    suite.run("require_gt fail", [](auto& t) {
+        RecordingReporter rec;
+        umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
+        inner.run("x", [](auto& ctx) { ctx.require_gt(1, 2); });
+        const auto& r = inner.get_reporter();
+        t.eq(r.recorded, 1);
+        t.is_true(r.records[0].is_fatal);
+        t.eq(r.records[0].kind, std::string("gt"));
+    });
+
+    suite.run("require_ge pass", [](auto& t) {
+        const bool result = t.require_ge(1, 1);
+        t.is_true(result);
+    });
+
+    suite.run("require_ge fail", [](auto& t) {
+        RecordingReporter rec;
+        umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
+        inner.run("x", [](auto& ctx) { ctx.require_ge(1, 2); });
+        const auto& r = inner.get_reporter();
+        t.eq(r.recorded, 1);
+        t.is_true(r.records[0].is_fatal);
+        t.eq(r.records[0].kind, std::string("ge"));
+    });
+
+    suite.run("require_near pass", [](auto& t) {
+        const bool result = t.require_near(1.0, 1.0005);
+        t.is_true(result);
+    });
+
+    suite.run("require_near fail", [](auto& t) {
+        RecordingReporter rec;
+        umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
+        inner.run("x", [](auto& ctx) { ctx.require_near(1.0, 2.0); });
+        const auto& r = inner.get_reporter();
+        t.eq(r.recorded, 1);
+        t.is_true(r.records[0].is_fatal);
+        t.eq(r.records[0].kind, std::string("near"));
     });
 }
 

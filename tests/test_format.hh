@@ -1,3 +1,5 @@
+#pragma once
+
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026, tekitounix
 /// @file
@@ -12,11 +14,10 @@
 #include <string_view>
 
 #include <umitest/format.hh>
-
-#include "test_fixture.hh"
+#include <umitest/test.hh>
 
 namespace umitest::test {
-namespace {
+namespace detail_test {
 
 using umi::test::BoundedWriter;
 
@@ -51,33 +52,33 @@ static_assert([] {
 
 /// Helper: format a value into a thread-local buffer and return string_view.
 template <typename T>
-std::string_view fmt(const T& v) {
-    // Use thread_local to allow multiple concurrent calls in the same test
-    // Each template instantiation gets its own buffer, so fmt(int) and fmt(double)
-    // don't overwrite each other. But two calls to fmt<int> in one expression would.
+inline std::string_view fmt(const T& v) {
     thread_local std::array<char, 128> buf{};
     std::memset(buf.data(), 0, buf.size());
     umi::test::detail::format_value(buf.data(), buf.size(), v);
     return {buf.data()};
 }
 
-} // namespace
+} // namespace detail_test
 
-void run_format_tests(umi::test::Suite& s) {
-    s.section("format_value");
+inline void run_format_tests(umi::test::Suite& suite) {
+    using detail_test::fmt;
+    using umi::test::BoundedWriter;
 
-    s.run("bool", [](auto& t) {
+    suite.section("format_value");
+
+    suite.run("bool", [](auto& t) {
         t.eq(fmt(true), std::string_view{"true"});
         t.eq(fmt(false), std::string_view{"false"});
     });
 
-    s.run("char printable", [](auto& t) {
+    suite.run("char printable", [](auto& t) {
         t.eq(fmt('A'), std::string_view{"'A' (65)"});
         t.eq(fmt('Z'), std::string_view{"'Z' (90)"});
         t.eq(fmt(' '), std::string_view{"' ' (32)"});
     });
 
-    s.run("char special", [](auto& t) {
+    suite.run("char special", [](auto& t) {
         t.eq(fmt('\0'), std::string_view{"'\\0' (0)"});
         t.eq(fmt('\n'), std::string_view{"'\\n' (10)"});
         t.eq(fmt('\t'), std::string_view{"'\\t' (9)"});
@@ -88,14 +89,14 @@ void run_format_tests(umi::test::Suite& s) {
         t.eq(fmt('\x7F'), std::string_view{"'\\x7f' (127)"});
     });
 
-    s.run("unsigned int", [](auto& t) {
+    suite.run("unsigned int", [](auto& t) {
         t.eq(fmt(0U), std::string_view{"0"});
         t.eq(fmt(42U), std::string_view{"42"});
         t.eq(fmt(255U), std::string_view{"255"});
         t.eq(fmt(UINT64_MAX), std::string_view{"18446744073709551615"});
     });
 
-    s.run("signed int", [](auto& t) {
+    suite.run("signed int", [](auto& t) {
         t.eq(fmt(0), std::string_view{"0"});
         t.eq(fmt(-1), std::string_view{"-1"});
         t.eq(fmt(42), std::string_view{"42"});
@@ -104,28 +105,36 @@ void run_format_tests(umi::test::Suite& s) {
         t.eq(fmt(INT64_MAX), std::string_view{"9223372036854775807"});
     });
 
-    s.run("float basic", [](auto& t) {
+    suite.run("float basic", [](auto& t) {
         t.eq(fmt(0.0), std::string_view{"0.0"});
         t.eq(fmt(1.0), std::string_view{"1.0"});
         t.eq(fmt(-1.0), std::string_view{"-1.0"});
         t.eq(fmt(3.14), std::string_view{"3.14"});
     });
 
-    s.run("float special", [](auto& t) {
+    suite.run("float special", [](auto& t) {
         t.eq(fmt(std::numeric_limits<double>::quiet_NaN()), std::string_view{"nan"});
         t.eq(fmt(std::numeric_limits<double>::infinity()), std::string_view{"inf"});
         t.eq(fmt(-std::numeric_limits<double>::infinity()), std::string_view{"-inf"});
         t.eq(fmt(-0.0), std::string_view{"-0.0"});
     });
 
-    s.run("enum", [](auto& t) {
+    suite.run("float diagnostic edge cases", [](auto& t) {
+        t.eq(fmt(999999.9), std::string_view{"999999.9"});
+        t.eq(fmt(1234567.89), std::string_view{"1234567.89"});
+        t.eq(fmt(99999.99), std::string_view{"99999.99"});
+        t.is_true(fmt(1e-7).find('e') != std::string_view::npos);
+        t.is_true(fmt(1e-10).find('e') != std::string_view::npos);
+    });
+
+    suite.run("enum", [](auto& t) {
         enum class Color : std::uint8_t { RED = 0, GREEN = 42, BLUE = 255 };
         t.eq(fmt(Color::RED), std::string_view{"0"});
         t.eq(fmt(Color::GREEN), std::string_view{"42"});
         t.eq(fmt(Color::BLUE), std::string_view{"255"});
     });
 
-    s.run("pointer", [](auto& t) {
+    suite.run("pointer", [](auto& t) {
         int const x = 0;
         std::array<char, 128> buf{};
         umi::test::detail::format_value(buf.data(), buf.size(), &x);
@@ -138,13 +147,13 @@ void run_format_tests(umi::test::Suite& s) {
         t.eq(sv, std::string_view{"0x0"});
     });
 
-    s.run("nullptr_t", [](auto& t) {
+    suite.run("nullptr_t", [](auto& t) {
         std::array<char, 128> buf{};
         umi::test::detail::format_value(buf.data(), buf.size(), nullptr);
         t.eq(std::string_view{buf.data()}, std::string_view{"nullptr"});
     });
 
-    s.run("const char*", [](auto& t) {
+    suite.run("const char*", [](auto& t) {
         std::array<char, 128> buf{};
         const char* str = "test";
         umi::test::detail::format_value(buf.data(), buf.size(), str);
@@ -155,20 +164,20 @@ void run_format_tests(umi::test::Suite& s) {
         t.eq(std::string_view{buf.data()}, std::string_view{"(null)"});
     });
 
-    s.run("std::string", [](auto& t) {
+    suite.run("std::string", [](auto& t) {
         std::array<char, 128> buf{};
-        std::string str = "hello";
+        const std::string str = "hello";
         umi::test::detail::format_value(buf.data(), buf.size(), str);
         t.eq(std::string_view{buf.data()}, std::string_view{"\"hello\""});
     });
 
-    s.run("std::string_view", [](auto& t) {
+    suite.run("std::string_view", [](auto& t) {
         std::array<char, 128> buf{};
         umi::test::detail::format_value(buf.data(), buf.size(), std::string_view{"hello"});
         t.eq(std::string_view{buf.data()}, std::string_view{"\"hello\""});
     });
 
-    s.run("unknown type", [](auto& t) {
+    suite.run("unknown type", [](auto& t) {
         struct Opaque {
             int x;
         };
@@ -178,9 +187,15 @@ void run_format_tests(umi::test::Suite& s) {
         t.eq(std::string_view{buf.data()}, std::string_view{"(?)"});
     });
 
-    s.section("BoundedWriter");
+    suite.run("near extra keeps tiny magnitudes", [](auto& t) {
+        std::array<char, 128> buf{};
+        umi::test::detail::format_near_extra(buf.data(), buf.size(), 1e-10, 0.0, 1e-12);
+        t.eq(std::string_view{buf.data()}, std::string_view{"eps=1e-12, diff=1e-10"});
+    });
 
-    s.run("size==0 safety", [](auto& t) {
+    suite.section("BoundedWriter");
+
+    suite.run("size==0 safety", [](auto& t) {
         BoundedWriter w(nullptr, 0);
         w.put('x');
         w.puts("hello");
@@ -188,7 +203,7 @@ void run_format_tests(umi::test::Suite& s) {
         t.is_false(w.truncated());
     });
 
-    s.run("size==1 safety", [](auto& t) {
+    suite.run("size==1 safety", [](auto& t) {
         std::array<char, 1> buf{};
         BoundedWriter w(buf.data(), buf.size());
         w.put('x');
@@ -197,7 +212,7 @@ void run_format_tests(umi::test::Suite& s) {
         t.is_true(w.truncated());
     });
 
-    s.run("truncation", [](auto& t) {
+    suite.run("truncation", [](auto& t) {
         std::array<char, 4> buf{};
         BoundedWriter w(buf.data(), buf.size());
         w.puts("hello");

@@ -7,7 +7,6 @@
 /// @author Shota Moriguchi @tekitounix
 
 #include <cstdio>
-#include <string_view>
 
 #include <umitest/failure.hh>
 #include <umitest/reporter.hh>
@@ -29,6 +28,8 @@ class PlainReporter {
         const char* op = op_for_kind(fv.kind);
         if (fv.lhs != nullptr && fv.rhs != nullptr) {
             std::printf("  FAIL [%s]: expected %s %s %s\n", fv.test_name, fv.lhs, op, fv.rhs);
+        } else if (fv.lhs != nullptr) {
+            std::printf("  FAIL [%s]: %s: %s\n", fv.test_name, op, fv.lhs);
         } else {
             std::printf("  FAIL [%s]: expected %s\n", fv.test_name, fv.kind);
         }
@@ -50,33 +51,6 @@ class PlainReporter {
         std::printf("cases: %d/%d passed\n", sv.cases_passed, total);
         std::printf("assertions: %d checked, %d failed\n", sv.assertions_checked, sv.assertions_failed);
         std::printf("=================================\n");
-    }
-
-  private:
-    static constexpr const char* op_for_kind(const char* kind) {
-        const std::string_view k(kind);
-        if (k == "eq") {
-            return "==";
-        }
-        if (k == "ne") {
-            return "!=";
-        }
-        if (k == "lt") {
-            return "<";
-        }
-        if (k == "le") {
-            return "<=";
-        }
-        if (k == "gt") {
-            return ">";
-        }
-        if (k == "ge") {
-            return ">=";
-        }
-        if (k == "near") {
-            return "~=";
-        }
-        return "?";
     }
 };
 

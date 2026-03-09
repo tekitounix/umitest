@@ -4,7 +4,13 @@
 /// @brief Test runner entry point for umitest self-tests.
 /// @author Shota Moriguchi @tekitounix
 
-#include "test_fixture.hh"
+#include "test_check.hh"
+#include "test_context.hh"
+#include "test_exception.hh"
+#include "test_format.hh"
+#include "test_reporter.hh"
+#include "test_string.hh"
+#include "test_suite.hh"
 
 int main() {
     umi::test::Suite suite("umitest");
@@ -14,6 +20,8 @@ int main() {
     umitest::test::run_context_tests(suite);
     umitest::test::run_suite_tests(suite);
     umitest::test::run_reporter_tests(suite);
+    umitest::test::run_exception_tests(suite);
+    umitest::test::run_string_tests(suite);
 
     return suite.summary();
 }

@@ -1,9 +1,9 @@
 target("test_umitest")
-    add_rules("host.test")
-    add_tests("default")
-    set_default(true)
+    set_kind("binary")
+    set_default(false)
     add_files("test_*.cc")
     add_deps("umitest")
+    add_tests("default")
 
     for _, f in ipairs(os.files(path.join(os.scriptdir(), "smoke", "*.cc"))) do
         local name = "smoke_" .. path.basename(f)
