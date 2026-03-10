@@ -1,0 +1,4 @@
+# Suppress all diagnostics for compile-fail test files.
+# These files are EXPECTED to produce errors (verified by xmake test).
+Diagnostics:
+  Suppress: "*"
