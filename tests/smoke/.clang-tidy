@@ -1,3 +1,0 @@
-# Smoke tests intentionally include all public headers without using them.
-InheritParentConfig: true
-Checks: '-misc-include-cleaner'
