@@ -17,7 +17,6 @@
 #include <umitest/test.hh>
 
 namespace umitest::test {
-using umi::test::TestContext;
 namespace detail_test {
 
 using umi::test::BoundedWriter;
@@ -68,18 +67,18 @@ inline void run_format_tests(umi::test::Suite& suite) {
 
     suite.section("format_value");
 
-    suite.run("bool", [](TestContext& t) {
+    suite.run("bool", [](auto& t) {
         t.eq(fmt(true), std::string_view{"true"});
         t.eq(fmt(false), std::string_view{"false"});
     });
 
-    suite.run("char printable", [](TestContext& t) {
+    suite.run("char printable", [](auto& t) {
         t.eq(fmt('A'), std::string_view{"'A' (65)"});
         t.eq(fmt('Z'), std::string_view{"'Z' (90)"});
         t.eq(fmt(' '), std::string_view{"' ' (32)"});
     });
 
-    suite.run("char special", [](TestContext& t) {
+    suite.run("char special", [](auto& t) {
         t.eq(fmt('\0'), std::string_view{"'\\0' (0)"});
         t.eq(fmt('\n'), std::string_view{"'\\n' (10)"});
         t.eq(fmt('\t'), std::string_view{"'\\t' (9)"});
@@ -90,14 +89,14 @@ inline void run_format_tests(umi::test::Suite& suite) {
         t.eq(fmt('\x7F'), std::string_view{"'\\x7f' (127)"});
     });
 
-    suite.run("unsigned int", [](TestContext& t) {
+    suite.run("unsigned int", [](auto& t) {
         t.eq(fmt(0U), std::string_view{"0"});
         t.eq(fmt(42U), std::string_view{"42"});
         t.eq(fmt(255U), std::string_view{"255"});
         t.eq(fmt(UINT64_MAX), std::string_view{"18446744073709551615"});
     });
 
-    suite.run("signed int", [](TestContext& t) {
+    suite.run("signed int", [](auto& t) {
         t.eq(fmt(0), std::string_view{"0"});
         t.eq(fmt(-1), std::string_view{"-1"});
         t.eq(fmt(42), std::string_view{"42"});
@@ -106,21 +105,21 @@ inline void run_format_tests(umi::test::Suite& suite) {
         t.eq(fmt(INT64_MAX), std::string_view{"9223372036854775807"});
     });
 
-    suite.run("float basic", [](TestContext& t) {
+    suite.run("float basic", [](auto& t) {
         t.eq(fmt(0.0), std::string_view{"0.0"});
         t.eq(fmt(1.0), std::string_view{"1.0"});
         t.eq(fmt(-1.0), std::string_view{"-1.0"});
         t.eq(fmt(3.14), std::string_view{"3.14"});
     });
 
-    suite.run("float special", [](TestContext& t) {
+    suite.run("float special", [](auto& t) {
         t.eq(fmt(std::numeric_limits<double>::quiet_NaN()), std::string_view{"nan"});
         t.eq(fmt(std::numeric_limits<double>::infinity()), std::string_view{"inf"});
         t.eq(fmt(-std::numeric_limits<double>::infinity()), std::string_view{"-inf"});
         t.eq(fmt(-0.0), std::string_view{"-0.0"});
     });
 
-    suite.run("float diagnostic edge cases", [](TestContext& t) {
+    suite.run("float diagnostic edge cases", [](auto& t) {
         t.eq(fmt(999999.9), std::string_view{"999999.9"});
         t.eq(fmt(1234567.89), std::string_view{"1234567.89"});
         t.eq(fmt(99999.99), std::string_view{"99999.99"});
@@ -128,14 +127,14 @@ inline void run_format_tests(umi::test::Suite& suite) {
         t.is_true(fmt(1e-10).find('e') != std::string_view::npos);
     });
 
-    suite.run("enum", [](TestContext& t) {
+    suite.run("enum", [](auto& t) {
         enum class Color : std::uint8_t { RED = 0, GREEN = 42, BLUE = 255 };
         t.eq(fmt(Color::RED), std::string_view{"0"});
         t.eq(fmt(Color::GREEN), std::string_view{"42"});
         t.eq(fmt(Color::BLUE), std::string_view{"255"});
     });
 
-    suite.run("pointer", [](TestContext& t) {
+    suite.run("pointer", [](auto& t) {
         int const x = 0;
         std::array<char, 128> buf{};
         umi::test::detail::format_value(buf.data(), buf.size(), &x);
@@ -148,13 +147,13 @@ inline void run_format_tests(umi::test::Suite& suite) {
         t.eq(sv, std::string_view{"0x0"});
     });
 
-    suite.run("nullptr_t", [](TestContext& t) {
+    suite.run("nullptr_t", [](auto& t) {
         std::array<char, 128> buf{};
         umi::test::detail::format_value(buf.data(), buf.size(), nullptr);
         t.eq(std::string_view{buf.data()}, std::string_view{"nullptr"});
     });
 
-    suite.run("const char*", [](TestContext& t) {
+    suite.run("const char*", [](auto& t) {
         std::array<char, 128> buf{};
         const char* str = "test";
         umi::test::detail::format_value(buf.data(), buf.size(), str);
@@ -165,20 +164,20 @@ inline void run_format_tests(umi::test::Suite& suite) {
         t.eq(std::string_view{buf.data()}, std::string_view{"(null)"});
     });
 
-    suite.run("std::string", [](TestContext& t) {
+    suite.run("std::string", [](auto& t) {
         std::array<char, 128> buf{};
         const std::string str = "hello";
         umi::test::detail::format_value(buf.data(), buf.size(), str);
         t.eq(std::string_view{buf.data()}, std::string_view{"\"hello\""});
     });
 
-    suite.run("std::string_view", [](TestContext& t) {
+    suite.run("std::string_view", [](auto& t) {
         std::array<char, 128> buf{};
         umi::test::detail::format_value(buf.data(), buf.size(), std::string_view{"hello"});
         t.eq(std::string_view{buf.data()}, std::string_view{"\"hello\""});
     });
 
-    suite.run("unknown type", [](TestContext& t) {
+    suite.run("unknown type", [](auto& t) {
         struct Opaque {
             int x;
         };
@@ -188,7 +187,7 @@ inline void run_format_tests(umi::test::Suite& suite) {
         t.eq(std::string_view{buf.data()}, std::string_view{"(?)"});
     });
 
-    suite.run("near extra keeps tiny magnitudes", [](TestContext& t) {
+    suite.run("near extra keeps tiny magnitudes", [](auto& t) {
         std::array<char, 128> buf{};
         umi::test::detail::format_near_extra(buf.data(), buf.size(), 1e-10, 0.0, 1e-12);
         t.eq(std::string_view{buf.data()}, std::string_view{"eps=1e-12, diff=1e-10"});
@@ -196,7 +195,7 @@ inline void run_format_tests(umi::test::Suite& suite) {
 
     suite.section("BoundedWriter");
 
-    suite.run("size==0 safety", [](TestContext& t) {
+    suite.run("size==0 safety", [](auto& t) {
         BoundedWriter w(nullptr, 0);
         w.put('x');
         w.puts("hello");
@@ -204,7 +203,7 @@ inline void run_format_tests(umi::test::Suite& suite) {
         t.is_false(w.truncated());
     });
 
-    suite.run("size==1 safety", [](TestContext& t) {
+    suite.run("size==1 safety", [](auto& t) {
         std::array<char, 1> buf{};
         BoundedWriter w(buf.data(), buf.size());
         w.put('x');
@@ -213,7 +212,7 @@ inline void run_format_tests(umi::test::Suite& suite) {
         t.is_true(w.truncated());
     });
 
-    suite.run("truncation", [](TestContext& t) {
+    suite.run("truncation", [](auto& t) {
         std::array<char, 4> buf{};
         BoundedWriter w(buf.data(), buf.size());
         w.puts("hello");

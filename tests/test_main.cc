@@ -4,6 +4,8 @@
 /// @brief Test runner entry point for umitest self-tests.
 /// @author Shota Moriguchi @tekitounix
 
+#include <umitest/test.hh>
+
 #include "test_check.hh"
 #include "test_context.hh"
 #include "test_exception.hh"

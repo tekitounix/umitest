@@ -18,7 +18,6 @@
 #include <umitest/test.hh>
 
 namespace umitest::test {
-using umi::test::TestContext;
 namespace detail_test {
 
 /// @brief Recording reporter for meta-testing (§16).
@@ -70,9 +69,9 @@ inline void run_context_tests(umi::test::Suite& suite) {
 
     suite.section("TestContext");
 
-    suite.run("soft check pass increments checked", [](TestContext& t) {
+    suite.run("soft check pass increments checked", [](auto& t) {
         umi::test::BasicSuite<umi::test::NullReporter> inner("inner");
-        inner.run("x", [](TestContext& ctx) {
+        inner.run("x", [](auto& ctx) {
             ctx.eq(1, 1);
             ctx.eq(2, 2);
             ctx.is_true(true);
@@ -81,20 +80,20 @@ inline void run_context_tests(umi::test::Suite& suite) {
         t.eq(inner.summary(), 0);
     });
 
-    suite.run("soft check fail records failure", [](TestContext& t) {
+    suite.run("soft check fail records failure", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
-        inner.run("deliberately fail", [](TestContext& ctx) { ctx.eq(1, 2); });
+        inner.run("deliberately fail", [](auto& ctx) { ctx.eq(1, 2); });
         const auto& r = inner.get_reporter();
         t.eq(r.fail_count, 1);
         t.eq(r.recorded, 1);
         t.eq(r.records[0].kind, std::string("eq"));
     });
 
-    suite.run("soft check fail continues", [](TestContext& t) {
+    suite.run("soft check fail continues", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
-        inner.run("multi fail", [](TestContext& ctx) {
+        inner.run("multi fail", [](auto& ctx) {
             ctx.eq(1, 2);
             ctx.eq(3, 4);
         });
@@ -103,10 +102,10 @@ inline void run_context_tests(umi::test::Suite& suite) {
         t.eq(r.recorded, 2);
     });
 
-    suite.run("fatal check sets is_fatal", [](TestContext& t) {
+    suite.run("fatal check sets is_fatal", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
-        inner.run("fatal", [](TestContext& ctx) {
+        inner.run("fatal", [](auto& ctx) {
             if (!ctx.require_eq(1, 2)) {
                 return;
             }
@@ -116,10 +115,10 @@ inline void run_context_tests(umi::test::Suite& suite) {
         t.is_true(r.records[0].is_fatal);
     });
 
-    suite.run("note appears in failure", [](TestContext& t) {
+    suite.run("note appears in failure", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
-        inner.run("with note", [](TestContext& ctx) {
+        inner.run("with note", [](auto& ctx) {
             auto guard = ctx.note("parsing header");
             ctx.eq(1, 2);
         });
@@ -129,10 +128,10 @@ inline void run_context_tests(umi::test::Suite& suite) {
         t.eq(r.records[0].first_note, std::string("parsing header"));
     });
 
-    suite.run("note pops on scope exit", [](TestContext& t) {
+    suite.run("note pops on scope exit", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
-        inner.run("note scope", [](TestContext& ctx) {
+        inner.run("note scope", [](auto& ctx) {
             {
                 auto guard = ctx.note("inner scope");
             }
@@ -143,10 +142,10 @@ inline void run_context_tests(umi::test::Suite& suite) {
         t.eq(r.records[0].note_count, 0);
     });
 
-    suite.run("note nullptr becomes (null)", [](TestContext& t) {
+    suite.run("note nullptr becomes (null)", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
-        inner.run("null note", [](TestContext& ctx) {
+        inner.run("null note", [](auto& ctx) {
             auto guard = ctx.note(nullptr);
             ctx.eq(1, 2);
         });
@@ -154,19 +153,19 @@ inline void run_context_tests(umi::test::Suite& suite) {
         t.eq(r.records[0].first_note, std::string("(null)"));
     });
 
-    suite.run("check_near failure reports extra", [](TestContext& t) {
+    suite.run("check_near failure reports extra", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
-        inner.run("near fail", [](TestContext& ctx) { ctx.near(1.0, 2.0); });
+        inner.run("near fail", [](auto& ctx) { ctx.near(1.0, 2.0); });
         const auto& r = inner.get_reporter();
         t.eq(r.recorded, 1);
         t.eq(r.records[0].kind, std::string("near"));
     });
 
-    suite.run("is_true / is_false", [](TestContext& t) {
+    suite.run("is_true / is_false", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
-        inner.run("bool checks", [](TestContext& ctx) {
+        inner.run("bool checks", [](auto& ctx) {
             ctx.is_true(false);
             ctx.is_false(true);
         });
@@ -176,10 +175,10 @@ inline void run_context_tests(umi::test::Suite& suite) {
         t.eq(r.records[1].kind, std::string("false"));
     });
 
-    suite.run("ordering checks", [](TestContext& t) {
+    suite.run("ordering checks", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
-        inner.run("lt/le/gt/ge", [](TestContext& ctx) {
+        inner.run("lt/le/gt/ge", [](auto& ctx) {
             ctx.lt(2, 1);
             ctx.le(2, 1);
             ctx.gt(1, 2);
@@ -193,105 +192,105 @@ inline void run_context_tests(umi::test::Suite& suite) {
         t.eq(r.records[3].kind, std::string("ge"));
     });
 
-    suite.run("require_true pass", [](TestContext& t) {
+    suite.run("require_true pass", [](auto& t) {
         const bool result = t.require_true(true);
         t.is_true(result);
     });
 
-    suite.run("require_true fail", [](TestContext& t) {
+    suite.run("require_true fail", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
-        inner.run("x", [](TestContext& ctx) { (void)ctx.require_true(false); });
+        inner.run("x", [](auto& ctx) { (void)ctx.require_true(false); });
         const auto& r = inner.get_reporter();
         t.eq(r.recorded, 1);
         t.is_true(r.records[0].is_fatal);
         t.eq(r.records[0].kind, std::string("true"));
     });
 
-    suite.run("require_false pass", [](TestContext& t) {
+    suite.run("require_false pass", [](auto& t) {
         const bool result = t.require_false(false);
         t.is_true(result);
     });
 
-    suite.run("require_false fail", [](TestContext& t) {
+    suite.run("require_false fail", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
-        inner.run("x", [](TestContext& ctx) { (void)ctx.require_false(true); });
+        inner.run("x", [](auto& ctx) { (void)ctx.require_false(true); });
         const auto& r = inner.get_reporter();
         t.eq(r.recorded, 1);
         t.is_true(r.records[0].is_fatal);
         t.eq(r.records[0].kind, std::string("false"));
     });
 
-    suite.run("require_ne pass", [](TestContext& t) {
+    suite.run("require_ne pass", [](auto& t) {
         const bool result = t.require_ne(1, 2);
         t.is_true(result);
     });
 
-    suite.run("require_ne fail", [](TestContext& t) {
+    suite.run("require_ne fail", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
-        inner.run("x", [](TestContext& ctx) { (void)ctx.require_ne(1, 1); });
+        inner.run("x", [](auto& ctx) { (void)ctx.require_ne(1, 1); });
         const auto& r = inner.get_reporter();
         t.eq(r.recorded, 1);
         t.is_true(r.records[0].is_fatal);
         t.eq(r.records[0].kind, std::string("ne"));
     });
 
-    suite.run("require_le pass", [](TestContext& t) {
+    suite.run("require_le pass", [](auto& t) {
         const bool result = t.require_le(1, 2);
         t.is_true(result);
     });
 
-    suite.run("require_le fail", [](TestContext& t) {
+    suite.run("require_le fail", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
-        inner.run("x", [](TestContext& ctx) { (void)ctx.require_le(2, 1); });
+        inner.run("x", [](auto& ctx) { (void)ctx.require_le(2, 1); });
         const auto& r = inner.get_reporter();
         t.eq(r.recorded, 1);
         t.is_true(r.records[0].is_fatal);
         t.eq(r.records[0].kind, std::string("le"));
     });
 
-    suite.run("require_gt pass", [](TestContext& t) {
+    suite.run("require_gt pass", [](auto& t) {
         const bool result = t.require_gt(2, 1);
         t.is_true(result);
     });
 
-    suite.run("require_gt fail", [](TestContext& t) {
+    suite.run("require_gt fail", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
-        inner.run("x", [](TestContext& ctx) { (void)ctx.require_gt(1, 2); });
+        inner.run("x", [](auto& ctx) { (void)ctx.require_gt(1, 2); });
         const auto& r = inner.get_reporter();
         t.eq(r.recorded, 1);
         t.is_true(r.records[0].is_fatal);
         t.eq(r.records[0].kind, std::string("gt"));
     });
 
-    suite.run("require_ge pass", [](TestContext& t) {
+    suite.run("require_ge pass", [](auto& t) {
         const bool result = t.require_ge(1, 1);
         t.is_true(result);
     });
 
-    suite.run("require_ge fail", [](TestContext& t) {
+    suite.run("require_ge fail", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
-        inner.run("x", [](TestContext& ctx) { (void)ctx.require_ge(1, 2); });
+        inner.run("x", [](auto& ctx) { (void)ctx.require_ge(1, 2); });
         const auto& r = inner.get_reporter();
         t.eq(r.recorded, 1);
         t.is_true(r.records[0].is_fatal);
         t.eq(r.records[0].kind, std::string("ge"));
     });
 
-    suite.run("require_near pass", [](TestContext& t) {
+    suite.run("require_near pass", [](auto& t) {
         const bool result = t.require_near(1.0, 1.0005);
         t.is_true(result);
     });
 
-    suite.run("require_near fail", [](TestContext& t) {
+    suite.run("require_near fail", [](auto& t) {
         RecordingReporter rec;
         umi::test::BasicSuite<RecordingReporter> inner("inner", std::move(rec));
-        inner.run("x", [](TestContext& ctx) { (void)ctx.require_near(1.0, 2.0); });
+        inner.run("x", [](auto& ctx) { (void)ctx.require_near(1.0, 2.0); });
         const auto& r = inner.get_reporter();
         t.eq(r.recorded, 1);
         t.is_true(r.records[0].is_fatal);

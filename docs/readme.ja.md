@@ -129,14 +129,6 @@ t.eq(header.version, 2);
 
 ### 使用方法
 
-umitest は**ライブラリ**であり、プロジェクトではない。`set_project()` は持たず、単体ビルドは存在しない。
-
-UMI モノレポ内:
-
-```lua
-add_deps("umitest")
-```
-
 外部プロジェクト:
 
 ```lua
