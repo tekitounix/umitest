@@ -36,10 +36,12 @@ int main() {
 
     suite.run("fatal checks — abort test on failure", [](umi::test::TestContext& t) {
         const int* ptr = nullptr;
-        if (!t.require_true(ptr == nullptr))
+        if (!t.require_true(ptr == nullptr)) {
             return;
-        if (!t.require_eq(1 + 1, 2))
+        }
+        if (!t.require_eq(1 + 1, 2)) {
             return;
+        }
     });
 
     suite.run("exception assertions", [](umi::test::TestContext& t) {
