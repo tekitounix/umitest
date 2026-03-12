@@ -21,18 +21,26 @@ Write test functions as ordinary C++ code with automatic source location capture
 using namespace umi::test;
 
 int main() {
-    Suite s("example");
-    s.run("add", [](auto& t) {
+    Suite suite("example");
+    suite.run("add", [](auto& t) {
         t.eq(1 + 1, 2);
         t.is_true(true);
     });
-    return s.summary();
+    return suite.summary();
 }
 ```
 
-## Build and Test
+## Installation
 
-From the project root:
+External projects:
+
+```lua
+add_repositories("synthernet https://github.com/tekitounix/synthernet-xmake-repo.git main")
+add_requires("umitest")
+add_packages("umitest")
+```
+
+## Build and Test
 
 ```bash
 xmake test 'test_umitest/*'
@@ -93,6 +101,7 @@ t.eq(ptr->value, 42);
 auto guard = t.note("processing header");
 t.eq(header.version, 2);
 ```
+
 ### Free Functions (check.hh)
 
 `constexpr bool` functions for use in `static_assert` or custom logic:
@@ -110,38 +119,149 @@ t.eq(header.version, 2);
 - `PlainReporter` — plain text without escape codes
 - `NullReporter` — silent, for testing the framework itself
 
-## Design Decisions
+## Writing Tests
 
-### Non-Negotiable Requirements
+### Test File Structure
 
-1. **No macros** — `std::source_location::current()` as default argument. No `ASSERT_EQ` or `TEST_CASE`.
-2. **Header-only** — no static libraries, no link-time registration, no code generation.
-3. **No heap allocation** — all internal state uses stack or static storage. Bare-metal compatible.
-4. **No exceptions** — assertions do not throw. TestContext tracks failure state internally.
-
-### Dependency Boundaries
-
-Layering is strict:
-
-1. `umitest` depends only on C++23 standard library headers.
-2. No dependency on other umi libraries.
-3. Other umi libraries depend on `umitest` for testing (test-time only).
-
-### Usage
-
-umitest is a **library**, not a project. It has no `set_project()` and no standalone build.
-
-In the UMI monorepo:
-
-```lua
-add_deps("umitest")
+```
+lib/<name>/tests/
+  xmake.lua           -- test target definition
+  test_main.cc         -- single compilation unit (includes all .hh)
+  test_<feature>.hh    -- per-feature header-only test (inline run_<feature>_tests)
+  compile_fail/        -- compile failure tests (type constraint verification)
+    <name>.cc
+  smoke/               -- single-header compilation tests
+    <name>.cc
 ```
 
-External projects:
+### xmake Test Target Definition
 
 ```lua
-add_requires("umitest")
-add_packages("umitest")
+target("test_<mylib>")
+    set_kind("binary")
+    set_default(false)
+    add_files("test_*.cc")
+    add_deps("<mylib>", "umitest")
+    add_tests("default")
+target_end()
+```
+
+With compile_fail tests:
+
+```lua
+    for _, f in ipairs(os.files(path.join(os.scriptdir(), "compile_fail", "*.cc"))) do
+        add_tests("fail_" .. path.basename(f),
+            {files = path.join("compile_fail", path.filename(f)), build_should_fail = true})
+    end
+```
+
+With smoke tests:
+
+```lua
+    for _, f in ipairs(os.files(path.join(os.scriptdir(), "smoke", "*.cc"))) do
+        add_tests("smoke_" .. path.basename(f),
+            {files = path.join("smoke", path.filename(f)), build_should_pass = true})
+    end
+```
+
+### Entry Point
+
+```cpp
+#include "test_feature.hh"
+
+int main() {
+    umi::test::Suite suite("test_<mylib>");
+    <mylib>::test::run_feature_tests(suite);
+    return suite.summary();
+}
+```
+
+### Test Functions (header-only)
+
+```cpp
+#pragma once
+#include <umitest/test.hh>
+
+namespace <mylib>::test {
+
+inline void run_feature_tests(umi::test::Suite& suite) {
+    suite.section("feature");
+
+    suite.run("basic", [](auto& t) {
+        t.eq(actual, expected);
+        if (!t.require_eq(actual, expected)) return;
+    });
+}
+
+} // namespace <mylib>::test
+```
+
+### Soft vs Fatal Checks
+
+- **soft** (`eq`, `lt`, `is_true`, etc.) — independent assertions. On failure, remaining checks still execute
+- **fatal** (`require_eq`, `require_true`, etc.) — preconditions. Returns `false` on failure for `if (!...) return;`
+
+```cpp
+suite.run("parse result", [](auto& t) {
+    auto result = parse(input);
+    if (!t.require_true(result.has_value())) return;
+    t.eq(result->name, "test");
+    t.gt(result->size, 0);
+});
+```
+
+### Test Naming
+
+Test names should state what is being verified. Describe behavior, not implementation details:
+
+```cpp
+// Good: behavior is clear
+suite.run("near rejects NaN", ...);
+suite.run("require_eq returns false on mismatch", ...);
+
+// Bad: implementation detail or vague
+suite.run("test1", ...);
+suite.run("check function", ...);
+```
+
+### compile_fail Tests
+
+Write code that **should fail to compile**. Verifies that type constraints correctly reject invalid usage.
+
+```cpp
+// compile_fail/eq_incomparable.cc
+#include <umitest/check.hh>
+
+struct A {};
+struct B {};
+
+void should_fail() {
+    umi::test::check_eq(A{}, B{});  // A and B are not comparable → compile error
+}
+```
+
+### Naming Conventions
+
+- Test files: `test_<feature>.hh` (header-only, included from test_main.cc)
+- compile_fail: `compile_fail/<constraint_name>.cc`
+- smoke: `smoke/<header_name>.cc`
+- Test names: `test_<lib>/default`, `test_<lib>/fail_<name>`, `test_<lib>/smoke_<name>`
+
+### Adding New Tests
+
+1. Create `tests/test_<feature>.hh` — include from `test_main.cc` and add a call in `main()`
+2. compile-fail: add `.cc` under `tests/compile_fail/` — auto-discovered by glob
+3. smoke: add `.cc` under `tests/smoke/` — auto-discovered by glob
+
+No xmake.lua edit needed.
+
+### Running Tests
+
+```bash
+xmake test                              # all tests
+xmake test 'test_<mylib>/*'            # specific library
+xmake test 'test_<mylib>/default'      # self-test only
+xmake test 'test_<mylib>/fail_*'       # compile_fail only
 ```
 
 ## Examples
@@ -153,4 +273,4 @@ add_packages("umitest")
 
 ## License
 
-MIT — See [LICENSE](../../LICENSE)
+MIT — See [LICENSE](LICENSE)

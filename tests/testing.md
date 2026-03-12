@@ -1,12 +1,14 @@
 # umitest Test Coverage
 
+[README](../README.md) | English | [日本語](testing.ja.md)
+
 umitest is the test framework itself, so its tests prove that every framework contract works correctly.
 
 ## Test Composition
 
 | Category | Count | Purpose |
 |----------|-------|---------|
-| default (runtime) | 96 assertions / 7 modules | Behavioral verification of all APIs |
+| default (runtime) | 97 cases, 231 assertions / 7 modules | Behavioral verification of all APIs |
 | compile_fail | 23 files | Prove type constraints reject invalid code |
 | smoke | 1 file | All public headers compile independently |
 
