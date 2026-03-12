@@ -41,9 +41,10 @@ class BasicSuite {
             [](const FailureView& fv, void* p) { static_cast<BasicSuite*>(p)->reporter.report_failure(fv); },
             this);
         fn(ctx);
-        total_checked += ctx.checked_count();
-        total_failed_checks += ctx.failed_count();
-        if (ctx.ok()) {
+        auto [checks, fails, ok] = ctx.result();
+        total_checked += checks;
+        total_failed_checks += fails;
+        if (ok) {
             reporter.test_pass(test_name);
             passed++;
         } else {

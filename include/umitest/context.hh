@@ -491,8 +491,13 @@ class TestContext {
     /// @pre cb != nullptr
     explicit TestContext(const char* name, FailCallback cb, void* ctx) : test_name(name), fail_cb(cb), fail_ctx(ctx) {}
 
-    [[nodiscard]] int checked_count() const { return checked; }
-    [[nodiscard]] int failed_count() const { return fail_count; }
+    /// @brief Collect test results. Non-const to clarify ctx mutation to static analysis.
+    struct Result {
+        int checked;
+        int failed;
+        bool passed;
+    };
+    [[nodiscard]] Result result() { return {.checked = checked, .failed = fail_count, .passed = !failed}; }
 
   private:
     static constexpr int max_notes = 4;
