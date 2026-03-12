@@ -1,4 +1,4 @@
-# umitest テストカバレッジ
+# テスト
 
 [README](../README.md) | [English](testing.md) | 日本語
 
@@ -53,8 +53,8 @@ umitest はテストフレームワーク自体であるため、テストはフ
 
 ## 網羅性の根拠
 
-1. **API 対称性**: 全ソフトチェックに対応する require_* があり、双方のパス/フェイルパスをテスト
-2. **型制約マトリクス**: 7 制約 × 3 レイヤーで compile_fail を網羅
-3. **フォーマッタカバレッジ**: format_value の全分岐（12 型 + フォールバック）をテスト
-4. **エッジケース**: BoundedWriter size=0/1、check_near NaN/負イプシロン、safe_eq nullptr/符号混合
-5. **メタテスト**: RecordingReporter で内部状態（is_fatal フラグ、kind 文字列）を検証
+1. **API 対称性** — 全ソフトチェックに対応する require_* があり、双方のパス/フェイルパスをテスト
+2. **型制約マトリクス** — 7 制約 × 3 レイヤーで compile_fail を網羅
+3. **フォーマッタカバレッジ** — format_value の全分岐（12 型 + フォールバック）をテスト
+4. **エッジケース** — BoundedWriter size=0/1、check_near NaN/負イプシロン、safe_eq nullptr/符号混合
+5. **メタテスト** — RecordingReporter で内部状態（is_fatal フラグ、kind 文字列）を検証

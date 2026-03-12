@@ -1,4 +1,4 @@
-# umitest Test Coverage
+# Testing
 
 [README](../README.md) | English | [日本語](testing.ja.md)
 
@@ -53,8 +53,8 @@ umitest is the test framework itself, so its tests prove that every framework co
 
 ## Completeness Rationale
 
-1. **API symmetry**: Every soft check has a corresponding require_* and both pass/fail paths are tested
-2. **Type constraint matrix**: 7 constraints × 3 layers cover compile_fail exhaustively
-3. **Formatter coverage**: All format_value branches (12 types + fallback) are tested
-4. **Edge cases**: BoundedWriter size=0/1, check_near NaN/negative-eps, safe_eq nullptr/mixed-sign
-5. **Meta-testing**: RecordingReporter verifies internal state (is_fatal flag, kind string)
+1. **API symmetry** — Every soft check has a corresponding require_* and both pass/fail paths are tested
+2. **Type constraint matrix** — 7 constraints × 3 layers cover compile_fail exhaustively
+3. **Formatter coverage** — All format_value branches (12 types + fallback) are tested
+4. **Edge cases** — BoundedWriter size=0/1, check_near NaN/negative-eps, safe_eq nullptr/mixed-sign
+5. **Meta-testing** — RecordingReporter verifies internal state (is_fatal flag, kind string)

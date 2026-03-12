@@ -7,12 +7,12 @@ Write test functions as ordinary C++ code with automatic source location capture
 
 ## Why umitest
 
-- Zero macros — all assertions are regular function calls
-- Header-only — `#include <umitest/test.hh>` and use
-- Embedded-ready — no exceptions, no heap, no RTTI
-- Reporter-parameterized — `BasicSuite<R>` separates output from logic
-- Compile-time contract enforcement — type constraints reject invalid comparisons at build time
-- Self-testing — umitest tests itself, so framework regressions are immediately visible
+- **Zero macros** — all assertions are regular function calls
+- **Header-only** — `#include <umitest/test.hh>` and use
+- **Embedded-ready** — no exceptions, no heap, no RTTI
+- **Reporter-parameterized** — `BasicSuite<R>` separates output from logic
+- **Compile-time contract enforcement** — type constraints reject invalid comparisons at build time
+- **Self-testing** — umitest tests itself, so framework regressions are immediately visible
 
 ## Quick Start
 
