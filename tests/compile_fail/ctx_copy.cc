@@ -3,5 +3,5 @@
 
 void test() {
     umi::test::Suite s("x");
-    s.run("x", [](auto& ctx) { auto copy = ctx; });
+    s.run("x", [](umi::test::TestContext& ctx) { auto copy = ctx; });
 }

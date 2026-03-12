@@ -6,7 +6,6 @@
 /// @brief BasicSuite<R> test runner template parameterized by reporter.
 /// @author Shota Moriguchi @tekitounix
 
-#include <concepts>
 #include <utility>
 
 #include <umitest/context.hh>
@@ -26,15 +25,13 @@ class BasicSuite {
     /// @brief Begin a named section for visual grouping in output.
     void section(const char* title) { reporter.section(title); }
 
+    /// @brief Function pointer type for test bodies. Captureless lambdas convert implicitly.
+    using TestFn = void (*)(TestContext&);
+
     /// @brief Run a structured test.
-    /// @tparam F Callable taking TestContext& and returning void.
     /// @param test_name Name displayed in output.
     /// @param fn Test body; use ctx.eq() etc. for assertions.
-    template <typename F>
-        requires requires(F& f, TestContext& ctx) {
-            { f(ctx) } -> std::same_as<void>;
-        }
-    void run(const char* test_name, F&& fn) {
+    void run(const char* test_name, TestFn fn) {
         reporter.test_begin(test_name);
         TestContext ctx(
             test_name,

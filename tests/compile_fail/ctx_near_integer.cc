@@ -3,5 +3,5 @@
 
 void test() {
     umi::test::Suite s("x");
-    s.run("x", [](auto& ctx) { ctx.near(1, 2); });
+    s.run("x", [](umi::test::TestContext& ctx) { ctx.near(1, 2); });
 }

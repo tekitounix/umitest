@@ -221,7 +221,7 @@ constexpr void format_string(BoundedWriter& w, std::string_view sv) {
 /// @post buf is null-terminated.
 template <typename T>
 constexpr void format_value(BoundedWriter& w, const T& v) {
-    using Raw = std::remove_cv_t<std::remove_reference_t<T>>;
+    using Raw = std::remove_cvref_t<T>;
     if constexpr (std::is_same_v<Raw, bool>) {
         w.puts(v ? "true" : "false");
     } else if constexpr (std::is_same_v<Raw, std::nullptr_t>) {
@@ -254,11 +254,11 @@ constexpr void format_value(BoundedWriter& w, const T& v) {
     } else if constexpr (std::is_floating_point_v<Raw>) {
         detail::format_double(w, static_cast<double>(v));
     } else if constexpr (std::is_enum_v<Raw>) {
-        using U = std::underlying_type_t<Raw>;
-        if constexpr (std::is_unsigned_v<U>) {
-            detail::format_uint(w, static_cast<std::uint64_t>(static_cast<U>(v)));
+        auto underlying = std::to_underlying(v);
+        if constexpr (std::is_unsigned_v<decltype(underlying)>) {
+            detail::format_uint(w, static_cast<std::uint64_t>(underlying));
         } else {
-            detail::format_int(w, static_cast<std::int64_t>(static_cast<U>(v)));
+            detail::format_int(w, static_cast<std::int64_t>(underlying));
         }
     } else if constexpr (std::is_pointer_v<Raw>) {
         detail::format_hex(w, reinterpret_cast<std::uintptr_t>(v));

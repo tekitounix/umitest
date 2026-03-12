@@ -3,5 +3,5 @@
 
 void test() {
     umi::test::Suite s("x");
-    s.run("x", [](auto& ctx) { ctx.eq(42, "hello"); });
+    s.run("x", [](umi::test::TestContext& ctx) { ctx.eq(42, "hello"); });
 }

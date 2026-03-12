@@ -54,11 +54,12 @@ static_assert(!umi::test::check_eq("hello", static_cast<const char*>(nullptr)));
 static_assert(umi::test::check_ne(static_cast<const char*>(nullptr), "hello"));
 
 namespace umitest::test {
+using umi::test::TestContext;
 
 inline void run_check_tests(umi::test::Suite& suite) {
     suite.section("check functions");
 
-    suite.run("check_eq runtime", [](auto& t) {
+    suite.run("check_eq runtime", [](TestContext& t) {
         t.is_true(umi::test::check_eq(1, 1));
         t.is_true(!umi::test::check_eq(1, 2));
 
@@ -73,7 +74,7 @@ inline void run_check_tests(umi::test::Suite& suite) {
         t.is_true(umi::test::check_eq("hello", b));
     });
 
-    suite.run("check_eq string vs const char*", [](auto& t) {
+    suite.run("check_eq string vs const char*", [](TestContext& t) {
         const std::string str = "hello";
         const char* ptr = "hello";
         t.is_true(umi::test::check_eq(str, ptr));
@@ -84,18 +85,18 @@ inline void run_check_tests(umi::test::Suite& suite) {
         t.is_false(umi::test::check_eq(null, str));
     });
 
-    suite.run("check_eq nullptr_t vs const char*", [](auto& t) {
+    suite.run("check_eq nullptr_t vs const char*", [](TestContext& t) {
         const char* null_ptr = nullptr;
         t.is_true(umi::test::check_eq(nullptr, null_ptr));
         t.is_false(umi::test::check_eq(nullptr, "hello"));
     });
 
-    suite.run("check_ne C strings", [](auto& t) {
+    suite.run("check_ne C strings", [](TestContext& t) {
         t.is_true(umi::test::check_ne("hello", "world"));
         t.is_false(umi::test::check_ne("hello", "hello"));
     });
 
-    suite.run("check_lt/le/gt/ge integers", [](auto& t) {
+    suite.run("check_lt/le/gt/ge integers", [](TestContext& t) {
         t.is_true(umi::test::check_lt(1, 2));
         t.is_false(umi::test::check_lt(2, 1));
         t.is_true(umi::test::check_le(1, 1));
@@ -103,27 +104,27 @@ inline void run_check_tests(umi::test::Suite& suite) {
         t.is_true(umi::test::check_ge(1, 1));
     });
 
-    suite.run("check_near basic", [](auto& t) {
+    suite.run("check_near basic", [](TestContext& t) {
         t.is_true(umi::test::check_near(1.0, 1.0005));
         t.is_false(umi::test::check_near(1.0, 2.0));
     });
 
-    suite.run("check_near inf", [](auto& t) {
+    suite.run("check_near inf", [](TestContext& t) {
         auto inf = std::numeric_limits<double>::infinity();
         t.is_true(umi::test::check_near(inf, inf));
         t.is_false(umi::test::check_near(inf, -inf));
     });
 
-    suite.run("check_near nan", [](auto& t) {
+    suite.run("check_near nan", [](TestContext& t) {
         auto nan = std::numeric_limits<double>::quiet_NaN();
         t.is_false(umi::test::check_near(nan, nan));
         t.is_false(umi::test::check_near(nan, 1.0));
     });
 
-    suite.run("check_near negative eps", [](auto& t) { t.is_false(umi::test::check_near(1.0, 1.0, -0.1)); });
+    suite.run("check_near negative eps", [](TestContext& t) { t.is_false(umi::test::check_near(1.0, 1.0, -0.1)); });
 
     suite.run("check_near exact equality independent of eps",
-              [](auto& t) { t.is_true(umi::test::check_near(1.0, 1.0, 0.0)); });
+              [](TestContext& t) { t.is_true(umi::test::check_near(1.0, 1.0, 0.0)); });
 }
 
 } // namespace umitest::test

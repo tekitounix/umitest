@@ -9,7 +9,7 @@
 int main() {
     umi::test::Suite suite("minimal");
 
-    suite.run("one plus one equals two", [](auto& t) { t.eq(1 + 1, 2); });
+    suite.run("one plus one equals two", [](umi::test::TestContext& t) { t.eq(1 + 1, 2); });
 
     return suite.summary();
 }

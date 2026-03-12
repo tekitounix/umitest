@@ -14,4 +14,5 @@ target("test_umitest")
         local name = "fail_" .. path.basename(f)
         add_tests(name, {files = path.join("compile_fail", path.filename(f)), build_should_fail = true})
     end
+
 target_end()

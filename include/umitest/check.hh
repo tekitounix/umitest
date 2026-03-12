@@ -122,11 +122,15 @@ constexpr bool check_ne(const char* a, const char* b) {
     return !detail::safe_eq(a, b);
 }
 
+/// @brief Constraint for orderable non-pointer types.
+template <typename A, typename B>
+concept OrderableNonPointer =
+    std::totally_ordered_with<A, B> && !std::is_pointer_v<std::decay_t<A>> && !std::is_pointer_v<std::decay_t<B>>;
+
 /// @brief Check less-than. Uses std::cmp_less for mixed-sign integer safety.
 /// Pointers excluded via decay_t to prevent unspecified ordering comparison.
 template <typename A, typename B>
-    requires(std::totally_ordered_with<A, B> && !std::is_pointer_v<std::decay_t<A>> &&
-             !std::is_pointer_v<std::decay_t<B>>)
+    requires OrderableNonPointer<A, B>
 constexpr bool check_lt(const A& a, const B& b) {
     if constexpr (detail::SafeCmpInteger<A> && detail::SafeCmpInteger<B>) {
         return std::cmp_less(a, b);
@@ -137,8 +141,7 @@ constexpr bool check_lt(const A& a, const B& b) {
 
 /// @brief Check less-or-equal.
 template <typename A, typename B>
-    requires(std::totally_ordered_with<A, B> && !std::is_pointer_v<std::decay_t<A>> &&
-             !std::is_pointer_v<std::decay_t<B>>)
+    requires OrderableNonPointer<A, B>
 constexpr bool check_le(const A& a, const B& b) {
     if constexpr (detail::SafeCmpInteger<A> && detail::SafeCmpInteger<B>) {
         return std::cmp_less_equal(a, b);
@@ -149,8 +152,7 @@ constexpr bool check_le(const A& a, const B& b) {
 
 /// @brief Check greater-than.
 template <typename A, typename B>
-    requires(std::totally_ordered_with<A, B> && !std::is_pointer_v<std::decay_t<A>> &&
-             !std::is_pointer_v<std::decay_t<B>>)
+    requires OrderableNonPointer<A, B>
 constexpr bool check_gt(const A& a, const B& b) {
     if constexpr (detail::SafeCmpInteger<A> && detail::SafeCmpInteger<B>) {
         return std::cmp_greater(a, b);
@@ -161,8 +163,7 @@ constexpr bool check_gt(const A& a, const B& b) {
 
 /// @brief Check greater-or-equal.
 template <typename A, typename B>
-    requires(std::totally_ordered_with<A, B> && !std::is_pointer_v<std::decay_t<A>> &&
-             !std::is_pointer_v<std::decay_t<B>>)
+    requires OrderableNonPointer<A, B>
 constexpr bool check_ge(const A& a, const B& b) {
     if constexpr (detail::SafeCmpInteger<A> && detail::SafeCmpInteger<B>) {
         return std::cmp_greater_equal(a, b);

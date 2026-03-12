@@ -6,9 +6,9 @@
 /// @brief Convenience umbrella header — includes Suite and PlainSuite aliases.
 /// @author Shota Moriguchi @tekitounix
 
-#include <umitest/reporters/plain.hh>
-#include <umitest/reporters/stdio.hh>
-#include <umitest/suite.hh>
+#include <umitest/reporters/plain.hh> // IWYU pragma: export
+#include <umitest/reporters/stdio.hh> // IWYU pragma: export
+#include <umitest/suite.hh>           // IWYU pragma: export
 
 namespace umi::test {
 

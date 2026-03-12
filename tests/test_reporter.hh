@@ -17,20 +17,21 @@
 #include <umitest/test.hh>
 
 namespace umitest::test {
+using umi::test::TestContext;
 
 inline void run_reporter_tests(umi::test::Suite& suite) {
     suite.section("reporter");
 
     suite.run("NullReporter satisfies ReporterLike",
-              [](auto& t) { t.is_true(umi::test::ReporterLike<umi::test::NullReporter>); });
+              [](TestContext& t) { t.is_true(umi::test::ReporterLike<umi::test::NullReporter>); });
 
     suite.run("StdioReporter satisfies ReporterLike",
-              [](auto& t) { t.is_true(umi::test::ReporterLike<umi::test::StdioReporter>); });
+              [](TestContext& t) { t.is_true(umi::test::ReporterLike<umi::test::StdioReporter>); });
 
     suite.run("PlainReporter satisfies ReporterLike",
-              [](auto& t) { t.is_true(umi::test::ReporterLike<umi::test::PlainReporter>); });
+              [](TestContext& t) { t.is_true(umi::test::ReporterLike<umi::test::PlainReporter>); });
 
-    suite.run("FailureView fields", [](auto& t) {
+    suite.run("FailureView fields", [](TestContext& t) {
         auto loc = std::source_location::current();
         std::array<const char*, 1> notes_arr = {"test note"};
         const umi::test::FailureView fv{
@@ -54,7 +55,7 @@ inline void run_reporter_tests(umi::test::Suite& suite) {
         t.eq(fv.notes[0], "test note");
     });
 
-    suite.run("op_for_kind maps all check kinds", [](auto& t) {
+    suite.run("op_for_kind maps all check kinds", [](TestContext& t) {
         using umi::test::op_for_kind;
         t.eq(op_for_kind("eq"), "==");
         t.eq(op_for_kind("ne"), "!=");
@@ -74,7 +75,7 @@ inline void run_reporter_tests(umi::test::Suite& suite) {
         t.eq(op_for_kind("unknown"), "?");
     });
 
-    suite.run("SummaryView fields", [](auto& t) {
+    suite.run("SummaryView fields", [](TestContext& t) {
         const umi::test::SummaryView sv{
             .suite_name = "test_suite",
             .cases_passed = 10,

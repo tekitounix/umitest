@@ -10,11 +10,11 @@ int main() {
     umi::test::Suite suite("sections_demo");
 
     suite.section("Arithmetic");
-    suite.run("addition", [](auto& t) { t.eq(2 + 3, 5); });
-    suite.run("multiplication", [](auto& t) { t.eq(3 * 4, 12); });
+    suite.run("addition", [](umi::test::TestContext& t) { t.eq(2 + 3, 5); });
+    suite.run("multiplication", [](umi::test::TestContext& t) { t.eq(3 * 4, 12); });
 
     suite.section("Floating point");
-    suite.run("one third", [](auto& t) { t.near(1.0 / 3.0, 0.3333, 0.001); });
+    suite.run("one third", [](umi::test::TestContext& t) { t.near(1.0 / 3.0, 0.3333, 0.001); });
 
     return suite.summary();
 }

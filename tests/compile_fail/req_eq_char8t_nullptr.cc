@@ -3,7 +3,7 @@
 
 void test() {
     umi::test::Suite s("x");
-    s.run("x", [](auto& ctx) {
+    s.run("x", [](umi::test::TestContext& ctx) {
         const char8_t* p = nullptr;
         ctx.require_eq(p, nullptr);
     });

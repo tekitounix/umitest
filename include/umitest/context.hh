@@ -42,7 +42,7 @@ class TestContext {
 
       private:
         friend class TestContext;
-        NoteGuard(TestContext& ctx) : ctx(ctx) {}
+        explicit NoteGuard(TestContext& ctx) : ctx(ctx) {}
         TestContext& ctx;
         bool active = true;
     };
@@ -67,337 +67,204 @@ class TestContext {
 
     // -- Soft checks --
 
+    /// @brief Soft: check boolean true.
     bool is_true(bool cond, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_true(cond)) {
-            return true;
-        }
-        report_bool_fail("true", loc);
-        return false;
+        return bool_check<false>(cond, "true", loc);
     }
 
+    /// @brief Soft: check boolean false.
     bool is_false(bool cond, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_false(cond)) {
-            return true;
-        }
-        report_bool_fail("false", loc);
-        return false;
+        return bool_check<false>(!cond, "false", loc);
     }
 
+    /// @brief Soft: check equality.
     template <typename A, typename B>
         requires(std::equality_comparable_with<A, B> &&
                  !detail::excluded_char_pointer_v<std::remove_cvref_t<A>, std::remove_cvref_t<B>>)
     bool eq(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_eq(a, b)) {
-            return true;
-        }
-        report_compare_fail(a, "eq", b, loc);
-        return false;
+        return compare_check<false>(check_eq(a, b), a, "eq", b, loc);
     }
 
+    /// @brief Soft: check equality for C strings.
     bool eq(const char* a, const char* b, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_eq(a, b)) {
-            return true;
-        }
-        report_compare_fail(a, "eq", b, loc);
-        return false;
+        return compare_check<false>(check_eq(a, b), a, "eq", b, loc);
     }
 
+    /// @brief Soft: check inequality.
     template <typename A, typename B>
         requires(std::equality_comparable_with<A, B> &&
                  !detail::excluded_char_pointer_v<std::remove_cvref_t<A>, std::remove_cvref_t<B>>)
     bool ne(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_ne(a, b)) {
-            return true;
-        }
-        report_compare_fail(a, "ne", b, loc);
-        return false;
+        return compare_check<false>(check_ne(a, b), a, "ne", b, loc);
     }
 
+    /// @brief Soft: check inequality for C strings.
     bool ne(const char* a, const char* b, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_ne(a, b)) {
-            return true;
-        }
-        report_compare_fail(a, "ne", b, loc);
-        return false;
+        return compare_check<false>(check_ne(a, b), a, "ne", b, loc);
     }
 
+    /// @brief Soft: check less-than.
     template <typename A, typename B>
-        requires(std::totally_ordered_with<A, B> && !std::is_pointer_v<std::decay_t<A>> &&
-                 !std::is_pointer_v<std::decay_t<B>>)
+        requires OrderableNonPointer<A, B>
     bool lt(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_lt(a, b)) {
-            return true;
-        }
-        report_compare_fail(a, "lt", b, loc);
-        return false;
+        return compare_check<false>(check_lt(a, b), a, "lt", b, loc);
     }
 
+    /// @brief Soft: check less-or-equal.
     template <typename A, typename B>
-        requires(std::totally_ordered_with<A, B> && !std::is_pointer_v<std::decay_t<A>> &&
-                 !std::is_pointer_v<std::decay_t<B>>)
+        requires OrderableNonPointer<A, B>
     bool le(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_le(a, b)) {
-            return true;
-        }
-        report_compare_fail(a, "le", b, loc);
-        return false;
+        return compare_check<false>(check_le(a, b), a, "le", b, loc);
     }
 
+    /// @brief Soft: check greater-than.
     template <typename A, typename B>
-        requires(std::totally_ordered_with<A, B> && !std::is_pointer_v<std::decay_t<A>> &&
-                 !std::is_pointer_v<std::decay_t<B>>)
+        requires OrderableNonPointer<A, B>
     bool gt(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_gt(a, b)) {
-            return true;
-        }
-        report_compare_fail(a, "gt", b, loc);
-        return false;
+        return compare_check<false>(check_gt(a, b), a, "gt", b, loc);
     }
 
+    /// @brief Soft: check greater-or-equal.
     template <typename A, typename B>
-        requires(std::totally_ordered_with<A, B> && !std::is_pointer_v<std::decay_t<A>> &&
-                 !std::is_pointer_v<std::decay_t<B>>)
+        requires OrderableNonPointer<A, B>
     bool ge(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_ge(a, b)) {
-            return true;
-        }
-        report_compare_fail(a, "ge", b, loc);
-        return false;
+        return compare_check<false>(check_ge(a, b), a, "ge", b, loc);
     }
 
+    /// @brief Soft: check approximate equality.
     template <std::floating_point A, std::floating_point B>
     bool near(const A& a,
               const B& b,
               std::common_type_t<A, B> eps = static_cast<std::common_type_t<A, B>>(0.001),
               std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_near(a, b, eps)) {
-            return true;
-        }
-        report_near_fail(a, b, eps, loc);
-        return false;
+        return near_check<false>(a, b, eps, loc);
     }
 
     // -- Exception checks (available only when exceptions are enabled) --
 
 #if defined(__cpp_exceptions) || defined(__EXCEPTIONS)
 
-    /// @brief Check that fn() throws an exception of type E.
+    /// @brief Soft: check that fn() throws an exception of type E.
     template <typename E, typename F>
         requires std::invocable<F>
     bool throws(F&& fn, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        try {
-            fn();
-        } catch (const E&) {
-            return true;
-        } catch (...) {
-            report_exception_fail("throws_as", "wrong exception type", loc);
-            return false;
-        }
-        report_exception_fail("throws_as", "no exception thrown", loc);
-        return false;
+        return throws_as_check<false, E>(std::forward<F>(fn), loc);
     }
 
-    /// @brief Check that fn() throws any exception.
+    /// @brief Soft: check that fn() throws any exception.
     template <typename F>
         requires std::invocable<F>
     bool throws(F&& fn, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        try {
-            fn();
-        } catch (...) {
-            return true;
-        }
-        report_exception_fail("throws", "no exception thrown", loc);
-        return false;
+        return throws_any_check<false>(std::forward<F>(fn), loc);
     }
 
-    /// @brief Check that fn() does not throw.
+    /// @brief Soft: check that fn() does not throw.
     template <typename F>
         requires std::invocable<F>
     bool nothrow(F&& fn, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        try {
-            fn();
-            return true;
-        } catch (...) {
-            report_exception_fail("nothrow", "unexpected exception thrown", loc);
-            return false;
-        }
+        return nothrow_check<false>(std::forward<F>(fn), loc);
     }
 
 #endif // __cpp_exceptions || __EXCEPTIONS
 
     // -- String checks --
 
-    /// @brief Check that haystack contains needle.
+    /// @brief Soft: check that haystack contains needle.
     bool str_contains(std::string_view haystack,
                       std::string_view needle,
                       std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_str_contains(haystack, needle)) {
-            return true;
-        }
-        report_string_fail("str_contains", haystack, needle, loc);
-        return false;
+        return string_check<false>(check_str_contains(haystack, needle), "str_contains", haystack, needle, loc);
     }
 
-    /// @brief Check that s starts with prefix.
+    /// @brief Soft: check that s starts with prefix.
     bool str_starts_with(std::string_view s,
                          std::string_view prefix,
                          std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_str_starts_with(s, prefix)) {
-            return true;
-        }
-        report_string_fail("str_starts_with", s, prefix, loc);
-        return false;
+        return string_check<false>(check_str_starts_with(s, prefix), "str_starts_with", s, prefix, loc);
     }
 
-    /// @brief Check that s ends with suffix.
+    /// @brief Soft: check that s ends with suffix.
     bool str_ends_with(std::string_view s,
                        std::string_view suffix,
                        std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_str_ends_with(s, suffix)) {
-            return true;
-        }
-        report_string_fail("str_ends_with", s, suffix, loc);
-        return false;
+        return string_check<false>(check_str_ends_with(s, suffix), "str_ends_with", s, suffix, loc);
     }
 
     // -- Fatal checks --
 
-    bool require_true(bool cond, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_true(cond)) {
-            return true;
-        }
-        report_bool_fail("true", loc, true);
-        return false;
+    /// @brief Fatal: check boolean true.
+    [[nodiscard]] bool require_true(bool cond, std::source_location loc = std::source_location::current()) {
+        return bool_check<true>(cond, "true", loc);
     }
 
-    bool require_false(bool cond, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_false(cond)) {
-            return true;
-        }
-        report_bool_fail("false", loc, true);
-        return false;
+    /// @brief Fatal: check boolean false.
+    [[nodiscard]] bool require_false(bool cond, std::source_location loc = std::source_location::current()) {
+        return bool_check<true>(!cond, "false", loc);
     }
 
+    /// @brief Fatal: check equality.
     template <typename A, typename B>
         requires(std::equality_comparable_with<A, B> &&
                  !detail::excluded_char_pointer_v<std::remove_cvref_t<A>, std::remove_cvref_t<B>>)
-    bool require_eq(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_eq(a, b)) {
-            return true;
-        }
-        report_compare_fail(a, "eq", b, loc, true);
-        return false;
+    [[nodiscard]] bool require_eq(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
+        return compare_check<true>(check_eq(a, b), a, "eq", b, loc);
     }
 
-    bool require_eq(const char* a, const char* b, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_eq(a, b)) {
-            return true;
-        }
-        report_compare_fail(a, "eq", b, loc, true);
-        return false;
+    /// @brief Fatal: check equality for C strings.
+    [[nodiscard]] bool
+    require_eq(const char* a, const char* b, std::source_location loc = std::source_location::current()) {
+        return compare_check<true>(check_eq(a, b), a, "eq", b, loc);
     }
 
+    /// @brief Fatal: check inequality.
     template <typename A, typename B>
         requires(std::equality_comparable_with<A, B> &&
                  !detail::excluded_char_pointer_v<std::remove_cvref_t<A>, std::remove_cvref_t<B>>)
-    bool require_ne(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_ne(a, b)) {
-            return true;
-        }
-        report_compare_fail(a, "ne", b, loc, true);
-        return false;
+    [[nodiscard]] bool require_ne(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
+        return compare_check<true>(check_ne(a, b), a, "ne", b, loc);
     }
 
-    bool require_ne(const char* a, const char* b, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_ne(a, b)) {
-            return true;
-        }
-        report_compare_fail(a, "ne", b, loc, true);
-        return false;
+    /// @brief Fatal: check inequality for C strings.
+    [[nodiscard]] bool
+    require_ne(const char* a, const char* b, std::source_location loc = std::source_location::current()) {
+        return compare_check<true>(check_ne(a, b), a, "ne", b, loc);
     }
 
+    /// @brief Fatal: check less-than.
     template <typename A, typename B>
-        requires(std::totally_ordered_with<A, B> && !std::is_pointer_v<std::decay_t<A>> &&
-                 !std::is_pointer_v<std::decay_t<B>>)
-    bool require_lt(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_lt(a, b)) {
-            return true;
-        }
-        report_compare_fail(a, "lt", b, loc, true);
-        return false;
+        requires OrderableNonPointer<A, B>
+    [[nodiscard]] bool require_lt(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
+        return compare_check<true>(check_lt(a, b), a, "lt", b, loc);
     }
 
+    /// @brief Fatal: check less-or-equal.
     template <typename A, typename B>
-        requires(std::totally_ordered_with<A, B> && !std::is_pointer_v<std::decay_t<A>> &&
-                 !std::is_pointer_v<std::decay_t<B>>)
-    bool require_le(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_le(a, b)) {
-            return true;
-        }
-        report_compare_fail(a, "le", b, loc, true);
-        return false;
+        requires OrderableNonPointer<A, B>
+    [[nodiscard]] bool require_le(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
+        return compare_check<true>(check_le(a, b), a, "le", b, loc);
     }
 
+    /// @brief Fatal: check greater-than.
     template <typename A, typename B>
-        requires(std::totally_ordered_with<A, B> && !std::is_pointer_v<std::decay_t<A>> &&
-                 !std::is_pointer_v<std::decay_t<B>>)
-    bool require_gt(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_gt(a, b)) {
-            return true;
-        }
-        report_compare_fail(a, "gt", b, loc, true);
-        return false;
+        requires OrderableNonPointer<A, B>
+    [[nodiscard]] bool require_gt(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
+        return compare_check<true>(check_gt(a, b), a, "gt", b, loc);
     }
 
+    /// @brief Fatal: check greater-or-equal.
     template <typename A, typename B>
-        requires(std::totally_ordered_with<A, B> && !std::is_pointer_v<std::decay_t<A>> &&
-                 !std::is_pointer_v<std::decay_t<B>>)
-    bool require_ge(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_ge(a, b)) {
-            return true;
-        }
-        report_compare_fail(a, "ge", b, loc, true);
-        return false;
+        requires OrderableNonPointer<A, B>
+    [[nodiscard]] bool require_ge(const A& a, const B& b, std::source_location loc = std::source_location::current()) {
+        return compare_check<true>(check_ge(a, b), a, "ge", b, loc);
     }
 
+    /// @brief Fatal: check approximate equality.
     template <std::floating_point A, std::floating_point B>
-    bool require_near(const A& a,
-                      const B& b,
-                      std::common_type_t<A, B> eps = static_cast<std::common_type_t<A, B>>(0.001),
-                      std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_near(a, b, eps)) {
-            return true;
-        }
-        report_near_fail(a, b, eps, loc, true);
-        return false;
+    [[nodiscard]] bool require_near(const A& a,
+                                    const B& b,
+                                    std::common_type_t<A, B> eps = static_cast<std::common_type_t<A, B>>(0.001),
+                                    std::source_location loc = std::source_location::current()) {
+        return near_check<true>(a, b, eps, loc);
     }
 
 #if defined(__cpp_exceptions) || defined(__EXCEPTIONS)
@@ -405,93 +272,50 @@ class TestContext {
     /// @brief Fatal: check that fn() throws an exception of type E.
     template <typename E, typename F>
         requires std::invocable<F>
-    bool require_throws(F&& fn, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        try {
-            fn();
-        } catch (const E&) {
-            return true;
-        } catch (...) {
-            report_exception_fail("throws_as", "wrong exception type", loc, true);
-            return false;
-        }
-        report_exception_fail("throws_as", "no exception thrown", loc, true);
-        return false;
+    [[nodiscard]] bool require_throws(F&& fn, std::source_location loc = std::source_location::current()) {
+        return throws_as_check<true, E>(std::forward<F>(fn), loc);
     }
 
     /// @brief Fatal: check that fn() throws any exception.
     template <typename F>
         requires std::invocable<F>
-    bool require_throws(F&& fn, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        try {
-            fn();
-        } catch (...) {
-            return true;
-        }
-        report_exception_fail("throws", "no exception thrown", loc, true);
-        return false;
+    [[nodiscard]] bool require_throws(F&& fn, std::source_location loc = std::source_location::current()) {
+        return throws_any_check<true>(std::forward<F>(fn), loc);
     }
 
     /// @brief Fatal: check that fn() does not throw.
     template <typename F>
         requires std::invocable<F>
-    bool require_nothrow(F&& fn, std::source_location loc = std::source_location::current()) {
-        ++checked;
-        try {
-            fn();
-            return true;
-        } catch (...) {
-            report_exception_fail("nothrow", "unexpected exception thrown", loc, true);
-            return false;
-        }
+    [[nodiscard]] bool require_nothrow(F&& fn, std::source_location loc = std::source_location::current()) {
+        return nothrow_check<true>(std::forward<F>(fn), loc);
     }
 
 #endif // __cpp_exceptions || __EXCEPTIONS
 
     /// @brief Fatal: check that haystack contains needle.
-    bool require_str_contains(std::string_view haystack,
-                              std::string_view needle,
-                              std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_str_contains(haystack, needle)) {
-            return true;
-        }
-        report_string_fail("str_contains", haystack, needle, loc, true);
-        return false;
+    [[nodiscard]] bool require_str_contains(std::string_view haystack,
+                                            std::string_view needle,
+                                            std::source_location loc = std::source_location::current()) {
+        return string_check<true>(check_str_contains(haystack, needle), "str_contains", haystack, needle, loc);
     }
 
     /// @brief Fatal: check that s starts with prefix.
-    bool require_str_starts_with(std::string_view s,
-                                 std::string_view prefix,
-                                 std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_str_starts_with(s, prefix)) {
-            return true;
-        }
-        report_string_fail("str_starts_with", s, prefix, loc, true);
-        return false;
+    [[nodiscard]] bool require_str_starts_with(std::string_view s,
+                                               std::string_view prefix,
+                                               std::source_location loc = std::source_location::current()) {
+        return string_check<true>(check_str_starts_with(s, prefix), "str_starts_with", s, prefix, loc);
     }
 
     /// @brief Fatal: check that s ends with suffix.
-    bool require_str_ends_with(std::string_view s,
-                               std::string_view suffix,
-                               std::source_location loc = std::source_location::current()) {
-        ++checked;
-        if (check_str_ends_with(s, suffix)) {
-            return true;
-        }
-        report_string_fail("str_ends_with", s, suffix, loc, true);
-        return false;
+    [[nodiscard]] bool require_str_ends_with(std::string_view s,
+                                             std::string_view suffix,
+                                             std::source_location loc = std::source_location::current()) {
+        return string_check<true>(check_str_ends_with(s, suffix), "str_ends_with", s, suffix, loc);
     }
 
     // -- Construction and stats (BasicSuite::run() use only, not user API) --
 
-    /// @pre name != nullptr
-    /// @pre cb != nullptr
-    explicit TestContext(const char* name, FailCallback cb, void* ctx) : test_name(name), fail_cb(cb), fail_ctx(ctx) {}
-
-    /// @brief Collect test results. Non-const to clarify ctx mutation to static analysis.
+    /// @brief Collect test results.
     struct Result {
         int checked;
         int failed;
@@ -499,7 +323,14 @@ class TestContext {
     };
     [[nodiscard]] Result result() { return {.checked = checked, .failed = fail_count, .passed = !failed}; }
 
+    /// @pre name != nullptr
+    /// @pre cb != nullptr
+    /// @note Internal API — intended for BasicSuite::run() only, not user code.
+    explicit TestContext(const char* name, FailCallback cb, void* ctx) : test_name(name), fail_cb(cb), fail_ctx(ctx) {}
+
   private:
+    // -- Note stack --
+
     static constexpr int max_notes = 4;
     std::array<const char*, max_notes> note_stack{};
     int note_depth = 0;
@@ -518,42 +349,61 @@ class TestContext {
         return {note_stack.data(), static_cast<std::size_t>(n)};
     }
 
-    void report_bool_fail(const char* kind, std::source_location loc, bool fatal = false) {
+    // -- Unified check implementations --
+
+    void record_failure() {
+        failed = true;
+        ++fail_count;
+    }
+
+    template <bool Fatal>
+    bool bool_check(bool passed, const char* kind, std::source_location loc) {
+        ++checked;
+        if (passed) {
+            return true;
+        }
         const FailureView fv{.test_name = test_name,
                              .loc = loc,
-                             .is_fatal = fatal,
+                             .is_fatal = Fatal,
                              .kind = kind,
                              .lhs = nullptr,
                              .rhs = nullptr,
                              .extra = nullptr,
                              .notes = active_notes()};
         fail_cb(fv, fail_ctx);
-        failed = true;
-        ++fail_count;
+        record_failure();
+        return false;
     }
 
-    template <typename A, typename B>
-    void report_compare_fail(const A& a, const char* kind, const B& b, std::source_location loc, bool fatal = false) {
+    template <bool Fatal, typename A, typename B>
+    bool compare_check(bool passed, const A& a, const char* kind, const B& b, std::source_location loc) {
+        ++checked;
+        if (passed) {
+            return true;
+        }
         std::array<char, detail::fail_message_capacity> lhs_buf{};
         std::array<char, detail::fail_message_capacity> rhs_buf{};
         detail::format_value(lhs_buf.data(), lhs_buf.size(), a);
         detail::format_value(rhs_buf.data(), rhs_buf.size(), b);
         const FailureView fv{.test_name = test_name,
                              .loc = loc,
-                             .is_fatal = fatal,
+                             .is_fatal = Fatal,
                              .kind = kind,
                              .lhs = lhs_buf.data(),
                              .rhs = rhs_buf.data(),
                              .extra = nullptr,
                              .notes = active_notes()};
         fail_cb(fv, fail_ctx);
-        failed = true;
-        ++fail_count;
+        record_failure();
+        return false;
     }
 
-    template <std::floating_point A, std::floating_point B>
-    void report_near_fail(
-        const A& a, const B& b, std::common_type_t<A, B> eps, std::source_location loc, bool fatal = false) {
+    template <bool Fatal, std::floating_point A, std::floating_point B>
+    bool near_check(const A& a, const B& b, std::common_type_t<A, B> eps, std::source_location loc) {
+        ++checked;
+        if (check_near(a, b, eps)) {
+            return true;
+        }
         std::array<char, detail::fail_message_capacity> lhs_buf{};
         std::array<char, detail::fail_message_capacity> rhs_buf{};
         std::array<char, 64> extra_buf{};
@@ -562,18 +412,59 @@ class TestContext {
         detail::format_near_extra(extra_buf.data(), extra_buf.size(), a, b, eps);
         const FailureView fv{.test_name = test_name,
                              .loc = loc,
-                             .is_fatal = fatal,
+                             .is_fatal = Fatal,
                              .kind = "near",
                              .lhs = lhs_buf.data(),
                              .rhs = rhs_buf.data(),
                              .extra = extra_buf.data(),
                              .notes = active_notes()};
         fail_cb(fv, fail_ctx);
-        failed = true;
-        ++fail_count;
+        record_failure();
+        return false;
     }
 
-    void report_exception_fail(const char* kind, const char* detail, std::source_location loc, bool fatal = false) {
+#if defined(__cpp_exceptions) || defined(__EXCEPTIONS)
+
+    template <bool Fatal, typename E, typename F>
+    bool throws_as_check(F&& fn, std::source_location loc) {
+        ++checked;
+        try {
+            fn();
+        } catch (const E&) {
+            return true;
+        } catch (...) {
+            report_exception_fail("throws_as", "wrong exception type", loc, Fatal);
+            return false;
+        }
+        report_exception_fail("throws_as", "no exception thrown", loc, Fatal);
+        return false;
+    }
+
+    template <bool Fatal, typename F>
+    bool throws_any_check(F&& fn, std::source_location loc) {
+        ++checked;
+        try {
+            fn();
+        } catch (...) {
+            return true;
+        }
+        report_exception_fail("throws", "no exception thrown", loc, Fatal);
+        return false;
+    }
+
+    template <bool Fatal, typename F>
+    bool nothrow_check(F&& fn, std::source_location loc) {
+        ++checked;
+        try {
+            fn();
+            return true;
+        } catch (...) {
+            report_exception_fail("nothrow", "unexpected exception thrown", loc, Fatal);
+            return false;
+        }
+    }
+
+    void report_exception_fail(const char* kind, const char* detail, std::source_location loc, bool fatal) {
         const FailureView fv{.test_name = test_name,
                              .loc = loc,
                              .is_fatal = fatal,
@@ -583,30 +474,33 @@ class TestContext {
                              .extra = nullptr,
                              .notes = active_notes()};
         fail_cb(fv, fail_ctx);
-        failed = true;
-        ++fail_count;
+        record_failure();
     }
 
-    void report_string_fail(const char* kind,
-                            std::string_view haystack,
-                            std::string_view needle,
-                            std::source_location loc,
-                            bool fatal = false) {
+#endif // __cpp_exceptions || __EXCEPTIONS
+
+    template <bool Fatal>
+    bool string_check(
+        bool passed, const char* kind, std::string_view haystack, std::string_view needle, std::source_location loc) {
+        ++checked;
+        if (passed) {
+            return true;
+        }
         std::array<char, detail::fail_message_capacity> lhs_buf{};
         std::array<char, detail::fail_message_capacity> rhs_buf{};
         detail::format_value(lhs_buf.data(), lhs_buf.size(), haystack);
         detail::format_value(rhs_buf.data(), rhs_buf.size(), needle);
         const FailureView fv{.test_name = test_name,
                              .loc = loc,
-                             .is_fatal = fatal,
+                             .is_fatal = Fatal,
                              .kind = kind,
                              .lhs = lhs_buf.data(),
                              .rhs = rhs_buf.data(),
                              .extra = nullptr,
                              .notes = active_notes()};
         fail_cb(fv, fail_ctx);
-        failed = true;
-        ++fail_count;
+        record_failure();
+        return false;
     }
 
     const char* test_name;
