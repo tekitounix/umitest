@@ -1,6 +1,6 @@
 # umitest
 
-[日本語](docs/readme.ja.md)
+English | [日本語](docs/readme.ja.md)
 
 A zero-macro, header-only test framework for C++23.
 Write test functions as ordinary C++ code with automatic source location capture via `std::source_location`.

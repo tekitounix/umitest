@@ -1,6 +1,6 @@
 # umitest
 
-[English](../README.md)
+[English](../README.md) | 日本語
 
 C++23 向けのマクロ不要・ヘッダオンリーのテストフレームワーク。
 `std::source_location` により、テスト関数を通常の C++ コードとして記述できる。
