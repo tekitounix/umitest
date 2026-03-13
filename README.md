@@ -9,7 +9,7 @@ Write test functions as ordinary C++ code with automatic source location capture
 
 - **Zero macros** — all assertions are regular function calls
 - **Header-only** — `#include <umitest/test.hh>` and use
-- **Embedded-ready** — no exceptions, no heap, no RTTI
+- **Embedded-friendly** — works without exceptions or RTTI; framework internals avoid heap. Requires hosted stdlib. Custom reporters for non-stdio targets.
 - **Reporter-parameterized** — `BasicSuite<R>` separates output from logic
 - **Compile-time contract enforcement** — type constraints reject invalid comparisons at build time
 - **Self-testing** — umitest tests itself, so framework regressions are immediately visible
@@ -109,7 +109,7 @@ t.eq(header.version, 2);
 `check_eq`, `check_ne`, `check_lt`, `check_le`, `check_gt`, `check_ge`, `check_true`, `check_false`,
 `check_str_contains`, `check_str_starts_with`, `check_str_ends_with`
 
-`check_near` is the exception — it is not `constexpr` because `std::abs` and `std::isnan` are not `constexpr` in the current standard.
+All check functions including `check_near` are `constexpr`.
 
 ### Reporters
 
@@ -118,6 +118,8 @@ t.eq(header.version, 2);
 - `StdioReporter` — ANSI colored stdout output (default via `Suite`)
 - `PlainReporter` — plain text without escape codes
 - `NullReporter` — silent, for testing the framework itself
+
+> **Embedded note:** `Suite` (= `BasicSuite<StdioReporter>`) and `PlainSuite` depend on `<cstdio>` and require a hosted stdlib. For freestanding or non-stdio targets, implement a custom reporter and use `BasicSuite<YourReporter>`. `NullReporter` can serve as a starting point.
 
 ## Writing Tests
 

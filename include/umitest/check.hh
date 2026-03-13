@@ -35,6 +35,13 @@ template <typename A, typename B>
 constexpr bool excluded_char_pointer_v =
     (is_char_pointer_v<A> && is_char_pointer_v<B>) || is_char8_pointer_v<A> || is_char8_pointer_v<B>;
 
+/// @brief constexpr absolute value for floating-point types.
+/// Workaround: libc++ does not yet implement constexpr std::abs (P0533R9).
+template <std::floating_point T>
+constexpr T constexpr_abs(T x) {
+    return x < T{0} ? -x : x;
+}
+
 /// @brief True if T is a character type (not safe for std::cmp_equal).
 template <typename T>
 constexpr bool is_char_type_v = std::same_as<T, char> || std::same_as<T, wchar_t> || std::same_as<T, char8_t> ||
@@ -172,10 +179,11 @@ constexpr bool check_ge(const A& a, const B& b) {
     }
 }
 
-/// @brief Check approximate equality. Floating-point only.
+/// @brief Check approximate equality. constexpr. Floating-point only.
 /// @pre eps >= 0. Negative eps unconditionally returns false.
 template <std::floating_point A, std::floating_point B>
-bool check_near(const A& a, const B& b, std::common_type_t<A, B> eps = static_cast<std::common_type_t<A, B>>(0.001)) {
+constexpr bool
+check_near(const A& a, const B& b, std::common_type_t<A, B> eps = static_cast<std::common_type_t<A, B>>(0.001)) {
     using C = std::common_type_t<A, B>;
     auto ca = static_cast<C>(a);
     auto cb = static_cast<C>(b);
@@ -188,7 +196,7 @@ bool check_near(const A& a, const B& b, std::common_type_t<A, B> eps = static_ca
     if (ca == cb) {
         return true;
     }
-    return std::abs(ca - cb) <= eps;
+    return detail::constexpr_abs(ca - cb) <= eps;
 }
 
 // =============================================================================
